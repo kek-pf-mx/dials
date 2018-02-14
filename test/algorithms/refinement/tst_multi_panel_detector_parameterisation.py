@@ -8,7 +8,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """
 Using code copied from tst_orientation_refinement.py, test refinement of beam,
 detector and crystal orientation parameters using generated reflection positions
@@ -85,16 +84,16 @@ def make_panel_in_array(array_elt, reference_panel):
               x_shift * matrix.col(reference_panel.get_fast_axis()) + \
               y_shift * matrix.col(reference_panel.get_slow_axis())
   return Panel(
-          type="PAD",
-          name="Panel",
-          fast_axis=reference_panel.get_fast_axis(),
-          slow_axis=reference_panel.get_slow_axis(),
-          origin=origin,
-          pixel_size=px_size,
-          image_size=reference_panel.get_image_size(),
-          trusted_range=(0, 1.e6),
-          thickness=0.0,
-          material="")
+      type="PAD",
+      name="Panel",
+      fast_axis=reference_panel.get_fast_axis(),
+      slow_axis=reference_panel.get_slow_axis(),
+      origin=origin,
+      pixel_size=px_size,
+      image_size=reference_panel.get_image_size(),
+      trusted_range=(0, 1.e6),
+      thickness=0.0,
+      material="")
 
 if __name__ == '__main__':
 
@@ -103,12 +102,14 @@ if __name__ == '__main__':
   #############################
 
   args = sys.argv[1:]
-  master_phil = parse("""
+  master_phil = parse(
+      """
       include scope dials.test.algorithms.refinement.geometry_phil
       include scope dials.test.algorithms.refinement.minimiser_phil
-      """, process_includes=True)
+      """,
+      process_includes=True)
 
-  models = setup_geometry.Extract(master_phil, cmdline_args = args)
+  models = setup_geometry.Extract(master_phil, cmdline_args=args)
 
   single_panel_detector = models.detector
   mygonio = models.goniometer
@@ -127,11 +128,7 @@ if __name__ == '__main__':
 
   # Build a mock scan for a 180 degree sweep
   sf = ScanFactory()
-  myscan = sf.make_scan(image_range = (1,1800),
-                        exposure_times = 0.1,
-                        oscillation = (0, 0.1),
-                        epochs = range(1800),
-                        deg = True)
+  myscan = sf.make_scan(image_range=(1, 1800), exposure_times=0.1, oscillation=(0, 0.1), epochs=range(1800), deg=True)
   sweep_range = myscan.get_oscillation_range(deg=False)
   im_width = myscan.get_oscillation(deg=False)[1]
   assert sweep_range == (0., pi)
@@ -140,12 +137,18 @@ if __name__ == '__main__':
   # Build ExperimentLists
   experiments_single_panel = ExperimentList()
   experiments_multi_panel = ExperimentList()
-  experiments_single_panel.append(Experiment(
-        beam=mybeam, detector=single_panel_detector, goniometer=mygonio,
-        scan=myscan, crystal=mycrystal, imageset=None))
-  experiments_multi_panel.append(Experiment(
-        beam=mybeam, detector=multi_panel_detector, goniometer=mygonio,
-        scan=myscan, crystal=mycrystal, imageset=None))
+  experiments_single_panel.append(
+      Experiment(
+          beam=mybeam,
+          detector=single_panel_detector,
+          goniometer=mygonio,
+          scan=myscan,
+          crystal=mycrystal,
+          imageset=None))
+  experiments_multi_panel.append(
+      Experiment(
+          beam=mybeam, detector=multi_panel_detector, goniometer=mygonio, scan=myscan, crystal=mycrystal,
+          imageset=None))
 
   ###########################
   # Parameterise the models #
@@ -169,11 +172,11 @@ if __name__ == '__main__':
   # prediction equation                                                  #
   ########################################################################
 
-  pred_param = XYPhiPredictionParameterisation(experiments_single_panel,
-      [det_param], [s0_param], [xlo_param], [xluc_param])
+  pred_param = XYPhiPredictionParameterisation(experiments_single_panel, [det_param], [s0_param], [xlo_param],
+                                               [xluc_param])
 
-  pred_param2 = XYPhiPredictionParameterisation(experiments_multi_panel,
-      [multi_det_param], [s0_param], [xlo_param],[xluc_param])
+  pred_param2 = XYPhiPredictionParameterisation(experiments_multi_panel, [multi_det_param], [s0_param], [xlo_param],
+                                                [xluc_param])
 
   ################################
   # Apply known parameter shifts #
@@ -181,13 +184,11 @@ if __name__ == '__main__':
 
   # shift detectors by 1.0 mm each translation and 2 mrad each rotation
   det_p_vals = det_param.get_param_vals()
-  p_vals = [a + b for a, b in zip(det_p_vals,
-                                  [1.0, 1.0, 1.0, 2., 2., 2.])]
+  p_vals = [a + b for a, b in zip(det_p_vals, [1.0, 1.0, 1.0, 2., 2., 2.])]
   det_param.set_param_vals(p_vals)
 
   multi_det_p_vals = multi_det_param.get_param_vals()
-  p_vals = [a + b for a, b in zip(multi_det_p_vals,
-                                  [1.0, 1.0, 1.0, 2., 2., 2.])]
+  p_vals = [a + b for a, b in zip(multi_det_p_vals, [1.0, 1.0, 1.0, 2., 2., 2.])]
   multi_det_param.set_param_vals(p_vals)
 
   # shift beam by 2 mrad in free axis
@@ -206,8 +207,7 @@ if __name__ == '__main__':
   # gamma angle)
   xluc_p_vals = xluc_param.get_param_vals()
   cell_params = mycrystal.get_unit_cell().parameters()
-  cell_params = [a + b for a, b in zip(cell_params, [0.1, 0.1, 0.1, 0.0,
-                                                     0.0, 0.1])]
+  cell_params = [a + b for a, b in zip(cell_params, [0.1, 0.1, 0.1, 0.0, 0.0, 0.1])]
   new_uc = unit_cell(cell_params)
   newB = matrix.sqr(new_uc.fractionalization_matrix()).transpose()
   S = symmetrize_reduce_enlarge(mycrystal.get_space_group())
@@ -222,7 +222,7 @@ if __name__ == '__main__':
   # All indices in a 2.0 Angstrom sphere
   resolution = 2.0
   index_generator = IndexGenerator(mycrystal.get_unit_cell(),
-                  space_group(space_group_symbols(1).hall()).type(), resolution)
+                                   space_group(space_group_symbols(1).hall()).type(), resolution)
   indices = index_generator.to_array()
 
   # for the reflection predictor, it doesn't matter which experiment list is
@@ -287,25 +287,24 @@ if __name__ == '__main__':
   ###############################
 
   mytarget = LeastSquaresPositionalResidualWithRmsdCutoff(
-      experiments_single_panel, ExperimentsPredictor(experiments_single_panel),
-      refman, pred_param, restraints_parameterisation=None)
+      experiments_single_panel,
+      ExperimentsPredictor(experiments_single_panel),
+      refman,
+      pred_param,
+      restraints_parameterisation=None)
   mytarget2 = LeastSquaresPositionalResidualWithRmsdCutoff(
-      experiments_multi_panel, ExperimentsPredictor(experiments_multi_panel),
-      refman2, pred_param2, restraints_parameterisation=None)
+      experiments_multi_panel,
+      ExperimentsPredictor(experiments_multi_panel),
+      refman2,
+      pred_param2,
+      restraints_parameterisation=None)
 
   #################################
   # Set up the refinement engines #
   #################################
 
-  refiner = setup_minimiser.Extract(master_phil,
-                                    mytarget,
-                                    pred_param,
-                                    cmdline_args = args).refiner
-  refiner2 = setup_minimiser.Extract(master_phil,
-                                    mytarget2,
-                                    pred_param2,
-                                    cmdline_args = args).refiner
-
+  refiner = setup_minimiser.Extract(master_phil, mytarget, pred_param, cmdline_args=args).refiner
+  refiner2 = setup_minimiser.Extract(master_phil, mytarget2, pred_param2, cmdline_args=args).refiner
 
   refiner.run()
 
@@ -325,8 +324,7 @@ if __name__ == '__main__':
     assert approx_equal(rmsd, rmsd2)
 
   # same parameter values each step
-  for params, params2 in zip(refiner.history["parameter_vector"],
-                             refiner.history["parameter_vector"]):
+  for params, params2 in zip(refiner.history["parameter_vector"], refiner.history["parameter_vector"]):
     assert approx_equal(params, params2)
 
   # if we got this far...

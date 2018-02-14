@@ -39,18 +39,13 @@ class Script(object):
 
     # Create the parser
     self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      epilog=help_message,
-      check_format=True,
-      read_experiments=True)
+        usage=usage, phil=phil_scope, epilog=help_message, check_format=True, read_experiments=True)
 
   def run(self):
     params, options = self.parser.parse_args(show_diff_phil=True)
     from dials.util import log
 
-    log.config(info="dials.complete_full_sphere.log",
-               debug="dials.complete_full_sphere.debug.log")
+    log.config(info="dials.complete_full_sphere.log", debug="dials.complete_full_sphere.debug.log")
 
     import math
     from scitbx import matrix
@@ -98,23 +93,22 @@ class Script(object):
     from cctbx import miller
     from cctbx import crystal
 
-    all = miller.build_set(crystal_symmetry=crystal.symmetry(
-      space_group=expt.crystal.get_space_group(),
-      unit_cell=expt.crystal.get_unit_cell()), anomalous_flag=True,
-      d_min=resolution)
+    all = miller.build_set(
+        crystal_symmetry=crystal.symmetry(
+            space_group=expt.crystal.get_space_group(), unit_cell=expt.crystal.get_unit_cell()),
+        anomalous_flag=True,
+        d_min=resolution)
 
     if model_shadow:
       obs, shadow = self.predict_to_miller_set_with_shadow(expt, resolution)
     else:
       obs = self.predict_to_miller_set(expt, resolution)
 
-    logger.info('Fraction of unique observations at datum: %.1f%%' %
-                (100. * len(obs.indices()) / len(all.indices())))
+    logger.info('Fraction of unique observations at datum: %.1f%%' % (100. * len(obs.indices()) / len(all.indices())))
 
     missing = all.lone_set(other=obs)
 
-    logger.info('%d unique reflections in blind region' %
-                len(missing.indices()))
+    logger.info('%d unique reflections in blind region' % len(missing.indices()))
 
     e1 = matrix.col(axes[0])
     e2 = matrix.col(axes[1])
@@ -129,10 +123,10 @@ class Script(object):
 
     # now decompose to e3, e2, e1
     sol_plus = rotation_decomposition.solve_r3_rotation_for_angles_given_axes(
-      R_ptt, e3, e2, e1, return_both_solutions=True, deg=True)
+        R_ptt, e3, e2, e1, return_both_solutions=True, deg=True)
 
     sol_minus = rotation_decomposition.solve_r3_rotation_for_angles_given_axes(
-      R_ntt, e3, e2, e1, return_both_solutions=True, deg=True)
+        R_ntt, e3, e2, e1, return_both_solutions=True, deg=True)
 
     solutions = []
     if sol_plus:
@@ -172,13 +166,13 @@ class Script(object):
     oscillation = scan.get_oscillation()
 
     current = 1 + image_range[1] - image_range[0]
-    turn = int(round(360./oscillation[1]))
+    turn = int(round(360. / oscillation[1]))
     extra = turn - current
 
     for j in range(extra):
       epochs.append(0.0)
       exposure_times.append(0.0)
-    image_range = image_range[0], image_range[1]+extra
+    image_range = image_range[0], image_range[1] + extra
 
     scan.set_image_range(image_range)
     scan.set_epochs(epochs)
@@ -195,10 +189,11 @@ class Script(object):
     from cctbx import miller
     from cctbx import crystal
 
-    obs = miller.set(crystal_symmetry=crystal.symmetry(
-      space_group=expt.crystal.get_space_group(),
-      unit_cell=expt.crystal.get_unit_cell()), anomalous_flag=True,
-      indices=hkl).unique_under_symmetry()
+    obs = miller.set(
+        crystal_symmetry=crystal.symmetry(
+            space_group=expt.crystal.get_space_group(), unit_cell=expt.crystal.get_unit_cell()),
+        anomalous_flag=True,
+        indices=hkl).unique_under_symmetry()
 
     return obs
 
@@ -212,8 +207,7 @@ class Script(object):
     experiments = ExperimentList()
     experiments.append(expt)
     predicted['id'] = flex.int(predicted.size(), 0)
-    shadowed = filter_shadowed_reflections(experiments, predicted,
-                                           experiment_goniometer=True)
+    shadowed = filter_shadowed_reflections(experiments, predicted, experiment_goniometer=True)
     predicted = predicted.select(~shadowed)
 
     hkl = predicted['miller_index']
@@ -222,10 +216,11 @@ class Script(object):
     from cctbx import miller
     from cctbx import crystal
 
-    obs = miller.set(crystal_symmetry=crystal.symmetry(
-      space_group=expt.crystal.get_space_group(),
-      unit_cell=expt.crystal.get_unit_cell()), anomalous_flag=True,
-      indices=hkl).unique_under_symmetry()
+    obs = miller.set(
+        crystal_symmetry=crystal.symmetry(
+            space_group=expt.crystal.get_space_group(), unit_cell=expt.crystal.get_unit_cell()),
+        anomalous_flag=True,
+        indices=hkl).unique_under_symmetry()
 
     return obs, shadowed
 

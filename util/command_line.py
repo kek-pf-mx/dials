@@ -30,7 +30,7 @@ def parse_range_list_string(string):
   items = [item for sublist in items for item in sublist]
   return set(items)
 
-interactive_console=debug_console
+interactive_console = debug_console
 
 class ProgressBarTimer:
   """ A simple timer for the progress bar. """
@@ -70,8 +70,7 @@ class ProgressBarTimer:
 class ProgressBar:
   """ A command line progress bar. """
 
-  def __init__(self, title=None, spinner=True, bar=True, estimate_time=True,
-               indent=0, length=80):
+  def __init__(self, title=None, spinner=True, bar=True, estimate_time=True, indent=0, length=80):
     """ Init the progress bar parameters. """
 
     # Set the parameters
@@ -117,7 +116,7 @@ class ProgressBar:
     # Add a spinner
     if self._spinner:
       left_str += ' '
-      left_str += '[ {0} ]'.format('-\|/'[percent % 4])
+      left_str += '[ {0} ]'.format('-\|/' [percent % 4])
 
     # Add a timer
     if self._estimate_time:
@@ -149,7 +148,6 @@ class ProgressBar:
       self._title = string
     else:
       string = ''
-
     ''' Print the 'end of comand' string.'''
     from sys import stdout
 

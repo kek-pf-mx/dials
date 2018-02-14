@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division
 
 class Test(object):
-
   def __init__(self):
     from dials.algorithms.profile_model.gaussian_rs import BBoxCalculator3D
     from dials.model.serialize import load
@@ -16,8 +15,7 @@ class Test(object):
 
     import os
 
-    filename = os.path.join(dials_regression,
-        'centroid_test_data', 'sweep.json')
+    filename = os.path.join(dials_regression, 'centroid_test_data', 'sweep.json')
 
     sweep = load.sweep(filename)
 
@@ -35,10 +33,8 @@ class Test(object):
     self.delta_mosaicity = self.n_sigma * self.mosaicity
 
     # Create the bounding box calculator
-    self.calculate_bbox = BBoxCalculator3D(
-        self.beam, self.detector, self.gonio, self.scan,
-        self.delta_divergence,
-        self.delta_mosaicity)
+    self.calculate_bbox = BBoxCalculator3D(self.beam, self.detector, self.gonio, self.scan, self.delta_divergence,
+                                           self.delta_mosaicity)
 
   def run(self):
     self.tst_outer_bounds()
@@ -50,7 +46,7 @@ class Test(object):
     from random import uniform
     from dials.algorithms.profile_model.gaussian_rs import CoordinateSystem
 
-    assert(len(self.detector) == 1)
+    assert (len(self.detector) == 1)
     s0 = self.beam.get_s0()
     m2 = self.gonio.get_rotation_axis()
     s0_length = matrix.col(self.beam.get_s0()).length()
@@ -65,8 +61,7 @@ class Test(object):
       z = uniform(0, 9)
 
       # Get random s1, phi, panel
-      s1 = matrix.col(self.detector[0].get_pixel_lab_coord(
-          (x, y))).normalize() * s0_length
+      s1 = matrix.col(self.detector[0].get_pixel_lab_coord((x, y))).normalize() * s0_length
       phi = self.scan.get_angle_from_array_index(z, deg=False)
       panel = 0
 
@@ -77,8 +72,8 @@ class Test(object):
       z1, z2 = bbox[4], bbox[5]
 
       # Calculate the rotation angle for each point
-      phi_dash1 = self.scan.get_angle_from_array_index(z1, deg = False)
-      phi_dash2 = self.scan.get_angle_from_array_index(z2, deg = False)
+      phi_dash1 = self.scan.get_angle_from_array_index(z1, deg=False)
+      phi_dash2 = self.scan.get_angle_from_array_index(z2, deg=False)
 
       # Create the XDS coordinate system
       xcs = CoordinateSystem(m2, s0, s1, phi)
@@ -96,10 +91,8 @@ class Test(object):
         e11, e21, e3 = xcs.from_beam_vector_and_rotation_angle(sdash1, phi)
         e12, e22, e3 = xcs.from_beam_vector_and_rotation_angle(sdash2, phi)
         if bbox[0] > 0 and bbox[1] < width:
-          assert(abs(e11) >= self.delta_divergence or
-                 abs(e21) >= self.delta_divergence)
-          assert(abs(e12) >= self.delta_divergence or
-                 abs(e22) >= self.delta_divergence)
+          assert (abs(e11) >= self.delta_divergence or abs(e21) >= self.delta_divergence)
+          assert (abs(e12) >= self.delta_divergence or abs(e22) >= self.delta_divergence)
 
       # Check horizontal edges
       for i in range(bbox[0], bbox[1] + 1):
@@ -110,15 +103,13 @@ class Test(object):
         e11, e21, e3 = xcs.from_beam_vector_and_rotation_angle(sdash1, phi)
         e12, e22, e3 = xcs.from_beam_vector_and_rotation_angle(sdash2, phi)
         if bbox[2] > 0 and bbox[3] < height:
-          assert(abs(e11) >= self.delta_divergence or
-                 abs(e21) >= self.delta_divergence)
-          assert(abs(e12) >= self.delta_divergence or
-                 abs(e22) >= self.delta_divergence)
+          assert (abs(e11) >= self.delta_divergence or abs(e21) >= self.delta_divergence)
+          assert (abs(e12) >= self.delta_divergence or abs(e22) >= self.delta_divergence)
 
       # All e3 coords >= delta_mosaicity
       if bbox[4] > zrange[0] and bbox[5] < zrange[1]:
-        assert(abs(e31) >= self.delta_mosaicity)
-        assert(abs(e32) >= self.delta_mosaicity)
+        assert (abs(e31) >= self.delta_mosaicity)
+        assert (abs(e32) >= self.delta_mosaicity)
 
     print 'OK'
 
@@ -145,8 +136,7 @@ class Test(object):
       z = uniform(0, 9)
 
       # Get random s1, phi, panel
-      s1 = matrix.col(self.detector[0].get_pixel_lab_coord(
-          (x, y))).normalize() * s0_length
+      s1 = matrix.col(self.detector[0].get_pixel_lab_coord((x, y))).normalize() * s0_length
       phi = self.scan.get_angle_from_array_index(z, deg=False)
       panel = 0
 
@@ -157,8 +147,8 @@ class Test(object):
       z1, z2 = bbox[4], bbox[5]
 
       # Calculate the rotation angle for each point
-      phi_dash1 = self.scan.get_angle_from_array_index(z1, deg = False)
-      phi_dash2 = self.scan.get_angle_from_array_index(z2, deg = False)
+      phi_dash1 = self.scan.get_angle_from_array_index(z1, deg=False)
+      phi_dash2 = self.scan.get_angle_from_array_index(z2, deg=False)
 
       # Create the XDS coordinate system
       xcs = CoordinateSystem(m2, s0, s1, phi)
@@ -172,8 +162,8 @@ class Test(object):
         e11, e21, e31 = xcs.from_beam_vector_and_rotation_angle(sdash1, phi)
         e12, e22, e31 = xcs.from_beam_vector_and_rotation_angle(sdash2, phi)
         if bbox[0] > 0 and bbox[1] < width:
-          assert(sqrt(e11**2 + e21**2) >= radius12)
-          assert(sqrt(e12**2 + e22**2) >= radius12)
+          assert (sqrt(e11**2 + e21**2) >= radius12)
+          assert (sqrt(e12**2 + e22**2) >= radius12)
 
       # Check horizontal edges
       for i in range(bbox[0], bbox[1] + 1):
@@ -184,8 +174,8 @@ class Test(object):
         e11, e21, e32 = xcs.from_beam_vector_and_rotation_angle(sdash1, phi)
         e12, e22, e32 = xcs.from_beam_vector_and_rotation_angle(sdash2, phi)
         if bbox[2] > 0 and bbox[3] < height:
-          assert(sqrt(e11**2 + e21**2) >= radius12)
-          assert(sqrt(e12**2 + e22**2) >= radius12)
+          assert (sqrt(e11**2 + e21**2) >= radius12)
+          assert (sqrt(e12**2 + e22**2) >= radius12)
 
     print 'OK'
 

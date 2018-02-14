@@ -11,7 +11,6 @@
 
 from __future__ import absolute_import, division
 
-
 class Cache(object):
   ''' Simple class to maintain a cache of additional folders to check. '''
 
@@ -29,7 +28,7 @@ class Cache(object):
       with open(self._path, "r") as infile:
         self._cache = set(infile.readlines())
     except IOError:
-        self._cache = set()
+      self._cache = set()
 
   def add(self, path):
     ''' Add a folder. '''
@@ -52,7 +51,5 @@ class Cache(object):
     except Exception:
       pass
 
-
 # Create a global variable
 cache = Cache()
-

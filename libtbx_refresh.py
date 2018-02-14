@@ -108,9 +108,7 @@ for cmd in [%s]:
             '}\n' % (
               os.path.join('$LIBTBX_BUILD', 'dials', 'autocomplete', 'bash.sh'))
           with open(os.path.join(build_path, file), 'w') as script:
-            script.write(original_file[:insert_position] +
-                         added_script +
-                         original_file[insert_position:])
+            script.write(original_file[:insert_position] + added_script + original_file[insert_position:])
   print()
 
 _install_dials_autocompletion()

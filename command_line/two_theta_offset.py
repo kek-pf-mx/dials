@@ -18,7 +18,8 @@ dials.two_theta_offset experiment_one.json experiment_two.json
 
 '''
 
-phil_scope = parse('''
+phil_scope = parse(
+    '''
 offset_fast = 100.0
   .type = float
   .help = 'How far to move in the detector plane (fast direction)'
@@ -28,7 +29,8 @@ offset_slow = 100.0
 min_distance = 10.0
   .type = float
   .help = 'Minimum shift in detector position'
-''', process_includes=True)
+''',
+    process_includes=True)
 
 class Script(object):
   '''A class for running the script.'''
@@ -45,11 +47,7 @@ class Script(object):
 
     # Create the parser
     self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      epilog=help_message,
-      check_format=False,
-      read_experiments=True)
+        usage=usage, phil=phil_scope, epilog=help_message, check_format=False, read_experiments=True)
 
   def run(self):
     '''Execute the script.'''
@@ -122,8 +120,7 @@ def determine_axis(detectors, params):
 
   # compute "true" two-theta from these
 
-  two_theta = component(x2 - centre, axis).angle(
-    component(x1 - centre, axis), deg=True)
+  two_theta = component(x2 - centre, axis).angle(component(x1 - centre, axis), deg=True)
 
   print 'Centre: %7.4f %7.4f %7.4f' % centre.elems, \
     '  axis: %7.4f %7.4f %7.4f' % axis.elems, 'angle: %.2f' % two_theta

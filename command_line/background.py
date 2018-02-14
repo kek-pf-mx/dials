@@ -15,7 +15,8 @@ Examples::
 
 '''
 
-phil_scope = iotbx.phil.parse("""\
+phil_scope = iotbx.phil.parse(
+    """\
 n_bins = 100
   .type = int
 frames = None
@@ -23,7 +24,8 @@ frames = None
   .multiple = True
 plot = False
   .type = bool
-""", process_includes=True)
+""",
+    process_includes=True)
 
 def main():
   import sys
@@ -35,15 +37,10 @@ def run(args):
   from dials.util.options import flatten_datablocks
   import libtbx.load_env
 
-  usage = "%s [options] image_*.cbf" % (
-    libtbx.env.dispatcher_name)
+  usage = "%s [options] image_*.cbf" % (libtbx.env.dispatcher_name)
 
   parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_datablocks=True,
-    read_datablocks_from_images=True,
-    epilog=help_message)
+      usage=usage, phil=phil_scope, read_datablocks=True, read_datablocks_from_images=True, epilog=help_message)
 
   params, options = parser.parse_args(show_diff_phil=True)
   datablocks = flatten_datablocks(params.input.datablock)
@@ -52,12 +49,12 @@ def run(args):
     parser.print_help()
     exit()
 
-  assert(len(datablocks) == 1)
+  assert (len(datablocks) == 1)
 
   datablock = datablocks[0]
   imagesets = datablock.extract_imagesets()
 
-  assert(len(imagesets) == 1)
+  assert (len(imagesets) == 1)
 
   imageset = imagesets[0]
 
@@ -85,7 +82,7 @@ def run(args):
     from matplotlib import pyplot
     fig = pyplot.figure()
     for d, I, sig in zip(d_spacings, intensities, sigmas):
-      ds2 = 1/flex.pow2(d)
+      ds2 = 1 / flex.pow2(d)
       pyplot.plot(ds2, I)
 
     pyplot.show()
@@ -98,7 +95,7 @@ def background(imageset, indx, n_bins):
 
   detector = imageset.get_detector()
   beam = imageset.get_beam()
-  assert(len(detector) == 1)
+  assert (len(detector) == 1)
   detector = detector[0]
   trusted = detector.get_trusted_range()
 
@@ -111,7 +108,7 @@ def background(imageset, indx, n_bins):
     raise Sorry('Detector not perpendicular to beam')
 
   data = imageset.get_raw_data(indx)
-  assert(len(data) == 1)
+  assert (len(data) == 1)
   data = data[0]
   negative = (data < 0)
   hot = (data > int(round(trusted[1])))
@@ -125,19 +122,15 @@ def background(imageset, indx, n_bins):
   from dxtbx import datablock
 
   spot_params = phil_scope.fetch(source=parse("")).extract()
-  threshold_function = SpotFinderFactory.configure_threshold(
-    spot_params, datablock.DataBlock([imageset]))
+  threshold_function = SpotFinderFactory.configure_threshold(spot_params, datablock.DataBlock([imageset]))
   peak_pixels = threshold_function.compute_threshold(data, ~bad)
   signal = data.select(peak_pixels.iselection())
   background = data.select((~bad & ~peak_pixels).iselection())
 
   # print some summary information
   print 'Mean background: %.3f' % (flex.sum(background) / background.size())
-  print 'Max/total signal pixels: %.0f / %.0f' % (flex.max(signal),
-                                                  flex.sum(signal))
-  print 'Peak/background/hot pixels: %d / %d / %d' % (peak_pixels.count(True),
-                                                      background.size(),
-                                                      hot.count(True))
+  print 'Max/total signal pixels: %.0f / %.0f' % (flex.max(signal), flex.sum(signal))
+  print 'Peak/background/hot pixels: %d / %d / %d' % (peak_pixels.count(True), background.size(), hot.count(True))
 
   # compute histogram of two-theta values, then same weighted
   # by pixel values, finally divide latter by former to get

@@ -32,9 +32,9 @@ if __name__ == "__main__":
 
     size_x = size_xyz * 2
 
-    data_xyz_flex = flex.double(flex.grid(size_xyz, size_xyz , size_x),15)
-    data_flex_norm = flex.double(flex.grid(size_xyz, size_xyz, size_x),15)
-    data_flex_mask = flex.int(flex.grid(size_xyz, size_xyz, size_x),0)
+    data_xyz_flex = flex.double(flex.grid(size_xyz, size_xyz, size_x), 15)
+    data_flex_norm = flex.double(flex.grid(size_xyz, size_xyz, size_x), 15)
+    data_flex_mask = flex.int(flex.grid(size_xyz, size_xyz, size_x), 0)
 
     tot = 0.0
     for frm in range(size_xyz):
@@ -52,12 +52,10 @@ if __name__ == "__main__":
             MaskCode.BackgroundUsed  =  "------"
             '''
 
-
     for frm in range(size_xyz):
       for row in range(size_xyz):
         for col in range(size_x):
           data_flex_norm[frm, row, col] += data_xyz_flex[frm, row, col] / tot
-
 
     lst_flex.append(data_xyz_flex)
     lst_flex_norm.append(data_flex_norm)

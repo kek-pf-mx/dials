@@ -21,7 +21,8 @@ class Script(object):
     import libtbx.load_env
 
     # Create the phil parameters
-    phil_scope = parse('''
+    phil_scope = parse(
+        '''
 
       output = simulated.pickle
         .type = str
@@ -57,16 +58,13 @@ class Script(object):
 
       include scope dials.algorithms.profile_model.factory.phil_scope
 
-    ''', process_includes=True)
+    ''',
+        process_includes=True)
 
     # Create the option parser
     usage = "usage: %s [options] experiment.json" \
       % libtbx.env.dispatcher_name
-    self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      read_experiments=True,
-      check_format=False)
+    self.parser = OptionParser(usage=usage, phil=phil_scope, read_experiments=True, check_format=False)
 
   def run(self):
     ''' Run the script. '''
@@ -110,7 +108,6 @@ class Script(object):
     # Save the reflections to file
     print 'Writing reflections to %s' % params.output
     refl.as_pickle(params.output)
-
 
 if __name__ == '__main__':
   from dials.util import halraiser

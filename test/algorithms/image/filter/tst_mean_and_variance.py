@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division
 
 class Test:
-
   def __init__(self):
     pass
 
@@ -29,11 +28,11 @@ class Test:
     for i in range(10000):
       i = randint(10, 1990)
       j = randint(10, 1990)
-      m1 = mean[j,i]
-      p = image[j-3:j+4,i-3:i+4]
+      m1 = mean[j, i]
+      p = image[j - 3:j + 4, i - 3:i + 4]
       mv = flex.mean_and_variance(p.as_1d())
       m2 = mv.mean()
-      assert(abs(m1 - m2) <= eps)
+      assert (abs(m1 - m2) <= eps)
 
     # Test passed
     print 'OK'
@@ -59,10 +58,10 @@ class Test:
     for i in range(10000):
       i = randint(10, 1990)
       j = randint(10, 1990)
-      m1 = mean[j,i]
-      p = image[j-3:j+4,i-3:i+4]
-      m = mask[j-3:j+4,i-3:i+4]
-      if mask[j,i] == 0:
+      m1 = mean[j, i]
+      p = image[j - 3:j + 4, i - 3:i + 4]
+      m = mask[j - 3:j + 4, i - 3:i + 4]
+      if mask[j, i] == 0:
         m2 = 0.0
       else:
         p = flex.select(p, flags=m)
@@ -70,7 +69,7 @@ class Test:
         m2 = mv.mean()
         s1 = flex.sum(flex.double(p))
         s2 = flex.sum(m.as_1d())
-      assert(abs(m1 - m2) <= eps)
+      assert (abs(m1 - m2) <= eps)
 
     # Test passed
     print 'OK'
@@ -96,15 +95,15 @@ class Test:
     for i in range(10000):
       i = randint(10, 1990)
       j = randint(10, 1990)
-      m1 = mean[j,i]
-      v1 = variance[j,i]
-      sv1 = sample_variance[j,i]
-      p = image[j-3:j+4,i-3:i+4]
+      m1 = mean[j, i]
+      v1 = variance[j, i]
+      sv1 = sample_variance[j, i]
+      p = image[j - 3:j + 4, i - 3:i + 4]
       mv = flex.mean_and_variance(p.as_1d())
       m2 = mv.mean()
       sv2 = mv.unweighted_sample_variance()
-      assert(abs(m1 - m2) <= eps)
-      assert(abs(sv1 - sv2) <= eps)
+      assert (abs(m1 - m2) <= eps)
+      assert (abs(sv1 - sv2) <= eps)
 
     # Test passed
     print 'OK'
@@ -132,11 +131,11 @@ class Test:
     for i in range(10000):
       i = randint(10, 1990)
       j = randint(10, 1990)
-      m1 = mean[j,i]
-      v1 = var[j,i]
-      p = image[j-3:j+4,i-3:i+4]
-      m = mask[j-3:j+4,i-3:i+4]
-      if mask[j,i] == 0:
+      m1 = mean[j, i]
+      v1 = var[j, i]
+      p = image[j - 3:j + 4, i - 3:i + 4]
+      m = mask[j - 3:j + 4, i - 3:i + 4]
+      if mask[j, i] == 0:
         m2 = 0.0
         v2 = 0.0
       else:
@@ -144,12 +143,11 @@ class Test:
         mv = flex.mean_and_variance(flex.double(p))
         m2 = mv.mean()
         v2 = mv.unweighted_sample_variance()
-      assert(abs(m1 - m2) <= eps)
-      assert(abs(v1 - v2) <= eps)
+      assert (abs(m1 - m2) <= eps)
+      assert (abs(v1 - v2) <= eps)
 
     # Test passed
     print 'OK'
-
 
 if __name__ == '__main__':
   from dials.test import cd_auto

@@ -59,7 +59,7 @@ class get_absorption_correction(object):
   def __init__(self):
     # Kapton, or polyimide.  C22H10N2O5 Density=1.43, Angle=90.deg
     # Photon Energy (eV), Atten Length (microns)
-    data="""6000.00  482.643
+    data = """6000.00  482.643
    6070.00  500.286
    6140.00  518.362
    6210.00  536.896
@@ -160,23 +160,23 @@ class get_absorption_correction(object):
    12860.0  4993.54
    12930.0  5072.79
    13000.0  5152.69"""
-    self.energy=flex.double()
-    self.microns=flex.double()
+    self.energy = flex.double()
+    self.microns = flex.double()
     for line in data.split("\n"):
-      tokens= line.strip().split()
+      tokens = line.strip().split()
       self.energy.append(float(tokens[0]))
       self.microns.append(float(tokens[1]))
 
-  def __call__(self,wavelength_ang):
+  def __call__(self, wavelength_ang):
     # calculate energy in eV 12398.425 eV/Ang
-    energy_eV = 12398.425/wavelength_ang
+    energy_eV = 12398.425 / wavelength_ang
     # interpolate the Henke tables downloaded from lbl.gov
-    index_float=(len(self.energy)-1)*(energy_eV-self.energy[0])/(self.energy[-1]-self.energy[0])
-    fraction,int_idx = math.modf(index_float)
+    index_float = (len(self.energy) - 1) * (energy_eV - self.energy[0]) / (self.energy[-1] - self.energy[0])
+    fraction, int_idx = math.modf(index_float)
     int_idx = int(int_idx)
 
-    microns = self.microns[int_idx] + fraction*(self.microns[int_idx+1]-self.microns[int_idx])
-    return microns/1000.
+    microns = self.microns[int_idx] + fraction * (self.microns[int_idx + 1] - self.microns[int_idx])
+    return microns / 1000.
 
 class KaptonAbsorption(object):
   def __init__(self,
@@ -194,7 +194,7 @@ class KaptonAbsorption(object):
     self.height_mm = height_mm # tool controlled
     self.thickness_mm = thickness_mm # tool controlled
     self.half_width_mm = half_width_mm # tool controlled
-    self.angle_rad = rotation_angle_deg * math.pi/180. # tool controlled
+    self.angle_rad = rotation_angle_deg * math.pi / 180. # tool controlled
     self.detector_dist_mm = detector_dist_mm
     self.pixel_size_mm = pixel_size_mm
     self.wavelength_ang = wavelength_ang
@@ -218,11 +218,10 @@ class KaptonAbsorption(object):
     # determine absorption coeff (mm-1) through kapton for a given X-ray energy
     G = get_absorption_correction()
     attenuation_length_mm = G(self.wavelength_ang)
-    self.abs_coeff = 1/attenuation_length_mm
+    self.abs_coeff = 1 / attenuation_length_mm
 
     # determine zones of different absorption behavior
-    self.surface_normal = matrix.col((-1, 0, 0)).rotate_around_origin(
-          axis=self.beam_direction,angle=-self.angle_rad)
+    self.surface_normal = matrix.col((-1, 0, 0)).rotate_around_origin(axis=self.beam_direction, angle=-self.angle_rad)
 
     # ray tracing
     self.edge_of_tape_normal = self.beam_direction
@@ -249,7 +248,7 @@ class KaptonAbsorption(object):
         kapton_path_mm = dsurf2 - dsurf1
 
       # determine absorption correction
-      absorption_correction = 1/math.exp(-self.abs_coeff * kapton_path_mm) # unitless, >=1
+      absorption_correction = 1 / math.exp(-self.abs_coeff * kapton_path_mm) # unitless, >=1
       return absorption_correction
     except ZeroDivisionError:
       return 0
@@ -276,16 +275,15 @@ class KaptonAbsorption(object):
     kapton_path_mm.set_selected(farsel, (dsurf2 - dsurf1).select(farsel))
 
     # determine absorption correction
-    absorption_correction = 1/flex.exp(-self.abs_coeff * kapton_path_mm) # unitless, >=1
+    absorption_correction = 1 / flex.exp(-self.abs_coeff * kapton_path_mm) # unitless, >=1
     return absorption_correction
 
   def abs_bounding_lines(self, as_xy_ints=False):
     if not hasattr(self, 'segments'): # avoid recomputing the bounding lines on subsequent calls
       # determine the beam center in mm
-      self.beam_ctr_mm_on_detector = matrix.col((
-        self.detector[0].get_beam_centre_px(self.beam_direction)[1]*self.pixel_size_mm,
-        self.detector[0].get_beam_centre_px(self.beam_direction)[0]*self.pixel_size_mm,
-        0))
+      self.beam_ctr_mm_on_detector = matrix.col(
+          (self.detector[0].get_beam_centre_px(self.beam_direction)[1] * self.pixel_size_mm,
+           self.detector[0].get_beam_centre_px(self.beam_direction)[0] * self.pixel_size_mm, 0))
       # dials format coordinates in pixels of the detector corner
       self.det_zero_mm = self.detector_dist_mm * self.beam_direction - self.beam_ctr_mm_on_detector
       # calculate the positions of the boundaries between zones with different absorption behavior
@@ -306,6 +304,7 @@ class KaptonAbsorption(object):
       # ctr1_det_dot = self.center_normal_1 - self.det_normal # crosshairs part 1
       # ctr2_det_dot = self.center_normal_2 - self.det_normal # crosshairs part 2
       min_max_det_add = self.det_zero_mm.dot(self.det_normal)
+
       # get the distances along the detector edges to the minimum and maximum absorption edges
       def get_intersection(offset, direction, min_or_max_det_dot, dimension):
         # offset is a number of pixels from the detector origin
@@ -313,19 +312,20 @@ class KaptonAbsorption(object):
         # min_or_max_det_dot is a quantity to be used in a dot product (see documentation)
         # dimension is the number of pixels in the panel along the direction specified
         try:
-          num = -(self.det_zero_mm + offset*self.pixel_size_mm).dot(min_or_max_det_dot) - min_max_det_add
+          num = -(self.det_zero_mm + offset * self.pixel_size_mm).dot(min_or_max_det_dot) - min_max_det_add
           denom = direction.dot(min_or_max_det_dot)
-          dist = num/denom
-          if 0<= dist  and dist <= dimension*self.pixel_size_mm: # point is on a detector edge
-            return self.det_zero_mm + offset*self.pixel_size_mm + dist*direction
+          dist = num / denom
+          if 0 <= dist and dist <= dimension * self.pixel_size_mm: # point is on a detector edge
+            return self.det_zero_mm + offset * self.pixel_size_mm + dist * direction
           else:
             return None
         except ZeroDivisionError:
           return None
+
       zero = matrix.col((0, 0, 0))
       self.segments = []
       for edge in [min_det_dot, max_det_dot]:
-      # for edge in [min_det_dot, max_det_dot, ctr1_det_dot, ctr2_det_dot]: # crosshairs
+        # for edge in [min_det_dot, max_det_dot, ctr1_det_dot, ctr2_det_dot]: # crosshairs
         # calculate all the possible intersections on the detector edges
         d_top_fast = get_intersection(zero, self.fast, edge, self.size_fast)
         d_bottom_fast = get_intersection(self.size_slow * self.slow, self.fast, edge, self.size_fast)
@@ -348,8 +348,8 @@ class KaptonAbsorption(object):
           seg_as_xy = []
           for point in seg:
             as_xy = point - self.det_zero_mm
-            x_int = int(as_xy.dot(self.slow)/self.pixel_size_mm)
-            y_int = int(as_xy.dot(self.fast)/self.pixel_size_mm)
+            x_int = int(as_xy.dot(self.slow) / self.pixel_size_mm)
+            y_int = int(as_xy.dot(self.fast) / self.pixel_size_mm)
             seg_as_xy += [x_int, y_int]
           self.segments_as_xy.append(tuple(seg_as_xy))
       return self.segments_as_xy
@@ -358,26 +358,26 @@ class KaptonAbsorption(object):
 
 class image_kapton_correction(object):
   def __init__(self,
-               panel_size_px = None,
-               pixel_size_mm = None,
-               detector_dist_mm = None,
-               wavelength_ang = None,
-               reflections_sele = None,
-               params = None,
-               expt = None,
-               refl = None,
-               smart_sigmas = True,
-               logger = None):
-    self.panel_size_px     = panel_size_px
-    self.pixel_size_mm     = pixel_size_mm
-    self.detector_dist_mm  = detector_dist_mm
-    self.wavelength_ang    = wavelength_ang
-    self.reflections_sele  = reflections_sele
-    self.params            = params
-    self.expt              = expt
-    self.refl              = refl
-    self.smart_sigmas      = smart_sigmas
-    self.logger            = logger
+               panel_size_px=None,
+               pixel_size_mm=None,
+               detector_dist_mm=None,
+               wavelength_ang=None,
+               reflections_sele=None,
+               params=None,
+               expt=None,
+               refl=None,
+               smart_sigmas=True,
+               logger=None):
+    self.panel_size_px = panel_size_px
+    self.pixel_size_mm = pixel_size_mm
+    self.detector_dist_mm = detector_dist_mm
+    self.wavelength_ang = wavelength_ang
+    self.reflections_sele = reflections_sele
+    self.params = params
+    self.expt = expt
+    self.refl = refl
+    self.smart_sigmas = smart_sigmas
+    self.logger = logger
     self.extract_params()
 
   def extract_params(self):
@@ -393,10 +393,10 @@ class image_kapton_correction(object):
       sig_w = self.params.kapton_half_width_mm.sigma
       sig_a = self.params.rotation_angle_deg.sigma
       self.kapton_params_sigmas = (sig_h, sig_t, sig_w, sig_a)
-      assert not False in [sig >=0 for sig in self.kapton_params_sigmas], "Kapton param sigmas must be nonnegative"
-      self.kapton_params_maxes = [[self.kapton_params[i] + self.kapton_params_sigmas[j]
-                            if j==i else self.kapton_params[i]
-                            for i in xrange(4)] for j in xrange(4)]
+      assert not False in [sig >= 0 for sig in self.kapton_params_sigmas], "Kapton param sigmas must be nonnegative"
+      self.kapton_params_maxes = [[
+          self.kapton_params[i] + self.kapton_params_sigmas[j] if j == i else self.kapton_params[i] for i in xrange(4)
+      ] for j in xrange(4)]
       self.kapton_params_mins  = [[max(self.kapton_params[i] - self.kapton_params_sigmas[j], 0.001)
                             if j==i else self.kapton_params[i]
                             for i in xrange(3)] + [a] for j in xrange(3)] + \
@@ -404,13 +404,8 @@ class image_kapton_correction(object):
 
   def __call__(self, plot=False):
     def correction_and_within_spot_sigma(params_version, variance_within_spot=True):
-      absorption = KaptonAbsorption(params_version[0],
-                                    params_version[1],
-                                    params_version[2],
-                                    params_version[3],
-                                    self.detector_dist_mm,
-                                    self.pixel_size_mm,
-                                    self.wavelength_ang,
+      absorption = KaptonAbsorption(params_version[0], params_version[1], params_version[2], params_version[3],
+                                    self.detector_dist_mm, self.pixel_size_mm, self.wavelength_ang,
                                     *map(float, self.panel_size_px))
       detector = self.expt.detector
       beam = self.expt.beam
@@ -433,7 +428,7 @@ class image_kapton_correction(object):
           f_absolute = fast_coords + shoebox.bbox[0] # relative to detector
           s_absolute = slow_coords + shoebox.bbox[2] # relative to detector
           lab_coords = detector[0].get_lab_coord(detector[0].pixel_to_millimeter(
-            flex.vec2_double(f_absolute.as_double(), s_absolute.as_double())))
+              flex.vec2_double(f_absolute.as_double(), s_absolute.as_double())))
           s1 = lab_coords.each_normalize()
           kapton_correction_vector.extend(absorption.abs_correction_flex(s1))
           average_kapton_correction = flex.mean(kapton_correction_vector)
@@ -455,7 +450,7 @@ class image_kapton_correction(object):
     # deviation within a single spot, whichever is larger.
     self.logger.info("Calculating kapton corrections to integrated intensities...")
     corrections, sigmas = correction_and_within_spot_sigma(
-      self.kapton_params, variance_within_spot=self.params.within_spot_sigmas)
+        self.kapton_params, variance_within_spot=self.params.within_spot_sigmas)
     if self.smart_sigmas:
       for p in self.kapton_params_mins + self.kapton_params_maxes:
         self.logger.info("Calculating smart sigmas...")
@@ -477,11 +472,7 @@ class image_kapton_correction(object):
     return corrections, sigmas
 
 class multi_kapton_correction(object):
-  def __init__(self,
-               experiments,
-               integrated,
-               kapton_params,
-               logger = None):
+  def __init__(self, experiments, integrated, kapton_params, logger=None):
     self.experiments = experiments
     self.reflections = integrated
     self.params = kapton_params
@@ -507,16 +498,16 @@ class multi_kapton_correction(object):
 
       def correct(refl_sele, smart_sigmas=True):
         kapton_correction = image_kapton_correction(
-          panel_size_px = panel_size_px,
-          pixel_size_mm = pixel_size_mm,
-          detector_dist_mm = detector_dist_mm,
-          wavelength_ang = wavelength_ang,
-          reflections_sele = refl_sele,
-          params = self.params,
-          expt = expt,
-          refl = refl,
-          smart_sigmas = smart_sigmas,
-          logger = self.logger)
+            panel_size_px=panel_size_px,
+            pixel_size_mm=pixel_size_mm,
+            detector_dist_mm=detector_dist_mm,
+            wavelength_ang=wavelength_ang,
+            reflections_sele=refl_sele,
+            params=self.params,
+            expt=expt,
+            refl=refl,
+            smart_sigmas=smart_sigmas,
+            logger=self.logger)
 
         k_corr, k_sigmas = kapton_correction()
         refl_sele['kapton_absorption_correction'] = k_corr
@@ -530,8 +521,8 @@ class multi_kapton_correction(object):
           integrated_data = refl_sele['intensity.sum.value']
           integrated_variance = refl_sele['intensity.sum.variance']
           integrated_sigma = flex.sqrt(integrated_variance)
-          term1 = flex.pow(k_sigmas/k_corr, 2)
-          term2 = flex.pow(integrated_sigma/integrated_data, 2)
+          term1 = flex.pow(k_sigmas / k_corr, 2)
+          term2 = flex.pow(integrated_sigma / integrated_data, 2)
           integrated_data *= k_corr
           integrated_variance = flex.pow(integrated_data, 2) * (term1 + term2)
           refl_sele['intensity.sum.value'] = integrated_data

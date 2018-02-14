@@ -22,9 +22,7 @@ def recursive_overwrite(src, dest, ignore=None):
       ignored = set()
     for f in files:
       if f not in ignored:
-        recursive_overwrite(os.path.join(src, f),
-                            os.path.join(dest, f),
-                            ignore)
+        recursive_overwrite(os.path.join(src, f), os.path.join(dest, f), ignore)
   else:
     shutil.copyfile(src, dest)
 
@@ -54,8 +52,11 @@ def update_dials_download_links():
       print("Could not determine most recent major DIALS release")
     release.write(caption + "\n" + '=' * len(caption) + "\n\n")
 
-    release.write('The current stable release can be downloaded from `Github <https://github.com/dials/dials/releases/latest>`_,\n')
-    release.write('where you can also find further `release notes <https://github.com/dials/dials/releases/latest>`_.\n\n')
+    release.write(
+        'The current stable release can be downloaded from `Github <https://github.com/dials/dials/releases/latest>`_,\n'
+    )
+    release.write(
+        'where you can also find further `release notes <https://github.com/dials/dials/releases/latest>`_.\n\n')
 
     def download_button(text, version, link):
       print("  %s %s -> %s" % (version, text, link))
@@ -66,17 +67,16 @@ def update_dials_download_links():
       tag = re.search('dials-v([^-]+)-([^-]+)-([^-]+)-(.+)', a['name'])
       if tag:
         shortname = tag.group(4)
-        version = ".".join(tag.group(1,2,3))
+        version = ".".join(tag.group(1, 2, 3))
         last_update = datetime.strptime(a['updated_at'], '%Y-%m-%dT%H:%M:%SZ') # - datetime(1970,1,1)).total_seconds()
         if shortname not in assets or assets[shortname][0] < last_update:
           assets[shortname] = (last_update, version, a.get('browser_download_url'))
 
-    long_names = { 'macosx.pkg': 'Mac installer',
-                   'macosx.tar.gz': 'Mac tar archive',
-                   'macosx-10.6.pkg': 'Mac installer (OS X 10.6)',
-                   'macosx-10.6.tar.gz': 'Mac tar archive (OS X 10.6)',
-                   'linux-x86_64.tar.xz': 'Linux installer',
-                   'source.tar.xz': 'Source installer' }
+    long_names = {
+        'macosx.pkg': 'Mac installer', 'macosx.tar.gz': 'Mac tar archive', 'macosx-10.6.pkg':
+        'Mac installer (OS X 10.6)', 'macosx-10.6.tar.gz': 'Mac tar archive (OS X 10.6)', 'linux-x86_64.tar.xz':
+        'Linux installer', 'source.tar.xz': 'Source installer'
+    }
 
     buttons = [ download_button(long_names.get(asset, asset), version, link) \
                     for asset, (_, version, link) in assets.iteritems() ]
@@ -87,8 +87,12 @@ if __name__ == "__main__":
 
   parser = OptionParser(description="Generate documentation website for DIALS")
   parser.add_option("-?", action="help", help=SUPPRESS_HELP)
-  parser.add_option("-s", "--strict", dest="strict",
-      action="store_true", default=False,
+  parser.add_option(
+      "-s",
+      "--strict",
+      dest="strict",
+      action="store_true",
+      default=False,
       help="Run in strict mode and stop on encountering any errors or warnings")
   options, args = parser.parse_args()
 

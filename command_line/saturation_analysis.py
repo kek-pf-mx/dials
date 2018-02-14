@@ -23,24 +23,21 @@ def saturation_analysis(data_files, value_column):
 
   assert value_column in reference_data
   variance_column = None
-  for column in ['%s.variance' % value_column,
-                 value_column.replace('value', 'variance')]:
+  for column in ['%s.variance' % value_column, value_column.replace('value', 'variance')]:
     if column in reference_data:
       variance_column = column
       break
 
-  assert(variance_column)
+  assert (variance_column)
 
   # construct XYZ pixel position search target
 
   reference_data = strip_not_integrated(reference_data)
 
   # keep only data with I/sig(I) > 3 for reference
-  strong = (reference_data[value_column] > 3 * flex.sqrt(
-    reference_data[variance_column]))
+  strong = (reference_data[value_column] > 3 * flex.sqrt(reference_data[variance_column]))
 
-  print 'Keeping %d strong reflections of %d' % (strong.count(True),
-                                                 len(reference_data))
+  print 'Keeping %d strong reflections of %d' % (strong.count(True), len(reference_data))
 
   reference_data = reference_data.select(strong)
 
@@ -58,10 +55,8 @@ def saturation_analysis(data_files, value_column):
     for j, refl in enumerate(query_data):
       rrefl = reference_data[ann.nn[j]]
       if refl['miller_index'] == rrefl['miller_index']:
-        fout.write('%d %d %d ' % refl['miller_index'] +
-                   '%f %f ' % (rrefl[value_column], rrefl[variance_column]) +
-                   '%f %f ' % (refl[value_column], refl[variance_column]) +
-                   '%f %f %f\n' % refl['xyzcal.px'])
+        fout.write('%d %d %d ' % refl['miller_index'] + '%f %f ' % (rrefl[value_column], rrefl[variance_column]) +
+                   '%f %f ' % (refl[value_column], refl[variance_column]) + '%f %f %f\n' % refl['xyzcal.px'])
         matches += 1
         x.append(rrefl[value_column])
         y.append(refl[value_column])

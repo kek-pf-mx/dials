@@ -1,4 +1,3 @@
-
 from __future__ import division
 
 def run():
@@ -13,17 +12,12 @@ def run():
     print 'SKIP: dials_regression not configured'
     exit(0)
 
-
   filename = join(dials_regression, "centroid_test_data/experiments.json")
 
   experiments = ExperimentListFactory.from_json_file(filename)
 
-  transform = PixelToMillerIndex(
-    experiments[0].beam,
-    experiments[0].detector,
-    experiments[0].goniometer,
-    experiments[0].scan,
-    experiments[0].crystal)
+  transform = PixelToMillerIndex(experiments[0].beam, experiments[0].detector, experiments[0].goniometer,
+                                 experiments[0].scan, experiments[0].crystal)
 
   reflections = flex.reflection_table.from_predictions(experiments[0])
 

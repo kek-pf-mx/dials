@@ -8,7 +8,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """
 Test scan-varying refinement of a multiple panel detector.
 
@@ -24,15 +23,11 @@ from dials.array_family import flex
 import cPickle as pickle
 
 class Test(object):
-
   def __init__(self):
 
-    dials_regression = libtbx.env.find_in_repositories(
-      relative_path="dials_regression",
-      test=os.path.isdir)
+    dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=os.path.isdir)
 
-    self._data_dir = os.path.join(dials_regression, "refinement_test_data",
-                            "i23_as_24_panel_barrel")
+    self._data_dir = os.path.join(dials_regression, "refinement_test_data", "i23_as_24_panel_barrel")
 
     # set up a temporary directory
     self._cwd = os.path.abspath(os.curdir)
@@ -50,9 +45,8 @@ class Test(object):
 
     experiments_path = os.path.join(self._data_dir, 'experiments.json')
     reflections_path = os.path.join(self._data_dir, 'indexed.pickle')
-    cmd=("dials.refine {0} {1} scan_varying=true history=history.pickle"
-         " outlier.separate_blocks=False").format(
-      experiments_path, reflections_path)
+    cmd = ("dials.refine {0} {1} scan_varying=true history=history.pickle"
+           " outlier.separate_blocks=False").format(experiments_path, reflections_path)
     result = easy_run.fully_buffered(command=cmd).raise_if_errors()
 
     # there are plenty of things we could do with the refinement history, but

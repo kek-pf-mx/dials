@@ -1,8 +1,6 @@
-
 from __future__ import absolute_import, division
 
 class Test(object):
-
   def __init__(self):
     from dxtbx.model.experiment_list import ExperimentListFactory
     import libtbx.load_env
@@ -21,7 +19,7 @@ class Test(object):
 
     from dials.array_family import flex
     from math import acos, sqrt, atan, pi, sin, cos
-    from scitbx import  matrix
+    from scitbx import matrix
     from dials.algorithms.spot_prediction import ScanStaticRayPredictor
 
     X = []
@@ -30,11 +28,11 @@ class Test(object):
     NY = 10
     for j in range(NX):
       for i in range(NY):
-        theta = -pi + i * 2*pi / float(NY)
-        phi   = -pi + j * 2*pi / float(NX)
+        theta = -pi + i * 2 * pi / float(NY)
+        phi = -pi + j * 2 * pi / float(NX)
         r = 1
-        x = r * sin(theta)*cos(phi)
-        y = r * sin(theta)*sin(phi)
+        x = r * sin(theta) * cos(phi)
+        y = r * sin(theta) * sin(phi)
         z = -1 + r * cos(theta)
         print x
         X.append(x / (1 - z))
@@ -111,7 +109,6 @@ class Test(object):
     #   dx.append(c1)
     #   dy.append(c2)
     #   dz.append(c3)
-
 
     #   # theta = acos(s1[2] / s1.length())
     #   # phi = atan(s1[1] / s1[0])

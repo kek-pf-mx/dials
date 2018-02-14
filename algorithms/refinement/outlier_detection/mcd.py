@@ -21,7 +21,8 @@ class MCD(CentroidOutlier):
   calculated using the robust location and scatter estimate from the Minimum
   Covariance Determinant estimate."""
 
-  def __init__(self, cols=None,
+  def __init__(self,
+               cols=None,
                min_num_obs=20,
                separate_experiments=True,
                separate_panels=True,
@@ -37,12 +38,13 @@ class MCD(CentroidOutlier):
 
     if cols is None:
       cols = ["x_resid", "y_resid", "phi_resid"]
-    CentroidOutlier.__init__(self,
-      cols=cols,
-      min_num_obs=min_num_obs,
-      separate_experiments=separate_experiments,
-      separate_panels=separate_panels,
-      block_width=block_width)
+    CentroidOutlier.__init__(
+        self,
+        cols=cols,
+        min_num_obs=min_num_obs,
+        separate_experiments=separate_experiments,
+        separate_panels=separate_panels,
+        block_width=block_width)
 
     # Keep the FastMCD options here
     self._alpha = alpha
@@ -63,14 +65,15 @@ class MCD(CentroidOutlier):
 
     outliers = flex.bool(len(cols[0]), False)
 
-    fast_mcd = FastMCD(cols,
-                       alpha = self._alpha,
-                       max_n_groups = self._max_n_groups,
-                       min_group_size = self._min_group_size,
-                       n_trials = self._n_trials,
-                       k1 = self._k1,
-                       k2 = self._k2,
-                       k3 = self._k3)
+    fast_mcd = FastMCD(
+        cols,
+        alpha=self._alpha,
+        max_n_groups=self._max_n_groups,
+        min_group_size=self._min_group_size,
+        n_trials=self._n_trials,
+        k1=self._k1,
+        k2=self._k2,
+        k3=self._k3)
 
     # get location and MCD scatter estimate
     T, S = fast_mcd.get_corrected_T_and_S()

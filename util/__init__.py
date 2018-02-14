@@ -21,7 +21,7 @@ def debug_console():
   except ImportError:
     # Otherwise use basic python console
     import code
-    code.interact(banner='='*80, local=namespace)
+    code.interact(banner='=' * 80, local=namespace)
 
 def halraiser(e):
   ''' Function to re-raise an exception with a useful message. '''
@@ -30,14 +30,15 @@ def halraiser(e):
   text = 'Please report this error to dials-support@lists.sourceforge.net:'
 
   if len(e.args) == 0:
-    e.args = (text,)
+    e.args = (text, )
   elif issubclass(e.__class__, Sorry):
     raise
   elif len(e.args) == 1:
-    e.args = (text + ' ' + str(e.args[0]),)
+    e.args = (text + ' ' + str(e.args[0]), )
   else:
-    e.args = (text,) + e.args
+    e.args = (text, ) + e.args
   raise
+
 
 # Add the following names to namespace for compatibility reasons.
 # Use will cause a warning to be printed. 20171127
@@ -55,9 +56,12 @@ def _make_dials_util_ext_redirection(name):
       raise RuntimeError()
     except RuntimeError:
       frame = sys.exc_info()[2].tb_frame.f_back
-    print("DeprecationWarning: {file}:{line} imported method {name} from dials.util rather than from dials.util.ext".format(name=name, file=frame.f_code.co_filename, line=frame.f_lineno))
+    print("DeprecationWarning: {file}:{line} imported method {name} from dials.util rather than from dials.util.ext".
+          format(name=name, file=frame.f_code.co_filename, line=frame.f_lineno))
     return getattr(dials.util.ext, name)(*args, **kwargs)
+
   return dials_util_ext_redirector
+
 ResolutionMaskGenerator = _make_dials_util_ext_redirection('ResolutionMaskGenerator')
 is_inside_polygon = _make_dials_util_ext_redirection('is_inside_polygon')
 mask_untrusted_circle = _make_dials_util_ext_redirection('mask_untrusted_circle')

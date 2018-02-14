@@ -47,7 +47,8 @@ Examples::
 
 # Set the phil scope
 from libtbx.phil import parse
-phil_scope = parse('''
+phil_scope = parse(
+    '''
 
   output {
     reflections = 'strong.pickle'
@@ -82,8 +83,8 @@ phil_scope = parse('''
 
   include scope dials.algorithms.spot_finding.factory.phil_scope
 
-''', process_includes=True)
-
+''',
+    process_includes=True)
 
 class Script(object):
   '''A class for running the script.'''
@@ -100,11 +101,7 @@ class Script(object):
 
     # Initialise the base class
     self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      epilog=help_message,
-      read_datablocks=True,
-      read_datablocks_from_images=True)
+        usage=usage, phil=phil_scope, epilog=help_message, read_datablocks=True, read_datablocks_from_images=True)
 
   def run(self):
     '''Execute the script.'''
@@ -119,10 +116,7 @@ class Script(object):
     params, options = self.parser.parse_args(show_diff_phil=False)
 
     # Configure the logging
-    log.config(
-      params.verbosity,
-      info=params.output.log,
-      debug=params.output.debug_log)
+    log.config(params.verbosity, info=params.output.log, debug=params.output.debug_log)
 
     from dials.util.version import dials_version
     logger.info(dials_version())
@@ -142,8 +136,7 @@ class Script(object):
       raise Sorry('only 1 datablock can be processed at a time')
 
     # Loop through all the imagesets and find the strong spots
-    reflections = flex.reflection_table.from_observations(
-      datablocks[0], params)
+    reflections = flex.reflection_table.from_observations(datablocks[0], params)
 
     # Delete the shoeboxes
     if not params.output.shoeboxes:
@@ -153,23 +146,20 @@ class Script(object):
     from dials.util.ascii_art import spot_counts_per_image_plot
 
     for i, imageset in enumerate(datablocks[0].extract_imagesets()):
-      ascii_plot = spot_counts_per_image_plot(
-        reflections.select(reflections['id'] == i))
+      ascii_plot = spot_counts_per_image_plot(reflections.select(reflections['id'] == i))
       if len(ascii_plot):
-        logger.info('\nHistogram of per-image spot count for imageset %i:' %i)
+        logger.info('\nHistogram of per-image spot count for imageset %i:' % i)
         logger.info(ascii_plot)
 
     # Save the reflections to file
     logger.info('\n' + '-' * 80)
     reflections.as_pickle(params.output.reflections)
-    logger.info('Saved {0} reflections to {1}'.format(
-        len(reflections), params.output.reflections))
+    logger.info('Saved {0} reflections to {1}'.format(len(reflections), params.output.reflections))
 
     # Save the datablock
     if params.output.datablock:
       from dxtbx.datablock import DataBlockDumper
-      logger.info('Saving datablocks to {0}'.format(
-        params.output.datablock))
+      logger.info('Saving datablocks to {0}'.format(params.output.datablock))
       dump = DataBlockDumper(datablocks)
       dump.as_file(params.output.datablock)
 
@@ -179,16 +169,14 @@ class Script(object):
       from cStringIO import StringIO
       s = StringIO()
       for i, imageset in enumerate(datablocks[0].extract_imagesets()):
-        print >> s, "Number of centroids per image for imageset %i:" %i
+        print >> s, "Number of centroids per image for imageset %i:" % i
         stats = per_image_analysis.stats_imageset(
-          imageset, reflections.select(reflections['id'] == i),
-          resolution_analysis=False)
+            imageset, reflections.select(reflections['id'] == i), resolution_analysis=False)
         per_image_analysis.print_table(stats, out=s)
       logger.info(s.getvalue())
 
     # Print the time
     logger.info("Time Taken: %f" % (time() - start_time))
-
 
 if __name__ == '__main__':
   from dials.util import halraiser

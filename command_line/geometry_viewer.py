@@ -18,7 +18,7 @@ help_message = '''
 
 '''
 
-phil_scope= libtbx.phil.parse("""
+phil_scope = libtbx.phil.parse("""
   angle = None
     .type = float
     .multiple = True
@@ -46,7 +46,6 @@ def settings():
   return phil_scope.fetch().extract()
 
 class render_3d(object):
-
   def __init__(self):
     self.goniometer_orig = None
     self.crystal = None
@@ -96,24 +95,22 @@ class render_3d(object):
         p.set_frame(p.get_fast_axis(), p.get_slow_axis(), new_origin.elems)
 
     gonio_masker = self.imageset.masker().format_class(
-      self.imageset.paths()[0]).get_goniometer_shadow_masker(goniometer=gonio)
+        self.imageset.paths()[0]).get_goniometer_shadow_masker(goniometer=gonio)
     if gonio_masker is None:
       return
 
-    points = gonio_masker.extrema_at_scan_angle(
-      gonio.get_angles()[gonio.get_scan_axis()])
-    points.insert(0, (0,0,0))
+    points = gonio_masker.extrema_at_scan_angle(gonio.get_angles()[gonio.get_scan_axis()])
+    points.insert(0, (0, 0, 0))
 
-    line_i_seqs = flex.vec2_double(((0,i) for i in range(1, points.size())))
+    line_i_seqs = flex.vec2_double(((0, i) for i in range(1, points.size())))
     line_i_seqs += (self.viewer.points.size(), self.viewer.points.size())
     for i_seqs in line_i_seqs:
       self.viewer.line_i_seqs.append([int(i_seq) for i_seq in i_seqs])
-      self.viewer.line_colors[(i_seqs)] = (100/255, 120/255, 255/255)
+      self.viewer.line_colors[(i_seqs)] = (100 / 255, 120 / 255, 255 / 255)
 
     self.viewer.points.extend(points)
 
-    shadow = gonio_masker.project_extrema(
-      detector, gonio.get_angles()[gonio.get_scan_axis()])
+    shadow = gonio_masker.project_extrema(detector, gonio.get_angles()[gonio.get_scan_axis()])
 
     for shadow_points, p in zip(shadow, detector):
       n = self.viewer.points.size()
@@ -121,13 +118,13 @@ class render_3d(object):
       line_colors = {}
       for i in range(shadow_points.size()):
         if i < shadow_points.size() - 1:
-          line_i_seqs.append((n+i, n+i+1))
+          line_i_seqs.append((n + i, n + i + 1))
         else:
-          line_i_seqs.append((n+i, n))
-        line_colors[line_i_seqs[-1]] = (1,1,1)
+          line_i_seqs.append((n + i, n))
+        line_colors[line_i_seqs[-1]] = (1, 1, 1)
       self.viewer.line_colors.update(line_colors)
       self.viewer.line_i_seqs.extend(line_i_seqs)
-      self.viewer.points.extend(p.get_lab_coord(shadow_points *p.get_pixel_size()[0]))
+      self.viewer.points.extend(p.get_lab_coord(shadow_points * p.get_pixel_size()[0]))
 
   def set_detector_points(self):
     detector = self.imageset.get_detector()
@@ -136,14 +133,14 @@ class render_3d(object):
     i = 0
     for p in detector:
       image_size = p.get_image_size_mm()
-      points.append(p.get_lab_coord((0,0)))
-      points.append(p.get_lab_coord((0,image_size[1])))
+      points.append(p.get_lab_coord((0, 0)))
+      points.append(p.get_lab_coord((0, image_size[1])))
       points.append(p.get_lab_coord(image_size))
-      points.append(p.get_lab_coord((image_size[0],0)))
-      line_i_seqs.append((i, i+1))
-      line_i_seqs.append((i+1, i+2))
-      line_i_seqs.append((i+2, i+3))
-      line_i_seqs.append((i+3, i))
+      points.append(p.get_lab_coord((image_size[0], 0)))
+      line_i_seqs.append((i, i + 1))
+      line_i_seqs.append((i + 1, i + 2))
+      line_i_seqs.append((i + 2, i + 3))
+      line_i_seqs.append((i + 3, i))
       i += 4
     line_i_seqs += (self.viewer.points.size(), self.viewer.points.size())
     self.viewer.points.extend(points)
@@ -170,15 +167,14 @@ class render_3d(object):
     if predicted is None:
       return
     t1 = time.time()
-    print "Predicted %i reflections in %.2f s" %(predicted.size(), (t1-t0))
+    print "Predicted %i reflections in %.2f s" % (predicted.size(), (t1 - t0))
     xyzcal_mm = predicted['xyzcal.mm']
     xc, yc, zc = predicted['xyzcal.mm'].parts()
     xycal = flex.vec2_double(xc, yc)
     panel = predicted['panel']
     detector = self.imageset.get_detector()
     for pid, p in enumerate(detector):
-      self.viewer.points.extend(
-        p.get_lab_coord(xycal.select(panel == pid)))
+      self.viewer.points.extend(p.get_lab_coord(xycal.select(panel == pid)))
 
   def predict(self):
     assert self.crystal is not None
@@ -193,21 +189,20 @@ class render_3d(object):
       scan_angle = gonio.get_angles()[gonio.get_scan_axis()]
     else:
       return
-    scan.set_oscillation(
-      (scan_angle, prediction_width))
+    scan.set_oscillation((scan_angle, prediction_width))
     expt = Experiment(
-      imageset=imageset,
-      crystal=self.crystal,
-      detector=imageset.get_detector(),
-      beam=imageset.get_beam(),
-      scan=scan[:1],
-      goniometer=imageset.get_goniometer())
+        imageset=imageset,
+        crystal=self.crystal,
+        detector=imageset.get_detector(),
+        beam=imageset.get_beam(),
+        scan=scan[:1],
+        goniometer=imageset.get_goniometer())
 
     # Populate the reflection table with predictions
     from dials.array_family import flex
     predicted = flex.reflection_table.from_predictions(
-      expt,
-      force_static=True,
+        expt,
+        force_static=True,
     )
     predicted['id'] = flex.int(len(predicted), 0)
     return predicted
@@ -225,13 +220,13 @@ class ExperimentViewer(wx.Frame, render_3d):
       # XXX copying the initial settings avoids awkward interactions when
       # multiple viewer windows are opened
       self.settings = copy.deepcopy(app.settings)
-    else :
+    else:
       self.settings = settings()
 
     self.create_settings_panel()
     self.sizer.Add(self.settings_panel, 0, wx.EXPAND)
     self.create_viewer_panel()
-    self.sizer.Add(self.viewer, 1, wx.EXPAND|wx.ALL)
+    self.sizer.Add(self.viewer, 1, wx.EXPAND | wx.ALL)
     self.SetSizer(self.sizer)
     self.sizer.SetSizeHints(self)
     self.Bind(wx.EVT_CLOSE, self.OnClose, self)
@@ -244,16 +239,16 @@ class ExperimentViewer(wx.Frame, render_3d):
     render_3d.load_imageset(self, imageset, crystal=crystal)
     self.settings_panel.add_goniometer_controls(imageset.get_goniometer())
 
-  def OnActive(self, event) :
+  def OnActive(self, event):
     if self.IsShown() and type(self.viewer).__name__ != "_wxPyDeadObject":
       self.viewer.Refresh()
 
-  def OnClose(self, event) :
+  def OnClose(self, event):
     self.Unbind(wx.EVT_ACTIVATE)
     self.Destroy()
     event.Skip()
 
-  def OnDestroy(self, event) :
+  def OnDestroy(self, event):
     if self.parent is not None:
       self.parent.viewer = None
     event.Skip()
@@ -262,14 +257,8 @@ class ExperimentViewer(wx.Frame, render_3d):
     key = event.GetUnicodeKey()
     if key == wx.WXK_NONE:
       key = event.GetKeyCode()
-    dxs = {wx.WXK_LEFT:-1,
-           wx.WXK_RIGHT:+1,
-           wx.WXK_UP:0,
-           wx.WXK_DOWN:0}
-    dys = {wx.WXK_LEFT:0,
-           wx.WXK_RIGHT:0,
-           wx.WXK_UP:+1,
-           wx.WXK_DOWN:-1}
+    dxs = {wx.WXK_LEFT: -1, wx.WXK_RIGHT: +1, wx.WXK_UP: 0, wx.WXK_DOWN: 0}
+    dys = {wx.WXK_LEFT: 0, wx.WXK_RIGHT: 0, wx.WXK_UP: +1, wx.WXK_DOWN: -1}
 
     if key in dxs:
       dx = dxs[key]
@@ -284,17 +273,18 @@ class ExperimentViewer(wx.Frame, render_3d):
     v = self.viewer
     rc = v.rotation_center
     glMatrixMode(GL_MODELVIEW)
-    gltbx.util.rotate_object_about_eye_x_and_y(
-      scale, rc[0], rc[1], rc[2],
-      dx, dy, 0, 0)
+    gltbx.util.rotate_object_about_eye_x_and_y(scale, rc[0], rc[1], rc[2], dx, dy, 0, 0)
     v.OnRedraw()
 
-  def create_viewer_panel(self) :
-    self.viewer = GeometryWindow(settings=self.settings, parent=self, size=(800,600),
-      #orthographic=True
-      )
+  def create_viewer_panel(self):
+    self.viewer = GeometryWindow(
+        settings=self.settings,
+        parent=self,
+        size=(800, 600),
+        #orthographic=True
+    )
 
-  def create_settings_panel(self) :
+  def create_settings_panel(self):
     self.settings_panel = settings_window(self, -1, style=wx.RAISED_BORDER)
 
   def set_points(self):
@@ -304,16 +294,15 @@ class ExperimentViewer(wx.Frame, render_3d):
     self.set_points()
     self.viewer.update_settings(*args, **kwds)
 
-
-class settings_window(wxtbx.utils.SettingsPanel) :
-  def __init__(self, *args, **kwds) :
+class settings_window(wxtbx.utils.SettingsPanel):
+  def __init__(self, *args, **kwds):
     wxtbx.utils.SettingsPanel.__init__(self, *args, **kwds)
     self.Bind(wx.EVT_CHAR, self.OnChar)
 
-  def OnChar(self, event) :
+  def OnChar(self, event):
     self.GetParent().viewer.OnChar(event)
 
-  def add_controls(self) :
+  def add_controls(self):
     pass
     # d_min control
     #from wx.lib.agw import floatspin
@@ -324,13 +313,13 @@ class settings_window(wxtbx.utils.SettingsPanel) :
     self.distance_ctrl = floatspin.FloatSpin(parent=self, increment=1, digits=2)
     self.distance_ctrl.SetValue(self.settings.detector_distance)
     self.distance_ctrl.Bind(wx.EVT_SET_FOCUS, lambda evt: None)
-    if wx.VERSION >= (2,9): # XXX FloatSpin bug in 2.9.2/wxOSX_Cocoa
+    if wx.VERSION >= (2, 9): # XXX FloatSpin bug in 2.9.2/wxOSX_Cocoa
       self.distance_ctrl.SetBackgroundColour(self.GetBackgroundColour())
     box = wx.BoxSizer(wx.HORIZONTAL)
     self.panel_sizer.Add(box)
-    label = wx.StaticText(self,-1,"Detector distance")
-    box.Add(self.distance_ctrl, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
-    box.Add(label, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    label = wx.StaticText(self, -1, "Detector distance")
+    box.Add(self.distance_ctrl, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+    box.Add(label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
     self.Bind(floatspin.EVT_FLOATSPIN, self.OnChangeSettings, self.distance_ctrl)
 
     self.rotation_angle_ctrls = []
@@ -342,13 +331,13 @@ class settings_window(wxtbx.utils.SettingsPanel) :
         ctrl = floatspin.FloatSpin(parent=self, increment=1, digits=3)
         ctrl.SetValue(angle)
         ctrl.Bind(wx.EVT_SET_FOCUS, lambda evt: None)
-        if wx.VERSION >= (2,9): # XXX FloatSpin bug in 2.9.2/wxOSX_Cocoa
+        if wx.VERSION >= (2, 9): # XXX FloatSpin bug in 2.9.2/wxOSX_Cocoa
           ctrl.SetBackgroundColour(self.GetBackgroundColour())
         box = wx.BoxSizer(wx.HORIZONTAL)
         self.panel_sizer.Add(box)
-        label = wx.StaticText(self,-1,"%s angle" %name)
-        box.Add(ctrl, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
-        box.Add(label, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+        label = wx.StaticText(self, -1, "%s angle" % name)
+        box.Add(ctrl, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+        box.Add(label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
         self.Bind(floatspin.EVT_FLOATSPIN, self.OnChangeSettings, ctrl)
         self.rotation_angle_ctrls.append(ctrl)
 
@@ -358,9 +347,7 @@ class settings_window(wxtbx.utils.SettingsPanel) :
       self.settings.angle[i] = ctrl.GetValue()
     self.parent.update_settings()
 
-
 class GeometryWindow(wx_viewer.show_points_and_lines_mixin):
-
   def __init__(self, settings, *args, **kwds):
     super(GeometryWindow, self).__init__(*args, **kwds)
     self.settings = settings
@@ -403,7 +390,7 @@ class GeometryWindow(wx_viewer.show_points_and_lines_mixin):
       self.points_display_list.compile()
       glLineWidth(1)
       if self.colors is None:
-        self.colors = flex.vec3_double(len(self.points), (1,1,1))
+        self.colors = flex.vec3_double(len(self.points), (1, 1, 1))
       for point, color in zip(self.points, self.colors):
         self.draw_cross_at(point, color=color)
       self.points_display_list.end()
@@ -416,19 +403,17 @@ class GeometryWindow(wx_viewer.show_points_and_lines_mixin):
     self.beam_vector = beam
 
   #--- user input and settings
-  def update_settings(self) :
+  def update_settings(self):
     self.points_display_list = None
     self.Refresh()
 
   def update_minimum_covering_sphere(self):
-    self.minimum_covering_sphere = minimum_covering_sphere(
-      self.points, epsilon=1e-3)
+    self.minimum_covering_sphere = minimum_covering_sphere(self.points, epsilon=1e-3)
 
-  def draw_cross_at(self, (x,y,z), color=(1,1,1), f=None):
+  def draw_cross_at(self, (x, y, z), color=(1, 1, 1), f=None):
     if f is None:
       f = 0.01 * self.settings.marker_size
-    wx_viewer.show_points_and_lines_mixin.draw_cross_at(
-      self, (x,y,z), color=color, f=f)
+    wx_viewer.show_points_and_lines_mixin.draw_cross_at(self, (x, y, z), color=color, f=f)
 
   def DrawGL(self):
     wx_viewer.show_points_and_lines_mixin.DrawGL(self)
@@ -439,10 +424,10 @@ class GeometryWindow(wx_viewer.show_points_and_lines_mixin):
       for p in detector:
         image_size = p.get_image_size_mm()
         from scitbx import matrix
-        o = matrix.col(p.get_lab_coord((0,0)))
-        f = matrix.col(p.get_lab_coord((image_size[0],0)))
+        o = matrix.col(p.get_lab_coord((0, 0)))
+        f = matrix.col(p.get_lab_coord((image_size[0], 0)))
         _f = (f - o).normalize()
-        s = matrix.col(p.get_lab_coord((0,image_size[1])))
+        s = matrix.col(p.get_lab_coord((0, image_size[1])))
         _s = (s - o).normalize()
         _n = _f.cross(_s)
         n = _n * (0.25 * (f.length() + s.length())) + o
@@ -475,8 +460,7 @@ class GeometryWindow(wx_viewer.show_points_and_lines_mixin):
         angle = gonio.get_angles()[gonio.get_scan_axis()]
       else:
         angle = scan.get_oscillation()[0]
-      rotation_matrix = rotation_axis.axis_and_angle_as_r3_rotation_matrix(
-        angle, deg=True)
+      rotation_matrix = rotation_axis.axis_and_angle_as_r3_rotation_matrix(angle, deg=True)
       U0 = matrix.sqr(crystal.get_U())
 
       # Goniometer datum setting [D] at which the orientation was determined
@@ -484,9 +468,9 @@ class GeometryWindow(wx_viewer.show_points_and_lines_mixin):
 
       U = D.inverse() * U0
       B = matrix.sqr(crystal.get_B())
-      a_star = U * B * matrix.col((1,0,0))
-      b_star = U * B * matrix.col((0,1,0))
-      c_star = U * B * matrix.col((0,0,1))
+      a_star = U * B * matrix.col((1, 0, 0))
+      b_star = U * B * matrix.col((0, 1, 0))
+      c_star = U * B * matrix.col((0, 0, 1))
       color = (1.0, 0.0, 0.0) # red
       self.draw_axis(a_star.normalize() * 0.5, "a*", color=color)
       self.draw_axis(b_star.normalize() * 0.5, "b*", color=color)
@@ -502,21 +486,21 @@ class GeometryWindow(wx_viewer.show_points_and_lines_mixin):
     glColor3f(*color)
     glLineWidth(1.0)
     glBegin(GL_LINES)
-    glVertex3f(0.,0.,0.)
-    glVertex3f(axis[0]*scale, axis[1]*scale, axis[2]*scale)
+    glVertex3f(0., 0., 0.)
+    glVertex3f(axis[0] * scale, axis[1] * scale, axis[2] * scale)
     glEnd()
-    glRasterPos3f(0.5+axis[0]*scale, 0.2+axis[1]*scale, 0.2+axis[2]*scale)
+    glRasterPos3f(0.5 + axis[0] * scale, 0.2 + axis[1] * scale, 0.2 + axis[2] * scale)
     gltbx.fonts.ucs_bitmap_8x13.render_string(label)
     glEnable(GL_LINE_STIPPLE)
     glLineStipple(4, 0xAAAA)
     glBegin(GL_LINES)
-    glVertex3f(0.,0.,0.)
-    glVertex3f(-axis[0]*scale, -axis[1]*scale, -axis[2]*scale)
+    glVertex3f(0., 0., 0.)
+    glVertex3f(-axis[0] * scale, -axis[1] * scale, -axis[2] * scale)
     glEnd()
     glDisable(GL_LINE_STIPPLE)
 
   def draw_lab_axis(self, start, end, label):
-    mid = tuple([0.5 * (s+e) for s, e in zip(start, end)])
+    mid = tuple([0.5 * (s + e) for s, e in zip(start, end)])
     gltbx.fonts.ucs_bitmap_8x13.setup_call_lists()
     glDisable(GL_LIGHTING)
     glColor3f(1.0, 1.0, 0.0)
@@ -529,17 +513,15 @@ class GeometryWindow(wx_viewer.show_points_and_lines_mixin):
     gltbx.fonts.ucs_bitmap_8x13.render_string(label)
 
   def rotate_view(self, x1, y1, x2, y2, shift_down=False, scale=0.1):
-    super(GeometryWindow, self).rotate_view(
-      x1, y1, x2, y2, shift_down=shift_down, scale=scale)
+    super(GeometryWindow, self).rotate_view(x1, y1, x2, y2, shift_down=shift_down, scale=scale)
 
-  def OnLeftUp(self,event):
+  def OnLeftUp(self, event):
     self.was_dragged = True
     super(GeometryWindow, self).OnLeftUp(event)
 
-
   def initialize_modelview(self, eye_vector=None, angle=None):
     super(GeometryWindow, self).initialize_modelview(eye_vector=eye_vector, angle=angle)
-    self.rotation_center = (0,0,0)
+    self.rotation_center = (0, 0, 0)
     self.move_to_center_of_viewport(self.rotation_center)
 
 def run(args):
@@ -549,27 +531,26 @@ def run(args):
   from dials.util.options import flatten_experiments
   import libtbx.load_env
 
-  usage = "%s [options] datablock.json" %(
-    libtbx.env.dispatcher_name)
+  usage = "%s [options] datablock.json" % (libtbx.env.dispatcher_name)
 
   import os
   if 'DIALS_EXPORT_DO_NOT_CHECK_FORMAT' in os.environ:
     parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      read_datablocks=True,
-      read_experiments=True,
-      check_format=False,
-      epilog=help_message)
+        usage=usage,
+        phil=phil_scope,
+        read_datablocks=True,
+        read_experiments=True,
+        check_format=False,
+        epilog=help_message)
 
   else:
     parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      read_datablocks=True,
-      read_experiments=True,
-      check_format=True,
-      epilog=help_message)
+        usage=usage,
+        phil=phil_scope,
+        read_datablocks=True,
+        read_experiments=True,
+        check_format=True,
+        epilog=help_message)
 
   params, options = parser.parse_args(show_diff_phil=True)
   datablocks = flatten_datablocks(params.input.datablock)
@@ -601,10 +582,10 @@ def run(args):
   if gonio is not None and not isinstance(gonio, MultiAxisGoniometer):
     from dxtbx.model.goniometer import GoniometerFactory
     gonio = GoniometerFactory.multi_axis(
-      axes=flex.vec3_double((gonio.get_rotation_axis(),)),
-      angles=flex.double((0,)),
-      names=flex.std_string(('GON_OMEGA',)),
-      scan_axis=0)
+        axes=flex.vec3_double((gonio.get_rotation_axis(), )),
+        angles=flex.double((0, )),
+        names=flex.std_string(('GON_OMEGA', )),
+        scan_axis=0)
     imageset.set_goniometer(gonio)
 
   if isinstance(gonio, MultiAxisGoniometer):
@@ -617,13 +598,11 @@ def run(args):
   import wxtbx.app
   a = wxtbx.app.CCTBXApp(0)
   a.settings = params
-  f = ExperimentViewer(
-    None, -1, "Experiment viewer", size=(1024,768))
+  f = ExperimentViewer(None, -1, "Experiment viewer", size=(1024, 768))
   f.load_imageset(imageset, crystal=crystal)
   f.Show()
   a.SetTopWindow(f)
   a.MainLoop()
-
 
 if __name__ == '__main__':
   import sys

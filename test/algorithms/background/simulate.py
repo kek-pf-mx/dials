@@ -1,6 +1,5 @@
 from __future__ import absolute_import, division
 
-
 def gaussian(grid, A, cent, sig):
 
   from scitbx.array_family import flex
@@ -8,8 +7,8 @@ def gaussian(grid, A, cent, sig):
   import numpy
 
   # Make sure everythings the same dimensions
-  assert(len(grid) == len(cent))
-  assert(len(grid) == len(sig))
+  assert (len(grid) == len(cent))
+  assert (len(grid) == len(sig))
 
   # Create the grid
   data = flex.double(flex.grid(grid)).as_numpy_array()
@@ -46,14 +45,13 @@ def gaussian_noise(grid, A, sig):
 #
 #    print mean, sdev
 
-
 if __name__ == '__main__':
 
   from scitbx.array_family import flex
 
-  spot = gaussian((30,30), 20, (15,15), (3,3))
-  background = poisson_noise((30,30), 20)
-  background = gaussian_noise((30,30),20,2)
+  spot = gaussian((30, 30), 20, (15, 15), (3, 3))
+  background = poisson_noise((30, 30), 20)
+  background = gaussian_noise((30, 30), 20, 2)
   grid = background + spot
 
   from dials.algorithms.background import NormalDiscriminator
@@ -62,8 +60,8 @@ if __name__ == '__main__':
 
   print normal_expected_n_sigma(30 * 30)
 
-  discriminate_normal = NormalDiscriminator(n_sigma = normal_expected_n_sigma(30 * 30))
-  discriminate_poisson = IndexOfDispersionDiscriminator(n_sigma = 2)
+  discriminate_normal = NormalDiscriminator(n_sigma=normal_expected_n_sigma(30 * 30))
+  discriminate_poisson = IndexOfDispersionDiscriminator(n_sigma=2)
 
   grid_i = flex.int(flex.grid(grid.all()))
   for i, g in enumerate(grid):
@@ -76,7 +74,7 @@ if __name__ == '__main__':
   poisson_pixels = flex.select(grid, flags=(mask_poisson == 1))
   all_pixels = list(grid)
 
-  line = grid.as_numpy_array()[15,:]
+  line = grid.as_numpy_array()[15, :]
 
   from matplotlib import pylab
   pylab.subplot2grid((3, 3), (0, 0))

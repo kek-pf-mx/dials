@@ -28,9 +28,7 @@ from dxtbx.model.experiment_list import Experiment, ExperimentList
 import logging
 logger = logging.getLogger(__name__)
 
-
 class indexer_fft3d(indexer_base):
-
   def __init__(self, reflections, imagesets, params):
     super(indexer_fft3d, self).__init__(reflections, imagesets, params)
 
@@ -49,10 +47,8 @@ class indexer_fft3d(indexer_base):
       self.debug_show_candidate_basis_vectors()
       if self.params.debug_plots:
         self.debug_plot_candidate_basis_vectors()
-      self.candidate_crystal_models = self.find_candidate_orientation_matrices(
-        self.candidate_basis_vectors)
-      crystal_model, n_indexed = self.choose_best_orientation_matrix(
-        self.candidate_crystal_models)
+      self.candidate_crystal_models = self.find_candidate_orientation_matrices(self.candidate_basis_vectors)
+      crystal_model, n_indexed = self.choose_best_orientation_matrix(self.candidate_crystal_models)
       if crystal_model is not None:
         crystal_models = [crystal_model]
       else:
@@ -60,12 +56,14 @@ class indexer_fft3d(indexer_base):
     experiments = ExperimentList()
     for cm in crystal_models:
       for imageset in self.imagesets:
-        experiments.append(Experiment(imageset=imageset,
-                                      beam=imageset.get_beam(),
-                                      detector=imageset.get_detector(),
-                                      goniometer=imageset.get_goniometer(),
-                                      scan=imageset.get_scan(),
-                                      crystal=cm))
+        experiments.append(
+            Experiment(
+                imageset=imageset,
+                beam=imageset.get_beam(),
+                detector=imageset.get_detector(),
+                goniometer=imageset.get_goniometer(),
+                scan=imageset.get_scan(),
+                crystal=cm))
     return experiments
 
   def map_centroids_to_reciprocal_space_grid(self):
@@ -75,12 +73,11 @@ class indexer_fft3d(indexer_base):
     rlgrid = 2 / (d_min * n_points)
 
     # real space FFT grid dimensions
-    cell_lengths = [n_points * d_min/2 for i in range(3)]
-    self.fft_cell = uctbx.unit_cell(cell_lengths+[90]*3)
-    self.crystal_symmetry = crystal.symmetry(unit_cell=self.fft_cell,
-                                             space_group_symbol="P1")
+    cell_lengths = [n_points * d_min / 2 for i in range(3)]
+    self.fft_cell = uctbx.unit_cell(cell_lengths + [90] * 3)
+    self.crystal_symmetry = crystal.symmetry(unit_cell=self.fft_cell, space_group_symbol="P1")
 
-    logger.info("FFT gridding: (%i,%i,%i)" %self.gridding)
+    logger.info("FFT gridding: (%i,%i,%i)" % self.gridding)
 
     grid = flex.double(flex.grid(self.gridding), 0)
 
@@ -88,11 +85,9 @@ class indexer_fft3d(indexer_base):
 
     if self.params.b_iso is libtbx.Auto:
       self.params.b_iso = -4 * d_min**2 * math.log(0.05)
-      logger.debug("Setting b_iso = %.1f" %self.params.b_iso)
+      logger.debug("Setting b_iso = %.1f" % self.params.b_iso)
     from dials.algorithms.indexing import map_centroids_to_reciprocal_space_grid
-    map_centroids_to_reciprocal_space_grid(
-      grid, self.reflections['rlp'], selection,
-      d_min, b_iso=self.params.b_iso)
+    map_centroids_to_reciprocal_space_grid(grid, self.reflections['rlp'], selection, d_min, b_iso=self.params.b_iso)
     reflections_used_for_indexing = selection.iselection()
 
     self.reciprocal_space_grid = grid
@@ -111,21 +106,17 @@ class indexer_fft3d(indexer_base):
       #   d_min = 5 * max_cell/n_points
 
       max_cell = self.params.max_cell
-      d_min = (
-        5 * max_cell / self.params.fft3d.reciprocal_space_grid.n_points)
-      d_spacings = 1/self.reflections['rlp'].norms()
-      self.params.fft3d.reciprocal_space_grid.d_min = max(
-        d_min, min(d_spacings))
-      logger.info("Setting d_min: %.2f" %self.params.fft3d.reciprocal_space_grid.d_min)
+      d_min = (5 * max_cell / self.params.fft3d.reciprocal_space_grid.n_points)
+      d_spacings = 1 / self.reflections['rlp'].norms()
+      self.params.fft3d.reciprocal_space_grid.d_min = max(d_min, min(d_spacings))
+      logger.info("Setting d_min: %.2f" % self.params.fft3d.reciprocal_space_grid.d_min)
     n_points = self.params.fft3d.reciprocal_space_grid.n_points
-    self.gridding = fftpack.adjust_gridding_triple(
-      (n_points,n_points,n_points), max_prime=5)
+    self.gridding = fftpack.adjust_gridding_triple((n_points, n_points, n_points), max_prime=5)
     n_points = self.gridding[0]
     self.map_centroids_to_reciprocal_space_grid()
     self.d_min = self.params.fft3d.reciprocal_space_grid.d_min
 
-    logger.info("Number of centroids used: %i" %(
-      (self.reciprocal_space_grid>0).count(True)))
+    logger.info("Number of centroids used: %i" % ((self.reciprocal_space_grid > 0).count(True)))
 
     #gb_to_bytes = 1073741824
     #bytes_to_gb = 1/gb_to_bytes
@@ -138,8 +129,7 @@ class indexer_fft3d(indexer_base):
 
     fft = fftpack.complex_to_complex_3d(self.gridding)
     grid_complex = flex.complex_double(
-      reals=self.reciprocal_space_grid,
-      imags=flex.double(self.reciprocal_space_grid.size(), 0))
+        reals=self.reciprocal_space_grid, imags=flex.double(self.reciprocal_space_grid.size(), 0))
     grid_transformed = fft.forward(grid_complex)
     #self.grid_real = flex.pow2(flex.abs(grid_transformed))
     self.grid_real = flex.pow2(flex.real(grid_transformed))
@@ -155,9 +145,8 @@ class indexer_fft3d(indexer_base):
 
   def find_peaks(self):
     grid_real_binary = self.grid_real.deep_copy()
-    rmsd = math.sqrt(
-      flex.mean(flex.pow2(grid_real_binary.as_1d()-flex.mean(grid_real_binary.as_1d()))))
-    grid_real_binary.set_selected(grid_real_binary < (self.params.rmsd_cutoff)*rmsd, 0)
+    rmsd = math.sqrt(flex.mean(flex.pow2(grid_real_binary.as_1d() - flex.mean(grid_real_binary.as_1d()))))
+    grid_real_binary.set_selected(grid_real_binary < (self.params.rmsd_cutoff) * rmsd, 0)
     grid_real_binary.as_1d().set_selected(grid_real_binary.as_1d() > 0, 1)
     grid_real_binary = grid_real_binary.iround()
     from cctbx import masks
@@ -168,15 +157,13 @@ class indexer_fft3d(indexer_base):
     # the peak at the origin might have a significantly larger volume than the
     # rest so exclude this peak from determining maximum volume
     isel = (flood_fill.grid_points_per_void() > int(
-        self.params.fft3d.peak_volume_cutoff * flex.max(
-          flood_fill.grid_points_per_void()[1:]))).iselection()
+        self.params.fft3d.peak_volume_cutoff * flex.max(flood_fill.grid_points_per_void()[1:]))).iselection()
 
     if self.params.optimise_initial_basis_vectors:
       self.volumes = flood_fill.grid_points_per_void().select(isel)
       sites_cart = flood_fill.centres_of_mass_cart().select(isel)
-      sites_cart_optimised = optimise_basis_vectors(
-        self.reflections['rlp'].select(self.reflections_used_for_indexing),
-        sites_cart)
+      sites_cart_optimised = optimise_basis_vectors(self.reflections['rlp'].select(self.reflections_used_for_indexing),
+                                                    sites_cart)
 
       self.sites = self.fft_cell.fractionalize(sites_cart_optimised)
 
@@ -188,7 +175,7 @@ class indexer_fft3d(indexer_base):
         logger.debug(sites_cart[p], sites_cart_optimised[p], norms[p])
 
       # only use those vectors which haven't shifted too far from starting point
-      sel = norms < (5 * self.fft_cell.parameters()[0]/self.gridding[0])
+      sel = norms < (5 * self.fft_cell.parameters()[0] / self.gridding[0])
       self.sites = self.sites.select(sel)
       self.volumes = self.volumes.select(sel)
       #diff = (self.sites - flood_fill.centres_of_mass_frac().select(isel))
@@ -204,7 +191,7 @@ class indexer_fft3d(indexer_base):
     # hijack the xray.structure class to facilitate calculation of distances
     xs = xray.structure(crystal_symmetry=self.crystal_symmetry)
     for i, site in enumerate(self.sites):
-      xs.add_scatterer(xray.scatterer("C%i" %i, site=site))
+      xs.add_scatterer(xray.scatterer("C%i" % i, site=site))
 
     xs = xs.sites_mod_short()
     sites_cart = xs.sites_cart()
@@ -240,14 +227,13 @@ class indexer_fft3d(indexer_base):
       for group in vector_groups:
         mean_v = group.mean()
         mean_v_length = mean_v.length()
-        if (abs(mean_v_length - length)/max(mean_v_length, length)
-            < relative_length_tolerance):
+        if (abs(mean_v_length - length) / max(mean_v_length, length) < relative_length_tolerance):
           angle = mean_v.angle(v, deg=True)
           if angle < angle_tolerance:
             group.append(v, length, volume)
             matched_group = True
             break
-          elif abs(180-angle) < angle_tolerance:
+          elif abs(180 - angle) < angle_tolerance:
             group.append(-v, length, volume)
             matched_group = True
             break
@@ -268,7 +254,7 @@ class indexer_fft3d(indexer_base):
     vectors = [vectors[i] for i in perm]
 
     for i, (v, volume) in enumerate(zip(vectors, volumes)):
-      logger.debug("%s %s %s" %(i, v.length(), volume))
+      logger.debug("%s %s %s" % (i, v.length(), volume))
 
     lengths = flex.double(v.length() for v in vectors)
     perm = flex.sort_permutation(lengths)
@@ -281,9 +267,8 @@ class indexer_fft3d(indexer_base):
       v = vectors[p]
       is_unique = True
       for i, v_u in enumerate(unique_vectors):
-        if ((unique_volumes[i] > volumes[p])
-            and is_approximate_integer_multiple(v_u, v)):
-          logger.debug("rejecting %s: integer multiple of %s" %(v.length(), v_u.length()))
+        if ((unique_volumes[i] > volumes[p]) and is_approximate_integer_multiple(v_u, v)):
+          logger.debug("rejecting %s: integer multiple of %s" % (v.length(), v_u.length()))
           is_unique = False
           break
       if is_unique:
@@ -296,7 +281,7 @@ class indexer_fft3d(indexer_base):
     volumes = unique_volumes.select(perm)
 
     #for i, (v, volume) in enumerate(zip(vectors, volumes)):
-      #logger.debug("%s %s %s" %(i, v.length(), volume))
+    #logger.debug("%s %s %s" %(i, v.length(), volume))
 
     self.candidate_basis_vectors = vectors
     return self.candidate_basis_vectors
@@ -307,13 +292,12 @@ class indexer_fft3d(indexer_base):
     # hijack the xray.structure class to facilitate calculation of distances
     xs = xray.structure(crystal_symmetry=self.crystal_symmetry)
     for i, site in enumerate(self.sites):
-      xs.add_scatterer(xray.scatterer("C%i" %i, site=site))
+      xs.add_scatterer(xray.scatterer("C%i" % i, site=site))
 
     xs = xs.sites_mod_short()
     xs = xs.select(xs.sites_frac().norms() < 0.45)
     cell_multiplier = 10
-    xs1 = xs.customized_copy(
-      unit_cell=uctbx.unit_cell([xs.unit_cell().parameters()[0]*cell_multiplier]*3))
+    xs1 = xs.customized_copy(unit_cell=uctbx.unit_cell([xs.unit_cell().parameters()[0] * cell_multiplier] * 3))
     xs1.set_sites_cart(xs.sites_cart())
     xs = xs1
     sites_cart = xs.sites_cart()
@@ -358,13 +342,11 @@ class indexer_fft3d(indexer_base):
       min_cluster_size = params.min_cluster_size
 
     if self.params.debug_plots:
-      self.debug_plot_clusters(
-        difference_vectors, i_cluster, min_cluster_size=min_cluster_size)
-
+      self.debug_plot_clusters(difference_vectors, i_cluster, min_cluster_size=min_cluster_size)
 
     clusters = []
     min_cluster_size = params.min_cluster_size
-    for i in range(max(i_cluster)+1):
+    for i in range(max(i_cluster) + 1):
       isel = (i_cluster == i).iselection()
       if len(isel) < min_cluster_size:
         continue
@@ -394,11 +376,10 @@ class indexer_fft3d(indexer_base):
 
     cutoff_frac = 0.25
     for i in range(len(cluster_point_sets)):
-      for j in range(i+1, len(cluster_point_sets)):
-        intersection_ij = cluster_point_sets[i].intersection(
-            cluster_point_sets[j])
+      for j in range(i + 1, len(cluster_point_sets)):
+        intersection_ij = cluster_point_sets[i].intersection(cluster_point_sets[j])
         union_ij = cluster_point_sets[i].union(cluster_point_sets[j])
-        frac_connected = len(intersection_ij)/len(union_ij)
+        frac_connected = len(intersection_ij) / len(union_ij)
         if frac_connected > cutoff_frac:
           G.add_edge(i, j)
 
@@ -425,11 +406,11 @@ class indexer_fft3d(indexer_base):
         this_set = set()
         for i_cluster in clique:
           this_set = this_set.union(cluster_point_sets[i_cluster])
-        logger.info("Clique %i: %i lattice points" %(i+1, len(this_set)))
+        logger.info("Clique %i: %i lattice points" % (i + 1, len(this_set)))
 
     assert len(distinct_cliques) > 0
 
-    logger.info("Estimated number of lattices: %i" %len(distinct_cliques))
+    logger.info("Estimated number of lattices: %i" % len(distinct_cliques))
 
     self.candidate_basis_vectors = []
     self.candidate_crystal_models = []
@@ -446,9 +427,7 @@ class indexer_fft3d(indexer_base):
       for v in vectors:
         is_unique = True
         for v_u in unique_vectors:
-          if is_approximate_integer_multiple(v_u, v,
-                                             relative_tolerance=0.01,
-                                             angular_tolerance=0.5):
+          if is_approximate_integer_multiple(v_u, v, relative_tolerance=0.01, angular_tolerance=0.5):
             is_unique = False
             break
         if is_unique:
@@ -460,13 +439,11 @@ class indexer_fft3d(indexer_base):
         = self.find_candidate_orientation_matrices(vectors)
       if len(candidate_orientation_matrices) == 0:
         continue
-      crystal_model, n_indexed = self.choose_best_orientation_matrix(
-        candidate_orientation_matrices)
+      crystal_model, n_indexed = self.choose_best_orientation_matrix(candidate_orientation_matrices)
       if crystal_model is None: continue
       # map to minimum reduced cell
       crystal_symmetry = crystal.symmetry(
-        unit_cell=crystal_model.get_unit_cell(),
-        space_group=crystal_model.get_space_group())
+          unit_cell=crystal_model.get_unit_cell(), space_group=crystal_model.get_space_group())
       cb_op = crystal_symmetry.change_of_basis_op_to_minimum_cell()
       crystal_model = crystal_model.change_basis(cb_op)
       self.candidate_crystal_models.append(crystal_model)
@@ -474,11 +451,11 @@ class indexer_fft3d(indexer_base):
     if self.params.debug:
       file_name = "vectors.pdb"
       a = self.params.max_cell
-      cs = crystal.symmetry(unit_cell=(a,a,a,90,90,90), space_group="P1")
+      cs = crystal.symmetry(unit_cell=(a, a, a, 90, 90, 90), space_group="P1")
       xs = xray.structure(crystal_symmetry=cs)
       for v in difference_vectors:
         v = matrix.col(v)
-        xs.add_scatterer(xray.scatterer("C", site=v/(a/10)))
+        xs.add_scatterer(xray.scatterer("C", site=v / (a / 10)))
       xs.sites_mod_short()
       with open(file_name, 'wb') as f:
         print >> f, xs.as_pdb_file()
@@ -547,11 +524,11 @@ class indexer_fft3d(indexer_base):
     n_clusters = len(unique_labels) - (1 if -1 in unique_labels else 0)
     colours = pyplot.cm.Spectral(numpy.linspace(0, 1, len(unique_labels)))
     #vectors = flex.vec3_double(vectors)
-    ax.scatter([0],[0],[0], c='k', marker='+', s=50)
+    ax.scatter([0], [0], [0], c='k', marker='+', s=50)
     for k, col in zip(unique_labels, colours):
       class_members = (labels == k).iselection()
-      if k == -1:# or len(class_members) < min_cluster_size:
-          # Black used for noise.
+      if k == -1: # or len(class_members) < min_cluster_size:
+        # Black used for noise.
         col = 'k'
         col = '0.25' # mid-grey
         markersize = 1
@@ -563,13 +540,13 @@ class indexer_fft3d(indexer_base):
       if not isinstance(col, basestring) and len(col) == 4:
         # darken the edges
         frac = 0.75
-        edgecolor = [col[0]*frac, col[1]*frac, col[2]*frac, col[3]]
+        edgecolor = [col[0] * frac, col[1] * frac, col[2] * frac, col[3]]
       else:
         edgecolor = col
       vs = numpy.array([vectors[i] for i in class_members])
-      xs = vs[:,0]
-      ys = vs[:,1]
-      zs = vs[:,2]
+      xs = vs[:, 0]
+      ys = vs[:, 1]
+      zs = vs[:, 2]
       # plot whole sphere for visual effect
       xs = numpy.concatenate((xs, -xs))
       ys = numpy.concatenate((ys, -ys))
@@ -588,31 +565,23 @@ class indexer_fft3d(indexer_base):
     rlgrid = 2 / (d_min * self.gridding[0])
 
     frame_number = self.reflections['xyzobs.px.value'].parts()[2]
-    scan_range_min = max(
-      int(math.floor(flex.min(frame_number))),
-      self.imagesets[0].get_array_range()[0]) # XXX what about multiple imagesets?
-    scan_range_max = min(
-      int(math.ceil(flex.max(frame_number))),
-      self.imagesets[0].get_array_range()[1]) # XXX what about multiple imagesets?
+    scan_range_min = max(int(math.floor(flex.min(frame_number))),
+                         self.imagesets[0].get_array_range()[0]) # XXX what about multiple imagesets?
+    scan_range_max = min(int(math.ceil(flex.max(frame_number))),
+                         self.imagesets[0].get_array_range()[1]) # XXX what about multiple imagesets?
     scan_range = self.params.scan_range
     if not len(scan_range):
       scan_range = [[scan_range_min, scan_range_max]]
 
     scan = self.imagesets[0].get_scan() # XXX what about multiple imagesets?
-    angle_ranges = [
-      [scan.get_angle_from_array_index(i, deg=False) for i in range_]
-      for range_ in scan_range]
+    angle_ranges = [[scan.get_angle_from_array_index(i, deg=False) for i in range_] for range_ in scan_range]
 
     grid = flex.double(flex.grid(self.gridding), 0)
-    sampling_volume_map(grid, flex.vec2_double(angle_ranges),
-                        self.imagesets[0].get_beam().get_s0(),
-                        self.imagesets[0].get_goniometer().get_rotation_axis(),
-                        rlgrid, d_min, self.params.b_iso)
+    sampling_volume_map(grid, flex.vec2_double(angle_ranges), self.imagesets[0].get_beam().get_s0(),
+                        self.imagesets[0].get_goniometer().get_rotation_axis(), rlgrid, d_min, self.params.b_iso)
 
     fft = fftpack.complex_to_complex_3d(self.gridding)
-    grid_complex = flex.complex_double(
-      reals=grid,
-      imags=flex.double(grid.size(), 0))
+    grid_complex = flex.complex_double(reals=grid, imags=flex.double(grid.size(), 0))
     grid_transformed = fft.forward(grid_complex)
     grid_real = flex.pow2(flex.real(grid_transformed))
 
@@ -629,16 +598,13 @@ class indexer_fft3d(indexer_base):
     t1 = time.time()
     #print "clean_3d took %.2f s" %(t1-t0)
 
-    reciprocal_lattice_points = self.reflections['rlp'].select(
-      self.reflections_used_for_indexing)
+    reciprocal_lattice_points = self.reflections['rlp'].select(self.reflections_used_for_indexing)
 
     peaks = self.optimise_peaks(peaks, reciprocal_lattice_points)
 
     peaks_frac = flex.vec3_double()
     for p in peaks:
-      peaks_frac.append((p[0]/self.gridding[0],
-                         p[1]/self.gridding[1],
-                         p[2]/self.gridding[2]))
+      peaks_frac.append((p[0] / self.gridding[0], p[1] / self.gridding[1], p[2] / self.gridding[2]))
       #print p, peaks_frac[-1]
 
     if self.params.debug:
@@ -667,8 +633,8 @@ class indexer_fft3d(indexer_base):
           j_coord = peak[1] + j * grid_step
           for k in range(-n_points, n_points):
             k_coord = peak[2] + k * grid_step
-            v = self.fft_cell.orthogonalize(
-              (i_coord/self.gridding[0], j_coord/self.gridding[1], k_coord/self.gridding[2]))
+            v = self.fft_cell.orthogonalize((i_coord / self.gridding[0], j_coord / self.gridding[1],
+                                             k_coord / self.gridding[2]))
             two_pi_S_dot_v = 2 * math.pi * reciprocal_lattice_points.dot(v)
             f = flex.sum(flex.cos(two_pi_S_dot_v))
             if f > max_value:
@@ -677,13 +643,9 @@ class indexer_fft3d(indexer_base):
       optimised_peaks.append(max_index)
     return optimised_peaks
 
-
-def sampling_volume_map(data, angle_range, beam_vector, rotation_axis,
-                        rl_grid_spacing, d_min, b_iso):
-    from dials.algorithms.indexing import sampling_volume_map
-    return sampling_volume_map(
-      data, angle_range, beam_vector, rotation_axis, rl_grid_spacing, d_min, b_iso)
-
+def sampling_volume_map(data, angle_range, beam_vector, rotation_axis, rl_grid_spacing, d_min, b_iso):
+  from dials.algorithms.indexing import sampling_volume_map
+  return sampling_volume_map(data, angle_range, beam_vector, rotation_axis, rl_grid_spacing, d_min, b_iso)
 
 def clean_3d(dirty_beam, dirty_map, n_peaks, gamma=1):
   from dials.algorithms.indexing import clean_3d as _clean_3d

@@ -12,7 +12,6 @@
 from __future__ import absolute_import, division
 from dials.framework import interface
 
-
 class SpotFinderThresholdIface(interface.Interface):
   ''' Interface for threshold algorithms to be used in spot finding. '''
 
@@ -68,7 +67,6 @@ class ProfileModelIface(interface.Interface):
 
   __metaclass__ = ProfileModelInterfaceMeta
 
-
   name = 'profile'
 
   @classmethod
@@ -80,7 +78,6 @@ class ProfileModelIface(interface.Interface):
   def from_dict(cls, d):
     ''' Get from dictionary. '''
     pass
-
 
 class CentroidIface(interface.Interface):
   ''' Interface for centroid algorithms. '''
@@ -105,7 +102,6 @@ class CentroidIface(interface.Interface):
 
     '''
     pass
-
 
 class BackgroundIface(interface.Interface):
   ''' Interface for background algorithms. '''

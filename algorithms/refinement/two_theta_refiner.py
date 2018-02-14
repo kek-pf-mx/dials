@@ -29,7 +29,6 @@ RAD2DEG = 180. / pi
 DEG2RAD = pi / 180.
 
 class ConstantTwoThetaWeightingStrategy(object):
-
   def calculate_weights(self, reflections):
 
     reflections['2theta.weights'] = flex.double(len(reflections), 1)
@@ -47,8 +46,8 @@ def calc_2theta(reflections, experiments):
       sel = (sub_ref['panel'] == ipanel)
       panel_ref = sub_ref.select(sel)
       x, y, phi = panel_ref['xyzobs.mm.value'].parts()
-      s1 = exp.detector[ipanel].get_lab_coord(flex.vec2_double(x,y))
-      s1 = s1/s1.norms() * s0.length()
+      s1 = exp.detector[ipanel].get_lab_coord(flex.vec2_double(x, y))
+      s1 = s1 / s1.norms() * s0.length()
 
       sub_isel = isel.select(sel)
       twotheta.set_selected(sub_isel, s1.angle(s0))
@@ -64,12 +63,10 @@ class TwoThetaReflectionManager(ReflectionManager):
     super(TwoThetaReflectionManager, self).__init__(*args, **kwargs)
 
     # set observed 2theta angles
-    self._reflections['2theta_obs.rad'] = calc_2theta(self._reflections,
-      self._experiments)
+    self._reflections['2theta_obs.rad'] = calc_2theta(self._reflections, self._experiments)
 
     # placeholder for calculated 2theta angles
-    self._reflections['2theta_cal.rad'] = flex.double(
-      len(self._reflections), 0.0)
+    self._reflections['2theta_cal.rad'] = flex.double(len(self._reflections), 0.0)
 
     return
 
@@ -102,7 +99,6 @@ class TwoThetaReflectionManager(ReflectionManager):
     logger.info("")
 
 class TwoThetaExperimentsPredictor(ExperimentsPredictor):
-
   def __call__(self, reflections):
     """Predict 2theta angles for all reflections at the current model geometry"""
 
@@ -133,10 +129,8 @@ class TwoThetaTarget(Target):
   rmsd_names = ["RMSD_2theta"]
   rmsd_units = ["rad"]
 
-  def __init__(self, experiments, reflection_predictor, ref_man,
-               prediction_parameterisation):
-    Target.__init__(self, experiments, reflection_predictor, ref_man,
-                    prediction_parameterisation)
+  def __init__(self, experiments, reflection_predictor, ref_man, prediction_parameterisation):
+    Target.__init__(self, experiments, reflection_predictor, ref_man, prediction_parameterisation)
 
     # set the single cutoff for 2theta residual to essentially zero
     self._binsize_cutoffs = [1.e-6]
@@ -161,8 +155,7 @@ class TwoThetaTarget(Target):
     self._reflection_predictor(reflections)
 
     # calculate  residuals
-    reflections['2theta_resid'] = (reflections['2theta_cal.rad'] -
-                                   reflections['2theta_obs.rad'])
+    reflections['2theta_resid'] = (reflections['2theta_cal.rad'] - reflections['2theta_obs.rad'])
     reflections['2theta_resid2'] = reflections['2theta_resid']**2
 
     # set used_in_refinement flag to all those that had predictions
@@ -228,7 +221,7 @@ class TwoThetaTarget(Target):
     return False
 
 class TwoThetaPredictionParameterisation(PredictionParameterisation):
-  _grad_names = ("d2theta_dp",)
+  _grad_names = ("d2theta_dp", )
 
   def __init__(self, *args, **kwargs):
     super(TwoThetaPredictionParameterisation, self).__init__(*args, **kwargs)
@@ -246,8 +239,7 @@ class TwoThetaPredictionParameterisation(PredictionParameterisation):
 
     return
 
-  def _xl_unit_cell_derivatives(self, isel, parameterisation=None,
-    reflections=None):
+  def _xl_unit_cell_derivatives(self, isel, parameterisation=None, reflections=None):
 
     # Get required data
     h = self._h.select(isel)
@@ -294,8 +286,7 @@ class TwoThetaPredictionParameterisation(PredictionParameterisation):
         isel.extend(self._experiment_to_idx[exp_id])
 
       # Extend derivative vectors for this crystal unit cell parameterisation
-      results = self._extend_gradient_vectors(results, self._nref, xlucp.num_free(),
-        keys=self._grad_names)
+      results = self._extend_gradient_vectors(results, self._nref, xlucp.num_free(), keys=self._grad_names)
 
       if len(isel) == 0:
         # if no reflections are in this experiment, skip calculation of
@@ -308,8 +299,7 @@ class TwoThetaPredictionParameterisation(PredictionParameterisation):
           self._iparam += xlucp.num_free()
         continue
 
-      d2theta_dp =  self._xl_unit_cell_derivatives(isel,
-        parameterisation=xlucp, reflections=reflections)
+      d2theta_dp = self._xl_unit_cell_derivatives(isel, parameterisation=xlucp, reflections=reflections)
 
       for d2theta in d2theta_dp:
         if d2theta is not None:

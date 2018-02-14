@@ -3,16 +3,14 @@ from dials.algorithms.profile_model.modeller import EmpiricalProfileModeller
 from dials.test.algorithms.integration.profile.tst_profile_helpers import gaussian
 
 class Modeller(EmpiricalProfileModeller):
-
   def model(self, reflections, profiles):
     from dials.array_family import flex
     indices = flex.size_t(range(len(self)))
-    weights = flex.double([1.0]*len(self))
+    weights = flex.double([1.0] * len(self))
     for profile in profiles:
       self.add(indices, weights, profile)
 
 class Test(object):
-
   def __init__(self):
 
     width = 1000
@@ -51,8 +49,8 @@ class Test(object):
       for k in range(self.grid_size[2]):
         for j in range(self.grid_size[1]):
           for i in range(self.grid_size[0]):
-            assert(abs(reference[k,j,i] - profile[k,j,i]) <= eps)
-      assert(abs(flex.sum(reference) - 1.0) <= eps)
+            assert (abs(reference[k, j, i] - profile[k, j, i]) <= eps)
+      assert (abs(flex.sum(reference) - 1.0) <= eps)
 
     print 'OK'
 
@@ -78,13 +76,12 @@ class Test(object):
         for k in range(self.grid_size[2]):
           for j in range(self.grid_size[1]):
             for i in range(self.grid_size[0]):
-              assert(abs(reference[k,j,i] - profile[k,j,i]) <= eps)
+              assert (abs(reference[k, j, i] - profile[k, j, i]) <= eps)
       else:
         profile = reference
-      assert(abs(flex.sum(reference) - 1.0) <= eps)
+      assert (abs(flex.sum(reference) - 1.0) <= eps)
 
     print 'OK'
-
 
   def normalize_profile(self, profile):
     from scitbx.array_family import flex
@@ -103,7 +100,6 @@ class Test(object):
 
     return result
 
-
   def generate_single_central_non_negative_profiles(self):
     from dials.array_family import flex
     rlist = flex.reflection_table(1)
@@ -115,11 +111,10 @@ class Test(object):
     z = 5
     xyz = flex.vec3_double(1)
     xyz[0] = (x, y, z)
-    profiles = [ profile.deep_copy() ]
+    profiles = [profile.deep_copy()]
     rlist['xyzcal.px'] = xyz
 
     return rlist, profiles, profile
-
 
   def generate_identical_non_negative_profiles(self):
     from dials.array_family import flex
@@ -152,10 +147,9 @@ class Test(object):
       y = uniform(0, 1000)
       z = uniform(0, 10)
 
-      offset = -4.5  + 9 * x / 1000.0
+      offset = -4.5 + 9 * x / 1000.0
 
-      profile = gaussian(self.grid_size, 1000,
-          (4 + offset, 4, 4), (1.5, 1.5, 1.5))
+      profile = gaussian(self.grid_size, 1000, (4 + offset, 4, 4), (1.5, 1.5, 1.5))
       xyz[i] = (x, y, z)
       profiles.append(profile)
 
@@ -167,4 +161,3 @@ if __name__ == '__main__':
   with cd_auto(__file__):
     test = Test()
     test.run()
-

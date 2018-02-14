@@ -101,7 +101,6 @@ def run(i, imp):
       raise RuntimeError('wrong result')
   return result
 
-
 if __name__ == '__main__':
   for i in range(5):
     res1 = run(i, "flat")

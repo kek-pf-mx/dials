@@ -12,12 +12,11 @@ def run():
     print 'FAIL: dials_regression not configured'
     exit(0)
 
-  orig_expt_json = os.path.join(
-    dials_regression, "experiment_test_data/kappa_experiments.json")
+  orig_expt_json = os.path.join(dials_regression, "experiment_test_data/kappa_experiments.json")
 
   new_expt_json = os.path.join(os.getcwd(), 'modified_experiments.json')
 
-  cmd = "dials.modify_geometry %s angles=10,20,30" %orig_expt_json
+  cmd = "dials.modify_geometry %s angles=10,20,30" % orig_expt_json
   result = easy_run.fully_buffered(cmd).raise_if_errors()
 
   from dxtbx.serialize import load
@@ -28,11 +27,10 @@ def run():
 
   orig_gonio = orig_expt.goniometers()[0]
   new_gonio = new_expt.goniometers()[0]
-  assert approx_equal(orig_gonio.get_angles(), [0,180,0])
-  assert approx_equal(new_gonio.get_angles(), [10,20,30])
+  assert approx_equal(orig_gonio.get_angles(), [0, 180, 0])
+  assert approx_equal(new_gonio.get_angles(), [10, 20, 30])
 
   return
-
 
 if __name__ == '__main__':
   from dials.test import cd_auto

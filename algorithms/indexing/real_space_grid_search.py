@@ -23,12 +23,9 @@ from dials.algorithms.indexing.indexer import \
      is_approximate_integer_multiple
 from dxtbx.model.experiment_list import Experiment, ExperimentList
 
-
 class indexer_real_space_grid_search(indexer_base):
-
   def __init__(self, reflections, imagesets, params):
-    super(indexer_real_space_grid_search, self).__init__(
-      reflections, imagesets, params)
+    super(indexer_real_space_grid_search, self).__init__(reflections, imagesets, params)
 
   def find_lattices(self):
     self.real_space_grid_search()
@@ -36,12 +33,14 @@ class indexer_real_space_grid_search(indexer_base):
     experiments = ExperimentList()
     for cm in crystal_models:
       for imageset in self.imagesets:
-        experiments.append(Experiment(imageset=imageset,
-                                      beam=imageset.get_beam(),
-                                      detector=imageset.get_detector(),
-                                      goniometer=imageset.get_goniometer(),
-                                      scan=imageset.get_scan(),
-                                      crystal=cm))
+        experiments.append(
+            Experiment(
+                imageset=imageset,
+                beam=imageset.get_beam(),
+                detector=imageset.get_detector(),
+                goniometer=imageset.get_goniometer(),
+                scan=imageset.get_scan(),
+                crystal=cm))
     return experiments
 
   def real_space_grid_search(self):
@@ -49,10 +48,10 @@ class indexer_real_space_grid_search(indexer_base):
 
     sel = (self.reflections['id'] == -1)
     if d_min is not None:
-      sel &= (1/self.reflections['rlp'].norms() > d_min)
+      sel &= (1 / self.reflections['rlp'].norms() > d_min)
     reciprocal_lattice_points = self.reflections['rlp'].select(sel)
 
-    logger.info("Indexing from %i reflections" %len(reciprocal_lattice_points))
+    logger.info("Indexing from %i reflections" % len(reciprocal_lattice_points))
 
     def compute_functional(vector):
       two_pi_S_dot_v = 2 * math.pi * reciprocal_lattice_points.dot(vector)
@@ -62,13 +61,11 @@ class indexer_real_space_grid_search(indexer_base):
     from rstbx.dps_core import SimpleSamplerTool
     assert self.target_symmetry_primitive is not None
     assert self.target_symmetry_primitive.unit_cell() is not None
-    SST = SimpleSamplerTool(
-      self.params.real_space_grid_search.characteristic_grid)
+    SST = SimpleSamplerTool(self.params.real_space_grid_search.characteristic_grid)
     SST.construct_hemisphere_grid(SST.incr)
     cell_dimensions = self.target_symmetry_primitive.unit_cell().parameters()[:3]
     unique_cell_dimensions = set(cell_dimensions)
-    logger.info(
-      "Number of search vectors: %i" %(len(SST.angles) * len(unique_cell_dimensions)))
+    logger.info("Number of search vectors: %i" % (len(SST.angles) * len(unique_cell_dimensions)))
     vectors = flex.vec3_double()
     function_values = flex.double()
     for i, direction in enumerate(SST.angles):
@@ -102,16 +99,14 @@ class indexer_real_space_grid_search(indexer_base):
 
     for i in range(30):
       v = matrix.col(vectors[i])
-      logger.debug("%s %s %s" %(str(v.elems), str(v.length()), str(function_values[i])))
+      logger.debug("%s %s %s" % (str(v.elems), str(v.length()), str(function_values[i])))
 
     basis_vectors = [v.elems for v in unique_vectors]
     self.candidate_basis_vectors = basis_vectors
 
     if self.params.optimise_initial_basis_vectors:
-      optimised_basis_vectors = optimise_basis_vectors(
-        reciprocal_lattice_points, basis_vectors)
-      optimised_function_values = flex.double([
-        compute_functional(v) for v in optimised_basis_vectors])
+      optimised_basis_vectors = optimise_basis_vectors(reciprocal_lattice_points, basis_vectors)
+      optimised_function_values = flex.double([compute_functional(v) for v in optimised_basis_vectors])
 
       perm = flex.sort_permutation(optimised_function_values, reverse=True)
       optimised_basis_vectors = optimised_basis_vectors.select(perm)
@@ -119,13 +114,11 @@ class indexer_real_space_grid_search(indexer_base):
 
       unique_vectors = [matrix.col(v) for v in optimised_basis_vectors]
 
-    logger.info("Number of unique vectors: %i" %len(unique_vectors))
+    logger.info("Number of unique vectors: %i" % len(unique_vectors))
 
     for i in range(len(unique_vectors)):
-      logger.debug("%s %s %s" %(
-        str(compute_functional(unique_vectors[i].elems)),
-        str(unique_vectors[i].length()),
-        str(unique_vectors[i].elems)))
+      logger.debug("%s %s %s" % (str(compute_functional(unique_vectors[i].elems)), str(unique_vectors[i].length()),
+                                 str(unique_vectors[i].elems)))
 
     crystal_models = []
     self.candidate_basis_vectors = unique_vectors
@@ -134,8 +127,7 @@ class indexer_real_space_grid_search(indexer_base):
       self.debug_plot_candidate_basis_vectors()
     candidate_orientation_matrices \
       = self.find_candidate_orientation_matrices(unique_vectors)
-    crystal_model, n_indexed = self.choose_best_orientation_matrix(
-      candidate_orientation_matrices)
+    crystal_model, n_indexed = self.choose_best_orientation_matrix(candidate_orientation_matrices)
     if crystal_model is not None:
       crystal_models = [crystal_model]
     else:
@@ -146,12 +138,11 @@ class indexer_real_space_grid_search(indexer_base):
     candidate_orientation_matrices = crystal_models
 
     #for i in range(len(candidate_orientation_matrices)):
-      #if self.target_symmetry_primitive is not None:
-        ##print "symmetrizing model"
-        ##self.target_symmetry_primitive.show_summary()
-        #symmetrized_model = self.apply_symmetry(
-          #candidate_orientation_matrices[i], self.target_symmetry_primitive)
-        #candidate_orientation_matrices[i] = symmetrized_model
+    #if self.target_symmetry_primitive is not None:
+    ##print "symmetrizing model"
+    ##self.target_symmetry_primitive.show_summary()
+    #symmetrized_model = self.apply_symmetry(
+    #candidate_orientation_matrices[i], self.target_symmetry_primitive)
+    #candidate_orientation_matrices[i] = symmetrized_model
 
     self.candidate_crystal_models = candidate_orientation_matrices
-

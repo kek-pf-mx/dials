@@ -32,12 +32,9 @@ class Algorithm(object):
     # Add all the experiments
     for exp in experiments:
       if exp.scan is not None:
-        self.centroider.add(
-          exp.detector,
-          exp.scan)
+        self.centroider.add(exp.detector, exp.scan)
       else:
-        self.centroider.add(
-          exp.detector)
+        self.centroider.add(exp.detector)
 
   def __call__(self, reflections, image_volume=None):
     '''

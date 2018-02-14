@@ -5,10 +5,7 @@ from libtbx import easy_run
 
 have_dials_regression = libtbx.env.has_module("dials_regression")
 if have_dials_regression:
-  dials_regression = libtbx.env.find_in_repositories(
-    relative_path="dials_regression",
-    test=os.path.isdir)
-
+  dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=os.path.isdir)
 
 def run(args):
   if not have_dials_regression:
@@ -21,9 +18,7 @@ def run(args):
   o0_k48_p48 = os.path.join(data_dir, 'experiments_o0_k48_p48.json')
   o48_k48_p48 = os.path.join(data_dir, 'experiments_o48_k48_p48.json')
 
-  args = ["dials.goniometer_calibration",
-          o0_k0_p0, o0_k0_p48, o0_k48_p48, o48_k48_p48,
-          "xoalign=xoalign_config.py"]
+  args = ["dials.goniometer_calibration", o0_k0_p0, o0_k0_p48, o0_k48_p48, o48_k48_p48, "xoalign=xoalign_config.py"]
 
   command = " ".join(args)
   print command

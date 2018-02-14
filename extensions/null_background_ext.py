@@ -12,7 +12,6 @@ from __future__ import absolute_import, division
 
 from dials.interfaces import BackgroundIface
 
-
 class NullBackgroundExt(BackgroundIface):
   ''' An extension class implementing Null background subtraction. '''
 

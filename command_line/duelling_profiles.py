@@ -4,7 +4,8 @@ from __future__ import absolute_import, division
 
 import iotbx.phil
 
-phil_scope = iotbx.phil.parse("""\
+phil_scope = iotbx.phil.parse(
+    """\
   method = *example rt0 flat predict
     .type = choice
   id = None
@@ -38,7 +39,8 @@ phil_scope = iotbx.phil.parse("""\
     .type = float
   debug = False
     .type = bool
-""", process_includes=True)
+""",
+    process_includes=True)
 
 help_message = '''
 
@@ -51,7 +53,7 @@ Examples::
 def model_background(shoebox, mean_bg):
   from scitbx.random import variate, poisson_distribution
   dz, dy, dx = shoebox.focus()
-  g = variate(poisson_distribution(mean = mean_bg))
+  g = variate(poisson_distribution(mean=mean_bg))
   for k in range(dz):
     for j in range(dy):
       for i in range(dx):
@@ -136,12 +138,12 @@ def trace_path(x0, y0, v, f, s, t0, p):
       c = int(m0) if s < 0 else int(m1)
       if int(m1) != int(m0):
         l2 = l0 + (c - m0) / m
-        _s = p * math.sqrt((l2 - l0) ** 2 + (c - m0) ** 2) / math.sin(a)
+        _s = p * math.sqrt((l2 - l0)**2 + (c - m0)**2) / math.sin(a)
         pixels.append((int(m0), int(l0), _s))
-        _s = p * math.sqrt((l1 - l2) ** 2 + (m1 - c) ** 2) / math.sin(a)
+        _s = p * math.sqrt((l1 - l2)**2 + (m1 - c)**2) / math.sin(a)
         pixels.append((int(m1), int(l0), _s))
       else:
-        _s = p * math.sqrt((l1 - l0) ** 2 + (m1 - m0) ** 2) / math.sin(a)
+        _s = p * math.sqrt((l1 - l0)**2 + (m1 - m0)**2) / math.sin(a)
         pixels.append((int(c), int(l0), _s))
 
   else:
@@ -168,15 +170,14 @@ def trace_path(x0, y0, v, f, s, t0, p):
       c = int(m0) if s < 0 else int(m1)
       if int(m1) != int(m0):
         l2 = l0 + (c - m0) / m
-        _s = p * math.sqrt((l2 - l0) ** 2 + (c - m0) ** 2) / math.sin(a)
+        _s = p * math.sqrt((l2 - l0)**2 + (c - m0)**2) / math.sin(a)
         pixels.append((int(l0), int(m0), _s))
-        _s = p * math.sqrt((l1 - l2) ** 2 + (m1 - c) ** 2) / math.sin(a)
+        _s = p * math.sqrt((l1 - l2)**2 + (m1 - c)**2) / math.sin(a)
         pixels.append((int(l0), int(m1), _s))
       else:
-        _s = p * math.sqrt((l1 - l0) ** 2 + (m1 - m0) ** 2) / math.sin(a)
+        _s = p * math.sqrt((l1 - l0)**2 + (m1 - m0)**2) / math.sin(a)
         pixels.append((int(l0), int(c), _s))
   return pixels
-
 
 def model_path_through_sensor(detector, reflection, s1, patch, scale):
   '''Model the passage of the ray s1 through the detector, depositing
@@ -240,7 +241,7 @@ def model_reflection_predict(reflection, experiment, params):
 
   angles = predict_angles(p0_star, experiment)
 
-  assert(angles)
+  assert (angles)
 
   if params.debug:
     print 'angles = %f %f' % angles
@@ -270,21 +271,21 @@ def predict_angles(p0_star, experiment, s0=None):
   m3 = m1.cross(m2)
 
   p0_sqr = p0_star.dot(p0_star)
-  rho = math.sqrt(p0_sqr - p0_star.dot(m2) ** 2)
+  rho = math.sqrt(p0_sqr - p0_star.dot(m2)**2)
   p_star_m3 = (-0.5 * p0_sqr - p0_star.dot(m2) * b.dot(m2)) / b.dot(m3)
   p_star_m2 = p0_star.dot(m2)
-  if rho ** 2 < p_star_m3 ** 2:
+  if rho**2 < p_star_m3**2:
     return None
-  p_star_m1 = math.sqrt(rho ** 2 - p_star_m3 ** 2)
+  p_star_m1 = math.sqrt(rho**2 - p_star_m3**2)
 
   p0_star_m1 = p0_star.dot(m1)
   p0_star_m2 = p0_star.dot(m2)
   p0_star_m3 = p0_star.dot(m3)
 
-  cp1 = + p_star_m1 * p0_star_m1 +  p_star_m3 * p0_star_m3
-  cp2 = - p_star_m1 * p0_star_m1 +  p_star_m3 * p0_star_m3
-  sp1 = + p_star_m1 * p0_star_m3 -  p_star_m3 * p0_star_m1
-  sp2 = - p_star_m1 * p0_star_m3 -  p_star_m3 * p0_star_m1
+  cp1 = +p_star_m1 * p0_star_m1 + p_star_m3 * p0_star_m3
+  cp2 = -p_star_m1 * p0_star_m1 + p_star_m3 * p0_star_m3
+  sp1 = +p_star_m1 * p0_star_m3 - p_star_m3 * p0_star_m1
+  sp2 = -p_star_m1 * p0_star_m3 - p_star_m3 * p0_star_m1
 
   return math.atan2(sp1, cp1), math.atan2(sp2, cp2)
 
@@ -293,14 +294,14 @@ def profile_correlation(data, model):
 
   from dials.array_family import flex
 
-  assert(data.focus() == model.focus())
+  assert (data.focus() == model.focus())
 
   sel = data.as_1d() > 0
 
   model = model.as_1d().select(sel)
   data = data.as_1d().select(sel).as_double()
 
-  assert(len(data) == len(model))
+  assert (len(data) == len(model))
 
   correlation = flex.linear_correlation(data, model)
   return correlation.coefficient()
@@ -335,13 +336,12 @@ def model_reflection_rt0(reflection, experiment, params):
 
   angles = predict_angles(p0_star, experiment)
 
-  assert(angles)
+  assert (angles)
 
   if params.debug:
     print 'angles = %f %f' % angles
 
-  angle = angles[0] if (abs(angles[0] - xyz_mm[2]) <
-                        abs(angles[1] - xyz_mm[2])) else angles[1]
+  angle = angles[0] if (abs(angles[0] - xyz_mm[2]) < abs(angles[1] - xyz_mm[2])) else angles[1]
 
   p = experiment.detector[reflection['panel']]
   n = matrix.col(p.get_normal())
@@ -418,9 +418,7 @@ def model_reflection_rt0(reflection, experiment, params):
     if params.rs_node_size > 0:
       ns = params.rs_node_size
       import random
-      dp0 = matrix.col((random.gauss(0, ns),
-                        random.gauss(0, ns),
-                        random.gauss(0, ns)))
+      dp0 = matrix.col((random.gauss(0, ns), random.gauss(0, ns), random.gauss(0, ns)))
       p0 += dp0
     angles = predict_angles(p0, experiment, b)
     if angles is None:
@@ -458,7 +456,6 @@ def model_reflection_rt0(reflection, experiment, params):
         print '%5d' % int(patch[(j, i)]),
       print
 
-
   cc = profile_correlation(data, patch)
   print 'Correlation coefficient: %.3f isum: %.1f ' % (cc, i0)
 
@@ -478,12 +475,9 @@ def main(reflections, experiment, params):
   ids = params.id
 
   if 'intensity.prf.variance' in reflections:
-    selection = reflections.get_flags(
-      reflections.flags.integrated,
-      all=True)
+    selection = reflections.get_flags(reflections.flags.integrated, all=True)
   else:
-    selection = reflections.get_flags(
-      reflections.flags.integrated_sum)
+    selection = reflections.get_flags(reflections.flags.integrated_sum)
   reflections = reflections.select(selection)
 
   # filter according to rules
@@ -535,16 +529,15 @@ def run(args):
   from dials.util.options import flatten_reflections
   import libtbx.load_env
 
-  usage = "%s [options] integrated.pickle experiments.json" % (
-    libtbx.env.dispatcher_name)
+  usage = "%s [options] integrated.pickle experiments.json" % (libtbx.env.dispatcher_name)
 
   parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_experiments=True,
-    read_reflections=True,
-    check_format=False,
-    epilog=help_message)
+      usage=usage,
+      phil=phil_scope,
+      read_experiments=True,
+      read_reflections=True,
+      check_format=False,
+      epilog=help_message)
 
   params, options = parser.parse_args(show_diff_phil=False)
   experiments = flatten_experiments(params.input.experiments)

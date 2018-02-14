@@ -8,7 +8,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """
 Test refinement of a crystal unit cell using a two theta target.
 
@@ -22,9 +21,8 @@ from libtbx.test_utils import approx_equal
 from math import pi
 from copy import deepcopy
 
-from dials.algorithms.refinement.two_theta_refiner import ( TwoThetaTarget,
-  TwoThetaReflectionManager, TwoThetaExperimentsPredictor,
-  TwoThetaPredictionParameterisation)
+from dials.algorithms.refinement.two_theta_refiner import (
+    TwoThetaTarget, TwoThetaReflectionManager, TwoThetaExperimentsPredictor, TwoThetaPredictionParameterisation)
 
 def generate_reflections(experiments):
 
@@ -41,7 +39,7 @@ def generate_reflections(experiments):
   # All indices in a 2.0 Angstrom sphere
   resolution = 2.0
   index_generator = IndexGenerator(crystal.get_unit_cell(),
-                  space_group(space_group_symbols(1).hall()).type(), resolution)
+                                   space_group(space_group_symbols(1).hall()).type(), resolution)
   indices = index_generator.to_array()
 
   # Predict rays within the sweep range
@@ -91,7 +89,8 @@ def test_fd_derivatives():
   overrides = """geometry.parameters.crystal.a.length.range = 10 50
   geometry.parameters.crystal.b.length.range = 10 50
   geometry.parameters.crystal.c.length.range = 10 50"""
-  master_phil = parse("""
+  master_phil = parse(
+      """
       include scope dials.test.algorithms.refinement.geometry_phil
       """, process_includes=True)
   models = Extract(master_phil, overrides)
@@ -102,14 +101,10 @@ def test_fd_derivatives():
   mybeam = models.beam
 
   # Build a mock scan for a 72 degree sweep
-  sweep_range = (0., pi/5.)
+  sweep_range = (0., pi / 5.)
   from dxtbx.model import ScanFactory
   sf = ScanFactory()
-  myscan = sf.make_scan(image_range = (1,720),
-                        exposure_times = 0.1,
-                        oscillation = (0, 0.1),
-                        epochs = range(720),
-                        deg = True)
+  myscan = sf.make_scan(image_range=(1, 720), exposure_times=0.1, oscillation=(0, 0.1), epochs=range(720), deg=True)
 
   # Create a parameterisation of the crystal unit cell
   from dials.algorithms.refinement.parameterisation.crystal_parameters import \
@@ -118,16 +113,16 @@ def test_fd_derivatives():
 
   # Create an ExperimentList
   experiments = ExperimentList()
-  experiments.append(Experiment(
-        beam=mybeam, detector=mydetector, goniometer=mygonio, scan=myscan,
-        crystal=mycrystal, imageset=None))
+  experiments.append(
+      Experiment(beam=mybeam, detector=mydetector, goniometer=mygonio, scan=myscan, crystal=mycrystal, imageset=None))
 
   # Build a prediction parameterisation for two theta prediction
-  pred_param = TwoThetaPredictionParameterisation(experiments,
-                 detector_parameterisations = None,
-                 beam_parameterisations = None,
-                 xl_orientation_parameterisations = None,
-                 xl_unit_cell_parameterisations = [xluc_param])
+  pred_param = TwoThetaPredictionParameterisation(
+      experiments,
+      detector_parameterisations=None,
+      beam_parameterisations=None,
+      xl_orientation_parameterisations=None,
+      xl_unit_cell_parameterisations=[xluc_param])
 
   # Generate some reflections
   obs_refs, ref_predictor = generate_reflections(experiments)
@@ -186,14 +181,11 @@ def test_fd_derivatives():
 def test_refinement():
   '''Test a refinement run'''
 
-  dials_regression = libtbx.env.find_in_repositories(
-    relative_path="dials_regression",
-    test=os.path.isdir)
+  dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=os.path.isdir)
 
   # Get a beam and detector from a datablock. This one has a CS-PAD, but that
   # is irrelevant
-  data_dir = os.path.join(dials_regression, "refinement_test_data",
-                          "hierarchy_test")
+  data_dir = os.path.join(dials_regression, "refinement_test_data", "hierarchy_test")
   datablock_path = os.path.join(data_dir, "datablock.json")
   assert os.path.exists(datablock_path)
 
@@ -207,8 +199,7 @@ def test_refinement():
 
   # Invent a crystal, goniometer and scan for this test
   from dxtbx.model import Crystal
-  crystal = Crystal((40.,0.,0.) ,(0.,40.,0.), (0.,0.,40.),
-                          space_group_symbol = "P1")
+  crystal = Crystal((40., 0., 0.), (0., 40., 0.), (0., 0., 40.), space_group_symbol="P1")
   orig_xl = deepcopy(crystal)
 
   from dxtbx.model import GoniometerFactory
@@ -217,11 +208,7 @@ def test_refinement():
   # Build a mock scan for a 180 degree sweep
   from dxtbx.model import ScanFactory
   sf = ScanFactory()
-  scan = sf.make_scan(image_range = (1,1800),
-                      exposure_times = 0.1,
-                      oscillation = (0, 0.1),
-                      epochs = range(1800),
-                      deg = True)
+  scan = sf.make_scan(image_range=(1, 1800), exposure_times=0.1, oscillation=(0, 0.1), epochs=range(1800), deg=True)
   sweep_range = scan.get_oscillation_range(deg=False)
   im_width = scan.get_oscillation(deg=False)[1]
   assert sweep_range == (0., pi)
@@ -231,9 +218,8 @@ def test_refinement():
 
   # Build an experiment list
   experiments = ExperimentList()
-  experiments.append(Experiment(
-        beam=beam, detector=detector, goniometer=goniometer,
-        scan=scan, crystal=crystal, imageset=None))
+  experiments.append(
+      Experiment(beam=beam, detector=detector, goniometer=goniometer, scan=scan, crystal=crystal, imageset=None))
 
   # simulate some reflections
   refs, _ = generate_reflections(experiments)
@@ -245,8 +231,7 @@ def test_refinement():
   xluc_param = CrystalUnitCellParameterisation(crystal)
   xluc_p_vals = xluc_param.get_param_vals()
   cell_params = crystal.get_unit_cell().parameters()
-  cell_params = [a + b for a, b in zip(cell_params, [0.1, -0.1, 0.1, 0.1,
-                                                     -0.1, 0.0])]
+  cell_params = [a + b for a, b in zip(cell_params, [0.1, -0.1, 0.1, 0.1, -0.1, 0.0])]
   from cctbx.uctbx import unit_cell
   from rstbx.symmetry.constraints.parameter_reduction import \
       symmetrize_reduce_enlarge
@@ -269,14 +254,11 @@ def test_refinement():
   # parameterisation of the prediction equation
   from dials.algorithms.refinement.parameterisation.parameter_report import \
       ParameterReporter
-  pred_param = TwoThetaPredictionParameterisation(experiments,
-    det_param, beam_param, xlo_param, [xluc_param])
-  param_reporter = ParameterReporter(det_param, beam_param,
-                                     xlo_param, [xluc_param])
+  pred_param = TwoThetaPredictionParameterisation(experiments, det_param, beam_param, xlo_param, [xluc_param])
+  param_reporter = ParameterReporter(det_param, beam_param, xlo_param, [xluc_param])
 
   # reflection manager
-  refman = TwoThetaReflectionManager(refs, experiments, nref_per_degree=20,
-    verbosity=2)
+  refman = TwoThetaReflectionManager(refs, experiments, nref_per_degree=20, verbosity=2)
 
   # reflection predictor
   ref_predictor = TwoThetaExperimentsPredictor(experiments)
@@ -287,22 +269,19 @@ def test_refinement():
   # minimisation engine
   from dials.algorithms.refinement.engine \
     import LevenbergMarquardtIterations as Refinery
-  refinery = Refinery(target = target,
-                      prediction_parameterisation = pred_param,
-                      log = None,
-                      verbosity = 0,
-                      max_iterations = 20)
+  refinery = Refinery(target=target, prediction_parameterisation=pred_param, log=None, verbosity=0, max_iterations=20)
 
   # Refiner
   from dials.algorithms.refinement.refiner import Refiner
-  refiner = Refiner(reflections=refs,
-                    experiments=experiments,
-                    pred_param=pred_param,
-                    param_reporter=param_reporter,
-                    refman=refman,
-                    target=target,
-                    refinery=refinery,
-                    verbosity=1)
+  refiner = Refiner(
+      reflections=refs,
+      experiments=experiments,
+      pred_param=pred_param,
+      param_reporter=param_reporter,
+      refman=refman,
+      target=target,
+      refinery=refinery,
+      verbosity=1)
 
   history = refiner.run()
 
@@ -310,8 +289,7 @@ def test_refinement():
   refined_xl = refiner.get_experiments()[0].crystal
 
   #print refined_xl
-  assert refined_xl.is_similar_to(orig_xl, uc_rel_length_tolerance=0.001,
-    uc_abs_angle_tolerance=0.01)
+  assert refined_xl.is_similar_to(orig_xl, uc_rel_length_tolerance=0.001, uc_abs_angle_tolerance=0.01)
 
   #print "Unit cell esds:"
   #print refined_xl.get_cell_parameter_sd()

@@ -1,8 +1,6 @@
 from __future__ import absolute_import, division
 
-
 class Test:
-
   def __init__(self):
     from scitbx.array_family import flex
 
@@ -72,16 +70,13 @@ class Test:
     result1 = dispersion_w_gain(self.image, self.mask, self.gain, self.size, nsig_b, nsig_s, self.min_count)
 
     # scaling both the image and the gain should not affect the result
-    result2 = dispersion_w_gain(2.*self.image, self.mask, 2.*self.gain, self.size,
-        nsig_b, nsig_s, self.min_count)
+    result2 = dispersion_w_gain(2. * self.image, self.mask, 2. * self.gain, self.size, nsig_b, nsig_s, self.min_count)
     assert (result1 == result2)
 
     # should get the same result as dispersion if the gain is unity
     from dials.algorithms.image.threshold import dispersion
-    result3 = dispersion(self.image, self.mask, self.size, nsig_b, nsig_s,
-        self.min_count)
-    result4 = dispersion_w_gain(self.image, self.mask, (0*self.gain+1), self.size,
-        nsig_b, nsig_s, self.min_count)
+    result3 = dispersion(self.image, self.mask, self.size, nsig_b, nsig_s, self.min_count)
+    result4 = dispersion_w_gain(self.image, self.mask, (0 * self.gain + 1), self.size, nsig_b, nsig_s, self.min_count)
     assert (result3 == result4)
     print 'OK'
 
@@ -92,14 +87,12 @@ class Test:
     nsig_b = 3
     nsig_s = 3
     result1 = dispersion(self.image, self.mask, self.size, nsig_b, nsig_s, self.min_count)
-    debug = DispersionThresholdDebug(self.image, self.mask, self.size, nsig_b, nsig_s,  0, self.min_count)
+    debug = DispersionThresholdDebug(self.image, self.mask, self.size, nsig_b, nsig_s, 0, self.min_count)
     result2 = debug.final_mask()
-    assert(result1.all_eq(result2))
+    assert (result1.all_eq(result2))
 
-    result3 = dispersion_w_gain(self.image, self.mask, self.gain, self.size,
-        nsig_b, nsig_s, self.min_count)
-    debug = DispersionThresholdDebug(self.image, self.mask, self.gain, self.size, nsig_b,
-        nsig_s,  0, self.min_count)
+    result3 = dispersion_w_gain(self.image, self.mask, self.gain, self.size, nsig_b, nsig_s, self.min_count)
+    debug = DispersionThresholdDebug(self.image, self.mask, self.gain, self.size, nsig_b, nsig_s, 0, self.min_count)
     result4 = debug.final_mask()
     assert (result3 == result4)
     print 'OK'
@@ -110,37 +103,18 @@ class Test:
     from dials.array_family import flex
     nsig_b = 3
     nsig_s = 3
-    algorithm = DispersionThreshold(
-      self.image.all(),
-      self.size,
-      nsig_b,
-      nsig_s,
-      0,
-      self.min_count)
+    algorithm = DispersionThreshold(self.image.all(), self.size, nsig_b, nsig_s, 0, self.min_count)
 
-    result1 = dispersion(
-      self.image,
-      self.mask,
-      self.size,
-      nsig_b,
-      nsig_s,
-      self.min_count)
+    result1 = dispersion(self.image, self.mask, self.size, nsig_b, nsig_s, self.min_count)
 
-    result2 = dispersion_w_gain(
-      self.image,
-      self.mask,
-      self.gain,
-      self.size,
-      nsig_b,
-      nsig_s,
-      self.min_count)
+    result2 = dispersion_w_gain(self.image, self.mask, self.gain, self.size, nsig_b, nsig_s, self.min_count)
 
     result3 = flex.bool(flex.grid(self.image.all()))
     result4 = flex.bool(flex.grid(self.image.all()))
     algorithm(self.image, self.mask, result3)
     algorithm(self.image, self.mask, self.gain, result4)
-    assert(result1 == result3)
-    assert(result2 == result4)
+    assert (result1 == result3)
+    assert (result2 == result4)
 
     print 'OK'
 

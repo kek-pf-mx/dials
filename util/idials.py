@@ -12,7 +12,6 @@
 from __future__ import absolute_import, division
 import sys
 
-
 class ActionError(RuntimeError):
   '''
   Class to represent exception for when an action can't be performed
@@ -28,7 +27,6 @@ class ActionError(RuntimeError):
     text = 'Unable to perform "%s" after "%s"' % (action, parent_action)
     super(ActionError, self).__init__(text)
 
-
 class ExternalCommand(object):
   '''
   Class to run an external command
@@ -36,14 +34,9 @@ class ExternalCommand(object):
   '''
 
   def __init__(self):
-      pass
+    pass
 
-  def __call__(self,
-               command,
-               stdout=sys.stdout,
-               stderr=sys.stderr,
-               stdout_filename=None,
-               stderr_filename=None):
+  def __call__(self, command, stdout=sys.stdout, stderr=sys.stderr, stdout_filename=None, stderr_filename=None):
     '''
     Run the command
 
@@ -63,6 +56,7 @@ class ExternalCommand(object):
         super(StreamThread, self).__init__()
         self.buffer = buffer
         self.output = output
+
       def run(self):
         while True:
           line = self.buffer.readline()
@@ -78,12 +72,7 @@ class ExternalCommand(object):
 
     # Run the command
     self.process = subprocess.Popen(
-      command,
-      shell=True,
-      universal_newlines=True,
-      bufsize=-1,
-      stdout=subprocess.PIPE,
-      stderr=subprocess.PIPE)
+        command, shell=True, universal_newlines=True, bufsize=-1, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     # Create the list of file handles to write to
     stdout = [stdout]
@@ -109,9 +98,8 @@ class ExternalCommand(object):
     # Get the result
     self.result = self.process.wait()
 
-
 class RunExternalCommand(object):
-    '''
+  '''
     Helper function to run command
 
     :param command: The command to run
@@ -121,19 +109,15 @@ class RunExternalCommand(object):
     :param stderr_filename The filename to log stderr
 
     '''
-    def __init__(self):
-        self.command_run = ExternalCommand()
 
-    def __call__(self, command,
-                 stdout=sys.stdout,
-                 stderr=sys.stderr,
-                 stdout_filename=None,
-                 stderr_filename=None):
+  def __init__(self):
+    self.command_run = ExternalCommand()
 
-        self.command_run(command, stdout, stderr, stdout_filename, stderr_filename)
-        if self.command_run.result != 0:
-            raise RuntimeError('Error: external command failed')
+  def __call__(self, command, stdout=sys.stdout, stderr=sys.stderr, stdout_filename=None, stderr_filename=None):
 
+    self.command_run(command, stdout, stderr, stdout_filename, stderr_filename)
+    if self.command_run.result != 0:
+      raise RuntimeError('Error: external command failed')
 
 class UndoStack(object):
   '''
@@ -154,7 +138,7 @@ class UndoStack(object):
     Add a new state
 
     '''
-    self._stack = self._stack[0:self._index+1] + [obj]
+    self._stack = self._stack[0:self._index + 1] + [obj]
     self._index = len(self._stack) - 1
 
   def peek(self):
@@ -194,7 +178,6 @@ class UndoStack(object):
 
     '''
     return len(self._stack)
-
 
 class ParameterManager(object):
   '''
@@ -247,12 +230,9 @@ class ParameterManager(object):
       working_phil = self.working_phil.peek()
       for parameter in shlex.split(parameters):
         interpretor = self.master_phil.command_line_argument_interpreter()
-        working_phil = working_phil.fetch(
-          interpretor.process_arg(parameter))
+        working_phil = working_phil.fetch(interpretor.process_arg(parameter))
     else:
-      working_phil, unused = self.working_phil.peek().fetch(
-        source=parse(parameters),
-        track_unused_definitions=True)
+      working_phil, unused = self.working_phil.peek().fetch(source=parse(parameters), track_unused_definitions=True)
       if len(unused) > 0:
         msg = [item.object.as_str().strip() for item in unused]
         msg = '\n'.join(['  %s' % line for line in msg])
@@ -273,7 +253,6 @@ class ParameterManager(object):
       result = working_phil
     return result
 
-
 class ImportParameterManager(ParameterManager):
   '''
   Specialization for import parameters
@@ -286,13 +265,14 @@ class ImportParameterManager(ParameterManager):
 
     '''
     from libtbx.phil import parse
-    phil_scope = parse('''
+    phil_scope = parse(
+        '''
       description=None
         .type = str
       include scope dials.command_line.dials_import.phil_scope
-    ''', process_includes=True)
+    ''',
+        process_includes=True)
     super(ImportParameterManager, self).__init__(phil_scope)
-
 
 class FindSpotsParameterManager(ParameterManager):
   '''
@@ -306,7 +286,8 @@ class FindSpotsParameterManager(ParameterManager):
 
     '''
     from libtbx.phil import parse
-    phil_scope = parse('''
+    phil_scope = parse(
+        '''
       description=None
         .type = str
       input {
@@ -314,9 +295,9 @@ class FindSpotsParameterManager(ParameterManager):
           .type = str
       }
       include scope dials.command_line.find_spots.phil_scope
-    ''', process_includes=True)
+    ''',
+        process_includes=True)
     super(FindSpotsParameterManager, self).__init__(phil_scope)
-
 
 class DiscoverBetterModelParameterManager(ParameterManager):
   '''
@@ -330,7 +311,8 @@ class DiscoverBetterModelParameterManager(ParameterManager):
 
     '''
     from libtbx.phil import parse
-    phil_scope = parse('''
+    phil_scope = parse(
+        '''
       description=None
         .type = str
       input {
@@ -340,9 +322,9 @@ class DiscoverBetterModelParameterManager(ParameterManager):
           .type = str
       }
       include scope dials.command_line.search_beam_position.phil_scope
-    ''', process_includes=True)
+    ''',
+        process_includes=True)
     super(DiscoverBetterModelParameterManager, self).__init__(phil_scope)
-
 
 class IndexParameterManager(ParameterManager):
   '''
@@ -356,7 +338,8 @@ class IndexParameterManager(ParameterManager):
 
     '''
     from libtbx.phil import parse
-    phil_scope = parse('''
+    phil_scope = parse(
+        '''
       description=None
         .type = str
       input {
@@ -368,9 +351,9 @@ class IndexParameterManager(ParameterManager):
           .type = str
       }
       include scope dials.command_line.index.phil_scope
-    ''', process_includes=True)
+    ''',
+        process_includes=True)
     super(IndexParameterManager, self).__init__(phil_scope)
-
 
 class RefineBSParameterManager(ParameterManager):
   '''
@@ -384,7 +367,8 @@ class RefineBSParameterManager(ParameterManager):
 
     '''
     from libtbx.phil import parse
-    phil_scope = parse('''
+    phil_scope = parse(
+        '''
       description=None
         .type = str
       input {
@@ -394,9 +378,9 @@ class RefineBSParameterManager(ParameterManager):
           .type = str
       }
       include scope dials.command_line.refine_bravais_settings.phil_scope
-    ''', process_includes=True)
+    ''',
+        process_includes=True)
     super(RefineBSParameterManager, self).__init__(phil_scope)
-
 
 class ReIndexParameterManager(ParameterManager):
   '''
@@ -410,7 +394,8 @@ class ReIndexParameterManager(ParameterManager):
 
     '''
     from libtbx.phil import parse
-    phil_scope = parse('''
+    phil_scope = parse(
+        '''
       description=None
         .type = str
       solution = None
@@ -420,9 +405,9 @@ class ReIndexParameterManager(ParameterManager):
           .type = str
       }
       include scope dials.command_line.reindex.phil_scope
-    ''', process_includes=True)
+    ''',
+        process_includes=True)
     super(ReIndexParameterManager, self).__init__(phil_scope)
-
 
 class RefineParameterManager(ParameterManager):
   '''
@@ -436,7 +421,8 @@ class RefineParameterManager(ParameterManager):
 
     '''
     from libtbx.phil import parse
-    phil_scope = parse('''
+    phil_scope = parse(
+        '''
       description=None
         .type = str
       input {
@@ -446,9 +432,9 @@ class RefineParameterManager(ParameterManager):
           .type = str
       }
       include scope dials.command_line.refine.phil_scope
-    ''', process_includes=True)
+    ''',
+        process_includes=True)
     super(RefineParameterManager, self).__init__(phil_scope)
-
 
 class IntegrateParameterManager(ParameterManager):
   '''
@@ -462,7 +448,8 @@ class IntegrateParameterManager(ParameterManager):
 
     '''
     from libtbx.phil import parse
-    phil_scope = parse('''
+    phil_scope = parse(
+        '''
       description=None
         .type = str
       input {
@@ -472,9 +459,9 @@ class IntegrateParameterManager(ParameterManager):
           .type = str
       }
       include scope dials.command_line.integrate.phil_scope
-    ''', process_includes=True)
+    ''',
+        process_includes=True)
     super(IntegrateParameterManager, self).__init__(phil_scope)
-
 
 class ExportParameterManager(ParameterManager):
   '''
@@ -488,7 +475,8 @@ class ExportParameterManager(ParameterManager):
 
     '''
     from libtbx.phil import parse
-    phil_scope = parse('''
+    phil_scope = parse(
+        '''
       description=None
         .type = str
       input {
@@ -498,10 +486,10 @@ class ExportParameterManager(ParameterManager):
           .type = str
       }
       include scope dials.command_line.export.phil_scope
-    ''', process_includes=True)
+    ''',
+        process_includes=True)
     phil_scope = phil_scope.fetch(parse("mtz.hklout=None"))
     super(ExportParameterManager, self).__init__(phil_scope)
-
 
 class GlobalParameterManager(dict):
   '''
@@ -516,17 +504,16 @@ class GlobalParameterManager(dict):
     '''
     super(GlobalParameterManager, self).__init__()
     self.update({
-      'import'                             : ImportParameterManager(),
-      'find_spots'                         : FindSpotsParameterManager(),
-      'search_beam_position' : DiscoverBetterModelParameterManager(),
-      'index'                              : IndexParameterManager(),
-      'refine_bravais_settings'            : RefineBSParameterManager(),
-      'reindex'                            : ReIndexParameterManager(),
-      'refine'                             : RefineParameterManager(),
-      'integrate'                          : IntegrateParameterManager(),
-      'export'                             : ExportParameterManager(),
+        'import': ImportParameterManager(),
+        'find_spots': FindSpotsParameterManager(),
+        'search_beam_position': DiscoverBetterModelParameterManager(),
+        'index': IndexParameterManager(),
+        'refine_bravais_settings': RefineBSParameterManager(),
+        'reindex': ReIndexParameterManager(),
+        'refine': RefineParameterManager(),
+        'integrate': IntegrateParameterManager(),
+        'export': ExportParameterManager(),
     })
-
 
 class Counter(object):
   '''
@@ -555,12 +542,12 @@ class Counter(object):
     '''
     self.count += 1
 
-
 class CommandState(object):
   '''
   A class to represent the command state
 
   '''
+
   def __init__(self, **kwargs):
     '''
     Initialise the command state
@@ -580,7 +567,7 @@ class CommandState(object):
     yield self, 0
     for child in self.children:
       for node, depth in child:
-        yield node, depth+1
+        yield node, depth + 1
 
   def as_dict(self):
     '''
@@ -626,7 +613,6 @@ class CommandState(object):
           value = join(workspace, value[len(placeholder):])
         setattr(state, key, value)
     return state
-
 
 class Command(object):
   '''
@@ -677,14 +663,14 @@ class Command(object):
 
     # Set the state
     self.state = CommandState(
-      name        = self.name,
-      index       = index,
-      parent      = parent,
-      description = description,
-      workspace   = workspace,
-      directory   = join(workspace, directory),
-      output      = join(workspace, directory, "output.txt"),
-      parameters  = join(workspace, directory, "parameters.phil"))
+        name=self.name,
+        index=index,
+        parent=parent,
+        description=description,
+        workspace=workspace,
+        directory=join(workspace, directory),
+        output=join(workspace, directory, "output.txt"),
+        parameters=join(workspace, directory, "parameters.phil"))
 
     # Set the parent and children
     if self.state.parent is not None:
@@ -754,15 +740,19 @@ class Command(object):
 
     '''
     from os.path import exists
+
     def assert_exists(name):
       if name is not None and name is not 'None' and not exists(name):
         raise RuntimeError("File %s could not be found" % name)
+
     if filenames is not None:
       for name in filenames:
         assert_exists(name)
+
     def assert_exists_if_present(name):
       if hasattr(self.state, name):
         assert_exists(getattr(self.state, name))
+
     assert_exists_if_present("directory")
     assert_exists_if_present("output")
     assert_exists_if_present("parameters")
@@ -771,7 +761,6 @@ class Command(object):
     assert_exists_if_present("datablock")
     assert_exists_if_present("experiments")
     assert_exists_if_present("reflections")
-
 
 class CommandTree(object):
   '''
@@ -814,6 +803,7 @@ class CommandTree(object):
 
     '''
     size = len(str(self.counter.current()))
+
     def draw_tree(node, prefix):
       from cStringIO import StringIO
       buf = StringIO()
@@ -829,14 +819,14 @@ class CommandTree(object):
         buf.write(" (current)")
       buf.write('\n')
       for index, child in enumerate(node.children):
-        if index+1 == len(node.children):
+        if index + 1 == len(node.children):
           sub_prefix = prefix + '   '
         else:
           sub_prefix = prefix + '  |'
         buf.write(draw_tree(child, sub_prefix))
       return buf.getvalue()
-    return draw_tree(self.root, '')
 
+    return draw_tree(self.root, '')
 
 class InitialState(CommandState):
   '''
@@ -850,13 +840,7 @@ class InitialState(CommandState):
 
     '''
     super(InitialState, self).__init__(
-      name        = "clean",
-      index       = 0,
-      description = '',
-      workspace   = None,
-      applied     = True,
-      success     = True)
-
+        name="clean", index=0, description='', workspace=None, applied=True, success=True)
 
 class Import(Command):
   '''
@@ -880,9 +864,8 @@ class Import(Command):
 
     # Set filenames and input
     self.filenames = {
-      'output.datablock' : self.state.datablock,
-      'output.log'       : join(self.state.directory, "info.log"),
-      'output.debug_log' : join(self.state.directory, "debug.log")
+        'output.datablock': self.state.datablock, 'output.log': join(self.state.directory, "info.log"),
+        'output.debug_log': join(self.state.directory, "debug.log")
     }
     for name, value in self.filenames.iteritems():
       self.phil_scope.set('%s=%s' % (name, value))
@@ -895,15 +878,14 @@ class Import(Command):
     # Run the command
     self.external_command = RunExternalCommand()
     self.external_command(
-      ['dials.import', self.state.parameters],
-      stdout=stdout,
-      stderr=stderr,
-      stdout_filename=self.state.output,
-      stderr_filename=self.state.output)
+        ['dials.import', self.state.parameters],
+        stdout=stdout,
+        stderr=stderr,
+        stdout_filename=self.state.output,
+        stderr_filename=self.state.output)
 
     # Check the files exist
     self.check_files_exist(self.filenames.values())
-
 
 class FindSpots(Command):
   '''
@@ -911,7 +893,7 @@ class FindSpots(Command):
 
   '''
 
-  name='find_spots'
+  name = 'find_spots'
 
   allowed_parents = ['import']
 
@@ -929,11 +911,11 @@ class FindSpots(Command):
 
     # Set filenames and input
     self.filenames = {
-      'input.datablock'    : self.state.parent.datablock,
-      'output.datablock'   : self.state.datablock,
-      'output.reflections' : self.state.reflections,
-      'output.log'         : join(self.state.directory, "info.log"),
-      'output.debug_log'   : join(self.state.directory, "debug.log"),
+        'input.datablock': self.state.parent.datablock,
+        'output.datablock': self.state.datablock,
+        'output.reflections': self.state.reflections,
+        'output.log': join(self.state.directory, "info.log"),
+        'output.debug_log': join(self.state.directory, "debug.log"),
     }
     for name, value in self.filenames.iteritems():
       self.phil_scope.set('%s=%s' % (name, value))
@@ -946,11 +928,11 @@ class FindSpots(Command):
     # Run find spots
     self.external_command = RunExternalCommand()
     self.external_command(
-      ['dials.find_spots', self.state.parameters],
-      stdout=stdout,
-      stderr=stderr,
-      stdout_filename=self.state.output,
-      stderr_filename=self.state.output)
+        ['dials.find_spots', self.state.parameters],
+        stdout=stdout,
+        stderr=stderr,
+        stdout_filename=self.state.output,
+        stderr_filename=self.state.output)
 
     # Generate the report
     self.generate_report(stdout=stdout, stderr=stderr)
@@ -958,14 +940,13 @@ class FindSpots(Command):
     # Check the files exist
     self.check_files_exist(self.filenames.values())
 
-
 class DiscoverBetterExperimentalModel(Command):
   '''
   A command to perform a search_beam_position operation
 
   '''
 
-  name='search_beam_position'
+  name = 'search_beam_position'
 
   allowed_parents = ['find_spots']
 
@@ -983,11 +964,11 @@ class DiscoverBetterExperimentalModel(Command):
 
     # Set filenames and input
     self.filenames = {
-      'input.datablock'    : self.state.parent.datablock,
-      'input.reflections'  : self.state.parent.reflections,
-      'output.datablock'   : self.state.datablock,
-      'output.log'         : join(self.state.directory, "info.log"),
-      'output.debug_log'   : join(self.state.directory, "debug.log"),
+        'input.datablock': self.state.parent.datablock,
+        'input.reflections': self.state.parent.reflections,
+        'output.datablock': self.state.datablock,
+        'output.log': join(self.state.directory, "info.log"),
+        'output.debug_log': join(self.state.directory, "debug.log"),
     }
     for name, value in self.filenames.iteritems():
       self.phil_scope.set('%s=%s' % (name, value))
@@ -1000,18 +981,17 @@ class DiscoverBetterExperimentalModel(Command):
     # Run the command
     self.external_command = RunExternalCommand()
     self.external_command(
-      ['dials.search_beam_position', self.state.parameters],
-      stdout=stdout,
-      stderr=stderr,
-      stdout_filename=self.state.output,
-      stderr_filename=self.state.output)
+        ['dials.search_beam_position', self.state.parameters],
+        stdout=stdout,
+        stderr=stderr,
+        stdout_filename=self.state.output,
+        stderr_filename=self.state.output)
 
     # Generate the report
     self.generate_report(stdout=stdout, stderr=stderr)
 
     # Check the files exist
     self.check_files_exist(self.filenames.values())
-
 
 class Index(Command):
   '''
@@ -1021,11 +1001,7 @@ class Index(Command):
 
   name = 'index'
 
-  allowed_parents = [
-    'find_spots',
-    'search_beam_position',
-    'index'
-  ]
+  allowed_parents = ['find_spots', 'search_beam_position', 'index']
 
   def run(self, stdout=sys.stdout, stderr=sys.stderr):
     '''
@@ -1042,18 +1018,18 @@ class Index(Command):
     # Set filenames and input
     if self.state.parent.name == 'index':
       self.filenames = {
-        'input.experiments' : self.state.parent.experiments,
+          'input.experiments': self.state.parent.experiments,
       }
     else:
       self.filenames = {
-        'input.datablock' : self.state.parent.datablock,
+          'input.datablock': self.state.parent.datablock,
       }
     self.filenames.update({
-      'input.reflections'  : self.state.parent.reflections,
-      'output.reflections' : self.state.reflections,
-      'output.experiments' : self.state.experiments,
-      'output.log'         : join(self.state.directory, "info.log"),
-      'output.debug_log'   : join(self.state.directory, "debug.log"),
+        'input.reflections': self.state.parent.reflections,
+        'output.reflections': self.state.reflections,
+        'output.experiments': self.state.experiments,
+        'output.log': join(self.state.directory, "info.log"),
+        'output.debug_log': join(self.state.directory, "debug.log"),
     })
     for name, value in self.filenames.iteritems():
       self.phil_scope.set('%s=%s' % (name, value))
@@ -1066,11 +1042,11 @@ class Index(Command):
     # Run the command
     self.external_command = RunExternalCommand()
     self.external_command(
-      ['dials.index', self.state.parameters],
-      stdout=stdout,
-      stderr=stderr,
-      stdout_filename=self.state.output,
-      stderr_filename=self.state.output)
+        ['dials.index', self.state.parameters],
+        stdout=stdout,
+        stderr=stderr,
+        stdout_filename=self.state.output,
+        stderr_filename=self.state.output)
 
     # Generate the report
     self.generate_report(stdout=stdout, stderr=stderr)
@@ -1078,14 +1054,13 @@ class Index(Command):
     # Check the files exist
     self.check_files_exist(self.filenames.values())
 
-
 class RefineBravaisSettings(Command):
   '''
   A command to perform an refine_bravais_settings operation
 
   '''
 
-  name='refine_bravais_settings'
+  name = 'refine_bravais_settings'
 
   allowed_parents = ['index']
 
@@ -1103,11 +1078,11 @@ class RefineBravaisSettings(Command):
 
     # Set other filenames
     self.filenames = {
-      'input.experiments'  : self.state.parent.experiments,
-      'input.reflections'  : self.state.parent.reflections,
-      'output.log'         : join(self.state.directory, "info.log"),
-      'output.debug_log'   : join(self.state.directory, "debug.log"),
-      'output.directory'   : self.state.directory,
+        'input.experiments': self.state.parent.experiments,
+        'input.reflections': self.state.parent.reflections,
+        'output.log': join(self.state.directory, "info.log"),
+        'output.debug_log': join(self.state.directory, "debug.log"),
+        'output.directory': self.state.directory,
     }
     for name, value in self.filenames.iteritems():
       self.phil_scope.set('%s=%s' % (name, value))
@@ -1120,11 +1095,11 @@ class RefineBravaisSettings(Command):
     # Run the command
     self.external_command = RunExternalCommand()
     self.external_command(
-      ['dials.refine_bravais_settings', self.state.parameters],
-      stdout=stdout,
-      stderr=stderr,
-      stdout_filename=self.state.output,
-      stderr_filename=self.state.output)
+        ['dials.refine_bravais_settings', self.state.parameters],
+        stdout=stdout,
+        stderr=stderr,
+        stdout_filename=self.state.output,
+        stderr_filename=self.state.output)
 
     # Read the summary and check all json files exist
     for item, filename in self.bravais_setting_filenames(self.state).iteritems():
@@ -1157,14 +1132,13 @@ class RefineBravaisSettings(Command):
       bs_filenames[name] = join(state.directory, 'bravais_setting_%s.json' % name)
     return bs_filenames
 
-
 class Reindex(Command):
   '''
   A command to perform an reindex operation
 
   '''
 
-  name='reindex'
+  name = 'reindex'
 
   allowed_parents = ['refine_bravais_settings']
 
@@ -1190,8 +1164,8 @@ class Reindex(Command):
 
     # The files which can be set as parameters
     self.filenames = {
-      'input.reflections'  : self.state.parent.reflections,
-      'output.reflections' : self.state.reflections,
+        'input.reflections': self.state.parent.reflections,
+        'output.reflections': self.state.reflections,
     }
     for name, value in self.filenames.iteritems():
       self.phil_scope.set('%s=%s' % (name, value))
@@ -1208,18 +1182,17 @@ class Reindex(Command):
     # Run the command
     self.external_command = RunExternalCommand()
     self.external_command(
-      ['dials.reindex', self.state.parameters],
-      stdout=stdout,
-      stderr=stderr,
-      stdout_filename=self.state.output,
-      stderr_filename=self.state.output)
+        ['dials.reindex', self.state.parameters],
+        stdout=stdout,
+        stderr=stderr,
+        stdout_filename=self.state.output,
+        stderr_filename=self.state.output)
 
     # Generate the report
     self.generate_report(stdout=stdout, stderr=stderr)
 
     # Check the files exist
     self.check_files_exist(self.filenames.values())
-
 
 class Refine(Command):
   '''
@@ -1229,12 +1202,7 @@ class Refine(Command):
 
   name = 'refine'
 
-  allowed_parents = [
-    'index',
-    'reindex',
-    'refine',
-    'integrate'
-  ]
+  allowed_parents = ['index', 'reindex', 'refine', 'integrate']
 
   def run(self, stdout=sys.stdout, stderr=sys.stderr):
     '''
@@ -1250,15 +1218,15 @@ class Refine(Command):
 
     # Set the other filenames and input
     self.filenames = {
-      'input.experiments'  : self.state.parent.experiments,
-      'input.reflections'  : self.state.parent.reflections,
-      'output.reflections' : self.state.reflections,
-      'output.experiments' : self.state.experiments,
-      'output.log'         : join(self.state.directory, "info.log"),
-      'output.debug_log'   : join(self.state.directory, "debug.log"),
-      'output.matches'     : join(self.state.directory, "matches.pickle"),
-      'output.centroids'   : join(self.state.directory, "centroids.pickle"),
-      'output.history'     : join(self.state.directory, "history.pickle"),
+        'input.experiments': self.state.parent.experiments,
+        'input.reflections': self.state.parent.reflections,
+        'output.reflections': self.state.reflections,
+        'output.experiments': self.state.experiments,
+        'output.log': join(self.state.directory, "info.log"),
+        'output.debug_log': join(self.state.directory, "debug.log"),
+        'output.matches': join(self.state.directory, "matches.pickle"),
+        'output.centroids': join(self.state.directory, "centroids.pickle"),
+        'output.history': join(self.state.directory, "history.pickle"),
     }
     for name, value in self.filenames.iteritems():
       self.phil_scope.set('%s=%s' % (name, value))
@@ -1271,18 +1239,17 @@ class Refine(Command):
     # Run the command
     self.external_command = RunExternalCommand()
     self.external_command(
-      ['dials.refine', self.state.parameters],
-      stdout=stdout,
-      stderr=stderr,
-      stdout_filename=self.state.output,
-      stderr_filename=self.state.output)
+        ['dials.refine', self.state.parameters],
+        stdout=stdout,
+        stderr=stderr,
+        stdout_filename=self.state.output,
+        stderr_filename=self.state.output)
 
     # Generate the report
     self.generate_report(stdout=stdout, stderr=stderr)
 
     # Check the files exist
     self.check_files_exist(self.filenames.values())
-
 
 class Integrate(Command):
   '''
@@ -1292,12 +1259,7 @@ class Integrate(Command):
 
   name = 'integrate'
 
-  allowed_parents = [
-    'index',
-    'reindex',
-    'refine',
-    'integrate'
-  ]
+  allowed_parents = ['index', 'reindex', 'refine', 'integrate']
 
   def run(self, stdout=sys.stdout, stderr=sys.stderr):
     '''
@@ -1313,14 +1275,11 @@ class Integrate(Command):
 
     # Set the other filenames and input
     self.filenames = {
-      'input.experiments'  : self.state.parent.experiments,
-      'input.reflections'  : self.state.parent.reflections,
-      'output.reflections' : self.state.reflections,
-      'output.experiments' : self.state.experiments,
-      'output.log'         : join(self.state.directory, "info.log"),
-      'output.debug_log'   : join(self.state.directory, "debug.log"),
-      'output.report'      : join(self.state.directory, "summary.json"),
-      'output.phil'        : 'None'
+        'input.experiments': self.state.parent.experiments, 'input.reflections': self.state.parent.reflections,
+        'output.reflections': self.state.reflections, 'output.experiments': self.state.experiments, 'output.log': join(
+            self.state.directory,
+            "info.log"), 'output.debug_log': join(self.state.directory, "debug.log"), 'output.report': join(
+                self.state.directory, "summary.json"), 'output.phil': 'None'
     }
     for name, value in self.filenames.iteritems():
       self.phil_scope.set('%s=%s' % (name, value))
@@ -1333,18 +1292,17 @@ class Integrate(Command):
     # Run the command
     self.external_command = RunExternalCommand()
     self.external_command(
-      ['dials.integrate', self.state.parameters],
-      stdout=stdout,
-      stderr=stderr,
-      stdout_filename=self.state.output,
-      stderr_filename=self.state.output)
+        ['dials.integrate', self.state.parameters],
+        stdout=stdout,
+        stderr=stderr,
+        stdout_filename=self.state.output,
+        stderr_filename=self.state.output)
 
     # Generate the report
     self.generate_report(stdout=stdout, stderr=stderr)
 
     # Check the files exist
     self.check_files_exist(self.filenames.values())
-
 
 class Export(Command):
   '''
@@ -1372,11 +1330,11 @@ class Export(Command):
 
     # Set filenames
     self.filenames = {
-      'input.experiments'  : self.state.parent.experiments,
-      'input.reflections'  : self.state.parent.reflections,
-      'mtz.hklout'         : join(self.state.directory, "reflections.mtz"),
-      'output.log'         : join(self.state.directory, "info.log"),
-      'output.debug_log'   : join(self.state.directory, "debug.log"),
+        'input.experiments': self.state.parent.experiments,
+        'input.reflections': self.state.parent.reflections,
+        'mtz.hklout': join(self.state.directory, "reflections.mtz"),
+        'output.log': join(self.state.directory, "info.log"),
+        'output.debug_log': join(self.state.directory, "debug.log"),
     }
     self.phil_scope.set("format=mtz")
     for name, value in self.filenames.iteritems():
@@ -1390,18 +1348,17 @@ class Export(Command):
     # Run the command
     self.external_command = RunExternalCommand()
     self.external_command(
-      ['dials.export', self.state.parameters],
-      stdout=stdout,
-      stderr=stderr,
-      stdout_filename=self.state.output,
-      stderr_filename=self.state.output)
+        ['dials.export', self.state.parameters],
+        stdout=stdout,
+        stderr=stderr,
+        stdout_filename=self.state.output,
+        stderr_filename=self.state.output)
 
     # Check the files exist
     self.check_files_exist(self.filenames.values())
 
     # Copy the resulting mtz file to the working directory
     shutil.copy2(self.filenames['mtz.hklout'], result_filename)
-
 
 class ApplicationState(object):
   '''
@@ -1411,15 +1368,9 @@ class ApplicationState(object):
 
   # The command classes
   CommandClass = {
-    'import'                             : Import,
-    'find_spots'                         : FindSpots,
-    'search_beam_position' : DiscoverBetterExperimentalModel,
-    'index'                              : Index,
-    'refine_bravais_settings'            : RefineBravaisSettings,
-    'reindex'                            : Reindex,
-    'refine'                             : Refine,
-    'integrate'                          : Integrate,
-    'export'                             : Export
+      'import': Import, 'find_spots': FindSpots, 'search_beam_position': DiscoverBetterExperimentalModel, 'index':
+      Index, 'refine_bravais_settings': RefineBravaisSettings, 'reindex': Reindex, 'refine': Refine, 'integrate':
+      Integrate, 'export': Export
   }
 
   class Memento(object):
@@ -1427,12 +1378,8 @@ class ApplicationState(object):
     Class to init from state
 
     '''
-    def __init__(self,
-                 workspace=None,
-                 current=None,
-                 commands=None,
-                 counter=None,
-                 mode=None):
+
+    def __init__(self, workspace=None, current=None, commands=None, counter=None, mode=None):
       self.workspace = workspace
       self.current = current
       self.commands = commands
@@ -1471,10 +1418,10 @@ class ApplicationState(object):
     '''
     # Create the command
     self.command = self.CommandClass[self.mode](
-      parent     = self.current,
-      index      = self.counter.current(),
-      phil_scope = self.parameters[self.mode],
-      workspace  = self.workspace)
+        parent=self.current,
+        index=self.counter.current(),
+        phil_scope=self.parameters[self.mode],
+        workspace=self.workspace)
 
     # Increment the counter
     self.counter.incr()
@@ -1499,11 +1446,8 @@ class ApplicationState(object):
 
     # The application state as a dictionary
     obj = {
-      'counter'   : self.counter.current(),
-      'current'   : self.current.index,
-      'mode'      : self.mode,
-      'workspace' : self.workspace,
-      'commands'  : self.command_tree.root.as_dict()
+        'counter': self.counter.current(), 'current': self.current.index, 'mode': self.mode, 'workspace':
+        self.workspace, 'commands': self.command_tree.root.as_dict()
     }
 
     # Return the dictionary
@@ -1516,13 +1460,11 @@ class ApplicationState(object):
 
     '''
     memento = cls.Memento(
-      counter   = dictionary['counter'],
-      current   = dictionary['current'],
-      mode      = dictionary['mode'],
-      workspace = dictionary['workspace'],
-      commands  = CommandState.from_dict(
-        dictionary['commands'],
-        workspace = dictionary['workspace']))
+        counter=dictionary['counter'],
+        current=dictionary['current'],
+        mode=dictionary['mode'],
+        workspace=dictionary['workspace'],
+        commands=CommandState.from_dict(dictionary['commands'], workspace=dictionary['workspace']))
     return cls(memento=memento)
 
   def dump(self, filename):
@@ -1546,6 +1488,7 @@ class ApplicationState(object):
 
     '''
     import json
+
     def _decode_list(data):
       rv = []
       for item in data:
@@ -1571,9 +1514,9 @@ class ApplicationState(object):
           value = _decode_dict(value)
         rv[key] = value
       return rv
+
     with open(filename) as infile:
       return cls.from_dict(json.load(infile, object_hook=_decode_dict))
-
 
 class Controller(object):
   '''
@@ -1586,20 +1529,11 @@ class Controller(object):
 
   # The list of program modes
   mode_list = [
-    'import',
-    'find_spots',
-    'search_beam_position',
-    'index',
-    'refine_bravais_settings',
-    'reindex',
-    'refine',
-    'integrate',
-    'export']
+      'import', 'find_spots', 'search_beam_position', 'index', 'refine_bravais_settings', 'reindex', 'refine',
+      'integrate', 'export'
+  ]
 
-  def __init__(self,
-               directory=".",
-               state_filename="dials.state",
-               recover=True):
+  def __init__(self, directory=".", state_filename="dials.state", recover=True):
     '''
     Initialise the controller
 
@@ -1623,6 +1557,7 @@ class Controller(object):
       print "Recovered state from %s" % state_filename
       print self.get_history()
     else:
+
       def find_directory(working_directory):
         counter = 1
         while True:
@@ -1630,6 +1565,7 @@ class Controller(object):
           if not exists(directory):
             return directory
           counter += 1
+
       self.state = ApplicationState(find_directory(abspath(directory)))
 
   def set_mode(self, mode):
@@ -1785,6 +1721,7 @@ class Controller(object):
       Run the command asynchronously
 
       '''
+
       def __init__(self, controller, stdout=sys.stdout, stderr=sys.stderr):
         '''
         Init the command
@@ -1830,12 +1767,7 @@ class Controller(object):
         '''
         return self.finished
 
-
     # Create the command and return
-    command = AsyncCommand(
-      self,
-      stdout=stdout,
-      stderr=stderr)
+    command = AsyncCommand(self, stdout=stdout, stderr=stderr)
     command.start()
     return command
-

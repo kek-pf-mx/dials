@@ -1,9 +1,7 @@
 from __future__ import absolute_import, division
 from dials.array_family import flex # import dependency
 
-
 class Test(object):
-
   def __init__(self):
     from os.path import join
     import libtbx.load_env
@@ -37,7 +35,7 @@ class Test(object):
     from dxtbx.format.FormatCBFCspad import FormatCBFCspadInMemory
     import cPickle as pickle
 
-    dirname ='tmp_%s' % uuid4().hex
+    dirname = 'tmp_%s' % uuid4().hex
     os.mkdir(dirname)
     os.chdir(dirname)
 
@@ -69,10 +67,7 @@ class Test(object):
     mem_img = FormatCBFCspadInMemory(mem_img._cbf_handle)
     mem_img._raw_data = raw_data
     mem_img._cbf_handle = None # drop the file handle to prevent swig errors
-    imgset = ImageSet(
-      ImageSetData(
-        MemReader([mem_img]),
-        MemMasker([mem_img])))
+    imgset = ImageSet(ImageSetData(MemReader([mem_img]), MemMasker([mem_img])))
     imgset.set_beam(mem_img.get_beam())
     imgset.set_detector(mem_img.get_detector())
     datablock = DataBlockFactory.from_imageset(imgset)[0]
@@ -82,7 +77,7 @@ class Test(object):
     # 09/20/17 Changes to still indexer: refine candidate basis vectors in target symmetry if supplied
     #n_refls = range(128,140) # large ranges to handle platform-specific differences
     # 09/27/17 Bugfix for refine_candidates_with_known_symmetry
-    n_refls = range(140,152) # large ranges to handle platform-specific differences
+    n_refls = range(140, 152) # large ranges to handle platform-specific differences
     table = pickle.load(open(result, 'rb'))
     assert len(table) in n_refls, len(table)
     assert 'id' in table
@@ -96,7 +91,7 @@ class Test(object):
     import os
     from uuid import uuid4
 
-    dirname ='tmp_%s' % uuid4().hex
+    dirname = 'tmp_%s' % uuid4().hex
     os.mkdir(dirname)
     os.chdir(dirname)
 
@@ -131,7 +126,7 @@ class Test(object):
           detector.fix_list = Dist,Tau1
         }
       }
-      """%geometry_path)
+      """ % geometry_path)
     f.close()
 
     # Call dials.stills_process
@@ -139,8 +134,7 @@ class Test(object):
       command = ['mpirun', '-n', '4', 'dials.stills_process']
     else:
       command = ['dials.stills_process']
-    command += [join(self.sacla_path, 'run266702-0-subset.h5'),
-      'process_sacla.phil']
+    command += [join(self.sacla_path, 'run266702-0-subset.h5'), 'process_sacla.phil']
     result = easy_run.fully_buffered(command).raise_if_errors()
     result.show_stdout()
 
@@ -177,10 +171,10 @@ class Test(object):
     #                            "idx-run266702-0-subset_00003_integrated.pickle"],
     #                            [range(100,115),range(155,165)]): # large ranges to handle platform-specific differences
     # 09/27/17 Bugfix for refine_candidates_with_known_symmetry
-    for result, n_refls in zip(["idx-run266702-0-subset_00000_integrated.pickle",
-                                "idx-run266702-0-subset_00001_integrated.pickle",
-                                "idx-run266702-0-subset_00003_integrated.pickle"],
-                                [range(212,225),range(565,580),range(475,500)]): # large ranges to handle platform-specific differences
+    for result, n_refls in zip([
+        "idx-run266702-0-subset_00000_integrated.pickle", "idx-run266702-0-subset_00001_integrated.pickle",
+        "idx-run266702-0-subset_00003_integrated.pickle"
+    ], [range(212, 225), range(565, 580), range(475, 500)]): # large ranges to handle platform-specific differences
       table = pickle.load(open(result, 'rb'))
       assert len(table) in n_refls, (result, len(table))
       assert 'id' in table

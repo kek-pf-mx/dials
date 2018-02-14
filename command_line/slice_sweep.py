@@ -79,7 +79,6 @@ phil_scope = parse('''
 
 ''')
 
-
 def calculate_block_ranges(scan, block_size):
   '''
 
@@ -214,13 +213,13 @@ class Script(object):
 
     # Create the parser
     self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      read_reflections=True,
-      read_experiments=True,
-      read_datablocks=True,
-      check_format=False,
-      epilog=help_message)
+        usage=usage,
+        phil=phil_scope,
+        read_reflections=True,
+        read_experiments=True,
+        read_datablocks=True,
+        check_format=False,
+        epilog=help_message)
 
   def run(self):
     '''Execute the script.'''
@@ -258,7 +257,7 @@ class Script(object):
       # if we still don't have the right column give up
       if 'xyzobs.px.value' not in reflections:
         raise Sorry("These reflections do not have frame numbers set, and "
-          "there are no experiments provided to calculate these.")
+                    "there are no experiments provided to calculate these.")
 
     # set trivial case where no scan range is provided at all
     if not params.image_range:
@@ -270,18 +269,15 @@ class Script(object):
       # an experiment list or datablocks, but not both. Ensure there is only
       # a single scan contained within.
       if [slice_exps, slice_dbs].count(True) != 1:
-        raise Sorry("For slicing into blocks please provide either datablocks"
-          " or experiments, but not both.")
+        raise Sorry("For slicing into blocks please provide either datablocks" " or experiments, but not both.")
       if slice_exps:
         if len(experiments) > 1:
-          raise Sorry("For slicing into blocks please provide a single "
-                      "scan only")
+          raise Sorry("For slicing into blocks please provide a single " "scan only")
         scan = experiments[0].scan
       if slice_dbs:
         scans = datablocks[0].unique_scans()
         if len(scans) > 1 or len(datablocks) > 1:
-          raise Sorry("For slicing into blocks please provide a single "
-                      "scan only")
+          raise Sorry("For slicing into blocks please provide a single " "scan only")
         scan = scans[0]
 
       # Having extracted the scan, calculate the blocks
@@ -332,8 +328,7 @@ class Script(object):
         else:
           ext = "_sliced.json"
         output_experiments_filename = bname + ext
-      print 'Saving sliced experiments to {0}'.format(
-        output_experiments_filename)
+      print 'Saving sliced experiments to {0}'.format(output_experiments_filename)
 
       from dxtbx.model.experiment_list import ExperimentListDumper
       dump = ExperimentListDumper(sliced_experiments)
@@ -353,8 +348,7 @@ class Script(object):
           ext = "_sliced.pickle"
         output_reflections_filename = bname + ext
 
-      print 'Saving sliced reflections to {0}'.format(
-        output_reflections_filename)
+      print 'Saving sliced reflections to {0}'.format(output_reflections_filename)
       sliced_reflections.as_pickle(output_reflections_filename)
 
     # Save sliced datablocks
@@ -370,8 +364,7 @@ class Script(object):
         else:
           ext = "_sliced.json"
         output_datablocks_filename = bname + ext
-      print 'Saving sliced datablocks to {0}'.format(
-        output_datablocks_filename)
+      print 'Saving sliced datablocks to {0}'.format(output_datablocks_filename)
 
       from dxtbx.datablock import DataBlockDumper
       dump = DataBlockDumper(sliced_datablocks)

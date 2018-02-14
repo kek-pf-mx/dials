@@ -4,7 +4,7 @@ def spot_counts_per_image_plot(reflections, **kwargs):
   if len(reflections) == 0:
     return '\n'
 
-  x,y,z = reflections['xyzobs.px.value'].parts()
+  x, y, z = reflections['xyzobs.px.value'].parts()
   return flex_histogram(z, **kwargs)
 
 def histogram_from_json(filename):
@@ -20,9 +20,9 @@ def flex_histogram(z, char='*', width=60, height=10):
   assert isinstance(char, basestring)
   assert len(char) == 1
 
-# import json
-# with open('list.json', 'w') as fh:
-#   json.dump(sorted(list(z)), fh)
+  # import json
+  # with open('list.json', 'w') as fh:
+  #   json.dump(sorted(list(z)), fh)
 
   min_z = flex.min(z)
   max_z = flex.max(z)
@@ -58,12 +58,11 @@ def flex_histogram(z, char='*', width=60, height=10):
   max_count = flex.max(counts)
   total_counts = flex.sum(counts)
   assert total_counts == len(z), "Only found %d out of %d reflections for histogram" % (total_counts, len(z))
-  counts *= (height/max_count)
+  counts *= (height / max_count)
   counts = counts.iround()
 
   rows = []
-  rows.append('%i spots found on %i images (max %i / bin)' %(
-    total_counts, image_count, max_count))
+  rows.append('%i spots found on %i images (max %i / bin)' % (total_counts, image_count, max_count))
 
   for i in range(height, 0, -1):
     row = []
@@ -75,9 +74,7 @@ def flex_histogram(z, char='*', width=60, height=10):
     rows.append(''.join(row))
 
   padding = width - len(str(xmin)) - len(str(xmax))
-  rows.append('%i%s%i' % (xmin,
-    (' ' if padding < 7 else 'image').center(padding) if padding > 0 else '',
-    xmax))
+  rows.append('%i%s%i' % (xmin, (' ' if padding < 7 else 'image').center(padding) if padding > 0 else '', xmax))
   return '\n'.join(rows)
 
 if __name__ == '__main__':

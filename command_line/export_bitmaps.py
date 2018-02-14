@@ -2,7 +2,6 @@ from __future__ import absolute_import, division
 
 import iotbx.phil
 
-
 from dials.util.options import flatten_datablocks
 
 help_message = '''
@@ -23,7 +22,8 @@ Examples::
 
 '''
 
-phil_scope = iotbx.phil.parse("""
+phil_scope = iotbx.phil.parse(
+    """
 binning = 1
   .type = int(value_min=1)
 brightness = 100
@@ -67,29 +67,25 @@ jpeg {
     .help = "The image quality, on a scale from 1 (worst) to 95 (best)"
 }
 
-""", process_includes=True)
+""",
+    process_includes=True)
 
-colour_schemes = {
-  'greyscale': 0,
-  'rainbow': 1,
-  'heatmap': 2,
-  'inverse_greyscale': 3
-}
+colour_schemes = {'greyscale': 0, 'rainbow': 1, 'heatmap': 2, 'inverse_greyscale': 3}
 
 def run(args):
   import os
   import libtbx.load_env
   from libtbx.utils import Sorry
   from dials.util.options import OptionParser
-  usage = "%s [options] datablock.json | image.cbf" %libtbx.env.dispatcher_name
+  usage = "%s [options] datablock.json | image.cbf" % libtbx.env.dispatcher_name
 
   parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_datablocks=True,
-    read_datablocks_from_images=True,
-    check_format=True,
-    epilog=help_message)
+      usage=usage,
+      phil=phil_scope,
+      read_datablocks=True,
+      read_datablocks_from_images=True,
+      check_format=True,
+      epilog=help_message)
 
   params, options = parser.parse_args(show_diff_phil=True)
 
@@ -121,8 +117,7 @@ def run(args):
     detector = imageset.get_detector()
 
     if len(detector) > 1:
-      raise Sorry('Currently only single panel detectors are supported by %s'
-                  %libtbx.env.dispatcher_name)
+      raise Sorry('Currently only single panel detectors are supported by %s' % libtbx.env.dispatcher_name)
 
     panel = detector[0]
     scan = imageset.get_scan()
@@ -134,14 +129,14 @@ def run(args):
       start, end = scan.get_image_range()
     else:
       start, end = 0, len(imageset)
-    for i_image in range(start, end+1):
-      image = imageset.get_raw_data(i_image-start)
+    for i_image in range(start, end + 1):
+      image = imageset.get_raw_data(i_image - start)
 
       #if len(detector) == 1:
-        #image = [image]
+      #image = [image]
 
       trange = [p.get_trusted_range() for p in detector]
-      mask = imageset.get_mask(i_image-start)
+      mask = imageset.get_mask(i_image - start)
       if mask is None:
         mask = [p.get_trusted_range_mask(im) for im, p in zip(image, detector)]
 
@@ -149,12 +144,16 @@ def run(args):
         for rd, m in zip(image, mask):
           rd.set_selected(~m, -2)
 
-      image = image_filter(image, mask, display=params.display, gain_value=params.gain,
-                           nsigma_b=params.nsigma_b,
-                           nsigma_s=params.nsigma_s,
-                           global_threshold=params.global_threshold,
-                           min_local=params.min_local,
-                           kernel_size=params.kernel_size)
+      image = image_filter(
+          image,
+          mask,
+          display=params.display,
+          gain_value=params.gain,
+          nsigma_b=params.nsigma_b,
+          nsigma_s=params.nsigma_s,
+          global_threshold=params.global_threshold,
+          min_local=params.min_local,
+          kernel_size=params.kernel_size)
 
       show_untrusted = params.show_mask
       if len(detector) > 1:
@@ -162,19 +161,19 @@ def run(args):
         # also binning doesn't work
         assert binning == 1
         flex_image = _get_flex_image_multipanel(
-          brightness=brightness,
-          panels=detector,
-          raw_data=image,
-          beam=imageset.get_beam(),
-          show_untrusted=show_untrusted)
+            brightness=brightness,
+            panels=detector,
+            raw_data=image,
+            beam=imageset.get_beam(),
+            show_untrusted=show_untrusted)
       else:
         flex_image = _get_flex_image(
-          brightness=brightness,
-          data=image[0],
-          binning=binning,
-          saturation=saturation,
-          vendortype=vendortype,
-          show_untrusted=show_untrusted)
+            brightness=brightness,
+            data=image[0],
+            binning=binning,
+            saturation=saturation,
+            vendortype=vendortype,
+            show_untrusted=show_untrusted)
 
       flex_image.setWindow(0, 0, 1)
       flex_image.adjust(color_scheme=colour_schemes.get(params.colour_scheme))
@@ -187,27 +186,19 @@ def run(args):
         import Image
       # XXX is size//binning safe here?
       try: # fromstring raises Exception in Pillow >= 3.0.0
-        pil_img = Image.fromstring('RGB',
-                        (flex_image.size2()//binning,
-                         flex_image.size1()//binning),
-                         flex_image.export_string)
+        pil_img = Image.fromstring('RGB', (flex_image.size2() // binning, flex_image.size1() // binning),
+                                   flex_image.export_string)
       except NotImplementedError:
-        pil_img = Image.frombytes('RGB',
-                        (flex_image.size2()//binning,
-                         flex_image.size1()//binning),
-                         flex_image.export_string)
-      path = os.path.join(
-        output_dir, params.prefix + ("%04d" % i_image) + '.' + params.format)
+        pil_img = Image.frombytes('RGB', (flex_image.size2() // binning, flex_image.size1() // binning),
+                                  flex_image.export_string)
+      path = os.path.join(output_dir, params.prefix + ("%04d" % i_image) + '.' + params.format)
 
-      print "Exporting %s" %path
+      print "Exporting %s" % path
       with open(path, 'wb') as tmp_stream:
-        pil_img.save(tmp_stream, format=params.format,
-                     compress_level=params.png.compress_level,
-                     quality=params.jpeg.quality)
+        pil_img.save(
+            tmp_stream, format=params.format, compress_level=params.png.compress_level, quality=params.jpeg.quality)
 
-def image_filter(raw_data, mask, display,
-                 gain_value, nsigma_b, nsigma_s, global_threshold,
-                 min_local, kernel_size):
+def image_filter(raw_data, mask, display, gain_value, nsigma_b, nsigma_s, global_threshold, min_local, kernel_size):
 
   from dials.algorithms.image.threshold import DispersionThresholdDebug
   from dials.array_family import flex
@@ -216,23 +207,20 @@ def image_filter(raw_data, mask, display,
     return raw_data
 
   assert gain_value > 0
-  gain_map = [flex.double(raw_data[i].accessor(), gain_value)
-              for i in range(len(raw_data))]
+  gain_map = [flex.double(raw_data[i].accessor(), gain_value) for i in range(len(raw_data))]
 
   kabsch_debug_list = []
   for i_panel in range(len(raw_data)):
     kabsch_debug_list.append(
-      DispersionThresholdDebug(
-        raw_data[i_panel].as_double(), mask[i_panel], gain_map[i_panel],
-        kernel_size, nsigma_b, nsigma_s, global_threshold, min_local))
+        DispersionThresholdDebug(raw_data[i_panel].as_double(), mask[i_panel], gain_map[i_panel], kernel_size, nsigma_b,
+                                 nsigma_s, global_threshold, min_local))
 
   if display == 'mean':
     display_data = [kabsch.mean() for kabsch in kabsch_debug_list]
   elif display == 'variance':
     display_data = [kabsch.variance() for kabsch in kabsch_debug_list]
   elif display == 'dispersion':
-    display_data = [
-      kabsch.index_of_dispersion() for kabsch in kabsch_debug_list]
+    display_data = [kabsch.index_of_dispersion() for kabsch in kabsch_debug_list]
   elif display == 'sigma_b':
     cv = [kabsch.index_of_dispersion() for kabsch in kabsch_debug_list]
     display_data = [kabsch.cv_mask() for kabsch in kabsch_debug_list]
@@ -259,7 +247,6 @@ def image_filter(raw_data, mask, display,
       mask.reshape(cv[i].accessor())
 
   return display_data
-
 
 if __name__ == '__main__':
   import sys

@@ -55,14 +55,12 @@ def add_resolution_to_reflections(reflections, datablock):
     reflections['imageset_id'] = reflections['id']
 
   spots_mm = indexer_base.map_spots_pixel_to_mm_rad(
-    spots=reflections, detector=imageset.get_detector(),
-    scan=imageset.get_scan())
+      spots=reflections, detector=imageset.get_detector(), scan=imageset.get_scan())
 
   indexer_base.map_centroids_to_reciprocal_space(
-    spots_mm, detector=imageset.get_detector(), beam=imageset.get_beam(),
-    goniometer=imageset.get_goniometer())
+      spots_mm, detector=imageset.get_detector(), beam=imageset.get_beam(), goniometer=imageset.get_goniometer())
 
-  d_spacings = 1/spots_mm['rlp'].norms()
+  d_spacings = 1 / spots_mm['rlp'].norms()
 
   reflections['d'] = d_spacings
 
@@ -91,7 +89,6 @@ def augment_reflections(reflections, params, datablock=None):
   if datablock:
     add_resolution_to_reflections(reflections, datablock)
 
-
   return reflections
 
 def run(args):
@@ -102,12 +99,12 @@ def run(args):
     libtbx.env.dispatcher_name
 
   parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_reflections=True,
-    read_datablocks=True,
-    check_format=False,
-    epilog=help_message)
+      usage=usage,
+      phil=phil_scope,
+      read_reflections=True,
+      read_datablocks=True,
+      check_format=False,
+      epilog=help_message)
 
   params, options = parser.parse_args(show_diff_phil=True)
 

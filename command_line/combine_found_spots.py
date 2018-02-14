@@ -24,7 +24,8 @@ help_message = '''
 
 # Set the phil scope
 from libtbx.phil import parse
-phil_scope = parse('''
+phil_scope = parse(
+    '''
 
   output {
     reflections = 'combined_strong.pickle'
@@ -115,8 +116,8 @@ phil_scope = parse('''
     .type = int(value_min=0)
     .help = "The verbosity level"
 
-''', process_includes=True)
-
+''',
+    process_includes=True)
 
 def combine(datablock_list, reflections_list, params):
   '''
@@ -140,18 +141,18 @@ def combine(datablock_list, reflections_list, params):
     imageset_list.append(iset[0])
 
   compare_beam = BeamComparison(
-    wavelength_tolerance=params.input.tolerance.beam.wavelength,
-    direction_tolerance=params.input.tolerance.beam.direction,
-    polarization_normal_tolerance=params.input.tolerance.beam.polarization_normal,
-    polarization_fraction_tolerance=params.input.tolerance.beam.polarization_fraction)
+      wavelength_tolerance=params.input.tolerance.beam.wavelength,
+      direction_tolerance=params.input.tolerance.beam.direction,
+      polarization_normal_tolerance=params.input.tolerance.beam.polarization_normal,
+      polarization_fraction_tolerance=params.input.tolerance.beam.polarization_fraction)
   compare_detector = DetectorComparison(
-    fast_axis_tolerance=params.input.tolerance.detector.fast_axis,
-    slow_axis_tolerance=params.input.tolerance.detector.slow_axis,
-    origin_tolerance=params.input.tolerance.detector.origin)
+      fast_axis_tolerance=params.input.tolerance.detector.fast_axis,
+      slow_axis_tolerance=params.input.tolerance.detector.slow_axis,
+      origin_tolerance=params.input.tolerance.detector.origin)
   compare_goniometer = GoniometerComparison(
-    rotation_axis_tolerance=params.input.tolerance.goniometer.rotation_axis,
-    fixed_rotation_tolerance=params.input.tolerance.goniometer.fixed_rotation,
-    setting_rotation_tolerance=params.input.tolerance.goniometer.setting_rotation)
+      rotation_axis_tolerance=params.input.tolerance.goniometer.rotation_axis,
+      fixed_rotation_tolerance=params.input.tolerance.goniometer.fixed_rotation,
+      setting_rotation_tolerance=params.input.tolerance.goniometer.setting_rotation)
   scan_tolerance = params.input.tolerance.scan.oscillation
 
   # The initial models
@@ -185,22 +186,16 @@ def combine(datablock_list, reflections_list, params):
 
   # Get the image range
   image_range = scan.get_image_range()
-  image_range = (image_range[0], image_range[1]+1)
+  image_range = (image_range[0], image_range[1] + 1)
 
   # Create the sweep
-  imageset = ImageSetFactory.make_sweep(
-    template, range(*image_range),
-    format_class,
-    beam, detector,
-    goniometer, scan)
+  imageset = ImageSetFactory.make_sweep(template, range(*image_range), format_class, beam, detector, goniometer, scan)
 
   # Combine spots
   combiner = StrongSpotCombiner()
   for index, rlist in enumerate(reflections_list, start=1):
     assert rlist['id'].all_eq(0)
-    logger.info("Combining %d reflections from reflection list %d" % (
-      len(rlist),
-      index))
+    logger.info("Combining %d reflections from reflection list %d" % (len(rlist), index))
     combiner.add(rlist['shoebox'])
   shoeboxes = combiner.shoeboxes()
 
@@ -212,20 +207,12 @@ def combine(datablock_list, reflections_list, params):
   logger.info('Calculated {0} spot intensities'.format(len(shoeboxes)))
 
   # Construct the reflection table
-  reflections = flex.reflection_table(
-    flex.observation(
-      shoeboxes.panels(),
-      centroid,
-      intensity),
-    shoeboxes)
+  reflections = flex.reflection_table(flex.observation(shoeboxes.panels(), centroid, intensity), shoeboxes)
   reflections['id'] = flex.int(len(reflections), 0)
-  reflections.set_flags(
-    flex.size_t_range(len(reflections)),
-    reflections.flags.strong)
+  reflections.set_flags(flex.size_t_range(len(reflections)), reflections.flags.strong)
 
   # Return the datablock and reflections
   return DataBlock([imageset]), reflections
-
 
 class Script(object):
   '''A class for running the script.'''
@@ -242,11 +229,7 @@ class Script(object):
 
     # Initialise the base class
     self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      epilog=help_message,
-      read_datablocks=True,
-      read_reflections=True)
+        usage=usage, phil=phil_scope, epilog=help_message, read_datablocks=True, read_reflections=True)
 
   def run(self):
     '''Execute the script.'''
@@ -262,10 +245,7 @@ class Script(object):
     params, options = self.parser.parse_args(show_diff_phil=False)
 
     # Configure the logging
-    log.config(
-      params.verbosity,
-      info=params.output.log,
-      debug=params.output.debug_log)
+    log.config(params.verbosity, info=params.output.log, debug=params.output.debug_log)
 
     from dials.util.version import dials_version
     logger.info(dials_version())
@@ -286,28 +266,21 @@ class Script(object):
       raise Sorry("Must have same number of datablocks and reflection tables")
 
     # Combine the datablocks and reflections
-    datablock, reflections = combine(
-      datablocks,
-      reflections,
-      params)
+    datablock, reflections = combine(datablocks, reflections, params)
 
     # Save the reflections to file
     logger.info('\n' + '-' * 80)
     reflections.as_pickle(params.output.reflections)
-    logger.info('Saved {0} reflections to {1}'.format(
-        len(reflections), params.output.reflections))
+    logger.info('Saved {0} reflections to {1}'.format(len(reflections), params.output.reflections))
 
     # Save the datablock
     from dxtbx.datablock import DataBlockDumper
-    logger.info('Saving datablocks to {0}'.format(
-      params.output.datablock))
+    logger.info('Saving datablocks to {0}'.format(params.output.datablock))
     dump = DataBlockDumper(datablocks)
     dump.as_file(params.output.datablock)
 
-
     # Print the time
     logger.info("Time Taken: %f" % (time() - start_time))
-
 
 if __name__ == '__main__':
   from dials.util import halraiser

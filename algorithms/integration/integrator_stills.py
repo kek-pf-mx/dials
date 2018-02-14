@@ -10,7 +10,6 @@
 
 from __future__ import absolute_import, division
 
-
 class ReflectionBlockIntegratorStills(object):
   ''' A class to perform the integration. '''
 
@@ -19,8 +18,8 @@ class ReflectionBlockIntegratorStills(object):
     from dials.algorithms import shoebox
 
     # Ensure we have 1 experiment at the moment
-    assert(len(experiments) == 1)
-    assert(extractor is not None)
+    assert (len(experiments) == 1)
+    assert (extractor is not None)
 
     # Save the parameters
     self.params = params
@@ -29,7 +28,7 @@ class ReflectionBlockIntegratorStills(object):
 
     # Create the shoebox masker
     n_sigma = params.integration.shoebox.n_sigma
-    assert(n_sigma > 0)
+    assert (n_sigma > 0)
     self._mask_profiles = shoebox.MaskerEmpirical(experiments[0], reference=reference)
 
   def integrate(self):
@@ -49,16 +48,14 @@ class ReflectionBlockIntegratorStills(object):
       del reflections['shoebox']
       del reflections['rs_shoebox']
       result.extend(reflections)
-    assert(len(result) > 0)
+    assert (len(result) > 0)
     result.sort('miller_index')
     return result
-
 
 class IntegratorStills(object):
   ''' Integrate reflections '''
 
-  def __init__(self, params, exlist, reference=None,
-               predicted=None, shoeboxes=None):
+  def __init__(self, params, exlist, reference=None, predicted=None, shoeboxes=None):
     '''Initialise the script.'''
 
     assert reference is not None
@@ -83,20 +80,20 @@ class IntegratorStills(object):
 
       bboxes = flex.int6()
       for i, ref in enumerate(predicted):
-        nn_pred = [matcheddata[A.nn[i*10+j]] for j in xrange(10)]
+        nn_pred = [matcheddata[A.nn[i * 10 + j]] for j in xrange(10)]
         nn_ref = [reference[reference['miller_index'].first_index(r['miller_index'])] for r in nn_pred]
 
-        max_x = max([r['bbox'][1]-r['bbox'][0] for r in nn_ref])
-        max_y = max([r['bbox'][3]-r['bbox'][2] for r in nn_ref])
-        max_z = max([r['bbox'][5]-r['bbox'][4] for r in nn_ref])
+        max_x = max([r['bbox'][1] - r['bbox'][0] for r in nn_ref])
+        max_y = max([r['bbox'][3] - r['bbox'][2] for r in nn_ref])
+        max_z = max([r['bbox'][5] - r['bbox'][4] for r in nn_ref])
 
         panel = exlist[ref['id']].detector[ref['panel']]
         imgsize_x, imgsize_y = panel.get_image_size()
 
         x1 = int(math.floor(ref['xyzcal.px'][0] - (max_x / 2)))
-        x2 = int(math.ceil (ref['xyzcal.px'][0] + (max_x / 2)))
+        x2 = int(math.ceil(ref['xyzcal.px'][0] + (max_x / 2)))
         y1 = int(math.floor(ref['xyzcal.px'][1] - (max_y / 2)))
-        y2 = int(math.ceil (ref['xyzcal.px'][1] + (max_y / 2)))
+        y2 = int(math.ceil(ref['xyzcal.px'][1] + (max_y / 2)))
 
         if x1 < 0: x1 = 0
         if y1 < 0: y1 = 0
@@ -104,7 +101,7 @@ class IntegratorStills(object):
         if x2 > imgsize_x: x2 = imgsize_x
         if y2 > imgsize_y: y2 = imgsize_y
 
-        bboxes.append((x1,x2,y1,y2,0,1))
+        bboxes.append((x1, x2, y1, y2, 0, 1))
 
       predicted['bbox'] = bboxes
 
@@ -129,30 +126,22 @@ class IntegratorStills(object):
     h2 = reference.select(rind)['miller_index']
     mask = (h1 == h2)
     predicted.set_flags(pind.select(mask), predicted.flags.reference_spot)
-    Command.end("Matched %d reference spots with predicted reflections" %
-                mask.count(True))
+    Command.end("Matched %d reference spots with predicted reflections" % mask.count(True))
     return predicted
 
   def _load_extractor(self, filename, params, exlist):
     ''' Load the shoebox extractor. '''
     from dials.model.serialize.reflection_block import ReflectionBlockExtractor
-    assert(len(exlist) == 1)
+    assert (len(exlist) == 1)
     imageset = exlist[0].imageset
-    return ReflectionBlockExtractor(
-      filename,
-      params.integration.shoebox.block_size,
-      imageset)
+    return ReflectionBlockExtractor(filename, params.integration.shoebox.block_size, imageset)
 
   def _create_extractor(self, params, exlist, predicted):
     ''' Create the extractor. '''
     from dials.model.serialize.reflection_block import ReflectionBlockExtractor
-    assert(len(exlist) == 1)
+    assert (len(exlist) == 1)
     imageset = exlist[0].imageset
-    return ReflectionBlockExtractor(
-      "shoebox.dat",
-      params.integration.shoebox.block_size,
-      imageset,
-      predicted)
+    return ReflectionBlockExtractor("shoebox.dat", params.integration.shoebox.block_size, imageset, predicted)
 
   def _predict_reflections(self, params, experiments):
     ''' Predict all the reflections. '''
@@ -177,10 +166,7 @@ class IntegratorStills(object):
       array_range = 1
     else:
       array_range = experiments[0].scan.get_array_range()
-    mask = filtering.by_detector_mask(
-      reflections['bbox'],
-      experiments[0].imageset.get_raw_data(0)[0] >= 0,
-      array_range)
+    mask = filtering.by_detector_mask(reflections['bbox'], experiments[0].imageset.get_raw_data(0)[0] >= 0, array_range)
     reflections.del_selected(not mask)
     Command.end('Filtered %d reflections by detector mask' % len(reflections))
 

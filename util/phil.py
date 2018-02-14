@@ -11,14 +11,12 @@
 from __future__ import absolute_import, division
 import libtbx.phil
 
-
 class FilenameDataWrapper(object):
   ''' A wrapper class to store data with a filename. '''
 
   def __init__(self, filename, data):
     self.filename = filename
     self.data = data
-
 
 class DataBlockConverters(object):
   ''' A phil converter for datablocks. '''
@@ -42,9 +40,7 @@ class DataBlockConverters(object):
     if s not in self.cache:
       if not exists(s):
         raise Sorry('File %s does not exist' % s)
-      self.cache[s] = FilenameDataWrapper(s,
-        DataBlockFactory.from_json_file(s,
-          check_format=self._check_format))
+      self.cache[s] = FilenameDataWrapper(s, DataBlockFactory.from_json_file(s, check_format=self._check_format))
     return self.cache[s]
 
   def from_words(self, words, master):
@@ -56,7 +52,6 @@ class DataBlockConverters(object):
     else:
       value = python_object.filename
     return [libtbx.phil.tokenizer.word(value=value)]
-
 
 class ExperimentListConverters(object):
   ''' A phil converter for the experiment list class. '''
@@ -80,9 +75,7 @@ class ExperimentListConverters(object):
     if s not in self.cache:
       if not exists(s):
         raise Sorry('File %s does not exist' % s)
-      self.cache[s] = FilenameDataWrapper(s,
-        ExperimentListFactory.from_json_file(s,
-          check_format=self._check_format))
+      self.cache[s] = FilenameDataWrapper(s, ExperimentListFactory.from_json_file(s, check_format=self._check_format))
     return self.cache[s]
 
   def from_words(self, words, master):
@@ -94,7 +87,6 @@ class ExperimentListConverters(object):
     else:
       value = python_object.filename
     return [libtbx.phil.tokenizer.word(value=value)]
-
 
 class ReflectionTableConverters(object):
   ''' A phil converter for the reflection table class. '''
@@ -128,7 +120,6 @@ class ReflectionTableConverters(object):
       value = python_object.filename
     return [libtbx.phil.tokenizer.word(value=value)]
 
-
 class ReflectionTableSelectorConverters(object):
   ''' A phil converter for the reflection table selector class. '''
 
@@ -152,7 +143,7 @@ class ReflectionTableSelectorConverters(object):
       raise RuntimeError('%s is not a single selection' % s)
     else:
       match = matches[0]
-    assert(len(match) == 3)
+    assert (len(match) == 3)
     col, op, value = match
     return flex.reflection_table_selector(col, op, value)
 
@@ -163,34 +154,21 @@ class ReflectionTableSelectorConverters(object):
     if python_object is None:
       value = "None"
     else:
-      value = "%s%s%s" % (python_object.column,
-                          python_object.op_string,
-                          python_object.value)
+      value = "%s%s%s" % (python_object.column, python_object.op_string, python_object.value)
     return [libtbx.phil.tokenizer.word(value=value)]
 
-
 # Create the default converter registry with the extract converters
-default_converter_registry = libtbx.phil.extended_converter_registry(
-  additional_converters=[
-    DataBlockConverters,
-    ExperimentListConverters,
-    ReflectionTableConverters,
-    ReflectionTableSelectorConverters
-  ])
+default_converter_registry = libtbx.phil.extended_converter_registry(additional_converters=[
+    DataBlockConverters, ExperimentListConverters, ReflectionTableConverters, ReflectionTableSelectorConverters
+])
 
-
-def parse(
-      input_string=None,
-      source_info=None,
-      file_name=None,
-      converter_registry=None,
-      process_includes=False):
+def parse(input_string=None, source_info=None, file_name=None, converter_registry=None, process_includes=False):
   ''' Redefinition of the parse function. '''
   if converter_registry is None:
     converter_registry = default_converter_registry
   return libtbx.phil.parse(
-    input_string=input_string,
-    source_info=source_info,
-    file_name=file_name,
-    converter_registry=converter_registry,
-    process_includes=process_includes)
+      input_string=input_string,
+      source_info=source_info,
+      file_name=file_name,
+      converter_registry=converter_registry,
+      process_includes=process_includes)

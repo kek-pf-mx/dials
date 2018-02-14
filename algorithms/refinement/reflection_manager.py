@@ -6,7 +6,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """Contains classes used to manage the reflections used during refinement,
 principally ReflectionManager."""
 from __future__ import absolute_import, division
@@ -27,6 +26,7 @@ from dials.algorithms.refinement.refinement_helpers import \
 # constants
 RAD2DEG = 180. / pi
 DEG2RAD = pi / 180.
+
 
 # helper functions
 def calculate_entering_flags(reflections, experiments):
@@ -101,8 +101,7 @@ class BlockCalculator(object):
       half_width = width * (0.5 - 1e-11) # ensure round down behaviour
 
       block_starts = [start + n * _width for n in xrange(nblocks)]
-      block_centres = [exp.scan.get_array_index_from_angle(
-        e + half_width, deg=False) for e in block_starts]
+      block_centres = [exp.scan.get_array_index_from_angle(e + half_width, deg=False) for e in block_starts]
 
       for b_num, (b_start, b_cent) in enumerate(zip(block_starts, block_centres)):
         sub_isel = isel.select((b_start <= exp_phi) & \
@@ -140,7 +139,6 @@ class BlockCalculator(object):
 
     return self._reflections
 
-
 class ReflectionManager(object):
   """A class to maintain information about observed and predicted
   reflections for refinement.
@@ -152,15 +150,16 @@ class ReflectionManager(object):
 
   _weighting_strategy = weighting_strategies.StatisticalWeightingStrategy()
 
-  def __init__(self, reflections,
-                     experiments,
-                     nref_per_degree=None,
-                     max_sample_size=None,
-                     min_sample_size=0,
-                     close_to_spindle_cutoff=0.02,
-                     outlier_detector=None,
-                     weighting_strategy_override=None,
-                     verbosity=0):
+  def __init__(self,
+               reflections,
+               experiments,
+               nref_per_degree=None,
+               max_sample_size=None,
+               min_sample_size=0,
+               close_to_spindle_cutoff=0.02,
+               outlier_detector=None,
+               weighting_strategy_override=None,
+               verbosity=0):
 
     # set verbosity
     if verbosity == 0:
@@ -174,8 +173,7 @@ class ReflectionManager(object):
     self._s0vecs = [matrix.col(e.beam.get_s0()) for e in self._experiments]
 
     # unset the refinement flags (creates flags field if needed)
-    reflections.unset_flags(flex.size_t_range(len(reflections)),
-        flex.reflection_table.flags.used_in_refinement)
+    reflections.unset_flags(flex.size_t_range(len(reflections)), flex.reflection_table.flags.used_in_refinement)
 
     # check that the observed beam vectors are stored: if not, compute them
     n_s1_set = set_obs_s1(reflections, experiments)
@@ -190,12 +188,13 @@ class ReflectionManager(object):
     # modules to allow for nlogn subselection of values used in refinement.
     l_id = reflections["id"]
     id0 = l_id[0]
-    for ii in xrange(1,len(l_id)):
+    for ii in xrange(1, len(l_id)):
       if id0 <= l_id[ii]:
         id0 = l_id[ii]
       else:
         reflections.sort("id") #Ensuring the ref_table is sorted by id
-        reflections.subsort("id","panel") #Ensuring that within each sorted id block, sorting is next performed by panel
+        reflections.subsort("id",
+                            "panel") #Ensuring that within each sorted id block, sorting is next performed by panel
         break
 
     # set up the reflection inclusion criteria
@@ -210,8 +209,7 @@ class ReflectionManager(object):
     self._accepted_refs_size = len(refs_to_keep)
 
     # set entering flags for all reflections
-    reflections['entering'] = calculate_entering_flags(reflections,
-      self._experiments)
+    reflections['entering'] = calculate_entering_flags(reflections, self._experiments)
 
     # set observed frame numbers for all reflections if not already present
     calculate_frame_numbers(reflections, self._experiments)
@@ -309,7 +307,7 @@ class ReflectionManager(object):
     Outlier rejection is done later."""
 
     # first exclude reflections with miller index set to 0,0,0
-    sel1 = obs_data['miller_index'] != (0,0,0)
+    sel1 = obs_data['miller_index'] != (0, 0, 0)
 
     # exclude reflections with overloads, as these have worse centroids
     sel2 = ~obs_data.get_flags(obs_data.flags.overloaded)
@@ -365,10 +363,10 @@ class ReflectionManager(object):
       # set sample size according to nref_per_degree (per experiment)
       if exp.scan and self._nref_per_degree:
         sweep_range_rad = exp.scan.get_oscillation_range(deg=False)
-        width = abs(sweep_range_rad[1] -
-                    sweep_range_rad[0]) * RAD2DEG
+        width = abs(sweep_range_rad[1] - sweep_range_rad[0]) * RAD2DEG
         sample_size = int(self._nref_per_degree * width)
-      else: sweep_range_rad = None
+      else:
+        sweep_range_rad = None
 
       # adjust sample size if below the chosen limit
       sample_size = max(sample_size, self._min_sample_size)
@@ -429,8 +427,7 @@ class ReflectionManager(object):
   def get_matches(self):
     """For every observation used in refinement return (a copy of) all data"""
 
-    return self._reflections.select(self._reflections.get_flags(
-      self._reflections.flags.used_in_refinement))
+    return self._reflections.select(self._reflections.get_flags(self._reflections.flags.used_in_refinement))
 
   def get_free_reflections(self):
     """Return all reflections that were accepted for refinement but not chosen
@@ -487,43 +484,48 @@ class ReflectionManager(object):
 
     sl = self._sort_obs_by_residual(l)
     logger.debug("Reflections with the worst 20 positional residuals:")
-    header = ['Miller index', 'x_resid', 'y_resid', 'phi_resid', 'pnl',
-              'x_obs', 'y_obs', 'phi_obs', 'x_obs\nweight', 'y_obs\nweight',
-              'phi_obs\nweight']
+    header = [
+        'Miller index', 'x_resid', 'y_resid', 'phi_resid', 'pnl', 'x_obs', 'y_obs', 'phi_obs', 'x_obs\nweight',
+        'y_obs\nweight', 'phi_obs\nweight'
+    ]
     rows = []
     for i in xrange(20):
       e = sl[i]
       x_obs, y_obs, phi_obs = e['xyzobs.mm.value']
-      rows.append(['% 3d, % 3d, % 3d'%e['miller_index'],
-                   '%5.3f'%e['x_resid'],
-                   '%5.3f'%e['y_resid'],
-                   '%6.4f'%(e['phi_resid'] * RAD2DEG),
-                   '%d'%e['panel'],
-                   '%5.3f'%x_obs,
-                   '%5.3f'%y_obs,
-                   '%6.4f'%(phi_obs * RAD2DEG),
-                   '%5.3f'%e['xyzobs.mm.weights'][0],
-                   '%5.3f'%e['xyzobs.mm.weights'][1],
-                   '%6.4f'%(e['xyzobs.mm.weights'][2] * DEG2RAD**2)])
+      rows.append([
+          '% 3d, % 3d, % 3d' % e['miller_index'],
+          '%5.3f' % e['x_resid'],
+          '%5.3f' % e['y_resid'],
+          '%6.4f' % (e['phi_resid'] * RAD2DEG),
+          '%d' % e['panel'],
+          '%5.3f' % x_obs,
+          '%5.3f' % y_obs,
+          '%6.4f' % (phi_obs * RAD2DEG),
+          '%5.3f' % e['xyzobs.mm.weights'][0],
+          '%5.3f' % e['xyzobs.mm.weights'][1],
+          '%6.4f' % (e['xyzobs.mm.weights'][2] * DEG2RAD**2)
+      ])
     logger.debug(simple_table(rows, header).format())
 
     sl = self._sort_obs_by_residual(sl, angular=True)
     logger.debug("\nReflections with the worst 20 angular residuals:")
-    rows=[]
+    rows = []
     for i in xrange(20):
       e = sl[i]
       x_obs, y_obs, phi_obs = e['xyzobs.mm.value']
-      rows.append(['% 3d, % 3d, % 3d'%e['miller_index'],
-                   '%5.3f'%e['x_resid'],
-                   '%5.3f'%e['y_resid'],
-                   '%6.4f'%(e['phi_resid'] * RAD2DEG),
-                   '%d'%e['panel'],
-                   '%5.3f'%x_obs,
-                   '%5.3f'%y_obs,
-                   '%6.4f'%(phi_obs * RAD2DEG),
-                   '%5.3f'%e['xyzobs.mm.weights'][0],
-                   '%5.3f'%e['xyzobs.mm.weights'][1],
-                   '%6.4f'%(e['xyzobs.mm.weights'][2] * DEG2RAD**2)])
+      rows.append([
+          '% 3d, % 3d, % 3d' % e['miller_index'],
+          '%5.3f' % e['x_resid'],
+          '%5.3f' % e['y_resid'],
+          '%6.4f' % (e['phi_resid'] * RAD2DEG),
+          '%d' % e['panel'],
+          '%5.3f' % x_obs,
+          '%5.3f' % y_obs,
+          '%6.4f' % (phi_obs * RAD2DEG),
+          '%5.3f' % e['xyzobs.mm.weights'][0],
+          '%5.3f' % e['xyzobs.mm.weights'][1],
+          '%6.4f' % (e['xyzobs.mm.weights'][2] * DEG2RAD**2)
+      ])
     logger.debug(simple_table(rows, header).format())
     logger.debug("")
 
@@ -609,20 +611,21 @@ class StillsReflectionManager(ReflectionManager):
 
     sl = self._sort_obs_by_residual(l)
     logger.debug("Reflections with the worst 20 positional residuals:")
-    header = ['Miller index', 'x_resid', 'y_resid', 'pnl',
-              'x_obs', 'y_obs', 'x_obs\nweight', 'y_obs\nweight']
+    header = ['Miller index', 'x_resid', 'y_resid', 'pnl', 'x_obs', 'y_obs', 'x_obs\nweight', 'y_obs\nweight']
     rows = []
     for i in xrange(20):
       e = sl[i]
       x_obs, y_obs, _ = e['xyzobs.mm.value']
-      rows.append(['% 3d, % 3d, % 3d'%e['miller_index'],
-                   '%5.3f'%e['x_resid'],
-                   '%5.3f'%e['y_resid'],
-                   '%d'%e['panel'],
-                   '%5.3f'%x_obs,
-                   '%5.3f'%y_obs,
-                   '%5.3f'%e['xyzobs.mm.weights'][0],
-                   '%5.3f'%e['xyzobs.mm.weights'][1]])
+      rows.append([
+          '% 3d, % 3d, % 3d' % e['miller_index'],
+          '%5.3f' % e['x_resid'],
+          '%5.3f' % e['y_resid'],
+          '%d' % e['panel'],
+          '%5.3f' % x_obs,
+          '%5.3f' % y_obs,
+          '%5.3f' % e['xyzobs.mm.weights'][0],
+          '%5.3f' % e['xyzobs.mm.weights'][1]
+      ])
     logger.debug(simple_table(rows, header).format())
     logger.debug("")
 

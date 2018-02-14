@@ -30,7 +30,8 @@ Examples::
 
 # Set the phil scope
 from libtbx.phil import parse
-phil_scope = parse('''
+phil_scope = parse(
+    '''
   output {
     log = 'dials.find_shared_models.log'
       .type = str
@@ -44,8 +45,8 @@ phil_scope = parse('''
   verbosity = 1
     .type = int
     .help = "The verbosity level"
-''', process_includes=True)
-
+''',
+    process_includes=True)
 
 class Script(object):
   '''A class for running the script.'''
@@ -61,11 +62,7 @@ class Script(object):
             % libtbx.env.dispatcher_name
 
     # Initialise the base class
-    self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      epilog=help_message,
-      read_datablocks=True)
+    self.parser = OptionParser(usage=usage, phil=phil_scope, epilog=help_message, read_datablocks=True)
 
   def run(self):
     '''Execute the script.'''
@@ -80,10 +77,7 @@ class Script(object):
     params, options = self.parser.parse_args(show_diff_phil=False)
 
     # Configure the logging
-    log.config(
-      params.verbosity,
-      info=params.output.log,
-      debug=params.output.debug_log)
+    log.config(params.verbosity, info=params.output.log, debug=params.output.debug_log)
 
     from dials.util.version import dials_version
     logger.info(dials_version())
@@ -132,9 +126,9 @@ class Script(object):
       logger.info("%d datasets collected on %s" % (counter[timestamp], timestamp))
 
     # Loop though and see if any models might be shared
-    b_list = [ s.get_beam() for s in sweeps ]
-    d_list = [ s.get_detector() for s in sweeps ]
-    g_list = [ s.get_goniometer() for s in sweeps ]
+    b_list = [s.get_beam() for s in sweeps]
+    d_list = [s.get_detector() for s in sweeps]
+    g_list = [s.get_goniometer() for s in sweeps]
     b_index = []
     d_index = []
     g_index = []
@@ -168,19 +162,19 @@ class Script(object):
       date_str = timestamp.strftime('%Y-%m-%d')
       time_str = timestamp.strftime('%H:%M:%S')
       row = [
-        '%s' % sweeps[i].get_template(),
-        '%s' % i,
-        '%s' % b_index[i],
-        '%s' % d_index[i],
-        '%s' % g_index[i],
-        '%s' % date_str,
-        '%s' % time_str]
+          '%s' % sweeps[i].get_template(),
+          '%s' % i,
+          '%s' % b_index[i],
+          '%s' % d_index[i],
+          '%s' % g_index[i],
+          '%s' % date_str,
+          '%s' % time_str
+      ]
       rows.append(row)
     logger.info(table(rows, has_header=True, justify='left', prefix=' '))
 
     # Print the time
     logger.info("Time Taken: %f" % (time() - start_time))
-
 
 if __name__ == '__main__':
   from dials.util import halraiser

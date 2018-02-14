@@ -8,7 +8,7 @@ from iotbx import mtz
 from cctbx.uctbx import unit_cell
 from scitbx import matrix
 
-def pull_reference_xds(integrate_hkl, d_min = 0.0):
+def pull_reference_xds(integrate_hkl, d_min=0.0):
   '''Generate reference data set from integrate.hkl, check out the calculated
   x, y and z centroids as well as the Miller indices as coordinates in some
   high dimensional space. Only consider measurements with meaningful
@@ -125,7 +125,7 @@ def pull_calculated(integrate_pkl):
     if r.intensity > math.sqrt(r.intensity_variance):
       strong_reflections.append(r)
 
-  del(r_list)
+  del (r_list)
 
   hkl = []
   i = []
@@ -146,7 +146,7 @@ def pull_calculated(integrate_pkl):
   return hkl, i, sigi, xyz
 
 def meansd(values):
-  assert(len(values) > 3)
+  assert (len(values) > 3)
 
   mean = sum(values) / len(values)
   var = sum([(v - mean) * (v - mean) for v in values]) / (len(values) - 1)
@@ -154,18 +154,17 @@ def meansd(values):
   return mean, math.sqrt(var)
 
 def cc(a, b):
-  assert(len(a) == len(b))
+  assert (len(a) == len(b))
 
   ma, sa = meansd(a)
   mb, sb = meansd(b)
 
-  r = (1 / (len(a) - 1)) * sum([((a[j] - ma) / sa) * ((b[j] - mb) / sb)
-                                for j in range(len(a))])
+  r = (1 / (len(a) - 1)) * sum([((a[j] - ma) / sa) * ((b[j] - mb) / sb) for j in range(len(a))])
 
   return r
 
-def R(calc, obs, scale = None):
-  assert(len(calc) == len(obs))
+def R(calc, obs, scale=None):
+  assert (len(calc) == len(obs))
 
   if not scale:
     scale = sum(obs) / sum(calc)
@@ -201,7 +200,7 @@ def compare_chunks(integrate_mtz, integrate_hkl):
     query.append(xyz[2])
 
   # perform the match
-  ann = ann_adaptor(data = reference, dim = 3, k = 1)
+  ann = ann_adaptor(data=reference, dim=3, k=1)
   ann.query(query)
 
   MOS = []
@@ -221,7 +220,7 @@ def compare_chunks(integrate_mtz, integrate_hkl):
 
   unique = set(HKL)
 
-  resolutions = { }
+  resolutions = {}
 
   for hkl in unique:
     resolutions[hkl] = uc.d(hkl)
@@ -261,9 +260,7 @@ def compare_chunks(integrate_mtz, integrate_hkl):
 
     c = cc(xds, mos)
     r, s = R(xds, mos)
-    print '%7d %4d %.3f %.3f %.3f %.3f %.3f' % (chunk[0], len(mos),
-                                                min(resols), max(resols),
-                                                c, r, s)
+    print '%7d %4d %.3f %.3f %.3f %.3f %.3f' % (chunk[0], len(mos), min(resols), max(resols), c, r, s)
     ccs.append(c)
     rs.append(r)
     ss.append(s)
@@ -278,9 +275,9 @@ def compare_chunks(integrate_mtz, integrate_hkl):
   pyplot.xlabel('Chunk')
   pyplot.ylabel('Statistic')
   pyplot.title('Statistics for 1000 reflection-pair chunks')
-  pyplot.plot(chunks, ccs, label = 'CC')
-  pyplot.plot(chunks, rs, label = 'R')
-  pyplot.plot(chunks, ss, label = 'K')
+  pyplot.plot(chunks, ccs, label='CC')
+  pyplot.plot(chunks, rs, label='R')
+  pyplot.plot(chunks, ss, label='K')
   pyplot.legend()
   pyplot.savefig('plot-xds-vs-mosflm.png')
   pyplot.close()
@@ -334,6 +331,7 @@ def integrate_mtz_to_A_matrix(integrate_mtz):
   f = matrix.sqr(c.fractionalization_matrix()).transpose()
 
   return (u * f)
+
 def integrate_hkl_to_unit_cell(integrate_hkl):
   '''Generate a cctbx unit_cell from an integrate_hkl file.'''
 
@@ -354,7 +352,7 @@ def derive_reindex_matrix(integrate_hkl, integrate_mtz):
   mbeam, maxis = get_mosflm_coordinate_frame(integrate_mtz)
 
   from rstbx.cftbx.coordinate_frame_helpers import align_reference_frame
-  R = align_reference_frame(mbeam, - dbeam, maxis, daxis)
+  R = align_reference_frame(mbeam, -dbeam, maxis, daxis)
   mA = R * integrate_mtz_to_A_matrix(integrate_mtz)
 
   # assert that this should just be a simple integer rotation matrix

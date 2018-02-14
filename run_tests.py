@@ -163,4 +163,4 @@ tst_list = [
     "$D/test/algorithms/indexing/tst_compare_orientation_matrices.py",
     "$D/test/algorithms/indexing/tst_symmetry.py",
     #"$D/scratch/rjg/unit_cell_refinement.py",
-    ] + discover()
+] + discover()

@@ -26,8 +26,8 @@ from dials.algorithms.refinement.parameterisation.crystal_parameters import \
 
 # Create modified version of ExperimentsPredictor class from refinement
 from dials.algorithms.spot_prediction import StillsReflectionPredictor
-class Predictor(object):
 
+class Predictor(object):
   def __init__(self, experiments):
 
     self._experiment = experiments[0]
@@ -36,8 +36,7 @@ class Predictor(object):
   def update(self):
     """Build predictor objects for the current geometry of each Experiment"""
 
-    self._predictor = StillsReflectionPredictor(self._experiment,
-      spherical_relp=True)
+    self._predictor = StillsReflectionPredictor(self._experiment, spherical_relp=True)
     self._UB = matrix.sqr(self._experiment.crystal.get_U()) * matrix.sqr(self._experiment.crystal.get_B())
 
   def predict(self, reflections):
@@ -48,15 +47,13 @@ class Predictor(object):
     self._predictor.for_reflection_table(reflections, self._UB)
     return reflections
 
+
 # Simplied equivalent of a PredictionParameterisation class for this test
 class AnalyticalGradients(object):
   '''A class to implement the analytical gradient calculation in the document'''
 
-  def __init__(self, experiments,
-                 detector_parameterisation,
-                 beam_parameterisation,
-                 xl_orientation_parameterisation,
-                 xl_unit_cell_parameterisation):
+  def __init__(self, experiments, detector_parameterisation, beam_parameterisation, xl_orientation_parameterisation,
+               xl_unit_cell_parameterisation):
 
     # References to the underlying models from the first experiment
     self.experiment = experiments[0]
@@ -88,7 +85,7 @@ class AnalyticalGradients(object):
     n = len(reflections)
     U = flex.mat3_double(n, self.U)
     B = flex.mat3_double(n, self.B)
-    UB = U*B
+    UB = U * B
 
     # q is the reciprocal lattice vector, in the lab frame
     h = reflections['miller_index'].as_vec3_double()
@@ -107,7 +104,8 @@ class AnalyticalGradients(object):
 
     # check equation 10
     tmp = self.s0len * (q_s0) / s
-    for a, b in zip(s1, tmp): assert approx_equal(a, b)
+    for a, b in zip(s1, tmp):
+      assert approx_equal(a, b)
 
     ds1_dp = {}
 
@@ -123,7 +121,7 @@ class AnalyticalGradients(object):
       term2 = term2 * inv_sss
 
       name = 'Beam1' + name # XXXX Hack to get matching keys
-      ds1_dp[name] = {'ds1':(term1 - term2)}
+      ds1_dp[name] = {'ds1': (term1 - term2)}
 
     return ds1_dp
 
@@ -136,7 +134,7 @@ class AnalyticalGradients(object):
     n = len(reflections)
     U = flex.mat3_double(n, self.U)
     B = flex.mat3_double(n, self.B)
-    UB = U*B
+    UB = U * B
 
     # q is the reciprocal lattice vector, in the lab frame
     h = reflections['miller_index'].as_vec3_double()
@@ -170,7 +168,7 @@ class AnalyticalGradients(object):
       term2 = term2 * inv_sss
 
       name = 'Crystal1' + name # XXXX Hack to get matching keys
-      ds1_dp[name] = {'ds1':(term1 - term2)}
+      ds1_dp[name] = {'ds1': (term1 - term2)}
 
     return ds1_dp
 
@@ -183,7 +181,7 @@ class AnalyticalGradients(object):
     n = len(reflections)
     U = flex.mat3_double(n, self.U)
     B = flex.mat3_double(n, self.B)
-    UB = U*B
+    UB = U * B
 
     # q is the reciprocal lattice vector, in the lab frame
     h = reflections['miller_index'].as_vec3_double()
@@ -217,11 +215,11 @@ class AnalyticalGradients(object):
       term2 = term2 * inv_sss
 
       name = 'Crystal1' + name # XXXX Hack to get matching keys
-      ds1_dp[name] = {'ds1':(term1 - term2)}
+      ds1_dp[name] = {'ds1': (term1 - term2)}
 
     return ds1_dp
 
-def run(verbose = False):
+def run(verbose=False):
 
   # Build models, with a larger crystal than default in order to get plenty of
   # reflections on the 'still' image
@@ -231,7 +229,8 @@ def run(verbose = False):
   geometry.parameters.crystal.c.length.range=40 50;
   geometry.parameters.random_seed = 42"""
 
-  master_phil = parse("""
+  master_phil = parse(
+      """
       include scope dials.test.algorithms.refinement.geometry_phil
       """, process_includes=True)
 
@@ -245,11 +244,7 @@ def run(verbose = False):
   # Build a mock scan for a 3 degree sweep
   from dxtbx.model import ScanFactory
   sf = ScanFactory()
-  myscan = sf.make_scan(image_range = (1,1),
-                        exposure_times = 0.1,
-                        oscillation = (0, 3.0),
-                        epochs = range(1),
-                        deg = True)
+  myscan = sf.make_scan(image_range=(1, 1), exposure_times=0.1, oscillation=(0, 3.0), epochs=range(1), deg=True)
   sweep_range = myscan.get_oscillation_range(deg=False)
 
   # Create parameterisations of these models
@@ -260,21 +255,18 @@ def run(verbose = False):
 
   # Create a scans ExperimentList, only for generating reflections
   experiments = ExperimentList()
-  experiments.append(Experiment(
-        beam=mybeam, detector=mydetector, goniometer=mygonio, scan=myscan,
-        crystal=mycrystal, imageset=None))
+  experiments.append(
+      Experiment(beam=mybeam, detector=mydetector, goniometer=mygonio, scan=myscan, crystal=mycrystal, imageset=None))
 
   # Create a stills ExperimentList
   stills_experiments = ExperimentList()
-  stills_experiments.append(Experiment(
-        beam=mybeam, detector=mydetector, crystal=mycrystal, imageset=None))
+  stills_experiments.append(Experiment(beam=mybeam, detector=mydetector, crystal=mycrystal, imageset=None))
 
   # Generate rays - only to work out which hkls are predicted
   ray_predictor = ScansRayPredictor(experiments, sweep_range)
   resolution = 2.0
   index_generator = IndexGenerator(mycrystal.get_unit_cell(),
-                        space_group(space_group_symbols(1).hall()).type(),
-                        resolution)
+                                   space_group(space_group_symbols(1).hall()).type(), resolution)
   indices = index_generator.to_array()
   rays = ray_predictor(indices)
 
@@ -284,11 +276,12 @@ def run(verbose = False):
 
   # Build a standard prediction parameterisation for the stills experiment to do
   # FD calculation (not used for its analytical gradients)
-  pred_param = StillsPredictionParameterisation(stills_experiments,
-                 detector_parameterisations = [det_param],
-                 beam_parameterisations = [s0_param],
-                 xl_orientation_parameterisations = [xlo_param],
-                 xl_unit_cell_parameterisations = [xluc_param])
+  pred_param = StillsPredictionParameterisation(
+      stills_experiments,
+      detector_parameterisations=[det_param],
+      beam_parameterisations=[s0_param],
+      xl_orientation_parameterisations=[xlo_param],
+      xl_unit_cell_parameterisations=[xluc_param])
 
   # Make a managed SphericalRelpStillsReflectionPredictor reflection predictor
   # for the first (only) experiment
@@ -300,11 +293,12 @@ def run(verbose = False):
   ref_predictor.predict(reflections)
 
   # calculate analytical gradients
-  ag = AnalyticalGradients(stills_experiments,
-                 detector_parameterisation=det_param,
-                 beam_parameterisation=s0_param,
-                 xl_orientation_parameterisation=xlo_param,
-                 xl_unit_cell_parameterisation=xluc_param)
+  ag = AnalyticalGradients(
+      stills_experiments,
+      detector_parameterisation=det_param,
+      beam_parameterisation=s0_param,
+      xl_orientation_parameterisation=xlo_param,
+      xl_unit_cell_parameterisation=xluc_param)
   an_grads = ag.get_beam_gradients(reflections)
   an_grads.update(ag.get_crystal_orientation_gradients(reflections))
   an_grads.update(ag.get_crystal_unit_cell_gradients(reflections))
@@ -353,7 +347,7 @@ def run(verbose = False):
     s1_grads = fd * inv_delta
 
     # store gradients
-    fd_grads.append({'name':p_names[i], 'ds1':s1_grads})
+    fd_grads.append({'name': p_names[i], 'ds1': s1_grads})
 
   # return to the initial state
   pred_param.set_param_vals(p_vals)
@@ -361,7 +355,7 @@ def run(verbose = False):
   for i, fd_grad in enumerate(fd_grads):
 
     ## compare FD with analytical calculations
-    if verbose: print "\n\nParameter {0}: {1}". format(i,  fd_grad['name'])
+    if verbose: print "\n\nParameter {0}: {1}".format(i, fd_grad['name'])
 
     if verbose: print "d[s1]/dp for the first reflection"
     if verbose: print 'finite diff', fd_grad['ds1'][0]

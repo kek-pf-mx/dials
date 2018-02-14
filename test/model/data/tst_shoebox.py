@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division
 
 class Test(object):
-
   def __init__(self):
     pass
 
@@ -34,11 +33,11 @@ class Test(object):
 
       shoebox = Shoebox((x0, x1, y0, y1, z0, z1))
       shoebox.allocate()
-      assert(shoebox.data.all() == (z1 - z0, y1 - y0, x1 - x0))
-      assert(shoebox.mask.all() == (z1 - z0, y1 - y0, x1 - x0))
+      assert (shoebox.data.all() == (z1 - z0, y1 - y0, x1 - x0))
+      assert (shoebox.mask.all() == (z1 - z0, y1 - y0, x1 - x0))
       shoebox.deallocate()
-      assert(shoebox.data.all() == (0, 0, 0))
-      assert(shoebox.mask.all() == (0, 0, 0))
+      assert (shoebox.data.all() == (0, 0, 0))
+      assert (shoebox.mask.all() == (0, 0, 0))
 
     # Test passed
     print 'OK'
@@ -57,10 +56,10 @@ class Test(object):
       z1 = randint(1, 10) + z0
 
       shoebox = Shoebox((x0, x1, y0, y1, z0, z1))
-      assert(shoebox.xoffset() == x0)
-      assert(shoebox.yoffset() == y0)
-      assert(shoebox.zoffset() == z0)
-      assert(shoebox.offset() == (z0, y0, x0))
+      assert (shoebox.xoffset() == x0)
+      assert (shoebox.yoffset() == y0)
+      assert (shoebox.zoffset() == z0)
+      assert (shoebox.offset() == (z0, y0, x0))
 
     # Test passed
     print 'OK'
@@ -79,10 +78,10 @@ class Test(object):
       z1 = randint(1, 10) + z0
 
       shoebox = Shoebox((x0, x1, y0, y1, z0, z1))
-      assert(shoebox.xsize() == x1 - x0)
-      assert(shoebox.ysize() == y1 - y0)
-      assert(shoebox.zsize() == z1 - z0)
-      assert(shoebox.size() == (z1 - z0, y1 - y0, x1 - x0))
+      assert (shoebox.xsize() == x1 - x0)
+      assert (shoebox.ysize() == y1 - y0)
+      assert (shoebox.zsize() == z1 - z0)
+      assert (shoebox.size() == (z1 - z0, y1 - y0, x1 - x0))
 
     # Test passed
     print 'OK'
@@ -102,13 +101,13 @@ class Test(object):
       z1 = randint(1, 10) + z0
       try:
         shoebox = Shoebox((x0, x1, y0, y1, z0, z1))
-        assert(not shoebox.is_consistent())
+        assert (not shoebox.is_consistent())
         shoebox.allocate()
-        assert(shoebox.is_consistent())
-        shoebox.data = flex.real(flex.grid(20,20, 20))
-        assert(not shoebox.is_consistent())
+        assert (shoebox.is_consistent())
+        shoebox.data = flex.real(flex.grid(20, 20, 20))
+        assert (not shoebox.is_consistent())
         shoebox.deallocate()
-        assert(not shoebox.is_consistent())
+        assert (not shoebox.is_consistent())
       except Exception:
         print x0, y0, z0, x1, y1, z1
         raise
@@ -124,19 +123,19 @@ class Test(object):
     srange = (0, 100)
 
     shoebox = Shoebox((10, 20, 10, 20, 10, 20))
-    assert(shoebox.is_bbox_within_image_volume(isize, srange))
+    assert (shoebox.is_bbox_within_image_volume(isize, srange))
     shoebox = Shoebox((-10, 20, 10, 20, 10, 20))
-    assert(not shoebox.is_bbox_within_image_volume(isize, srange))
+    assert (not shoebox.is_bbox_within_image_volume(isize, srange))
     shoebox = Shoebox((10, 20, -10, 20, 10, 20))
-    assert(not shoebox.is_bbox_within_image_volume(isize, srange))
+    assert (not shoebox.is_bbox_within_image_volume(isize, srange))
     shoebox = Shoebox((10, 20, 10, 20, -10, 20))
-    assert(not shoebox.is_bbox_within_image_volume(isize, srange))
+    assert (not shoebox.is_bbox_within_image_volume(isize, srange))
     shoebox = Shoebox((10, 1020, 10, 20, 10, 20))
-    assert(not shoebox.is_bbox_within_image_volume(isize, srange))
+    assert (not shoebox.is_bbox_within_image_volume(isize, srange))
     shoebox = Shoebox((10, 20, 10, 1020, 10, 20))
-    assert(not shoebox.is_bbox_within_image_volume(isize, srange))
+    assert (not shoebox.is_bbox_within_image_volume(isize, srange))
     shoebox = Shoebox((10, 20, 10, 20, 10, 1020))
-    assert(not shoebox.is_bbox_within_image_volume(isize, srange))
+    assert (not shoebox.is_bbox_within_image_volume(isize, srange))
 
     # Test passed
     print 'OK'
@@ -149,8 +148,8 @@ class Test(object):
     mask = flex.bool(flex.grid(100, 100), True)
     for j in range(100):
       for i in range(40, 60):
-        mask[j,i] = False
-        mask[i,j] = False
+        mask[j, i] = False
+        mask[i, j] = False
 
     for i in range(1000):
       x0 = randint(0, 90)
@@ -173,7 +172,7 @@ class Test(object):
       if y1 > 40 and y1 <= 60:
         res2 = True
 
-      assert(res1 == res2)
+      assert (res1 == res2)
 
     # Test passed
     print 'OK'
@@ -200,7 +199,7 @@ class Test(object):
       for i in indices:
         shoebox.mask[i] = value
 
-      assert(shoebox.count_mask_values(value) == num)
+      assert (shoebox.count_mask_values(value) == num)
 
     # Test passed
     print 'OK'
@@ -209,8 +208,8 @@ class Test(object):
     from scitbx import matrix
     for shoebox, (XC, I) in self.random_shoeboxes(10):
       centroid = shoebox.centroid_all()
-      assert(shoebox.is_consistent())
-      assert(abs(matrix.col(centroid.px.position) - matrix.col(XC)) < 1.0)
+      assert (shoebox.is_consistent())
+      assert (abs(matrix.col(centroid.px.position) - matrix.col(XC)) < 1.0)
 
     print 'OK'
 
@@ -218,16 +217,16 @@ class Test(object):
     from scitbx import matrix
     for shoebox, (XC, I) in self.random_shoeboxes(10):
       centroid = shoebox.centroid_masked((1 << 0))
-      assert(shoebox.is_consistent())
-      assert(abs(matrix.col(centroid.px.position) - matrix.col(XC)) < 1.0)
+      assert (shoebox.is_consistent())
+      assert (abs(matrix.col(centroid.px.position) - matrix.col(XC)) < 1.0)
 
     print 'OK'
 
   def tst_summed_intensity(self):
     for shoebox, (XC, I) in self.random_shoeboxes(10):
       intensity = shoebox.summed_intensity()
-      assert(shoebox.is_consistent())
-      assert(abs(intensity.observed.value - I) < 1e-1)
+      assert (shoebox.is_consistent())
+      assert (abs(intensity.observed.value - I) < 1e-1)
 
     print 'OK'
 
@@ -235,7 +234,7 @@ class Test(object):
     from dials.array_family import flex
     from dials.algorithms.shoebox import MaskCode
     for shoebox, (XC, I) in self.random_shoeboxes(10, mask=True):
-      assert(not shoebox.flat)
+      assert (not shoebox.flat)
       zs = shoebox.zsize()
       ys = shoebox.ysize()
       xs = shoebox.xsize()
@@ -244,18 +243,17 @@ class Test(object):
       for k in range(zs):
         for j in range(ys):
           for i in range(xs):
-            expected_data[0, j, i] += shoebox.data[k,j,i]
-            expected_mask[0, j, i] |= shoebox.mask[k,j,i]
-            if (not (expected_mask[0,j,i] & MaskCode.Valid) or
-                not (shoebox.mask[k,j,i] & MaskCode.Valid)):
-              expected_mask[0,j,i] &= ~MaskCode.Valid
+            expected_data[0, j, i] += shoebox.data[k, j, i]
+            expected_mask[0, j, i] |= shoebox.mask[k, j, i]
+            if (not (expected_mask[0, j, i] & MaskCode.Valid) or not (shoebox.mask[k, j, i] & MaskCode.Valid)):
+              expected_mask[0, j, i] &= ~MaskCode.Valid
       shoebox.flatten()
       diff = expected_data.as_double() - shoebox.data.as_double()
       max_diff = flex.max(flex.abs(diff))
-      assert(max_diff < 1e-7)
-      assert(expected_mask.all_eq(shoebox.mask))
-      assert(shoebox.flat)
-      assert(shoebox.is_consistent())
+      assert (max_diff < 1e-7)
+      assert (expected_mask.all_eq(shoebox.mask))
+      assert (shoebox.flat)
+      assert (shoebox.is_consistent())
     print 'OK'
 
   def tst_all_foreground_valid(self):
@@ -264,9 +262,9 @@ class Test(object):
     shoeboxes = pickle.loads(data)
     for i in xrange(len(shoeboxes)):
       if i < 4:
-        assert(not shoeboxes[i].all_foreground_valid())
+        assert (not shoeboxes[i].all_foreground_valid())
       else:
-        assert(shoeboxes[i].all_foreground_valid())
+        assert (shoeboxes[i].all_foreground_valid())
     print 'OK'
 
   def random_shoeboxes(self, num, mask=False):
@@ -298,15 +296,11 @@ class Test(object):
     shoebox.allocate()
     for i in range(len(shoebox.mask)):
       shoebox.mask[i] = MaskCode.Valid | MaskCode.Foreground
-    shoebox.data = self.gaussian(
-        shoebox.size(), 1.0,
-        [c - o for c, o in zip(centre[::-1], shoebox.offset())],
-        [s / 8.0 for s in shoebox.size()])
+    shoebox.data = self.gaussian(shoebox.size(), 1.0, [c - o for c, o in zip(centre[::-1], shoebox.offset())],
+                                 [s / 8.0 for s in shoebox.size()])
     if mask:
-      shoebox.mask = self.create_mask(
-          shoebox.size(),
-          [c - o for c, o in zip(centre[::-1], shoebox.offset())],
-          MaskCode.Valid | MaskCode.Foreground)
+      shoebox.mask = self.create_mask(shoebox.size(), [c - o for c, o in zip(centre[::-1], shoebox.offset())],
+                                      MaskCode.Valid | MaskCode.Foreground)
     tot = 0
     mask_code = MaskCode.Valid | MaskCode.Foreground
     for i in range(len(shoebox.data)):
@@ -326,15 +320,15 @@ class Test(object):
         for i in range(size[2]):
           d = sqrt((j - x0[1])**2 + (i - x0[2])**2)
           if d < rad:
-            mask[k,j,i] = value
+            mask[k, j, i] = value
     return mask
 
   def evaluate_gaussian(self, x, a, x0, sx):
 
     from math import exp
 
-    assert(len(x) == len(x0))
-    assert(len(x) == len(sx))
+    assert (len(x) == len(x0))
+    assert (len(x) == len(sx))
 
     g = 0.0
     for xi, x0i, sxi in zip(x, x0, sx):
@@ -358,7 +352,6 @@ class Test(object):
         index[j] = 0
         if j == len(size) - 1:
           return result
-
 
 if __name__ == '__main__':
   from dials.test import cd_auto

@@ -21,7 +21,8 @@ class wxbitmap_convert(object):
   to
   a list of WxBitmaps
   '''
-  def __init__(self, data_in_n1, data_in_n2 = None):
+
+  def __init__(self, data_in_n1, data_in_n2=None):
 
     if data_in_n1 is None and data_in_n2 is None:
 
@@ -84,18 +85,16 @@ class wxbitmap_convert(object):
         # might be a good idea to raise a runtime error here
         print "Got mixture of different type of data"
 
-
-
   def get_np(self):
     #returning numpy arrays in the rare case where they might be needed
     return self.lst_3d_data
 
-  def get_wxbitmap_lst(self, show_nums = True, palette = "black2white", scale = 1.0):
+  def get_wxbitmap_lst(self, show_nums=True, palette="black2white", scale=1.0):
     #returning wxbitmaps needed to be shown
     self.local_bmp = wxbmp_from_np_array(self.lst_3d_data, show_nums, palette, self.lst_3d_mask)
     return self.scaling(scale)
 
-  def scaling(self, scale = 1.0):
+  def scaling(self, scale=1.0):
     #scaling the list of wxbitmap to be shown
     lst_img = self.local_bmp.bmp_lst_scaled(scale)
 

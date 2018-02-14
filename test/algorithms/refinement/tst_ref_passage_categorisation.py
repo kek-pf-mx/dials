@@ -8,7 +8,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """Trivial check for whether classification of reflections as exiting or
 entering the Ewald sphere is done the right way round"""
 
@@ -36,16 +35,18 @@ from dxtbx.model import ScanFactory
 
 args = sys.argv[1:]
 
-master_phil = parse("""
+master_phil = parse(
+    """
 include scope dials.test.algorithms.refinement.geometry_phil
 include scope dials.test.algorithms.refinement.minimiser_phil
-""", process_includes=True)
+""",
+    process_includes=True)
 
 overrides = """geometry.parameters.crystal.a.length.range = 10 50
 geometry.parameters.crystal.b.length.range = 10 50
 geometry.parameters.crystal.c.length.range = 10 50"""
 
-models = Extract(master_phil, local_overrides=overrides, cmdline_args = args)
+models = Extract(master_phil, local_overrides=overrides, cmdline_args=args)
 
 mydetector = models.detector
 mygonio = models.goniometer
@@ -59,16 +60,12 @@ mybeam = models.beam
 # All indices in a 2.0 Angstrom sphere
 resolution = 2.0
 index_generator = IndexGenerator(mycrystal.get_unit_cell(),
-                space_group(space_group_symbols(1).hall()).type(), resolution)
+                                 space_group(space_group_symbols(1).hall()).type(), resolution)
 indices = index_generator.to_array()
 
 # Build a mock scan for a 30 degree sweep
 sf = ScanFactory()
-myscan = sf.make_scan(image_range = (1,300),
-                      exposure_times = 0.1,
-                      oscillation = (0, 0.1),
-                      epochs = range(300),
-                      deg = True)
+myscan = sf.make_scan(image_range=(1, 300), exposure_times=0.1, oscillation=(0, 0.1), epochs=range(300), deg=True)
 sweep_range = myscan.get_oscillation_range(deg=False)
 assert approx_equal(sweep_range, (0., pi / 6.))
 im_width = myscan.get_oscillation(deg=False)[1]
@@ -76,9 +73,8 @@ assert approx_equal(im_width, 0.1 * pi / 180.)
 
 # Create an ExperimentList for ScansRayPredictor
 experiments = ExperimentList()
-experiments.append(Experiment(
-        beam=mybeam, detector=mydetector, goniometer=mygonio,
-        scan=myscan, crystal=mycrystal, imageset=None))
+experiments.append(
+    Experiment(beam=mybeam, detector=mydetector, goniometer=mygonio, scan=myscan, crystal=mycrystal, imageset=None))
 
 # Select those that are excited in a 30 degree sweep and get angles
 UB = mycrystal.get_A()
@@ -108,6 +104,6 @@ for ref in obs_refs:
 
   # is it outside the Ewald sphere (i.e. entering)?
   test = (s0 + r_orig).length() > s0.length()
-  assert(ref['entering'] == test)
+  assert (ref['entering'] == test)
 
 print "OK"

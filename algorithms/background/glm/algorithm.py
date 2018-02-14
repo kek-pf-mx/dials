@@ -14,10 +14,7 @@ from __future__ import absolute_import, division
 class BackgroundAlgorithm(object):
   ''' Class to do background subtraction. '''
 
-  def __init__(self, experiments,
-               model='constant3d',
-               tuning_constant=1.345,
-               min_pixels=10):
+  def __init__(self, experiments, model='constant3d', tuning_constant=1.345, min_pixels=10):
     '''
     Initialise the algorithm.
 
@@ -37,11 +34,7 @@ class BackgroundAlgorithm(object):
       model = Creator.model.loglinear3d
     else:
       raise RuntimeError('Unknown background model')
-    self._create = Creator(
-      model=model,
-      tuning_constant=tuning_constant,
-      max_iter=100,
-      min_pixels=min_pixels)
+    self._create = Creator(model=model, tuning_constant=tuning_constant, max_iter=100, min_pixels=min_pixels)
 
   def compute_background(self, reflections, image_volume=None):
     '''
@@ -61,15 +54,11 @@ class BackgroundAlgorithm(object):
     reflections.set_flags(success != True, reflections.flags.dont_integrate)
     return success
 
-
 class GLMBackgroundCalculatorFactory(object):
   ''' Class to do background subtraction. '''
 
   @classmethod
-  def create(Class, experiments,
-             model='constant3d',
-             tuning_constant=1.345,
-             min_pixels=10):
+  def create(Class, experiments, model='constant3d', tuning_constant=1.345, min_pixels=10):
     '''
     Initialise the algorithm.
 
@@ -90,9 +79,4 @@ class GLMBackgroundCalculatorFactory(object):
       model = Creator.model.loglinear3d
     else:
       raise RuntimeError('Unknown background model')
-    return GLMBackgroundCalculator(
-      model           = model,
-      tuning_constant = tuning_constant,
-      max_iter        = 100,
-      min_pixels      = min_pixels)
-
+    return GLMBackgroundCalculator(model=model, tuning_constant=tuning_constant, max_iter=100, min_pixels=min_pixels)

@@ -78,11 +78,7 @@ class Script(object):
 
     usage = "usage: %s [options] experiments.json" % libtbx.env.dispatcher_name
     self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      read_experiments=True,
-      check_format=False,
-      epilog=help_message)
+        usage=usage, phil=phil_scope, read_experiments=True, check_format=False, epilog=help_message)
 
   def run(self):
     '''Run the script.'''
@@ -96,8 +92,7 @@ class Script(object):
     experiments = flatten_experiments(params.input.experiments)
 
     # Determine output path
-    self._directory = os.path.join(params.output.directory,
-      "scan-varying_crystal")
+    self._directory = os.path.join(params.output.directory, "scan-varying_crystal")
     self._directory = os.path.abspath(self._directory)
     ensure_directory(self._directory)
     self._format = "." + params.output.format
@@ -123,17 +118,10 @@ class Script(object):
       scan_pts = range(crystal.num_scan_points)
       cells = [crystal.get_unit_cell_at_scan_point(t) for t in scan_pts]
       cell_params = [e.parameters() for e in cells]
-      a,b,c,aa,bb,cc = zip(*cell_params)
+      a, b, c, aa, bb, cc = zip(*cell_params)
       phi = [scan.get_angle_from_array_index(t) for t in scan_pts]
       vol = [e.volume() for e in cells]
-      cell_dat = {'phi':phi,
-                  'a':a,
-                  'b':b,
-                  'c':c,
-                  'alpha':aa,
-                  'beta':bb,
-                  'gamma':cc,
-                  'volume':vol}
+      cell_dat = {'phi': phi, 'a': a, 'b': b, 'c': c, 'alpha': aa, 'beta': bb, 'gamma': cc, 'volume': vol}
       if self._debug:
         print "Crystal in Experiment {0}".format(iexp)
         print "Phi\ta\tb\tc\talpha\tbeta\tgamma\tVolume"
@@ -161,17 +149,13 @@ class Script(object):
       if params.orientation_decomposition.relative_to_static_orientation:
         # factor out static U
         Uinv = matrix.sqr(crystal.get_U()).inverse()
-        Umats = [U*Uinv for U in Umats]
+        Umats = [U * Uinv for U in Umats]
       # NB e3 and e1 definitions for the crystal are swapped compared
       # with those used inside the solve_r3_rotation_for_angles_given_axes
       # method
-      angles = [solve_r3_rotation_for_angles_given_axes(U,
-        self._e3, self._e2, self._e1, deg=True) for U in Umats]
+      angles = [solve_r3_rotation_for_angles_given_axes(U, self._e3, self._e2, self._e1, deg=True) for U in Umats]
       phi3, phi2, phi1 = zip(*angles)
-      angle_dat = {'phi':phi,
-                   'phi3':phi3,
-                   'phi2':phi2,
-                   'phi1':phi1}
+      angle_dat = {'phi': phi, 'phi3': phi3, 'phi2': phi2, 'phi1': phi1}
       if self._debug:
         print "Crystal in Experiment {0}".format(iexp)
         print "Image\tphi3\tphi2\tphi1"
@@ -257,7 +241,7 @@ class Script(object):
     plt.ylabel(r'angle $\left(^\circ\right)$')
     plt.title(r'$\gamma$')
 
-    ax = plt.subplot2grid((4,2), (3, 0), colspan=2)
+    ax = plt.subplot2grid((4, 2), (3, 0), colspan=2)
     ax.ticklabel_format(useOffset=False)
     for cell in dat:
       plt.plot(cell['phi'], cell['volume'])

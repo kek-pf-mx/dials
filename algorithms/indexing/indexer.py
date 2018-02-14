@@ -373,18 +373,20 @@ indexing {
     }
   }
 }
-''' %max_cell_phil_str
+''' % max_cell_phil_str
 
 index_only_phil_scope = iotbx.phil.parse(index_only_phil_str, process_includes=True)
 
-master_phil_scope = iotbx.phil.parse("""
+master_phil_scope = iotbx.phil.parse(
+    """
 %s
 include scope dials.algorithms.refinement.refiner.phil_scope
-""" %index_only_phil_str, process_includes=True)
+""" % index_only_phil_str,
+    process_includes=True)
 
 # override default refinement parameters
-master_phil_scope = master_phil_scope.fetch(source=iotbx.phil.parse(
-  """\
+master_phil_scope = master_phil_scope.fetch(
+    source=iotbx.phil.parse("""\
 refinement {
   reflections {
     reflections_per_degree=100
@@ -394,7 +396,6 @@ refinement {
 
 master_params = master_phil_scope.fetch().extract()
 
-
 def filter_reflections_by_scan_range(reflections, scan_range):
   reflections_in_scan_range = flex.bool(len(reflections), False)
   frame_number = reflections['xyzobs.px.value'].parts()[2]
@@ -402,10 +403,8 @@ def filter_reflections_by_scan_range(reflections, scan_range):
   for scan_range in scan_range:
     if scan_range is None: continue
     range_start, range_end = scan_range
-    reflections_in_scan_range.set_selected(
-      (frame_number >= range_start) & (frame_number < range_end), True)
+    reflections_in_scan_range.set_selected((frame_number >= range_start) & (frame_number < range_end), True)
   return reflections.select(reflections_in_scan_range)
-
 
 class vector_group(object):
   def __init__(self):
@@ -433,12 +432,9 @@ class vector_group(object):
       sum_x += v.elems[0]
       sum_y += v.elems[1]
       sum_z += v.elems[2]
-    return matrix.col((sum_x, sum_y, sum_z))/len(self.vectors)
+    return matrix.col((sum_x, sum_y, sum_z)) / len(self.vectors)
 
-
-def is_approximate_integer_multiple(vec_a, vec_b,
-                                    relative_tolerance=0.2,
-                                    angular_tolerance=5.0):
+def is_approximate_integer_multiple(vec_a, vec_b, relative_tolerance=0.2, angular_tolerance=5.0):
   length_a = vec_a.length()
   length_b = vec_b.length()
   #assert length_b >= length_a
@@ -446,18 +442,15 @@ def is_approximate_integer_multiple(vec_a, vec_b,
     vec_a, vec_b = vec_b, vec_a
     length_a, length_b = length_b, length_a
   angle = vec_a.angle(vec_b, deg=True)
-  if angle < angular_tolerance or abs(180-angle) < angular_tolerance:
-    n = length_b/length_a
+  if angle < angular_tolerance or abs(180 - angle) < angular_tolerance:
+    n = length_b / length_a
     if abs(round(n) - n) < relative_tolerance:
       return True
   return False
 
-
-deg_to_radians = math.pi/180
-
+deg_to_radians = math.pi / 180
 
 class indexer_base(object):
-
   def __init__(self, reflections, imagesets, params=None):
     self.reflections = reflections
     self.imagesets = imagesets
@@ -491,8 +484,7 @@ class indexer_base(object):
         # can only share a beam if we share a goniometer?
         if imageset.get_beam().is_similar_to(self.imagesets[0].get_beam()):
           imageset.set_beam(self.imagesets[0].get_beam())
-        if (self.params.combine_scans and
-            imageset.get_scan() == self.imagesets[0].get_scan()):
+        if (self.params.combine_scans and imageset.get_scan() == self.imagesets[0].get_scan()):
           imageset.set_scan(self.imagesets[0].get_scan())
 
     if 'flags' in self.reflections:
@@ -501,8 +493,7 @@ class indexer_base(object):
         self.reflections = self.reflections.select(strong_sel)
     if 'flags' not in self.reflections or strong_sel.count(True) == 0:
       # backwards compatibility for testing
-      self.reflections.set_flags(
-        flex.size_t_range(len(self.reflections)), self.reflections.flags.strong)
+      self.reflections.set_flags(flex.size_t_range(len(self.reflections)), self.reflections.flags.strong)
 
     self._setup_symmetry()
     self.d_min = None
@@ -510,8 +501,7 @@ class indexer_base(object):
     self.setup_indexing()
 
   @staticmethod
-  def from_parameters(reflections, imagesets,
-                      known_crystal_models=None, params=None):
+  def from_parameters(reflections, imagesets, known_crystal_models=None, params=None):
 
     if params is None:
       params = master_params
@@ -519,8 +509,7 @@ class indexer_base(object):
     if known_crystal_models is not None:
       from dials.algorithms.indexing.known_orientation \
            import indexer_known_orientation
-      idxr = indexer_known_orientation(
-        reflections, imagesets, params, known_crystal_models)
+      idxr = indexer_known_orientation(reflections, imagesets, params, known_crystal_models)
     else:
       has_stills = False
       has_sweeps = False
@@ -553,7 +542,7 @@ class indexer_base(object):
 
       if use_stills_indexer:
         # Ensure the indexer and downstream applications treat this as set of stills
-        from dxtbx.imageset import ImageSet#, MemImageSet
+        from dxtbx.imageset import ImageSet #, MemImageSet
         reset_sets = []
         for i in xrange(len(imagesets)):
           imagesweep = imagesets.pop(0)
@@ -608,8 +597,7 @@ class indexer_base(object):
 
       if target_unit_cell is not None and target_space_group is not None:
         from cctbx.sgtbx.bravais_types import bravais_lattice
-        target_bravais_t = bravais_lattice(
-          group=target_space_group.info().reference_setting().group())
+        target_bravais_t = bravais_lattice(group=target_space_group.info().reference_setting().group())
         best_subgroup = None
         best_angular_difference = 1e8
         from cctbx.sgtbx import lattice_symmetry
@@ -617,27 +605,22 @@ class indexer_base(object):
         if target_space_group.conventional_centring_type_symbol() != 'P':
           space_groups.append(sgtbx.space_group())
         for target in space_groups:
-          cs = crystal.symmetry(
-            unit_cell=target_unit_cell, space_group=target,
-            assert_is_compatible_unit_cell=False)
+          cs = crystal.symmetry(unit_cell=target_unit_cell, space_group=target, assert_is_compatible_unit_cell=False)
           target_best_cell = cs.best_cell().unit_cell()
           subgroups = lattice_symmetry.metric_subgroups(cs, max_delta=0.1)
           for subgroup in subgroups.result_groups:
-            bravais_t = bravais_lattice(
-              group=subgroup['ref_subsym'].space_group())
+            bravais_t = bravais_lattice(group=subgroup['ref_subsym'].space_group())
             if bravais_t == target_bravais_t:
               # allow for the cell to be given as best cell, reference setting
               # primitive settings, or minimum cell
               best_subsym = subgroup['best_subsym']
               ref_subsym = best_subsym.as_reference_setting()
-              if not (
-                best_subsym.unit_cell().is_similar_to(target_unit_cell) or
-                ref_subsym.unit_cell().is_similar_to(target_unit_cell) or
-                ref_subsym.primitive_setting().unit_cell().is_similar_to(target_unit_cell) or
-                best_subsym.primitive_setting().unit_cell().is_similar_to(target_unit_cell) or
-                best_subsym.minimum_cell().unit_cell().is_similar_to(
-                  target_unit_cell.minimum_cell()) or
-                best_subsym.unit_cell().is_similar_to(target_best_cell)):
+              if not (best_subsym.unit_cell().is_similar_to(target_unit_cell)
+                      or ref_subsym.unit_cell().is_similar_to(target_unit_cell)
+                      or ref_subsym.primitive_setting().unit_cell().is_similar_to(target_unit_cell)
+                      or best_subsym.primitive_setting().unit_cell().is_similar_to(target_unit_cell)
+                      or best_subsym.minimum_cell().unit_cell().is_similar_to(target_unit_cell.minimum_cell())
+                      or best_subsym.unit_cell().is_similar_to(target_best_cell)):
                 continue
               if subgroup['max_angular_difference'] < best_angular_difference:
                 best_subgroup = subgroup
@@ -651,19 +634,18 @@ class indexer_base(object):
         cb_op_best_ref = best_subsym.change_of_basis_op_to_reference_setting()
         self.cb_op_inp_ref = cb_op_best_ref * cb_op_inp_best
         self.target_symmetry_reference_setting = crystal.symmetry(
-          unit_cell=target_unit_cell.change_basis(self.cb_op_inp_ref),
-          space_group=target_space_group.info().as_reference_setting().group())
+            unit_cell=target_unit_cell.change_basis(self.cb_op_inp_ref),
+            space_group=target_space_group.info().as_reference_setting().group())
 
       elif target_unit_cell is not None:
         self.target_symmetry_reference_setting = crystal.symmetry(
-          unit_cell=target_unit_cell,
-          space_group=sgtbx.space_group())
+            unit_cell=target_unit_cell, space_group=sgtbx.space_group())
         self.cb_op_inp_ref = sgtbx.change_of_basis_op()
 
       elif target_space_group is not None:
         self.cb_op_inp_ref = target_space_group.info().change_of_basis_op_to_reference_setting()
         self.target_symmetry_reference_setting = crystal.symmetry(
-          space_group=target_space_group.change_basis(self.cb_op_inp_ref))
+            space_group=target_space_group.change_basis(self.cb_op_inp_ref))
 
       self.cb_op_reference_to_primitive \
         = self.target_symmetry_reference_setting.change_of_basis_op_to_primitive_setting()
@@ -695,9 +677,8 @@ class indexer_base(object):
       if 'imageset_id' not in reflections_input:
         reflections_input['imageset_id'] = reflections_input['id']
       sel = (reflections_input['imageset_id'] == i)
-      self.reflections.extend(self.map_spots_pixel_to_mm_rad(
-        reflections_input.select(sel),
-        imageset.get_detector(), imageset.get_scan()))
+      self.reflections.extend(
+          self.map_spots_pixel_to_mm_rad(reflections_input.select(sel), imageset.get_detector(), imageset.get_scan()))
     self.filter_reflections_by_scan_range()
     if len(self.reflections) == 0:
       raise Sorry("No reflections left to index!")
@@ -707,12 +688,10 @@ class indexer_base(object):
 
     for i, imageset in enumerate(self.imagesets):
       spots_sel = spots_mm.select(spots_mm['imageset_id'] == i)
-      self.map_centroids_to_reciprocal_space(
-        spots_sel, imageset.get_detector(), imageset.get_beam(),
-        imageset.get_goniometer())
+      self.map_centroids_to_reciprocal_space(spots_sel, imageset.get_detector(), imageset.get_beam(),
+                                             imageset.get_goniometer())
       spots_sel['entering'] = self.calculate_entering_flags(
-        spots_sel, beam=imageset.get_beam(),
-        goniometer=imageset.get_goniometer())
+          spots_sel, beam=imageset.get_beam(), goniometer=imageset.get_goniometer())
       self.reflections.extend(spots_sel)
 
     try:
@@ -723,10 +702,8 @@ class indexer_base(object):
 
     if self.params.sigma_phi_deg is not None:
       var_x, var_y, _ = self.reflections['xyzobs.mm.variance'].parts()
-      var_phi_rad = flex.double(
-        var_x.size(), (math.pi/180 * self.params.sigma_phi_deg)**2)
-      self.reflections['xyzobs.mm.variance'] = flex.vec3_double(
-        var_x, var_y, var_phi_rad)
+      var_phi_rad = flex.double(var_x.size(), (math.pi / 180 * self.params.sigma_phi_deg)**2)
+      self.reflections['xyzobs.mm.variance'] = flex.vec3_double(var_x, var_y, var_phi_rad)
 
     if self.params.debug:
       self.debug_write_reciprocal_lattice_points_as_pdb()
@@ -749,14 +726,14 @@ class indexer_base(object):
       if len(experiments) > 0:
         cutoff_fraction = \
           self.params.multiple_lattice_search.recycle_unindexed_reflections_cutoff
-        d_spacings = 1/self.reflections['rlp'].norms()
+        d_spacings = 1 / self.reflections['rlp'].norms()
         d_min_indexed = flex.min(d_spacings.select(self.indexed_reflections))
         min_reflections_for_indexing = \
           cutoff_fraction * len(self.reflections.select(d_spacings > d_min_indexed))
         crystal_ids = self.reflections.select(d_spacings > d_min_indexed)['id']
         if (crystal_ids == -1).count(True) < min_reflections_for_indexing:
-          logger.info("Finish searching for more lattices: %i unindexed reflections remaining." %(
-            min_reflections_for_indexing))
+          logger.info("Finish searching for more lattices: %i unindexed reflections remaining." %
+                      (min_reflections_for_indexing))
           break
 
       n_lattices_previous_cycle = len(experiments)
@@ -778,12 +755,11 @@ class indexer_base(object):
         if self.d_min is None or n_cycles == 1:
           self.params.refinement_protocol.d_min_step = 0
         else:
-          d_spacings = 1/self.reflections['rlp'].norms()
+          d_spacings = 1 / self.reflections['rlp'].norms()
           d_min_all = flex.min(d_spacings)
           self.params.refinement_protocol.d_min_step \
             = (self.d_min - d_min_all)/(n_cycles-1)
-          logger.info("Using d_min_step %.1f"
-               %self.params.refinement_protocol.d_min_step)
+          logger.info("Using d_min_step %.1f" % self.params.refinement_protocol.d_min_step)
 
       if len(experiments) == 0:
         raise Sorry("No suitable lattice could be found.")
@@ -792,14 +768,13 @@ class indexer_base(object):
         break
 
       for i_cycle in range(self.params.refinement_protocol.n_macro_cycles):
-        if (i_cycle > 0 and self.d_min is not None and
-            self.params.refinement_protocol.d_min_step > 0):
+        if (i_cycle > 0 and self.d_min is not None and self.params.refinement_protocol.d_min_step > 0):
           d_min = self.d_min - self.params.refinement_protocol.d_min_step
           d_min = max(d_min, 0)
           d_min = max(d_min, self.params.refinement_protocol.d_min_final)
           if d_min >= 0:
             self.d_min = d_min
-            logger.info("Increasing resolution to %.2f Angstrom" %d_min)
+            logger.info("Increasing resolution to %.2f Angstrom" % d_min)
 
         # reset reflection lattice flags
         # the lattice a given reflection belongs to: a value of -1 indicates
@@ -814,28 +789,22 @@ class indexer_base(object):
           target_space_group = self.target_symmetry_primitive.space_group()
           for i_cryst, cryst in enumerate(experiments.crystals()):
             if i_cryst >= n_lattices_previous_cycle:
-              new_cryst, cb_op_to_primitive = self.apply_symmetry(
-                cryst, target_space_group)
+              new_cryst, cb_op_to_primitive = self.apply_symmetry(cryst, target_space_group)
               if self.cb_op_primitive_inp is not None:
                 new_cryst = new_cryst.change_basis(self.cb_op_primitive_inp)
               cryst.update(new_cryst)
-              cryst.set_space_group(
-                self.params.known_symmetry.space_group.group())
+              cryst.set_space_group(self.params.known_symmetry.space_group.group())
               for i_expt, expt in enumerate(experiments):
                 if expt.crystal is not cryst:
                   continue
                 if not cb_op_to_primitive.is_identity_op():
-                  miller_indices = self.reflections['miller_index'].select(
-                    self.reflections['id'] == i_expt)
+                  miller_indices = self.reflections['miller_index'].select(self.reflections['id'] == i_expt)
                   miller_indices = cb_op_to_primitive.apply(miller_indices)
-                  self.reflections['miller_index'].set_selected(
-                    self.reflections['id'] == i_expt, miller_indices)
+                  self.reflections['miller_index'].set_selected(self.reflections['id'] == i_expt, miller_indices)
                 if self.cb_op_primitive_inp is not None:
-                  miller_indices = self.reflections['miller_index'].select(
-                    self.reflections['id'] == i_expt)
+                  miller_indices = self.reflections['miller_index'].select(self.reflections['id'] == i_expt)
                   miller_indices = self.cb_op_primitive_inp.apply(miller_indices)
-                  self.reflections['miller_index'].set_selected(
-                    self.reflections['id'] == i_expt, miller_indices)
+                  self.reflections['miller_index'].set_selected(self.reflections['id'] == i_expt, miller_indices)
           logger.info("\nIndexed crystal models:")
           self.show_experiments(experiments, self.reflections, d_min=self.d_min)
 
@@ -849,12 +818,10 @@ class indexer_base(object):
               difference_rotation_matrix_axis_angle(cryst_a, cryst_b)
             min_angle = self.params.multiple_lattice_search.minimum_angular_separation
             if abs(angle) < min_angle: # degrees
-              logger.info("Crystal models too similar, rejecting crystal %i:" %(
-                len(experiments)))
-              logger.info("Rotation matrix to transform crystal %i to crystal %i" %(
-                i_a+1, len(experiments)))
+              logger.info("Crystal models too similar, rejecting crystal %i:" % (len(experiments)))
+              logger.info("Rotation matrix to transform crystal %i to crystal %i" % (i_a + 1, len(experiments)))
               logger.info(R_ab)
-              logger.info("Rotation of %.3f degrees" %angle + " about axis (%.3f, %.3f, %.3f)" %axis)
+              logger.info("Rotation of %.3f degrees" % angle + " about axis (%.3f, %.3f, %.3f)" % axis)
               #show_rotation_matrix_differences([cryst_a, cryst_b])
               have_similar_crystal_models = True
               del experiments[-1]
@@ -864,13 +831,13 @@ class indexer_base(object):
 
         logger.info("")
         logger.info("#" * 80)
-        logger.info("Starting refinement (macro-cycle %i)" %(i_cycle+1))
+        logger.info("Starting refinement (macro-cycle %i)" % (i_cycle + 1))
         logger.info("#" * 80)
         logger.info("")
         self.indexed_reflections = (self.reflections['id'] > -1)
 
         sel = flex.bool(len(self.reflections), False)
-        lengths = 1/self.reflections['rlp'].norms()
+        lengths = 1 / self.reflections['rlp'].norms()
         if self.d_min is not None:
           isel = (lengths <= self.d_min).iselection()
           sel.set_selected(isel, True)
@@ -878,22 +845,19 @@ class indexer_base(object):
         self.reflections.unset_flags(sel, self.reflections.flags.indexed)
         self.unindexed_reflections = self.reflections.select(sel)
 
-        reflections_for_refinement = self.reflections.select(
-          self.indexed_reflections)
+        reflections_for_refinement = self.reflections.select(self.indexed_reflections)
         if self.params.refinement_protocol.mode == 'repredict_only':
           refined_experiments, refined_reflections = experiments, reflections_for_refinement
           from dials.algorithms.refinement.prediction import ExperimentsPredictor
-          ref_predictor = ExperimentsPredictor(experiments,
-                                               spherical_relp=self.all_params.refinement.parameterisation.spherical_relp_model)
+          ref_predictor = ExperimentsPredictor(
+              experiments, spherical_relp=self.all_params.refinement.parameterisation.spherical_relp_model)
           ref_predictor(refined_reflections)
         else:
           try:
-            refined_experiments, refined_reflections = self.refine(
-              experiments, reflections_for_refinement)
+            refined_experiments, refined_reflections = self.refine(experiments, reflections_for_refinement)
           except RuntimeError as e:
             s = str(e)
-            if ("below the configured limit" in s or
-                "Insufficient matches for crystal" in s):
+            if ("below the configured limit" in s or "Insufficient matches for crystal" in s):
               if len(experiments) == 1:
                 raise Sorry(e)
               had_refinement_error = True
@@ -910,26 +874,21 @@ class indexer_base(object):
           for orig_expt, refined_expt in zip(experiments, refined_experiments):
             uc1 = orig_expt.crystal.get_unit_cell()
             uc2 = refined_expt.crystal.get_unit_cell()
-            volume_change = abs(uc1.volume()-uc2.volume())/uc1.volume()
+            volume_change = abs(uc1.volume() - uc2.volume()) / uc1.volume()
             cutoff = 0.5
             if volume_change > cutoff:
-              msg = "\n".join((
-                "Unrealistic unit cell volume increase during refinement of %.1f%%.",
-                "Please try refining fewer parameters, either by enforcing symmetry",
-                "constraints (space_group=) and/or disabling experimental geometry",
-                "refinement (detector.fix=all and beam.fix=all). To disable this",
-                "sanity check set disable_unit_cell_volume_sanity_check=True.")) %(
-                100*volume_change)
+              msg = "\n".join(("Unrealistic unit cell volume increase during refinement of %.1f%%.",
+                               "Please try refining fewer parameters, either by enforcing symmetry",
+                               "constraints (space_group=) and/or disabling experimental geometry",
+                               "refinement (detector.fix=all and beam.fix=all). To disable this",
+                               "sanity check set disable_unit_cell_volume_sanity_check=True.")) % (100 * volume_change)
               raise Sorry(msg)
 
         self.refined_reflections = refined_reflections
-        self.refined_reflections.unset_flags(
-          self.refined_reflections['id'] < 0,
-          self.refined_reflections.flags.indexed)
+        self.refined_reflections.unset_flags(self.refined_reflections['id'] < 0, self.refined_reflections.flags.indexed)
 
         for i, imageset in enumerate(self.imagesets):
-          ref_sel = self.refined_reflections.select(
-            self.refined_reflections['imageset_id'] == i)
+          ref_sel = self.refined_reflections.select(self.refined_reflections['imageset_id'] == i)
           ref_sel = ref_sel.select(ref_sel['id'] >= 0)
           for i_expt in set(ref_sel['id']):
             expt = refined_experiments[i_expt]
@@ -948,9 +907,8 @@ class indexer_base(object):
           self.reflections = flex.reflection_table()
           for i, imageset in enumerate(self.imagesets):
             spots_sel = spots_mm.select(spots_mm['imageset_id'] == i)
-            self.map_centroids_to_reciprocal_space(
-              spots_sel, imageset.get_detector(), imageset.get_beam(),
-              imageset.get_goniometer())
+            self.map_centroids_to_reciprocal_space(spots_sel, imageset.get_detector(), imageset.get_beam(),
+                                                   imageset.get_goniometer())
             self.reflections.extend(spots_sel)
 
         # update for next cycle
@@ -958,11 +916,9 @@ class indexer_base(object):
         self.refined_experiments = refined_experiments
 
         logger.info("\nRefined crystal models:")
-        self.show_experiments(
-          self.refined_experiments, self.reflections, d_min=self.d_min)
+        self.show_experiments(self.refined_experiments, self.reflections, d_min=self.d_min)
 
-        if (i_cycle >=2 and
-            self.d_min == self.params.refinement_protocol.d_min_final):
+        if (i_cycle >= 2 and self.d_min == self.params.refinement_protocol.d_min_final):
           logger.info("Target d_min_final reached: finished with refinement")
           break
 
@@ -972,11 +928,9 @@ class indexer_base(object):
     if len(self.refined_experiments) > 1:
       from dials.algorithms.indexing.compare_orientation_matrices \
            import show_rotation_matrix_differences
-      show_rotation_matrix_differences(
-        self.refined_experiments.crystals(), out=info_handle)
+      show_rotation_matrix_differences(self.refined_experiments.crystals(), out=info_handle)
 
-    self.refined_reflections['xyzcal.px'] = flex.vec3_double(
-      len(self.refined_reflections))
+    self.refined_reflections['xyzcal.px'] = flex.vec3_double(len(self.refined_reflections))
     for i, imageset in enumerate(self.imagesets):
       imgset_sel = self.refined_reflections['imageset_id'] == i
       # set xyzcal.px field in self.refined_reflections
@@ -991,8 +945,7 @@ class indexer_base(object):
         sel = (panel_numbers == i_panel)
         isel = sel.iselection()
         ref_panel = refined_reflections.select(panel_numbers == i_panel)
-        xy_cal_px.set_selected(
-          sel, panel.millimeter_to_pixel(xy_cal_mm.select(sel)))
+        xy_cal_px.set_selected(sel, panel.millimeter_to_pixel(xy_cal_mm.select(sel)))
       x_px, y_px = xy_cal_px.parts()
       scan = imageset.get_scan()
       if scan is not None:
@@ -1007,23 +960,20 @@ class indexer_base(object):
     if d_min is not None:
       reciprocal_lattice_points = reflections['rlp']
       if d_min is not None:
-        d_spacings = 1/reciprocal_lattice_points.norms()
+        d_spacings = 1 / reciprocal_lattice_points.norms()
         reflections = reflections.select(d_spacings > d_min)
     for i_expt, expt in enumerate(experiments):
-      logger.info("model %i (%i reflections):" %(
-        i_expt+1, (reflections['id'] == i_expt).count(True)))
+      logger.info("model %i (%i reflections):" % (i_expt + 1, (reflections['id'] == i_expt).count(True)))
       logger.info(expt.crystal)
 
     indexed_flags = reflections.get_flags(reflections.flags.indexed)
     imageset_id = reflections['imageset_id']
     rows = [['Imageset', '#indexed', '#unindexed']]
-    for i in range(flex.max(imageset_id)+1):
+    for i in range(flex.max(imageset_id) + 1):
       imageset_indexed_flags = indexed_flags.select(imageset_id == i)
-      rows.append([str(i), str(imageset_indexed_flags.count(True)),
-                   str(imageset_indexed_flags.count(False))])
+      rows.append([str(i), str(imageset_indexed_flags.count(True)), str(imageset_indexed_flags.count(False))])
     from libtbx import table_utils
-    logger.info(
-      table_utils.format(rows, has_header=True, prefix='| ', postfix=' |'))
+    logger.info(table_utils.format(rows, has_header=True, prefix='| ', postfix=' |'))
 
   def find_max_cell(self):
     params = self.params.max_cell_estimation
@@ -1031,24 +981,24 @@ class indexer_base(object):
       if self.params.known_symmetry.unit_cell is not None:
         uc_params = self.target_symmetry_primitive.unit_cell().parameters()
         self.params.max_cell = params.multiplier * max(uc_params[:3])
-        logger.info("Using max_cell: %.1f Angstrom" %(self.params.max_cell))
+        logger.info("Using max_cell: %.1f Angstrom" % (self.params.max_cell))
       else:
         self.params.max_cell = find_max_cell(
-          self.reflections, max_cell_multiplier=params.multiplier,
-          step_size=params.step_size,
-          nearest_neighbor_percentile=params.nearest_neighbor_percentile,
-          histogram_binning=params.histogram_binning,
-          nn_per_bin=params.nn_per_bin,
-          max_height_fraction=params.max_height_fraction,
-          filter_ice=params.filter_ice,
-          filter_overlaps=params.filter_overlaps,
-          overlaps_border=params.overlaps_border).max_cell
-        logger.info("Found max_cell: %.1f Angstrom" %(self.params.max_cell))
+            self.reflections,
+            max_cell_multiplier=params.multiplier,
+            step_size=params.step_size,
+            nearest_neighbor_percentile=params.nearest_neighbor_percentile,
+            histogram_binning=params.histogram_binning,
+            nn_per_bin=params.nn_per_bin,
+            max_height_fraction=params.max_height_fraction,
+            filter_ice=params.filter_ice,
+            filter_overlaps=params.filter_overlaps,
+            overlaps_border=params.overlaps_border).max_cell
+        logger.info("Found max_cell: %.1f Angstrom" % (self.params.max_cell))
 
   def filter_reflections_by_scan_range(self):
     if len(self.params.scan_range):
-      self.reflections = filter_reflections_by_scan_range(
-        self.reflections, self.params.scan_range)
+      self.reflections = filter_reflections_by_scan_range(self.reflections, self.params.scan_range)
 
   @staticmethod
   def calculate_entering_flags(reflections, beam, goniometer):
@@ -1098,20 +1048,16 @@ class indexer_base(object):
       # e.g. data imported from XDS; no variance known then; since is used
       # only for weights assign as 1 => uniform weights
       if not 'xyzobs.px.variance' in spots_panel:
-        spots_panel['xyzobs.px.variance'] = flex.vec3_double(
-            len(spots_panel), (1,1,1))
+        spots_panel['xyzobs.px.variance'] = flex.vec3_double(len(spots_panel), (1, 1, 1))
       centroid_position, centroid_variance, _ = centroid_px_to_mm_panel(
-        detector[i_panel], scan,
-        spots_panel['xyzobs.px.value'],
-        spots_panel['xyzobs.px.variance'],
-        flex.vec3_double(len(spots_panel), (1,1,1)))
+          detector[i_panel], scan, spots_panel['xyzobs.px.value'], spots_panel['xyzobs.px.variance'],
+          flex.vec3_double(len(spots_panel), (1, 1, 1)))
       spots['xyzobs.mm.value'].set_selected(sel, centroid_position)
       spots['xyzobs.mm.variance'].set_selected(sel, centroid_variance)
     return spots
 
   @staticmethod
-  def map_centroids_to_reciprocal_space(spots_mm, detector, beam, goniometer,
-                                        calculated=False):
+  def map_centroids_to_reciprocal_space(spots_mm, detector, beam, goniometer, calculated=False):
     """Map mm/radian spot centroids to reciprocal space.
 
     Used to convert spot centroids provided in mm/radian units to reciprocal space
@@ -1138,29 +1084,24 @@ class indexer_base(object):
         x, y, rot_angle = spots_panel['xyzcal.mm'].parts()
       else:
         x, y, rot_angle = spots_panel['xyzobs.mm.value'].parts()
-      s1 = detector[i_panel].get_lab_coord(flex.vec2_double(x,y))
-      s1 = s1/s1.norms() * (1/beam.get_wavelength())
+      s1 = detector[i_panel].get_lab_coord(flex.vec2_double(x, y))
+      s1 = s1 / s1.norms() * (1 / beam.get_wavelength())
       spots_mm['s1'].set_selected(sel, s1)
       S = s1 - beam.get_s0()
       if goniometer is not None:
         setting_rotation = matrix.sqr(goniometer.get_setting_rotation())
         rotation_axis = goniometer.get_rotation_axis_datum()
         fixed_rotation = matrix.sqr(goniometer.get_fixed_rotation())
-        spots_mm['rlp'].set_selected(
-          sel, tuple(setting_rotation.inverse()) * S)
-        spots_mm['rlp'].set_selected(
-          sel, spots_mm['rlp'].select(sel).rotate_around_origin(
-            rotation_axis, -rot_angle))
-        spots_mm['rlp'].set_selected(
-          sel, tuple(fixed_rotation.inverse()) * spots_mm['rlp'].select(sel))
+        spots_mm['rlp'].set_selected(sel, tuple(setting_rotation.inverse()) * S)
+        spots_mm['rlp'].set_selected(sel, spots_mm['rlp'].select(sel).rotate_around_origin(rotation_axis, -rot_angle))
+        spots_mm['rlp'].set_selected(sel, tuple(fixed_rotation.inverse()) * spots_mm['rlp'].select(sel))
       else:
         spots_mm['rlp'].set_selected(sel, S)
 
   def find_candidate_orientation_matrices(self, candidate_basis_vectors):
     candidate_crystal_models = []
     vectors = candidate_basis_vectors
-    if (self.target_symmetry_primitive is not None and
-        self.target_symmetry_primitive.unit_cell() is not None):
+    if (self.target_symmetry_primitive is not None and self.target_symmetry_primitive.unit_cell() is not None):
       target_min_cell = self.target_symmetry_primitive.minimum_cell().unit_cell()
     else:
       target_min_cell = None
@@ -1174,15 +1115,14 @@ class indexer_base(object):
     # https://github.com/dials/dials/issues/72
     n = min(n, 100)
     vectors = vectors[:n]
-    combinations = flex.vec3_int(flex.nested_loop((n,n,n)))
-    combinations = combinations.select(
-      flex.sort_permutation(combinations.as_vec3_double().norms()))
+    combinations = flex.vec3_int(flex.nested_loop((n, n, n)))
+    combinations = combinations.select(flex.sort_permutation(combinations.as_vec3_double().norms()))
 
     from rstbx.indexing_api import tools
     transformations = [
-      sgtbx.change_of_basis_op(
-        str(sgtbx.rt_mx(sgtbx.rot_mx(T['trans'].transpose().as_int()))))
-      for T in tools.R if T['mod'] < 5]
+        sgtbx.change_of_basis_op(str(sgtbx.rt_mx(sgtbx.rot_mx(T['trans'].transpose().as_int())))) for T in tools.R
+        if T['mod'] < 5
+    ]
     transformations = [] # XXX temporarily disable cell doubling checks
     transformations.insert(0, sgtbx.change_of_basis_op())
 
@@ -1198,12 +1138,12 @@ class indexer_base(object):
       combinations = combinations[:max_combinations]
 
     half_pi = 0.5 * math.pi
-    min_angle = 20/180 * math.pi # 20 degrees, arbitrary cutoff
+    min_angle = 20 / 180 * math.pi # 20 degrees, arbitrary cutoff
     for i, j, k in combinations:
       a = vectors[i]
       b = vectors[j]
       angle = a.angle(b)
-      if angle < min_angle or (math.pi-angle) < min_angle:
+      if angle < min_angle or (math.pi - angle) < min_angle:
         continue
       a_cross_b = a.cross(b)
       gamma = a.angle(b)
@@ -1213,7 +1153,7 @@ class indexer_base(object):
         gamma = math.pi - gamma
         a_cross_b = -a_cross_b
       c = vectors[k]
-      if abs(half_pi-a_cross_b.angle(c)) < min_angle:
+      if abs(half_pi - a_cross_b.angle(c)) < min_angle:
         continue
       alpha = b.angle(c, deg=True)
       if alpha < half_pi:
@@ -1242,11 +1182,9 @@ class indexer_base(object):
             if det > 1: break
           else:
             primitive_volume = self.target_symmetry_primitive.unit_cell().volume()
-          if det > 1 and abs(uc.volume()/primitive_volume - det) < 1e-1:
+          if det > 1 and abs(uc.volume() / primitive_volume - det) < 1e-1:
             uc = uc.change_basis(T)
-          best_subgroup = find_matching_symmetry(
-            uc, self.target_symmetry_primitive.space_group(),
-            max_delta=max_delta)
+          best_subgroup = find_matching_symmetry(uc, self.target_symmetry_primitive.space_group(), max_delta=max_delta)
           cb_op_extra = None
           if best_subgroup is None:
             if self.target_symmetry_reference_setting is not None:
@@ -1254,8 +1192,9 @@ class indexer_base(object):
               # indexing hasn't found the centred unit cell instead of the
               # primitive cell
               best_subgroup = find_matching_symmetry(
-                uc, self.target_symmetry_reference_setting.space_group().build_derived_point_group(),
-                max_delta=max_delta)
+                  uc,
+                  self.target_symmetry_reference_setting.space_group().build_derived_point_group(),
+                  max_delta=max_delta)
               cb_op_extra = self.cb_op_reference_to_primitive
               if best_subgroup is None:
                 continue
@@ -1273,17 +1212,13 @@ class indexer_base(object):
 
           def is_similar_cell(uc1, uc2):
             return uc1.is_similar_to(
-              uc2,
-              relative_length_tolerance=self.params.known_symmetry.relative_length_tolerance,
-              absolute_angle_tolerance=self.params.known_symmetry.absolute_angle_tolerance)
+                uc2,
+                relative_length_tolerance=self.params.known_symmetry.relative_length_tolerance,
+                absolute_angle_tolerance=self.params.known_symmetry.absolute_angle_tolerance)
 
           if (self.target_symmetry_primitive.unit_cell() is not None
-              and not (
-                is_similar_cell(best_model.get_unit_cell(),
-                                self.target_symmetry_primitive.unit_cell())
-                or
-                is_similar_cell(
-                  best_model.get_unit_cell().minimum_cell(), target_min_cell))):
+              and not (is_similar_cell(best_model.get_unit_cell(), self.target_symmetry_primitive.unit_cell())
+                       or is_similar_cell(best_model.get_unit_cell().minimum_cell(), target_min_cell))):
             best_model = None
             continue
           else:
@@ -1296,7 +1231,7 @@ class indexer_base(object):
 
       uc = best_model.get_unit_cell()
       params = uc.parameters()
-      if uc.volume() > (params[0]*params[1]*params[2]/100):
+      if uc.volume() > (params[0] * params[1] * params[2] / 100):
         # unit cell volume cutoff from labelit 2004 paper
         candidate_crystal_models.append(best_model)
         if len(candidate_crystal_models) == self.params.basis_vector_combinations.max_refine:
@@ -1309,17 +1244,17 @@ class indexer_base(object):
     if solution_scorer == 'weighted':
       weighted_params = self.params.basis_vector_combinations.weighted
       solutions = SolutionTrackerWeighted(
-        power=weighted_params.power,
-        volume_weight=weighted_params.volume_weight,
-        n_indexed_weight=weighted_params.n_indexed_weight,
-        rmsd_weight=weighted_params.rmsd_weight)
+          power=weighted_params.power,
+          volume_weight=weighted_params.volume_weight,
+          n_indexed_weight=weighted_params.n_indexed_weight,
+          rmsd_weight=weighted_params.rmsd_weight)
     else:
       filter_params = self.params.basis_vector_combinations.filter
       solutions = SolutionTrackerFilter(
-        check_doubled_cell=filter_params.check_doubled_cell,
-        likelihood_cutoff=filter_params.likelihood_cutoff,
-        volume_cutoff=filter_params.volume_cutoff,
-        n_indexed_cutoff=filter_params.n_indexed_cutoff)
+          check_doubled_cell=filter_params.check_doubled_cell,
+          likelihood_cutoff=filter_params.likelihood_cutoff,
+          volume_cutoff=filter_params.volume_cutoff,
+          n_indexed_cutoff=filter_params.n_indexed_cutoff)
 
     def run_one_refinement(args):
       params, reflections, experiments = args
@@ -1328,7 +1263,7 @@ class indexer_base(object):
       from dials.command_line import check_indexing_symmetry
       grid_search_scope = params.indexing.check_misindexing.grid_search_scope
 
-      best_offset = (0,0,0)
+      best_offset = (0, 0, 0)
       best_cc = 0.0
       best_nref = 0
 
@@ -1355,11 +1290,9 @@ class indexer_base(object):
           #print offsets[13], nref[13], '%.2f' %ccs[13] # (0,0,0)
           #print best_offset, best_nref, '%.2f' %best_cc
 
-          if best_offset != (0,0,0):
-            logger.debug('Applying h,k,l offset: (%i, %i, %i)' %best_offset
-                 + ' [cc = %.2f]' %best_cc)
-            indexed_reflections['miller_index'] = apply_hkl_offset(
-              indexed_reflections['miller_index'], best_offset)
+          if best_offset != (0, 0, 0):
+            logger.debug('Applying h,k,l offset: (%i, %i, %i)' % best_offset + ' [cc = %.2f]' % best_cc)
+            indexed_reflections['miller_index'] = apply_hkl_offset(indexed_reflections['miller_index'], best_offset)
 
       from dials.algorithms.refinement import RefinerFactory
       logger = logging.getLogger('dials.algorithms.refinement.refiner')
@@ -1368,9 +1301,7 @@ class indexer_base(object):
       disabled = logger.disabled
       logger.disabled = True
       try:
-        refiner = RefinerFactory.from_parameters_data_experiments(
-          params, indexed_reflections, experiments,
-          verbosity=0)
+        refiner = RefinerFactory.from_parameters_data_experiments(params, indexed_reflections, experiments, verbosity=0)
         refiner.run()
       except (RuntimeError, ValueError, Sorry) as e:
         return
@@ -1378,12 +1309,13 @@ class indexer_base(object):
         rmsds = refiner.rmsds()
         xy_rmsds = math.sqrt(rmsds[0]**2 + rmsds[1]**2)
         model_likelihood = 1.0 - xy_rmsds
-        soln = Solution(model_likelihood=model_likelihood,
-                        crystal=experiments.crystals()[0],
-                        rmsds=rmsds,
-                        n_indexed=len(indexed_reflections),
-                        fraction_indexed=float(len(indexed_reflections))/len(reflections),
-                        hkl_offset=best_offset)
+        soln = Solution(
+            model_likelihood=model_likelihood,
+            crystal=experiments.crystals()[0],
+            rmsds=rmsds,
+            n_indexed=len(indexed_reflections),
+            fraction_indexed=float(len(indexed_reflections)) / len(reflections),
+            hkl_offset=best_offset)
         return soln
       finally:
         logger.disabled = disabled
@@ -1394,8 +1326,7 @@ class indexer_base(object):
     params.refinement.parameterisation.auto_reduction.action = "fix"
     params.refinement.parameterisation.scan_varying = False
     params.refinement.refinery.max_iterations = 4
-    params.refinement.reflections.reflections_per_degree = min(
-      params.refinement.reflections.reflections_per_degree, 20)
+    params.refinement.reflections.reflections_per_degree = min(params.refinement.reflections.reflections_per_degree, 20)
     if params.refinement.reflections.outlier.block_width is libtbx.Auto:
       # auto block_width determination is potentially too expensive to do at
       # this stage: instead set separate_blocks=False and increase value
@@ -1411,7 +1342,7 @@ class indexer_base(object):
     for cm in candidate_orientation_matrices:
       sel = (self.reflections['id'] == -1)
       if self.d_min is not None:
-        sel &= (1/self.reflections['rlp'].norms() > self.d_min)
+        sel &= (1 / self.reflections['rlp'].norms() > self.d_min)
       xo, yo, zo = self.reflections['xyzobs.mm.value'].parts()
       imageset_id = self.reflections['imageset_id']
       experiments = ExperimentList()
@@ -1421,14 +1352,15 @@ class indexer_base(object):
           start, end = scan.get_oscillation_range()
           if (end - start) > 360:
             # only use reflections from the first 360 degrees of the scan
-            sel.set_selected(
-              (imageset_id == i_imageset) & (zo > ((start * math.pi/180) + 2 * math.pi)), False)
-        experiments.append(Experiment(imageset=imageset,
-                                      beam=imageset.get_beam(),
-                                      detector=imageset.get_detector(),
-                                      goniometer=imageset.get_goniometer(),
-                                      scan=scan,
-                                      crystal=cm))
+            sel.set_selected((imageset_id == i_imageset) & (zo > ((start * math.pi / 180) + 2 * math.pi)), False)
+        experiments.append(
+            Experiment(
+                imageset=imageset,
+                beam=imageset.get_beam(),
+                detector=imageset.get_detector(),
+                goniometer=imageset.get_goniometer(),
+                scan=scan,
+                crystal=cm))
       refl = self.reflections.select(sel)
       self.index_reflections(experiments, refl)
       if refl.get_flags(refl.flags.indexed).count(True) == 0:
@@ -1436,18 +1368,17 @@ class indexer_base(object):
 
       from rstbx.dps_core.cell_assessment import SmallUnitCellVolume
       threshold = self.params.basis_vector_combinations.sys_absent_threshold
-      if (threshold and (self.target_symmetry_primitive is None or
-                         self.target_symmetry_primitive.unit_cell() is None)):
+      if (threshold and (self.target_symmetry_primitive is None or self.target_symmetry_primitive.unit_cell() is None)):
         try:
           self.correct_non_primitive_basis(experiments, refl, threshold)
         except SmallUnitCellVolume:
-          logger.debug("correct_non_primitive_basis SmallUnitCellVolume error for unit cell %s:"
-                       %experiments[0].crystal.get_unit_cell())
+          logger.debug("correct_non_primitive_basis SmallUnitCellVolume error for unit cell %s:" %
+                       experiments[0].crystal.get_unit_cell())
           continue
         except RuntimeError as e:
           if 'Krivy-Gruber iteration limit exceeded' in str(e):
-            logger.debug("correct_non_primitive_basis Krivy-Gruber iteration limit exceeded error for unit cell %s:"
-                         %experiments[0].crystal.get_unit_cell())
+            logger.debug("correct_non_primitive_basis Krivy-Gruber iteration limit exceeded error for unit cell %s:" %
+                         experiments[0].crystal.get_unit_cell())
             continue
           raise
         if experiments[0].crystal.get_unit_cell().volume() < self.params.min_cell_volume:
@@ -1455,8 +1386,7 @@ class indexer_base(object):
 
       if self.params.known_symmetry.space_group is not None:
         target_space_group = self.target_symmetry_primitive.space_group()
-        new_crystal, cb_op_to_primitive = self.apply_symmetry(
-          experiments[0].crystal, target_space_group)
+        new_crystal, cb_op_to_primitive = self.apply_symmetry(experiments[0].crystal, target_space_group)
         if new_crystal is None:
           continue
         experiments[0].crystal.update(new_crystal)
@@ -1467,14 +1397,12 @@ class indexer_base(object):
           refl['miller_index'].set_selected(sel, miller_indices)
         if 0 and self.cb_op_primitive_to_given is not None:
           sel = refl['id'] > -1
-          experiments[0].crystal.update(
-            experiments[0].crystal.change_basis(self.cb_op_primitive_to_given))
+          experiments[0].crystal.update(experiments[0].crystal.change_basis(self.cb_op_primitive_to_given))
           miller_indices = refl['miller_index'].select(sel)
           miller_indices = self.cb_op_primitive_to_given.apply(miller_indices)
           refl['miller_index'].set_selected(sel, miller_indices)
 
-      if (self.refined_experiments is not None and
-          len(self.refined_experiments) > 0):
+      if (self.refined_experiments is not None and len(self.refined_experiments) > 0):
         orientation_too_similar = False
         cryst_b = experiments[0].crystal
         for i_a, cryst_a in enumerate(self.refined_experiments.crystals()):
@@ -1492,10 +1420,10 @@ class indexer_base(object):
 
     from libtbx import easy_mp
     results = easy_mp.parallel_map(
-      run_one_refinement,
-      args,
-      processes=self.params.nproc,
-      preserve_exception_message=True,
+        run_one_refinement,
+        args,
+        processes=self.params.nproc,
+        preserve_exception_message=True,
     )
 
     for soln in results:
@@ -1507,8 +1435,8 @@ class indexer_base(object):
       logger.info("Candidate solutions:")
       logger.info(str(solutions))
       best_solution = solutions.best_solution()
-      logger.debug("best model_likelihood: %.2f" %best_solution.model_likelihood)
-      logger.debug("best n_indexed: %i" %best_solution.n_indexed)
+      logger.debug("best model_likelihood: %.2f" % best_solution.model_likelihood)
+      logger.debug("best n_indexed: %i" % best_solution.n_indexed)
       self.hkl_offset = best_solution.hkl_offset
       return best_solution.crystal, best_solution.n_indexed
     else:
@@ -1517,11 +1445,10 @@ class indexer_base(object):
   def correct_non_primitive_basis(self, experiments, reflections, threshold):
     assert len(experiments.crystals()) == 1
     while True:
-      sel = reflections['miller_index'] != (0,0,0)
+      sel = reflections['miller_index'] != (0, 0, 0)
       if sel.count(True) == 0:
         break
-      T = detect_non_primitive_basis(
-        reflections['miller_index'].select(sel), threshold=threshold)
+      T = detect_non_primitive_basis(reflections['miller_index'].select(sel), threshold=threshold)
       if T is None:
         break
 
@@ -1553,8 +1480,7 @@ class indexer_base(object):
     best_angular_difference = 1e8
     best_subgroup = None
     for item in items:
-      if (bravais_lattice(group=target_sg_ref) !=
-          bravais_lattice(group=item['ref_subsym'].space_group())):
+      if (bravais_lattice(group=target_sg_ref) != bravais_lattice(group=item['ref_subsym'].space_group())):
         continue
       if item['max_angular_difference'] < best_angular_difference:
         best_angular_difference = item['max_angular_difference']
@@ -1565,8 +1491,7 @@ class indexer_base(object):
 
     cb_op_inp_best = best_subgroup['cb_op_inp_best']
     orient = crystal_orientation(A, True)
-    orient_best = orient.change_basis(
-      matrix.sqr(cb_op_inp_best.c().as_double_array()[0:9]).transpose())
+    orient_best = orient.change_basis(matrix.sqr(cb_op_inp_best.c().as_double_array()[0:9]).transpose())
     constrain_orient = orient_best.constrain(best_subgroup['system'])
 
     best_subsym = best_subgroup['best_subsym']
@@ -1583,8 +1508,7 @@ class indexer_base(object):
     a = matrix.col(direct_matrix[:3])
     b = matrix.col(direct_matrix[3:6])
     c = matrix.col(direct_matrix[6:9])
-    model = Crystal(
-      a, b, c, space_group=target_sg_best)
+    model = Crystal(a, b, c, space_group=target_sg_best)
     assert target_sg_best.is_compatible_unit_cell(model.get_unit_cell())
 
     model = model.change_basis(cb_op_best_primitive)
@@ -1595,40 +1519,39 @@ class indexer_base(object):
       params_local = self.params.index_assignment.local
       from dials.algorithms.indexing import index_reflections_local
       index_reflections_local(
-        reflections,
-        experiments, self.d_min, epsilon=params_local.epsilon,
-        delta=params_local.delta, l_min=params_local.l_min,
-        nearest_neighbours=params_local.nearest_neighbours)
+          reflections,
+          experiments,
+          self.d_min,
+          epsilon=params_local.epsilon,
+          delta=params_local.delta,
+          l_min=params_local.l_min,
+          nearest_neighbours=params_local.nearest_neighbours)
     else:
       params_simple = self.params.index_assignment.simple
       from dials.algorithms.indexing import index_reflections
-      index_reflections(reflections,
-                        experiments, self.d_min,
-                        tolerance=params_simple.hkl_tolerance)
-    if self.hkl_offset is not None and self.hkl_offset != (0,0,0):
-      reflections['miller_index'] = apply_hkl_offset(
-        reflections['miller_index'], self.hkl_offset)
+      index_reflections(reflections, experiments, self.d_min, tolerance=params_simple.hkl_tolerance)
+    if self.hkl_offset is not None and self.hkl_offset != (0, 0, 0):
+      reflections['miller_index'] = apply_hkl_offset(reflections['miller_index'], self.hkl_offset)
       self.hkl_offset = None
 
   def refine(self, experiments, reflections):
     from dials.algorithms.indexing.refinement import refine
     refiner, refined, outliers = refine(
-      self.all_params, reflections, experiments,
-      verbosity=self.params.refinement_protocol.verbosity,
-      debug_plots=self.params.debug_plots)
+        self.all_params,
+        reflections,
+        experiments,
+        verbosity=self.params.refinement_protocol.verbosity,
+        debug_plots=self.params.debug_plots)
     if outliers is not None:
       reflections['id'].set_selected(outliers, -1)
     predicted = refiner.predict_for_indexed()
     verbosity = self.params.refinement_protocol.verbosity
     reflections['xyzcal.mm'] = predicted['xyzcal.mm']
     reflections['entering'] = predicted['entering']
-    reflections.unset_flags(
-      flex.bool(len(reflections), True), reflections.flags.centroid_outlier)
+    reflections.unset_flags(flex.bool(len(reflections), True), reflections.flags.centroid_outlier)
     assert reflections.get_flags(reflections.flags.centroid_outlier).count(True) == 0
-    reflections.set_flags(predicted.get_flags(predicted.flags.centroid_outlier),
-                          reflections.flags.centroid_outlier)
-    reflections.set_flags(refiner.selection_used_for_refinement(),
-                          reflections.flags.used_in_refinement)
+    reflections.set_flags(predicted.get_flags(predicted.flags.centroid_outlier), reflections.flags.centroid_outlier)
+    reflections.set_flags(refiner.selection_used_for_refinement(), reflections.flags.used_in_refinement)
     return refiner.get_experiments(), reflections
 
   def debug_show_candidate_basis_vectors(self):
@@ -1637,7 +1560,7 @@ class indexer_base(object):
 
     logger.debug("Candidate basis vectors:")
     for i, v in enumerate(vectors):
-      logger.debug("%s %s" %(i, v.length()))# , vector_heights[i]
+      logger.debug("%s %s" % (i, v.length())) # , vector_heights[i]
 
     if self.params.debug:
       # print a table of the angles between each pair of vectors
@@ -1650,11 +1573,11 @@ class indexer_base(object):
 
       for i in range(len(vectors)):
         v_i = vectors[i]
-        for j in range(i+1, len(vectors)):
+        for j in range(i + 1, len(vectors)):
           v_j = vectors[j]
-          angles[i,j] = v_i.angle(v_j, deg=True)
+          angles[i, j] = v_i.angle(v_j, deg=True)
 
-      print >> s, (" "*7),
+      print >> s, (" " * 7),
       for i in range(len(vectors)):
         print >> s, "%7.3f" % vectors[i].length(),
       print >> s
@@ -1662,9 +1585,9 @@ class indexer_base(object):
         print >> s, "%7.3f" % vectors[i].length(),
         for j in range(len(vectors)):
           if j <= i:
-            print >> s, (" "*7),
+            print >> s, (" " * 7),
           else:
-            print >> s, "%5.1f  " %angles[i,j],
+            print >> s, "%5.1f  " % angles[i, j],
         print >> s
 
       logger.debug(s.getvalue())
@@ -1682,22 +1605,21 @@ class indexer_base(object):
     from mpl_toolkits.mplot3d import proj3d
 
     class Arrow3D(FancyArrowPatch):
-        def __init__(self, xs, ys, zs, *args, **kwargs):
-            FancyArrowPatch.__init__(self, (0,0), (0,0), *args, **kwargs)
-            self._verts3d = xs, ys, zs
+      def __init__(self, xs, ys, zs, *args, **kwargs):
+        FancyArrowPatch.__init__(self, (0, 0), (0, 0), *args, **kwargs)
+        self._verts3d = xs, ys, zs
 
-        def draw(self, renderer):
-            xs3d, ys3d, zs3d = self._verts3d
-            xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, renderer.M)
-            self.set_positions((xs[0],ys[0]),(xs[1],ys[1]))
-            FancyArrowPatch.draw(self, renderer)
+      def draw(self, renderer):
+        xs3d, ys3d, zs3d = self._verts3d
+        xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, renderer.M)
+        self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
+        FancyArrowPatch.draw(self, renderer)
+
     for v in self.candidate_basis_vectors:
       x, y, z = v.elems
-      a = Arrow3D(
-        [0,x],[0,y],[0,z], mutation_scale=10, lw=1, arrowstyle="-|>", color="k")
+      a = Arrow3D([0, x], [0, y], [0, z], mutation_scale=10, lw=1, arrowstyle="-|>", color="k")
       ax.add_artist(a)
-      a = Arrow3D(
-        [0,-x],[0,-y],[0,-z], mutation_scale=10, lw=1, arrowstyle="-|>", color="k")
+      a = Arrow3D([0, -x], [0, -y], [0, -z], mutation_scale=10, lw=1, arrowstyle="-|>", color="k")
       ax.add_artist(a)
 
     x, y, z = zip(*self.candidate_basis_vectors)
@@ -1705,13 +1627,12 @@ class indexer_base(object):
     ax.scatter([-i for i in x], [-i for i in y], [-i for i in z], marker='.', s=1)
     pyplot.show()
 
-  def debug_write_reciprocal_lattice_points_as_pdb(
-      self, file_name='reciprocal_lattice.pdb'):
+  def debug_write_reciprocal_lattice_points_as_pdb(self, file_name='reciprocal_lattice.pdb'):
     from cctbx import crystal, xray
-    cs = crystal.symmetry(unit_cell=(1000,1000,1000,90,90,90), space_group="P1")
+    cs = crystal.symmetry(unit_cell=(1000, 1000, 1000, 90, 90, 90), space_group="P1")
     for i_panel in range(len(self.imagesets[0].get_detector())):
       if len(self.imagesets[0].get_detector()) > 1:
-        file_name = 'reciprocal_lattice_%i.pdb' %i_panel
+        file_name = 'reciprocal_lattice_%i.pdb' % i_panel
       with open(file_name, 'wb') as f:
         xs = xray.structure(crystal_symmetry=cs)
         reflections = self.reflections.select(self.reflections['panel'] == i_panel)
@@ -1722,20 +1643,19 @@ class indexer_base(object):
 
   def debug_write_ccp4_map(self, map_data, file_name):
     from iotbx import ccp4_map
-    gridding_first = (0,0,0)
+    gridding_first = (0, 0, 0)
     gridding_last = map_data.all()
     labels = ["cctbx.miller.fft_map"]
     ccp4_map.write_ccp4_map(
-      file_name=file_name,
-      unit_cell=self.fft_cell,
-      space_group=sgtbx.space_group("P1"),
-      gridding_first=gridding_first,
-      gridding_last=gridding_last,
-      map_data=map_data,
-      labels=flex.std_string(labels))
+        file_name=file_name,
+        unit_cell=self.fft_cell,
+        space_group=sgtbx.space_group("P1"),
+        gridding_first=gridding_first,
+        gridding_last=gridding_last,
+        map_data=map_data,
+        labels=flex.std_string(labels))
 
-  def export_as_json(self, experiments, file_name="experiments.json",
-                     compact=False):
+  def export_as_json(self, experiments, file_name="experiments.json", compact=False):
     from dxtbx.serialize import dump
     assert experiments.is_consistent()
     dump.experiment_list(experiments, file_name)
@@ -1746,34 +1666,32 @@ class indexer_base(object):
   def find_lattices(self):
     raise NotImplementedError()
 
-
 from libtbx import group_args
+
 class Solution(group_args):
   pass
-
 
 def filter_doubled_cell(solutions):
   from dials.algorithms.indexing.compare_orientation_matrices import difference_rotation_matrix_axis_angle
   accepted_solutions = []
   for i1, s1 in enumerate(solutions):
     doubled_cell = False
-    for (m1,m2,m3) in ((2,1,1), (1,2,1), (1,1,2), (2,2,1), (2,1,2), (1,2,2), (2,2,2)):
+    for (m1, m2, m3) in ((2, 1, 1), (1, 2, 1), (1, 1, 2), (2, 2, 1), (2, 1, 2), (1, 2, 2), (2, 2, 2)):
       if doubled_cell:
         break
       a, b, c = s1.crystal.get_real_space_vectors()
-      new_cryst = Crystal(real_space_a=1/m1*a,
-                          real_space_b=1/m2*b,
-                          real_space_c=1/m3*c,
-                          space_group=s1.crystal.get_space_group())
+      new_cryst = Crystal(
+          real_space_a=1 / m1 * a,
+          real_space_b=1 / m2 * b,
+          real_space_c=1 / m3 * c,
+          space_group=s1.crystal.get_space_group())
       new_unit_cell = new_cryst.get_unit_cell()
       for s2 in solutions:
         if s2 is s1:
           continue
-        if new_unit_cell.is_similar_to(s2.crystal.get_unit_cell(),
-                                       relative_length_tolerance=0.05):
+        if new_unit_cell.is_similar_to(s2.crystal.get_unit_cell(), relative_length_tolerance=0.05):
           R, axis, angle, cb = difference_rotation_matrix_axis_angle(new_cryst, s2.crystal)
-          if ((angle < 1) and
-              (s1.n_indexed < (1.1 * s2.n_indexed))):
+          if ((angle < 1) and (s1.n_indexed < (1.1 * s2.n_indexed))):
             doubled_cell = True
             break
 
@@ -1785,8 +1703,7 @@ def filter_doubled_cell(solutions):
 
 # Tracker for solutions based on code in rstbx/dps_core/basis_choice.py
 class SolutionTrackerFilter(object):
-  def __init__(self, check_doubled_cell=True, likelihood_cutoff=0.8,
-               volume_cutoff=1.25, n_indexed_cutoff=0.9):
+  def __init__(self, check_doubled_cell=True, likelihood_cutoff=0.8, volume_cutoff=1.25, n_indexed_cutoff=0.9):
     self.check_doubled_cell = check_doubled_cell
     self.likelihood_cutoff = likelihood_cutoff
     self.volume_cutoff = volume_cutoff
@@ -1807,16 +1724,13 @@ class SolutionTrackerFilter(object):
     while (best_likelihood + offset) <= 0:
       offset += 1
     return [
-      s for s in solutions
-      if (s.model_likelihood+offset) >= (self.likelihood_cutoff * (best_likelihood+offset))]
+        s for s in solutions if (s.model_likelihood + offset) >= (self.likelihood_cutoff * (best_likelihood + offset))
+    ]
 
   def filter_by_volume(self, solutions):
     # filter by volume - prefer solutions with a smaller unit cell
-    min_volume = min(s.crystal.get_unit_cell().volume()
-                          for s in solutions)
-    return [
-      s for s in solutions
-      if s.crystal.get_unit_cell().volume() < (self.volume_cutoff * min_volume)]
+    min_volume = min(s.crystal.get_unit_cell().volume() for s in solutions)
+    return [s for s in solutions if s.crystal.get_unit_cell().volume() < (self.volume_cutoff * min_volume)]
 
   def filter_by_n_indexed(self, solutions, n_indexed_cutoff=None):
     if n_indexed_cutoff is None:
@@ -1824,14 +1738,12 @@ class SolutionTrackerFilter(object):
     # filter by number of indexed reflections - prefer solutions that
     # account for more of the diffracted spots
     max_n_indexed = max(s.n_indexed for s in solutions)
-    return [s for s in solutions
-            if s.n_indexed >= n_indexed_cutoff * max_n_indexed]
+    return [s for s in solutions if s.n_indexed >= n_indexed_cutoff * max_n_indexed]
 
   def update_analysis(self):
     # pre-filter out solutions that only account for a very small
     # percentage of the indexed spots relative to the best one
-    self.filtered_solutions = self.filter_by_n_indexed(
-      self.all_solutions, n_indexed_cutoff=0.05) # 5 percent
+    self.filtered_solutions = self.filter_by_n_indexed(self.all_solutions, n_indexed_cutoff=0.05) # 5 percent
 
     if self.check_doubled_cell:
       self.filtered_solutions = filter_doubled_cell(self.filtered_solutions)
@@ -1845,28 +1757,27 @@ class SolutionTrackerFilter(object):
     return
 
   def best_solution(self):
-    self.best_filtered_liklihood = max(
-      s.model_likelihood for s in self.filtered_solutions)
+    self.best_filtered_liklihood = max(s.model_likelihood for s in self.filtered_solutions)
 
-    solutions = [s for s in self.filtered_solutions
-                 if s.model_likelihood == self.best_filtered_liklihood]
+    solutions = [s for s in self.filtered_solutions if s.model_likelihood == self.best_filtered_liklihood]
     return solutions[0]
 
   def __str__(self):
     rows = []
-    rows.append(
-      ['unit_cell', 'volume', 'n_indexed', 'fraction_indexed', 'likelihood'])
+    rows.append(['unit_cell', 'volume', 'n_indexed', 'fraction_indexed', 'likelihood'])
 
     for i, s in enumerate(self.all_solutions):
       s = self.all_solutions[i]
-      rows.append(
-        [format(s.crystal.get_unit_cell(), '{:.2f} {:.2f} {:.2f} {:.1f} {:.1f} {:.1f}'),
-         "%.0f" %s.crystal.get_unit_cell().volume(),
-         str(s.n_indexed), "%.0f" %(s.fraction_indexed*100), "%.2f" %s.model_likelihood])
+      rows.append([
+          format(s.crystal.get_unit_cell(), '{:.2f} {:.2f} {:.2f} {:.1f} {:.1f} {:.1f}'),
+          "%.0f" % s.crystal.get_unit_cell().volume(),
+          str(s.n_indexed),
+          "%.0f" % (s.fraction_indexed * 100),
+          "%.2f" % s.model_likelihood
+      ])
 
     from libtbx import table_utils
     return table_utils.format(rows=rows, has_header=True)
-
 
 class SolutionTrackerWeighted(object):
   def __init__(self, power=2, volume_weight=1, n_indexed_weight=1, rmsd_weight=1):
@@ -1884,30 +1795,27 @@ class SolutionTrackerWeighted(object):
 
   def score_by_volume(self, reverse=False):
     # smaller volume = better
-    volumes = flex.double(
-      s.crystal.get_unit_cell().volume() for s in self.all_solutions)
-    score = flex.log(volumes)/math.log(2)
+    volumes = flex.double(s.crystal.get_unit_cell().volume() for s in self.all_solutions)
+    score = flex.log(volumes) / math.log(2)
     return self.volume_weight * (score - flex.min(score))
 
   def score_by_rmsd_xy(self, reverse=False):
     # smaller rmsds = better
-    rmsd_x, rmsd_y, rmsd_z = flex.vec3_double(
-      s.rmsds for s in self.all_solutions).parts()
+    rmsd_x, rmsd_y, rmsd_z = flex.vec3_double(s.rmsds for s in self.all_solutions).parts()
     rmsd_xy = flex.sqrt(flex.pow2(rmsd_x) + flex.pow2(rmsd_y))
-    score = flex.log(rmsd_xy)/math.log(2)
+    score = flex.log(rmsd_xy) / math.log(2)
     return self.rmsd_weight * (score - flex.min(score))
 
   def score_by_rmsd_z(self, reverse=False):
     # smaller rmsds = better
-    rmsd_x, rmsd_y, rmsd_z = flex.vec3_double(
-      s.rmsds for s in self.all_solutions).parts()
-    score = flex.log(rmsd_z)/math.log(2)
+    rmsd_x, rmsd_y, rmsd_z = flex.vec3_double(s.rmsds for s in self.all_solutions).parts()
+    score = flex.log(rmsd_z) / math.log(2)
     return score - flex.min(score)
 
   def score_by_fraction_indexed(self, reverse=False):
     # more indexed reflections = better
     fraction_indexed = flex.double(s.fraction_indexed for s in self.all_solutions)
-    score = flex.log(fraction_indexed)/math.log(2)
+    score = flex.log(fraction_indexed) / math.log(2)
     return self.n_indexed_weight * (-score + flex.max(score))
 
   def best_solution(self):
@@ -1916,23 +1824,30 @@ class SolutionTrackerWeighted(object):
     return self.all_solutions[perm[0]]
 
   def solution_scores(self):
-    scores = sum(flex.pow(score.as_double(), self.power)
-                 for score in (
-                               self.score_by_fraction_indexed(),
-                               self.score_by_volume(),
-                               self.score_by_rmsd_xy(),
-                               #self.score_by_rmsd_z(),
-                               ))
+    scores = sum(
+        flex.pow(score.as_double(), self.power)
+        for score in (
+            self.score_by_fraction_indexed(),
+            self.score_by_volume(),
+            self.score_by_rmsd_xy(),
+            #self.score_by_rmsd_z(),
+        ))
     return scores
 
   def __str__(self):
     rows = []
-    rows.append(
-      ['unit_cell', 'volume', 'volume score',
-       '#indexed', '% indexed', '% indexed score',
-       'rmsd_xy', 'rmsd_xy score',
-       #'rmsd_z', 'rank_rmsd_z',
-       'overall score'])
+    rows.append([
+        'unit_cell',
+        'volume',
+        'volume score',
+        '#indexed',
+        '% indexed',
+        '% indexed score',
+        'rmsd_xy',
+        'rmsd_xy score',
+        #'rmsd_z', 'rank_rmsd_z',
+        'overall score'
+    ])
 
     score_by_fraction_indexed = self.score_by_fraction_indexed()
     score_by_volume = self.score_by_volume()
@@ -1942,25 +1857,27 @@ class SolutionTrackerWeighted(object):
 
     perm = flex.sort_permutation(overall_scores)
 
-    rmsd_x, rmsd_y, rmsd_z = flex.vec3_double(
-      s.rmsds for s in self.all_solutions).parts()
+    rmsd_x, rmsd_y, rmsd_z = flex.vec3_double(s.rmsds for s in self.all_solutions).parts()
     rmsd_xy = flex.sqrt(flex.pow2(rmsd_x) + flex.pow2(rmsd_y))
-    rmsd_z *= (180/math.pi)
+    rmsd_z *= (180 / math.pi)
 
     for i in perm:
       s = self.all_solutions[i]
-      rows.append(
-        [format(s.crystal.get_unit_cell(), '{:.2f} {:.2f} {:.2f} {:.1f} {:.1f} {:.1f}'),
-         "%.0f" %s.crystal.get_unit_cell().volume(), "%.2f" %score_by_volume[i],
-         str(s.n_indexed), "%.0f" %(s.fraction_indexed*100),
-         "%.2f" %score_by_fraction_indexed[i],
-         "%.2f" %rmsd_xy[i], "%.2f" %score_by_rmsd_xy[i],
-         #"%.2f" %rmsd_z[i], "%.2f" %score_by_rmsd_z[i],
-         "%.2f" %overall_scores[i]])
+      rows.append([
+          format(s.crystal.get_unit_cell(), '{:.2f} {:.2f} {:.2f} {:.1f} {:.1f} {:.1f}'),
+          "%.0f" % s.crystal.get_unit_cell().volume(),
+          "%.2f" % score_by_volume[i],
+          str(s.n_indexed),
+          "%.0f" % (s.fraction_indexed * 100),
+          "%.2f" % score_by_fraction_indexed[i],
+          "%.2f" % rmsd_xy[i],
+          "%.2f" % score_by_rmsd_xy[i],
+          #"%.2f" %rmsd_z[i], "%.2f" %score_by_rmsd_z[i],
+          "%.2f" % overall_scores[i]
+      ])
 
     from libtbx import table_utils
     return table_utils.format(rows=rows, has_header=True)
-
 
 def detect_non_primitive_basis(miller_indices, threshold=0.9):
 
@@ -1968,21 +1885,25 @@ def detect_non_primitive_basis(miller_indices, threshold=0.9):
   for test in tools.R:
     cum = tools.cpp_absence_test(miller_indices, test['mod'], test['vec'])
     for counter in xrange(test['mod']):
-      if float(cum[counter])/miller_indices.size() > threshold and counter==0:
+      if float(cum[counter]) / miller_indices.size() > threshold and counter == 0:
         # (if counter != 0 there is no obvious way to correct this)
-        logger.debug("Detected exclusive presence of %dH %dK %dL = %dn, remainder %d"%(
-          test['vec'][0], test['vec'][1], test['vec'][2], test['mod'],counter))
-        logger.debug("%s, %s, %s" %(
-          test['vec'], test['mod'], float(cum[counter])/miller_indices.size()))
+        logger.debug("Detected exclusive presence of %dH %dK %dL = %dn, remainder %d" %
+                     (test['vec'][0], test['vec'][1], test['vec'][2], test['mod'], counter))
+        logger.debug("%s, %s, %s" % (test['vec'], test['mod'], float(cum[counter]) / miller_indices.size()))
         #flag = {'vec':test['vec'],'mod':test['mod'],
-                #'remainder':counter, 'trans':test['trans'].elems}
+        #'remainder':counter, 'trans':test['trans'].elems}
         return test['trans']
 
-
-def find_max_cell(reflections, max_cell_multiplier, step_size,
-                  nearest_neighbor_percentile=None, histogram_binning='linear',
-                  nn_per_bin=5, max_height_fraction=0.25,
-                  filter_ice=True, filter_overlaps=True, overlaps_border=0):
+def find_max_cell(reflections,
+                  max_cell_multiplier,
+                  step_size,
+                  nearest_neighbor_percentile=None,
+                  histogram_binning='linear',
+                  nn_per_bin=5,
+                  max_height_fraction=0.25,
+                  filter_ice=True,
+                  filter_overlaps=True,
+                  overlaps_border=0):
   logger.debug('Finding suitable max_cell based on %i reflections' % len(reflections))
   # Exclude potential ice-ring spots from nearest neighbour analysis if needed
   if filter_ice:
@@ -1990,7 +1911,7 @@ def find_max_cell(reflections, max_cell_multiplier, step_size,
      ice_rings_selection
     ice_sel = ice_rings_selection(reflections)
     reflections = reflections.select(~ice_sel)
-    logger.debug('Rejecting %i reflections at ice ring resolution' %ice_sel.count(True))
+    logger.debug('Rejecting %i reflections at ice ring resolution' % ice_sel.count(True))
 
   # need bounding box in reflections to find overlaps; this is not there if
   # spots are from XDS (for example)
@@ -2003,33 +1924,32 @@ def find_max_cell(reflections, max_cell_multiplier, step_size,
       i1 = overlaps.target(item)
       overlap_sel[i0] = True
       overlap_sel[i1] = True
-    logger.debug('Rejecting %i overlapping bounding boxes' %overlap_sel.count(True))
+    logger.debug('Rejecting %i overlapping bounding boxes' % overlap_sel.count(True))
     reflections = reflections.select(~overlap_sel)
   logger.debug('%i reflections remain for max_cell identification' % len(reflections))
 
   # Histogram spot counts in resolution bins: filter out outlier bin counts
   # according to the Tukey method
-  d_spacings = 1/reflections['rlp'].norms()
-  d_star_sq = 1/flex.pow2(d_spacings)
+  d_spacings = 1 / reflections['rlp'].norms()
+  d_star_sq = 1 / flex.pow2(d_spacings)
   hist = flex.histogram(d_star_sq, n_slots=100)
   bin_counts = hist.slots().as_double()
   perm = flex.sort_permutation(bin_counts)
   sorted_bin_counts = bin_counts.select(perm)
   sorted_bin_counts = sorted_bin_counts.select(sorted_bin_counts > 0)
-  if sorted_bin_counts.size() >=4:
+  if sorted_bin_counts.size() >= 4:
     from libtbx.math_utils import nearest_integer as nint
-    q1 = sorted_bin_counts[nint(len(sorted_bin_counts)/4)]
-    q2 = sorted_bin_counts[nint(len(sorted_bin_counts)/2)]
-    q3 = sorted_bin_counts[nint(len(sorted_bin_counts)*3/4)]
-    iqr = q3-q1
-    inlier_sel = (bin_counts >= (q1 - 1.5*iqr)) & (bin_counts <= (q3 + 1.5*iqr))
+    q1 = sorted_bin_counts[nint(len(sorted_bin_counts) / 4)]
+    q2 = sorted_bin_counts[nint(len(sorted_bin_counts) / 2)]
+    q3 = sorted_bin_counts[nint(len(sorted_bin_counts) * 3 / 4)]
+    iqr = q3 - q1
+    inlier_sel = (bin_counts >= (q1 - 1.5 * iqr)) & (bin_counts <= (q3 + 1.5 * iqr))
 
     sel = flex.bool(d_star_sq.size(), True)
     for i_slot in range(hist.slots().size()):
       if not inlier_sel[i_slot]:
-        sel.set_selected(
-          (d_star_sq > (hist.slot_centers()[i_slot] - 0.5*hist.slot_width())) &
-          (d_star_sq <= (hist.slot_centers()[i_slot] + 0.5*hist.slot_width())), False)
+        sel.set_selected((d_star_sq > (hist.slot_centers()[i_slot] - 0.5 * hist.slot_width())) &
+                         (d_star_sq <= (hist.slot_centers()[i_slot] + 0.5 * hist.slot_width())), False)
 
     reflections = reflections.select(sel)
   #from libtbx import easy_pickle
@@ -2048,18 +1968,18 @@ def find_max_cell(reflections, max_cell_multiplier, step_size,
   else:
     entering_flags = flex.bool(len(reflections), False)
   from dials.algorithms.indexing.nearest_neighbor import neighbor_analysis
-  phi_deg = reflections['xyzobs.mm.value'].parts()[2] * (180/math.pi)
+  phi_deg = reflections['xyzobs.mm.value'].parts()[2] * (180 / math.pi)
 
-  NN = neighbor_analysis(reflections,
-                         step_size=step_size,
-                         max_height_fraction=max_height_fraction,
-                         tolerance=max_cell_multiplier,
-                         percentile=nearest_neighbor_percentile,
-                         histogram_binning=histogram_binning,
-                         nn_per_bin=nn_per_bin)
+  NN = neighbor_analysis(
+      reflections,
+      step_size=step_size,
+      max_height_fraction=max_height_fraction,
+      tolerance=max_cell_multiplier,
+      percentile=nearest_neighbor_percentile,
+      histogram_binning=histogram_binning,
+      nn_per_bin=nn_per_bin)
 
   return NN
-
 
 def optimise_basis_vectors(reciprocal_lattice_points, vectors):
   optimised = flex.vec3_double()
@@ -2068,13 +1988,12 @@ def optimise_basis_vectors(reciprocal_lattice_points, vectors):
     optimised.append(tuple(minimised.x))
   return optimised
 
-
 from scitbx import lbfgs
+
 
 # Optimise the initial basis vectors as per equation 11.4.3.4 of
 # Otwinowski et al, International Tables Vol. F, chapter 11.4 pp. 282-295
 class basis_vector_target(object):
-
   def __init__(self, reciprocal_lattice_points):
     self.reciprocal_lattice_points = reciprocal_lattice_points
     self._xyz_parts = self.reciprocal_lattice_points.parts()
@@ -2082,15 +2001,15 @@ class basis_vector_target(object):
   def compute_functional_and_gradients(self, vector):
     assert len(vector) == 3
     two_pi_S_dot_v = 2 * math.pi * self.reciprocal_lattice_points.dot(vector)
-    f = - flex.sum(flex.cos(two_pi_S_dot_v))
+    f = -flex.sum(flex.cos(two_pi_S_dot_v))
     sin_part = flex.sin(two_pi_S_dot_v)
-    g = flex.double([flex.sum(2 * math.pi * self._xyz_parts[i] * sin_part)
-                     for i in range(3)])
+    g = flex.double([flex.sum(2 * math.pi * self._xyz_parts[i] * sin_part) for i in range(3)])
     return f, g
 
-
 class basis_vector_minimser(object):
-  def __init__(self, reciprocal_lattice_points, vector,
+  def __init__(self,
+               reciprocal_lattice_points,
+               vector,
                lbfgs_termination_params=None,
                lbfgs_core_params=lbfgs.core_parameters(m=20)):
     self.reciprocal_lattice_points = reciprocal_lattice_points
@@ -2101,9 +2020,8 @@ class basis_vector_minimser(object):
     self.n = len(self.x)
     assert self.n == 3
     self.target = basis_vector_target(self.reciprocal_lattice_points)
-    self.minimizer = lbfgs.run(target_evaluator=self,
-                               termination_params=lbfgs_termination_params,
-                               core_params=lbfgs_core_params)
+    self.minimizer = lbfgs.run(
+        target_evaluator=self, termination_params=lbfgs_termination_params, core_params=lbfgs_core_params)
     #print "number of iterations:", self.minimizer.iter()
 
   def compute_functional_and_gradients(self):
@@ -2117,7 +2035,6 @@ class basis_vector_minimser(object):
     #print tuple(self.x)
     return
 
-
 def _gradient_fd(target, vector, eps=1e-6):
   grads = []
   for i in range(len(vector)):
@@ -2126,26 +2043,23 @@ def _gradient_fd(target, vector, eps=1e-6):
     tm, _ = target.compute_functional_and_gradients(v)
     v[i] += 2 * eps
     tp, _ = target.compute_functional_and_gradients(v)
-    grads.append((tp-tm)/(2*eps))
+    grads.append((tp - tm) / (2 * eps))
   return grads
-
 
 def reject_weight_outliers_selection(reflections, sigma_cutoff=5):
   from scitbx.math import basic_statistics
   variances = flex.vec3_double([r.centroid_variance for r in reflections])
   selection = None
   for v in variances.parts():
-    w = 1/v
+    w = 1 / v
     ln_w = flex.log(w)
     stats = basic_statistics(ln_w)
-    sel = ln_w < (sigma_cutoff * stats.bias_corrected_standard_deviation
-                  + stats.mean)
+    sel = ln_w < (sigma_cutoff * stats.bias_corrected_standard_deviation + stats.mean)
     if selection is None:
       selection = sel
     else:
       selection &= sel
   return selection
-
 
 def hist_outline(hist):
 
@@ -2168,14 +2082,13 @@ def hist_outline(hist):
 
   return (bins, data)
 
-
 def plot_centroid_weights_histograms(reflections, n_slots=50):
   from matplotlib import pyplot
   variances = flex.vec3_double([r.centroid_variance for r in reflections])
   vx, vy, vz = variances.parts()
-  wx = 1/vx
-  wy = 1/vy
-  wz = 1/vz
+  wx = 1 / vx
+  wy = 1 / vy
+  wz = 1 / vz
   #hx = flex.histogram(vx, n_slots=n_slots)
   #hy = flex.histogram(vy, n_slots=n_slots)
   #hz = flex.histogram(vz, n_slots=n_slots)
@@ -2189,10 +2102,10 @@ def plot_centroid_weights_histograms(reflections, n_slots=50):
 
   #outliers = reflections.select(wx > 50)
   #for refl in outliers:
-    #print refl
+  #print refl
 
   for i, h in enumerate([hx, hy, hz]):
-    ax = fig.add_subplot(311+i)
+    ax = fig.add_subplot(311 + i)
 
     slots = h.slots().as_double()
     bins, data = hist_outline(h)
@@ -2204,7 +2117,7 @@ def plot_centroid_weights_histograms(reflections, n_slots=50):
     #pyplot.suptitle(title)
     data_min = min([slot.low_cutoff for slot in h.slot_infos() if slot.n > 0])
     data_max = max([slot.low_cutoff for slot in h.slot_infos() if slot.n > 0])
-    ax.set_xlim(data_min, data_max+h.slot_width())
+    ax.set_xlim(data_min, data_max + h.slot_width())
   pyplot.show()
 
 def apply_hkl_offset(indices, offset):
@@ -2212,5 +2125,4 @@ def apply_hkl_offset(indices, offset):
   h += offset[0]
   k += offset[1]
   l += offset[2]
-  return flex.miller_index(
-    h.iround(), k.iround(), l.iround())
+  return flex.miller_index(h.iround(), k.iround(), l.iround())

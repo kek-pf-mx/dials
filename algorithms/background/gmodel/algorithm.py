@@ -16,6 +16,7 @@ class ModelCache(object):
   A class to cache the model
 
   '''
+
   def __init__(self):
     '''
     Create a model dictionary
@@ -39,20 +40,13 @@ class ModelCache(object):
         self.model[name] = model
     return model
 
-
 # Instance of the model cache
 global_model_cache = ModelCache()
-
 
 class BackgroundAlgorithm(object):
   ''' Class to do background subtraction. '''
 
-  def __init__(self,
-               experiments,
-               model=None,
-               robust=False,
-               tuning_constant=1.345,
-               min_pixels=10):
+  def __init__(self, experiments, model=None, robust=False, tuning_constant=1.345, min_pixels=10):
     '''
     Initialise the algorithm.
 
@@ -69,11 +63,7 @@ class BackgroundAlgorithm(object):
 
     # Create the background creator
     self._create = Creator(
-      model           = model,
-      robust          = robust,
-      tuning_constant = tuning_constant,
-      max_iter        = 100,
-      min_pixels      = min_pixels)
+        model=model, robust=robust, tuning_constant=tuning_constant, max_iter=100, min_pixels=min_pixels)
 
   def compute_background(self, reflections, image_volume=None):
     '''
@@ -93,17 +83,11 @@ class BackgroundAlgorithm(object):
     reflections.set_flags(success != True, reflections.flags.dont_integrate)
     return success
 
-
 class GModelBackgroundCalculatorFactory(object):
   ''' Class to do background subtraction. '''
 
   @classmethod
-  def create(Class,
-             experiments,
-             model=None,
-             robust=False,
-             tuning_constant=1.345,
-             min_pixels=10):
+  def create(Class, experiments, model=None, robust=False, tuning_constant=1.345, min_pixels=10):
     '''
     Initialise the algorithm.
 
@@ -121,8 +105,4 @@ class GModelBackgroundCalculatorFactory(object):
 
     # Create the background creator
     return GModelBackgroundCalculator(
-      model           = model,
-      robust          = robust,
-      tuning_constant = tuning_constant,
-      max_iter        = 100,
-      min_pixels      = min_pixels)
+        model=model, robust=robust, tuning_constant=tuning_constant, max_iter=100, min_pixels=min_pixels)

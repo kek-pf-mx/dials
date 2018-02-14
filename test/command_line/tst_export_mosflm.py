@@ -13,8 +13,7 @@ def run():
     print 'FAIL: dials_regression not configured'
     exit(0)
 
-  path = os.path.join(
-    dials_regression, "experiment_test_data/experiment_1.json")
+  path = os.path.join(dials_regression, "experiment_test_data/experiment_1.json")
   newpath = os.path.join(os.getcwd(), 'experiments.json')
   shutil.copyfile(path, newpath)
   for line in fileinput.FileInput(newpath, inplace=True):
@@ -22,7 +21,7 @@ def run():
       line = line.replace('$DIALS_REGRESSION', dials_regression)
     print line
 
-  cmd = "dials.export format=mosflm %s" %newpath
+  cmd = "dials.export format=mosflm %s" % newpath
   result = easy_run.fully_buffered(cmd).raise_if_errors()
   assert os.path.exists("mosflm/index.mat")
   with open("mosflm/index.mat", "rb") as f:
@@ -49,7 +48,6 @@ BEAM 220.002 212.478
 DISTANCE 190.1800
 MATRIX index.mat
 """)
-
 
 if __name__ == '__main__':
   from dials.test import cd_auto

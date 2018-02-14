@@ -6,7 +6,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """Provides a class for producing efficient looping limits for reflection
 prediction based on the Reeke algorithm (see Mosflm)"""
 
@@ -37,7 +36,7 @@ def solve_quad(a, b, c):
 class reeke_model:
   """Model and methods for the Reeke algorithm"""
 
-  def __init__(self, ub_beg, ub_end, axis, s0, dmin, margin = 3):
+  def __init__(self, ub_beg, ub_end, axis, s0, dmin, margin=3):
 
     # the source vector and wavelength
     self._source = -s0
@@ -61,26 +60,22 @@ class reeke_model:
 
     # Thus set the reciprocal lattice axis vectors, in permuted order
     # p, q and r for both orientations
-    rl_vec = [ub_beg.extract_block(start=(0,0), stop=(3,1)),
-              ub_beg.extract_block(start=(0,1), stop=(3,2)),
-              ub_beg.extract_block(start=(0,2), stop=(3,3))]
-    self._rlv_beg = [rl_vec[col1],
-                     rl_vec[col2],
-                     rl_vec[col3]]
-    rl_vec = [ub_end.extract_block(start=(0,0), stop=(3,1)),
-              ub_end.extract_block(start=(0,1), stop=(3,2)),
-              ub_end.extract_block(start=(0,2), stop=(3,3))]
-    self._rlv_end = [rl_vec[col1],
-                     rl_vec[col2],
-                     rl_vec[col3]]
+    rl_vec = [
+        ub_beg.extract_block(start=(0, 0), stop=(3, 1)),
+        ub_beg.extract_block(start=(0, 1), stop=(3, 2)),
+        ub_beg.extract_block(start=(0, 2), stop=(3, 3))
+    ]
+    self._rlv_beg = [rl_vec[col1], rl_vec[col2], rl_vec[col3]]
+    rl_vec = [
+        ub_end.extract_block(start=(0, 0), stop=(3, 1)),
+        ub_end.extract_block(start=(0, 1), stop=(3, 2)),
+        ub_end.extract_block(start=(0, 2), stop=(3, 3))
+    ]
+    self._rlv_end = [rl_vec[col1], rl_vec[col2], rl_vec[col3]]
 
     # Set permuted setting matrices
-    self._p_beg = matrix.sqr(self._rlv_beg[0].elems +
-                             self._rlv_beg[1].elems +
-                             self._rlv_beg[2].elems).transpose()
-    self._p_end = matrix.sqr(self._rlv_end[0].elems +
-                             self._rlv_end[1].elems +
-                             self._rlv_end[2].elems).transpose()
+    self._p_beg = matrix.sqr(self._rlv_beg[0].elems + self._rlv_beg[1].elems + self._rlv_beg[2].elems).transpose()
+    self._p_end = matrix.sqr(self._rlv_end[0].elems + self._rlv_end[1].elems + self._rlv_end[2].elems).transpose()
 
     ## Define a new coordinate system concentric with the Ewald sphere.
     ##
@@ -96,14 +91,14 @@ class reeke_model:
     ##
 
     # Calculate P' matrices for the beginning and end settings
-    pp_beg = matrix.rec(self._p_beg.elems[0:3] + (-1.*self._source[0],) +
-                        self._p_beg.elems[3:6] + (-1.*self._source[1],) +
-                        self._p_beg.elems[6:9] + (-1.*self._source[2],),
-                        n=(3, 4))
-    pp_end = matrix.rec(self._p_end.elems[0:3] + (-1.*self._source[0],) +
-                        self._p_end.elems[3:6] + (-1.*self._source[1],) +
-                        self._p_end.elems[6:9] + (-1.*self._source[2],),
-                        n=(3, 4))
+    pp_beg = matrix.rec(
+        self._p_beg.elems[0:3] + (-1. * self._source[0], ) + self._p_beg.elems[3:6] +
+        (-1. * self._source[1], ) + self._p_beg.elems[6:9] + (-1. * self._source[2], ),
+        n=(3, 4))
+    pp_end = matrix.rec(
+        self._p_end.elems[0:3] + (-1. * self._source[0], ) + self._p_end.elems[3:6] +
+        (-1. * self._source[1], ) + self._p_end.elems[6:9] + (-1. * self._source[2], ),
+        n=(3, 4))
 
     # Various quantities of interest are obtained from the reciprocal metric
     # tensor T of P'. These quantities are to be used (later) for solving
@@ -115,38 +110,22 @@ class reeke_model:
     t_end = (pp_end.transpose() * pp_end).as_list_of_lists()
 
     # quantities that are constant with p, beginning orientation
-    self._cp_beg = [t_beg[2][2],
-                    t_beg[2][3]**2,
-                    t_beg[0][2] * t_beg[2][3] - t_beg[0][3] * t_beg[2][2],
-                    t_beg[0][2]**2 - t_beg[0][0] * t_beg[2][2],
-                    t_beg[1][2] * t_beg[2][3] - t_beg[1][3] * t_beg[2][2],
-                    t_beg[0][2] * t_beg[1][2] - t_beg[0][1] * t_beg[2][2],
-                    t_beg[1][2]**2 - t_beg[1][1] * t_beg[2][2],
-                    2.0 * t_beg[0][2],
-                    2.0 * t_beg[1][2],
-                    t_beg[0][0],
-                    t_beg[1][1],
-                    2.0 * t_beg[0][1],
-                    2.0 * t_beg[2][3],
-                    2.0 * t_beg[1][3],
-                    2.0 * t_beg[0][3]]
+    self._cp_beg = [
+        t_beg[2][2], t_beg[2][3]**2, t_beg[0][2] * t_beg[2][3] - t_beg[0][3] * t_beg[2][2],
+        t_beg[0][2]**2 - t_beg[0][0] * t_beg[2][2], t_beg[1][2] * t_beg[2][3] - t_beg[1][3] * t_beg[2][2],
+        t_beg[0][2] * t_beg[1][2] - t_beg[0][1] * t_beg[2][2], t_beg[1][2]**2 - t_beg[1][1] * t_beg[2][2],
+        2.0 * t_beg[0][2], 2.0 * t_beg[1][2], t_beg[0][0], t_beg[1][1], 2.0 * t_beg[0][1], 2.0 * t_beg[2][3],
+        2.0 * t_beg[1][3], 2.0 * t_beg[0][3]
+    ]
 
     # quantities that are constant with p, end orientation
-    self._cp_end = [t_end[2][2],
-                    t_end[2][3]**2,
-                    t_end[0][2] * t_end[2][3] - t_end[0][3] * t_end[2][2],
-                    t_end[0][2]**2 - t_end[0][0] * t_end[2][2],
-                    t_end[1][2] * t_end[2][3] - t_end[1][3] * t_end[2][2],
-                    t_end[0][2] * t_end[1][2] - t_end[0][1] * t_end[2][2],
-                    t_end[1][2]**2 - t_end[1][1] * t_end[2][2],
-                    2.0 * t_end[0][2],
-                    2.0 * t_end[1][2],
-                    t_end[0][0],
-                    t_end[1][1],
-                    2.0 * t_end[0][1],
-                    2.0 * t_end[2][3],
-                    2.0 * t_end[1][3],
-                    2.0 * t_end[0][3]]
+    self._cp_end = [
+        t_end[2][2], t_end[2][3]**2, t_end[0][2] * t_end[2][3] - t_end[0][3] * t_end[2][2],
+        t_end[0][2]**2 - t_end[0][0] * t_end[2][2], t_end[1][2] * t_end[2][3] - t_end[1][3] * t_end[2][2],
+        t_end[0][2] * t_end[1][2] - t_end[0][1] * t_end[2][2], t_end[1][2]**2 - t_end[1][1] * t_end[2][2],
+        2.0 * t_end[0][2], 2.0 * t_end[1][2], t_end[0][0], t_end[1][1], 2.0 * t_end[0][1], 2.0 * t_end[2][3],
+        2.0 * t_end[1][3], 2.0 * t_end[0][3]
+    ]
 
     ## The following are set during the generation of indices
 
@@ -221,7 +200,6 @@ class reeke_model:
 
     return index_of_p, index_of_q, index_of_r
 
-
   def _p_limits(self):
     """
     Calculate the values of p at which planes of constant p are tangential
@@ -288,8 +266,7 @@ class reeke_model:
     sin_2theta = sin(2.0 * asin(sin_theta))
 
     e = 2.0 * sin_theta**2 * dp_beg
-    f = sin_2theta * sqrt(max(1. / self._wavelength_sq - dp_beg**2,
-                                   0.))
+    f = sin_2theta * sqrt(max(1. / self._wavelength_sq - dp_beg**2, 0.))
     limits = [(sign * e + s * f) / p_dist for s in (-1, 1)]
 
     self._res_p_lim_beg = tuple(sorted(limits))
@@ -303,27 +280,19 @@ class reeke_model:
     # select between Ewald and resolution limits on the basis of sign
     if sign < 0: # p axis aligned with beam, against source
 
-      p_min_beg = max(min(self._res_p_lim_beg),
-                      min(self._ewald_p_lim_beg))
-      p_min_end = max(min(self._res_p_lim_end),
-                      min(self._ewald_p_lim_end))
+      p_min_beg = max(min(self._res_p_lim_beg), min(self._ewald_p_lim_beg))
+      p_min_end = max(min(self._res_p_lim_end), min(self._ewald_p_lim_end))
 
-      p_max_beg = max(max(self._res_p_lim_beg),
-                      max(self._ewald_p_lim_beg))
-      p_max_end = max(max(self._res_p_lim_end),
-                      max(self._ewald_p_lim_end))
+      p_max_beg = max(max(self._res_p_lim_beg), max(self._ewald_p_lim_beg))
+      p_max_end = max(max(self._res_p_lim_end), max(self._ewald_p_lim_end))
 
     else: # p axis aligned with source, against beam
 
-      p_min_beg = min(min(self._res_p_lim_beg),
-                      min(self._ewald_p_lim_beg))
-      p_min_end = min(min(self._res_p_lim_end),
-                      min(self._ewald_p_lim_end))
+      p_min_beg = min(min(self._res_p_lim_beg), min(self._ewald_p_lim_beg))
+      p_min_end = min(min(self._res_p_lim_end), min(self._ewald_p_lim_end))
 
-      p_max_beg = min(max(self._res_p_lim_beg),
-                      max(self._ewald_p_lim_beg))
-      p_max_end = min(max(self._res_p_lim_end),
-                      max(self._ewald_p_lim_end))
+      p_max_beg = min(max(self._res_p_lim_beg), max(self._ewald_p_lim_beg))
+      p_max_end = min(max(self._res_p_lim_end), max(self._ewald_p_lim_end))
 
     p_lim_beg = (p_min_beg, p_max_beg)
     p_lim_end = (p_min_end, p_max_end)
@@ -356,8 +325,7 @@ class reeke_model:
 
     # Extend limits by the margin, ensuring there is a range even for
     # a single quadratic root
-    res_q_lim = [int(res_q_lim[0]) - max(self._margin, 1),
-                 int(res_q_lim[-1]) + max(self._margin, 1)]
+    res_q_lim = [int(res_q_lim[0]) - max(self._margin, 1), int(res_q_lim[-1]) + max(self._margin, 1)]
 
     # Ewald sphere limits for the beginning setting
     b = 2.0 * (self._cp_beg[4] + p * self._cp_beg[5])
@@ -376,8 +344,7 @@ class reeke_model:
     ewald_q_lim = sorted([item for item in ewald_q_lim_beg + \
                           ewald_q_lim_end if item is not None])
     if len(ewald_q_lim) > 0:
-      ewald_q_lim = [int(ewald_q_lim[0]) - max(self._margin, 1),
-                     int(ewald_q_lim[-1]) + max(self._margin, 1)]
+      ewald_q_lim = [int(ewald_q_lim[0]) - max(self._margin, 1), int(ewald_q_lim[-1]) + max(self._margin, 1)]
 
     else:
       return None
@@ -404,8 +371,7 @@ class reeke_model:
 
     # Extend limits by the margin, ensuring there is a range even for
     # a single quadratic root
-    res_r_lim = [int(res_r_lim[0]) - max(self._margin, 1),
-                 int(res_r_lim[-1]) + max(self._margin, 1)]
+    res_r_lim = [int(res_r_lim[0]) - max(self._margin, 1), int(res_r_lim[-1]) + max(self._margin, 1)]
 
     # Ewald sphere limits for the beginning setting
     b = cq_beg[0] + q * self._cp_beg[8] + self._cp_beg[12]
@@ -490,16 +456,10 @@ class reeke_model:
     for p in range(p_lim[0], p_lim[1] + 1):
 
       # quantities that vary with p but are constant with q, beginning setting
-      cq_beg = [(p * self._cp_beg[7]),
-                (p**2 * self._cp_beg[9]),
-                (p * self._cp_beg[11]),
-                (p * self._cp_beg[14])]
+      cq_beg = [(p * self._cp_beg[7]), (p**2 * self._cp_beg[9]), (p * self._cp_beg[11]), (p * self._cp_beg[14])]
 
       # quantities that vary with p but are constant with q, end setting
-      cq_end = [(p * self._cp_end[7]),
-                (p**2 * self._cp_end[9]),
-                (p * self._cp_end[11]),
-                (p * self._cp_end[14])]
+      cq_end = [(p * self._cp_end[7]), (p**2 * self._cp_end[9]), (p * self._cp_end[11]), (p * self._cp_end[14])]
 
       # find the limiting values of q
       q_lim = self._q_limits(p)
@@ -516,7 +476,7 @@ class reeke_model:
         for item in r_lim:
           if item[0] is None: continue
 
-          r_seq = range(item[0], item[1]+1)
+          r_seq = range(item[0], item[1] + 1)
           r_trials += [e for e in r_seq if e not in r_trials]
 
         for r in r_trials:

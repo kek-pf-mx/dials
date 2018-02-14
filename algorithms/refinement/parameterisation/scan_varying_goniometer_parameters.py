@@ -16,13 +16,11 @@ from dials.algorithms.refinement.parameterisation.scan_varying_model_parameters 
 from dials.algorithms.refinement.parameterisation.goniometer_parameters \
     import GoniometerMixin
 
-class ScanVaryingGoniometerParameterisation(
-  ScanVaryingModelParameterisation, GoniometerMixin):
+class ScanVaryingGoniometerParameterisation(ScanVaryingModelParameterisation, GoniometerMixin):
   """A scan-varying parameterisation for the setting rotation of a goniometer
   with angles expressed in mrad."""
 
-  def __init__(self, goniometer, t_range, num_intervals, beam=None,
-      experiment_ids=None):
+  def __init__(self, goniometer, t_range, num_intervals, beam=None, experiment_ids=None):
 
     if experiment_ids is None:
       experiment_ids = [0]
@@ -57,9 +55,7 @@ class ScanVaryingGoniometerParameterisation(
     p_list = self._build_p_list(e_lab, beam, parameter_type=parameter_type)
 
     # Set up the base class
-    ScanVaryingModelParameterisation.__init__(self, goniometer, istate,
-                                              p_list, smoother,
-                                              experiment_ids=experiment_ids)
+    ScanVaryingModelParameterisation.__init__(self, goniometer, istate, p_list, smoother, experiment_ids=experiment_ids)
 
     return
 
@@ -81,14 +77,16 @@ class ScanVaryingGoniometerParameterisation(
     dgamma1_dp = gamma1_weights * (1. / gamma1_sumweights)
     dgamma2_dp = gamma2_weights * (1. / gamma2_sumweights)
 
-    self._S_at_t, dS_dval = self._compose_core(iS0, gamma1, gamma2,
-      gamma1_axis=gamma1_set.axis, gamma2_axis=gamma2_set.axis)
+    self._S_at_t, dS_dval = self._compose_core(
+        iS0, gamma1, gamma2, gamma1_axis=gamma1_set.axis, gamma2_axis=gamma2_set.axis)
 
     # calculate derivatives of state wrt underlying smoother parameters
     dS_dp1 = [None] * dgamma1_dp.size
-    for (i, v) in dgamma1_dp: dS_dp1[i] = dS_dval[0] * v
+    for (i, v) in dgamma1_dp:
+      dS_dp1[i] = dS_dval[0] * v
     dS_dp2 = [None] * dgamma2_dp.size
-    for (i, v) in dgamma2_dp: dS_dp2[i] = dS_dval[1] * v
+    for (i, v) in dgamma2_dp:
+      dS_dp2[i] = dS_dval[1] * v
 
     # store derivatives as list-of-lists
     self._dstate_dp = [dS_dp1, dS_dp2]

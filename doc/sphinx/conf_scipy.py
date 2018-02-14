@@ -3,15 +3,8 @@ from __future__ import absolute_import, division, print_function
 needs_sphinx = '1.1'
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.imgmath',
-    'numpydoc',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.coverage',
-    'sphinx.ext.autosummary',
-    'matplotlib.sphinxext.plot_directive',
-    'sphinx.ext.viewcode',
-    'libtbx.sphinx.phil',
+    'sphinx.ext.autodoc', 'sphinx.ext.imgmath', 'numpydoc', 'sphinx.ext.intersphinx', 'sphinx.ext.coverage',
+    'sphinx.ext.autosummary', 'matplotlib.sphinxext.plot_directive', 'sphinx.ext.viewcode', 'libtbx.sphinx.phil',
     'libtbx.sphinx.python_string'
 ]
 
@@ -28,10 +21,7 @@ exclude_patterns = ['_build', 'scipy-sphinx-theme']
 pygments_style = 'sphinx'
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {
-  'http://docs.python.org/': None,
-  'http://cci.lbl.gov/cctbx_docs/': None
-}
+intersphinx_mapping = {'http://docs.python.org/': None, 'http://cci.lbl.gov/cctbx_docs/': None}
 
 # -- Options for HTML output ---------------------------------------------------
 
@@ -40,10 +30,9 @@ html_theme_path = ['scipy-sphinx-theme/_theme']
 #html_logo = '_static/scipyshiny_small.png'
 html_static_path = ['_static']
 html_theme_options = {
-    "edit_link": "true",
-    "sidebar": "right",
-    "scipy_org_logo": "false",
-    "rootlinks": [("dials://diamond.ac.uk/doc/", "DIALS"),]
+    "edit_link": "true", "sidebar": "right", "scipy_org_logo": "false", "rootlinks": [
+        ("dials://diamond.ac.uk/doc/", "DIALS"),
+    ]
 }
 
 imgmath_latex_preamble = r"""
@@ -68,9 +57,9 @@ plot_formats = [('png', 96), 'pdf']
 plot_html_show_formats = False
 
 import math
-phi = (math.sqrt(5) + 1)/2
+phi = (math.sqrt(5) + 1) / 2
 
-font_size = 13*72/96.0  # 13 px
+font_size = 13 * 72 / 96.0 # 13 px
 
 plot_rcparams = {
     'font.size': font_size,
@@ -79,7 +68,7 @@ plot_rcparams = {
     'xtick.labelsize': font_size,
     'ytick.labelsize': font_size,
     'legend.fontsize': font_size,
-    'figure.figsize': (3*phi, 3),
+    'figure.figsize': (3 * phi, 3),
     'figure.subplot.bottom': 0.2,
     'figure.subplot.left': 0.2,
     'figure.subplot.right': 0.9,

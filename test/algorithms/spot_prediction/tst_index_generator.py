@@ -4,8 +4,7 @@ import libtbx.load_env
 from os.path import join, isdir
 have_dials_regression = libtbx.env.has_module("dials_regression")
 if have_dials_regression:
-  dials_regression = libtbx.env.find_in_repositories(
-    relative_path="dials_regression", test=isdir)
+  dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=isdir)
 
 def run():
   if not have_dials_regression:
@@ -66,9 +65,9 @@ def run():
   min_xds_l, max_xds_l = numpy.min(xds_l), numpy.max(xds_l)
 
   # Ensure we have the whole xds range  in the generated set
-  assert(min_gen_h <= min_xds_h and max_gen_h >= max_xds_h)
-  assert(min_gen_k <= min_xds_k and max_gen_k >= max_xds_k)
-  assert(min_gen_l <= min_xds_l and max_gen_l >= max_xds_l)
+  assert (min_gen_h <= min_xds_h and max_gen_h >= max_xds_h)
+  assert (min_gen_k <= min_xds_k and max_gen_k >= max_xds_k)
+  assert (min_gen_l <= min_xds_l and max_gen_l >= max_xds_l)
 
   # Test Passed
   print "OK"

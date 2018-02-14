@@ -91,24 +91,23 @@ class Script(object):
 
     phil_scope = parse(phil_str, process_includes=True)
 
-
     # The script usage
-    usage  = "usage: %s [options] experiment.json" % libtbx.env.dispatcher_name
+    usage = "usage: %s [options] experiment.json" % libtbx.env.dispatcher_name
 
     # Create the parser
     self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      epilog=help_message,
-      read_reflections=True,
-      read_experiments=True,
-      read_datablocks=True)
+        usage=usage,
+        phil=phil_scope,
+        epilog=help_message,
+        read_reflections=True,
+        read_experiments=True,
+        read_datablocks=True)
 
   def analysis(self, reflections):
     '''Print a table of flags present in the reflections file'''
 
     from libtbx.table_utils import simple_table
-    header = ['flag','nref']
+    header = ['flag', 'nref']
     rows = []
     for name, val in zip(self.flag_names, self.flag_values):
       n = (reflections.get_flags(val)).count(True)
@@ -172,11 +171,9 @@ class Script(object):
 
     print "{0} reflections loaded".format(len(reflections))
 
-    if (len(params.inclusions.flag) == 0 and
-        len(params.exclusions.flag) == 0 and
-        params.d_min is None and params.d_max is None and
-        params.partiality.min is None and params.partiality.max is None and
-        not params.ice_rings.filter):
+    if (len(params.inclusions.flag) == 0 and len(params.exclusions.flag) == 0 and params.d_min is None
+        and params.d_max is None and params.partiality.min is None and params.partiality.max is None
+        and not params.ice_rings.filter):
       print "No filter specified. Performing analysis instead."
       return self.analysis(reflections)
 
@@ -245,19 +242,18 @@ class Script(object):
       if d_min is None:
         d_min = flex.min(d_spacings)
 
-      ice_filter = filtering.PowderRingFilter(
-        params.ice_rings.unit_cell, params.ice_rings.space_group.group(), d_min, width)
+      ice_filter = filtering.PowderRingFilter(params.ice_rings.unit_cell, params.ice_rings.space_group.group(), d_min,
+                                              width)
 
       ice_sel = ice_filter(d_spacings)
 
-      print "Rejecting %i reflections at ice ring resolution" %ice_sel.count(True)
+      print "Rejecting %i reflections at ice ring resolution" % ice_sel.count(True)
       reflections = reflections.select(~ice_sel)
       #reflections = reflections.select(ice_sel)
 
     # Save filtered reflections to file
     if params.output.reflections:
-      print "Saving {0} reflections to {1}".format(len(reflections),
-                                                   params.output.reflections)
+      print "Saving {0} reflections to {1}".format(len(reflections), params.output.reflections)
       reflections.as_pickle(params.output.reflections)
 
     return

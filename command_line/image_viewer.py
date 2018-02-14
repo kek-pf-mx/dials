@@ -13,7 +13,6 @@ from __future__ import absolute_import, division
 # LIBTBX_PRE_DISPATCHER_INCLUDE_SH export PHENIX_GUI_ENVIRONMENT=1
 # LIBTBX_PRE_DISPATCHER_INCLUDE_SH export BOOST_ADAPTBX_FPE_DEFAULT=1
 
-
 import iotbx.phil
 
 help_message = '''
@@ -35,7 +34,8 @@ Examples::
 
 '''
 
-phil_scope = iotbx.phil.parse("""\
+phil_scope = iotbx.phil.parse(
+    """\
 brightness = 100
   .type = int
 color_scheme = *grayscale rainbow heatmap invert
@@ -117,7 +117,8 @@ predict_reflections = False
 include scope dials.algorithms.profile_model.factory.phil_scope
 include scope dials.algorithms.spot_prediction.reflection_predictor.phil_scope
 
-""", process_includes=True)
+""",
+    process_includes=True)
 
 class Script(object):
   '''Class to run script.'''
@@ -141,20 +142,17 @@ class Script(object):
   def view(self):
     from dials.util.image_viewer.spotfinder_wrap import spot_wrapper
     self.wrapper = spot_wrapper(params=self.params)
-    self.wrapper.display(
-      datablock=self.datablock,
-      experiments=self.experiments,
-      reflections=self.reflections)
+    self.wrapper.display(datablock=self.datablock, experiments=self.experiments, reflections=self.reflections)
 
 if __name__ == '__main__':
   import wx # It is unclear why, but it is crucial that wx
-            # is imported before the parser is run.
-            # Otherwise viewer will crash when run with
-            # .cbf image as parameter on linux with wxPython>=3
-            # The problem can be traced to
-            # dxtbx/format/FormatCBFFull.py:49
-            #  ''' from iotbx.detectors.cbf import CBFImage '''
-            # and the wx import must happen before that import.
+  # is imported before the parser is run.
+  # Otherwise viewer will crash when run with
+  # .cbf image as parameter on linux with wxPython>=3
+  # The problem can be traced to
+  # dxtbx/format/FormatCBFFull.py:49
+  #  ''' from iotbx.detectors.cbf import CBFImage '''
+  # and the wx import must happen before that import.
 
   from dials.util.options import OptionParser
   from dials.util.options import flatten_datablocks
@@ -163,15 +161,15 @@ if __name__ == '__main__':
   import libtbx.load_env
   usage_message = """
     %s datablock.json [reflections.pickle]
-  """ %libtbx.env.dispatcher_name
+  """ % libtbx.env.dispatcher_name
   parser = OptionParser(
-    usage=usage_message,
-    phil=phil_scope,
-    read_datablocks=True,
-    read_experiments=True,
-    read_reflections=True,
-    read_datablocks_from_images=True,
-    epilog=help_message)
+      usage=usage_message,
+      phil=phil_scope,
+      read_datablocks=True,
+      read_experiments=True,
+      read_reflections=True,
+      read_datablocks_from_images=True,
+      epilog=help_message)
   params, options = parser.parse_args(show_diff_phil=True)
   datablocks = flatten_datablocks(params.input.datablock)
   experiments = flatten_experiments(params.input.experiments)
@@ -191,12 +189,7 @@ if __name__ == '__main__':
     from libtbx import easy_pickle
     params.mask = easy_pickle.load(params.mask)
 
-  runner = Script(
-    params=params,
-    reflections=reflections,
-    datablock=datablock,
-    experiments=experiments
-  )
+  runner = Script(params=params, reflections=reflections, datablock=datablock, experiments=experiments)
 
   # Run the script
   runner()

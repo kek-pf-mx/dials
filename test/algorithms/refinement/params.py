@@ -190,8 +190,7 @@ geometry_phil = """geometry.parameters
     }
 }"""
 
-
-minimiser_phil="""minimiser.parameters
+minimiser_phil = """minimiser.parameters
     .help = "Set up an minimiser for refinement test case"
 {
     engine = SimpleLBFGS LBFGScurvs *GaussNewton

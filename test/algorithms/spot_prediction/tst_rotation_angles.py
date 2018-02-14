@@ -4,8 +4,7 @@ import libtbx.load_env
 from os.path import join, isdir
 have_dials_regression = libtbx.env.has_module("dials_regression")
 if have_dials_regression:
-  dials_regression = libtbx.env.find_in_repositories(
-    relative_path="dials_regression", test=isdir)
+  dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=isdir)
 
 def run():
   if not have_dials_regression:
@@ -55,8 +54,7 @@ def run():
   # Get the number of frames from the max z value
   xcal, ycal, zcal = zip(*integrate_handle.xyzcal)
   num_frames = int(ceil(max(zcal)))
-  scan.set_image_range((scan.get_image_range()[0],
-                      scan.get_image_range()[0] + num_frames - 1))
+  scan.set_image_range((scan.get_image_range()[0], scan.get_image_range()[0] + num_frames - 1))
 
   # Create the rotation angle object
   ra = RotationAngles(beam.get_s0(), gonio.get_rotation_axis())
@@ -78,7 +76,7 @@ def run():
       r = m2.axis_and_angle_as_r3_rotation_matrix(angle=phi)
       pstar = r * ub * h
       s1 = s0 + pstar
-      assert(abs(s1.length() - s0.length()) < 1e-7)
+      assert (abs(s1.length() - s0.length()) < 1e-7)
 
   print "OK"
 
@@ -89,6 +87,7 @@ def run():
     # Calculate the angles
     angles = ra(h, ub)
     gen_phi[h] = angles
+
 #        for phi in angles:
 #            try:
 #                a = gen_phi[h]
@@ -97,9 +96,8 @@ def run():
 #            except KeyError:
 #                gen_phi[h] = [phi]
 
-  # For each hkl in the xds file
-  for hkl, xyz in zip(integrate_handle.hkl,
-                      integrate_handle.xyzcal):
+# For each hkl in the xds file
+  for hkl, xyz in zip(integrate_handle.hkl, integrate_handle.xyzcal):
 
     # Calculate the XDS phi value
     xds_phi = scan.get_oscillation(deg=False)[0] + \
@@ -120,7 +118,7 @@ def run():
       my_phi = my_phi[0]
 
     # Check the Phi values are the same
-    assert(abs(xds_phi - my_phi) < 0.1)
+    assert (abs(xds_phi - my_phi) < 0.1)
 
   # Test Passed
   print "OK"

@@ -36,7 +36,7 @@ def read_image_to_flex_array(in_image):
   import os
   from dxtbx import load
 
-  assert(os.path.exists(in_image))
+  assert (os.path.exists(in_image))
 
   start_tag = binascii.unhexlify('0c1a04d5')
 
@@ -55,7 +55,7 @@ def write_image_from_flex_array(out_image, pixel_values, header):
   import binascii
   import os
 
-  assert(not os.path.exists(out_image))
+  assert (not os.path.exists(out_image))
   start_tag = binascii.unhexlify('0c1a04d5')
 
   compressed = compress(pixel_values)

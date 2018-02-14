@@ -2,8 +2,7 @@ from __future__ import absolute_import, division
 import os
 import shutil
 import sys
-libtbx_path = os.path.join(
-  os.path.abspath(os.path.dirname(os.path.dirname(__file__))), "lib")
+libtbx_path = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), "lib")
 if libtbx_path not in sys.path:
   sys.path.append(libtbx_path)
 from libtbx.auto_build import install_distribution
@@ -17,24 +16,24 @@ class installer(install_distribution.installer):
   base_package_options = ["--dials"]
   installer_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
   modules = [
-    # hot
-    'annlib',
-    'boost',
-    'scons',
-    'ccp4io',
-    # base
-    'cbflib',
-    'cctbx_project',
-    'gui_resources',
-    'ccp4io_adaptbx',
-    'annlib_adaptbx',
-    'tntbx',
-    'clipper',
-    # dials
-    'dials',
-    'xia2',
-    'iota',
-    'prime',
+      # hot
+      'annlib',
+      'boost',
+      'scons',
+      'ccp4io',
+      # base
+      'cbflib',
+      'cctbx_project',
+      'gui_resources',
+      'ccp4io_adaptbx',
+      'annlib_adaptbx',
+      'tntbx',
+      'clipper',
+      # dials
+      'dials',
+      'xia2',
+      'iota',
+      'prime',
   ]
   flags = list(install_distribution.installer.flags)
   try:
@@ -49,16 +48,18 @@ class installer(install_distribution.installer):
     self.print_header('Deflating installer')
 
     suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+
     def humansize(nbytes):
       if nbytes == 0: return '0 B'
       i = 0
-      while nbytes >= 1024 and i < len(suffixes)-1:
+      while nbytes >= 1024 and i < len(suffixes) - 1:
         nbytes /= 1024.
         i += 1
       f = ('%.2f' % nbytes).rstrip('0').rstrip('.')
       return '%s %s' % (f, suffixes[i])
 
     self._cleaned_size, self._cleaned_files = 0, 0
+
     def rmdir(subdir):
       fullpath = os.path.join(directory, subdir)
       if not os.path.exists(fullpath):
@@ -75,6 +76,7 @@ class installer(install_distribution.installer):
       shutil.rmtree(fullpath)
       self._cleaned_size = self._cleaned_size + total_size
       self._cleaned_files = self._cleaned_files + num_files
+
     def rmfile(filename):
       fullpath = os.path.join(directory, filename)
       if not os.path.exists(fullpath):

@@ -8,7 +8,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """
 Regression test for refinement of beam, detector and crystal orientation
 parameters using generated reflection positions from ideal geometry.
@@ -87,13 +86,14 @@ override = """geometry.parameters
   detector.centre.exactly.value=1.0 -0.5 199.0
 }"""
 
-master_phil = parse("""
+master_phil = parse(
+    """
 include scope dials.test.algorithms.refinement.geometry_phil
 include scope dials.test.algorithms.refinement.minimiser_phil
-""", process_includes=True)
+""",
+    process_includes=True)
 
-models = setup_geometry.Extract(master_phil, local_overrides=override,
-                                verbose=False)
+models = setup_geometry.Extract(master_phil, local_overrides=override, verbose=False)
 
 mydetector = models.detector
 mygonio = models.goniometer
@@ -119,21 +119,15 @@ s0_param.set_fixed([True, False, True])
 
 # Build a mock scan for a 180 degree sweep
 sf = ScanFactory()
-myscan = sf.make_scan(image_range = (1,1800),
-                      exposure_times = 0.1,
-                      oscillation = (0, 0.1),
-                      epochs = range(1800),
-                      deg = True)
+myscan = sf.make_scan(image_range=(1, 1800), exposure_times=0.1, oscillation=(0, 0.1), epochs=range(1800), deg=True)
 
 # Build an ExperimentList
 experiments = ExperimentList()
-experiments.append(Experiment(
-      beam=mybeam, detector=mydetector, goniometer=mygonio,
-      scan=myscan, crystal=mycrystal, imageset=None))
+experiments.append(
+    Experiment(beam=mybeam, detector=mydetector, goniometer=mygonio, scan=myscan, crystal=mycrystal, imageset=None))
 
 # Create the PredictionParameterisation
-pred_param = XYPhiPredictionParameterisation(experiments, [det_param],
-    [s0_param], [xlo_param], [xluc_param])
+pred_param = XYPhiPredictionParameterisation(experiments, [det_param], [s0_param], [xlo_param], [xluc_param])
 
 ################################
 # Apply known parameter shifts #
@@ -141,8 +135,7 @@ pred_param = XYPhiPredictionParameterisation(experiments, [det_param],
 
 # shift detector by 1.0 mm each translation and 4 mrad each rotation
 det_p_vals = det_param.get_param_vals()
-p_vals = [a + b for a, b in zip(det_p_vals,
-                                [1.0, 1.0, 1.0, 4., 4., 4.])]
+p_vals = [a + b for a, b in zip(det_p_vals, [1.0, 1.0, 1.0, 4., 4., 4.])]
 det_param.set_param_vals(p_vals)
 
 # shift beam by 4 mrad in free axis
@@ -161,8 +154,7 @@ xlo_param.set_param_vals(p_vals)
 # alpha and beta angles)
 xluc_p_vals = xluc_param.get_param_vals()
 cell_params = mycrystal.get_unit_cell().parameters()
-cell_params = [a + b for a, b in zip(cell_params, [0.1, -0.1, 0.1, 0.1,
-                                                   -0.1, 0.0])]
+cell_params = [a + b for a, b in zip(cell_params, [0.1, -0.1, 0.1, 0.1, -0.1, 0.0])]
 new_uc = unit_cell(cell_params)
 newB = matrix.sqr(new_uc.fractionalization_matrix()).transpose()
 S = symmetrize_reduce_enlarge(mycrystal.get_space_group())
@@ -177,7 +169,7 @@ xluc_param.set_param_vals(X)
 # All indices in a 2.0 Angstrom sphere
 resolution = 2.0
 index_generator = IndexGenerator(mycrystal.get_unit_cell(),
-                space_group(space_group_symbols(1).hall()).type(), resolution)
+                                 space_group(space_group_symbols(1).hall()).type(), resolution)
 indices = index_generator.to_array()
 
 sweep_range = myscan.get_oscillation_range(deg=False)
@@ -226,8 +218,7 @@ xluc_param.set_param_vals(xluc_p_vals)
 # Select reflections for refinement #
 #####################################
 
-refman = ReflectionManager(obs_refs, experiments, outlier_detector=None,
-  close_to_spindle_cutoff=0.1)
+refman = ReflectionManager(obs_refs, experiments, outlier_detector=None, close_to_spindle_cutoff=0.1)
 
 ##############################
 # Set up the target function #
@@ -235,28 +226,23 @@ refman = ReflectionManager(obs_refs, experiments, outlier_detector=None,
 
 # The current 'achieved' criterion compares RMSD against 1/3 the pixel size and
 # 1/3 the image width in radians. For the simulated data, these are just made up
-mytarget = LeastSquaresPositionalResidualWithRmsdCutoff(experiments,
-    ref_predictor, refman, pred_param, restraints_parameterisation=None)
+mytarget = LeastSquaresPositionalResidualWithRmsdCutoff(
+    experiments, ref_predictor, refman, pred_param, restraints_parameterisation=None)
 
 ######################################
 # Set up the LSTBX refinement engine #
 ######################################
 
-overrides="""minimiser.parameters.engine=GaussNewton
+overrides = """minimiser.parameters.engine=GaussNewton
 minimiser.parameters.verbosity=0
 minimiser.parameters.logfile=None"""
-refiner = setup_minimiser.Extract(master_phil,
-                                  mytarget,
-                                  pred_param,
-                                  local_overrides = overrides).refiner
+refiner = setup_minimiser.Extract(master_phil, mytarget, pred_param, local_overrides=overrides).refiner
 
 refiner.run()
 
 assert mytarget.achieved()
 assert refiner.get_num_steps() == 1
-assert approx_equal(mytarget.rmsds(), (0.00508252354876,
-                                       0.00420954552156,
-                                       8.97303428289e-05))
+assert approx_equal(mytarget.rmsds(), (0.00508252354876, 0.00420954552156, 8.97303428289e-05))
 print "OK"
 
 ###############################
@@ -272,19 +258,14 @@ xluc_param.set_param_vals(xluc_p_vals)
 # Set up the LBFGS with curvatures refinement engine #
 ######################################################
 
-overrides="""minimiser.parameters.engine=LBFGScurvs
+overrides = """minimiser.parameters.engine=LBFGScurvs
 minimiser.parameters.verbosity=0
 minimiser.parameters.logfile=None"""
-refiner = setup_minimiser.Extract(master_phil,
-                                  mytarget,
-                                  pred_param,
-                                  local_overrides = overrides).refiner
+refiner = setup_minimiser.Extract(master_phil, mytarget, pred_param, local_overrides=overrides).refiner
 
 refiner.run()
 
 assert mytarget.achieved()
 assert refiner.get_num_steps() == 9
-assert approx_equal(mytarget.rmsds(), (0.0558857700305,
-                                       0.0333446685335,
-                                       0.000347402754278))
+assert approx_equal(mytarget.rmsds(), (0.0558857700305, 0.0333446685335, 0.000347402754278))
 print "OK"

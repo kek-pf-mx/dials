@@ -45,12 +45,7 @@ class Script(object):
     params, options = self.parser.parse_args()
 
     # Create the list of interfaces
-    interfaces = [
-      ProfileModelIface,
-      BackgroundIface,
-      CentroidIface,
-      SpotFinderThresholdIface
-    ]
+    interfaces = [ProfileModelIface, BackgroundIface, CentroidIface, SpotFinderThresholdIface]
 
     # Loop through all the interfaces
     for iface in interfaces:
@@ -67,7 +62,7 @@ class Script(object):
           if options.verbose > 1:
             level = options.verbose - 2
             scope = iface.phil_scope()
-            phil = scope.as_str(print_width=80-3, attributes_level=level)
+            phil = scope.as_str(print_width=80 - 3, attributes_level=level)
             phil = '\n'.join((' ' * 2) + l for l in phil.split('\n'))
             if phil.strip() != '':
               print ' phil:\n%s' % phil
@@ -82,11 +77,10 @@ class Script(object):
             if options.verbose > 1:
               level = options.verbose - 2
               scope = ext.phil_scope()
-              phil = scope.as_str(print_width=80-3, attributes_level=level)
+              phil = scope.as_str(print_width=80 - 3, attributes_level=level)
               phil = '\n'.join((' ' * 3) + l for l in phil.split('\n'))
               if phil.strip() != '':
                 print '  phil:\n%s' % phil
-
 
 if __name__ == '__main__':
   from dials.util import halraiser

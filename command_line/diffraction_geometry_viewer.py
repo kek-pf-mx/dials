@@ -7,15 +7,14 @@ from __future__ import absolute_import, division
 from dials.command_line.reciprocal_lattice_viewer import *
 
 class DGVWindow(RLVWindow):
-
   def draw_ewald_sphere(self):
 
     if self.beam_vector is None: return
     from scitbx import matrix
     s0 = matrix.col(self.beam_vector)
     ewald_sphere = gltbx.util.WireSphere
-    x = (-100*s0).elems
-    r = 100*s0.length()
+    x = (-100 * s0).elems
+    r = 100 * s0.length()
     grid = 200
     glPushMatrix()
     glTranslated(*(x))
@@ -27,12 +26,13 @@ class DGVWindow(RLVWindow):
     self.draw_ewald_sphere()
 
 class DiffractionGeometryViewer(ReciprocalLatticeViewer):
-
-  def create_viewer_panel (self) :
-    self.viewer = DGVWindow(settings=self.settings, parent=self, size=(800,600),
-      #orthographic=True
-      )
-
+  def create_viewer_panel(self):
+    self.viewer = DGVWindow(
+        settings=self.settings,
+        parent=self,
+        size=(800, 600),
+        #orthographic=True
+    )
 
 def run(args):
 
@@ -42,17 +42,16 @@ def run(args):
   from dials.util.options import flatten_reflections
   import libtbx.load_env
 
-  usage = "%s [options] datablock.json reflections.pickle" %(
-    libtbx.env.dispatcher_name)
+  usage = "%s [options] datablock.json reflections.pickle" % (libtbx.env.dispatcher_name)
 
   parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_datablocks=True,
-    read_experiments=True,
-    read_reflections=True,
-    check_format=False,
-    epilog=help_message)
+      usage=usage,
+      phil=phil_scope,
+      read_datablocks=True,
+      read_experiments=True,
+      read_reflections=True,
+      check_format=False,
+      epilog=help_message)
 
   params, options = parser.parse_args(show_diff_phil=True)
   datablocks = flatten_datablocks(params.input.datablock)
@@ -75,14 +74,12 @@ def run(args):
   import wxtbx.app
   a = wxtbx.app.CCTBXApp(0)
   a.settings = params
-  f = DiffractionGeometryViewer(
-    None, -1, "Diffraction Geometry viewer", size=(1024,768))
+  f = DiffractionGeometryViewer(None, -1, "Diffraction Geometry viewer", size=(1024, 768))
   f.load_models(imagesets, reflections)
   f.Show()
   a.SetTopWindow(f)
   #a.Bind(wx.EVT_WINDOW_DESTROY, lambda evt: tb_icon.Destroy(), f)
   a.MainLoop()
-
 
 if __name__ == '__main__':
   import sys

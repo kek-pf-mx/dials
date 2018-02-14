@@ -1,15 +1,11 @@
 from __future__ import absolute_import, division
 
-
 class Test:
-
   def __init__(self):
     from scitbx import matrix
     # cubic, 50A cell, 1A radiation, 1 deg osciillation, everything ideal
     a = 50.0
-    self.ub = matrix.sqr((1.0 / a, 0.0, 0.0,
-                         0.0, 1.0 / a, 0.0,
-                         0.0, 0.0, 1.0 / a))
+    self.ub = matrix.sqr((1.0 / a, 0.0, 0.0, 0.0, 1.0 / a, 0.0, 0.0, 0.0, 1.0 / a))
 
     self.axis = matrix.col((0, 1, 0))
     self.s0 = matrix.col((0, 0, 1))
@@ -37,8 +33,8 @@ class Test:
       assert len(py_index) > 3800
 
       # Check indices are unique in list
-      assert(len(py_set) == len(py_index))
-      assert(len(cp_set) == len(cp_index))
+      assert (len(py_set) == len(py_index))
+      assert (len(cp_set) == len(cp_index))
 
       # Check there are 6 or fewer differences between the two lists. A
       # difference of 6 indices may be caused by just 2 additional Ewald sphere
@@ -59,24 +55,21 @@ class Test:
     import random
     from math import pi
 
-    hkl_sets=[]
+    hkl_sets = []
     # loop over random beam changes and ensure we can generate indices
     us0 = self.s0.normalize()
     for i in range(100):
       # find a random axis orthogonal to the beam about which to rotate it
-      axis = (us0.ortho()).rotate_around_origin(
-          axis=us0, angle=random.uniform(0,2*pi))
+      axis = (us0.ortho()).rotate_around_origin(axis=us0, angle=random.uniform(0, 2 * pi))
 
       # apply small angle of rotation (up to ~1mrad) to perturb the beam direction
-      s0_2 = self.s0.rotate_around_origin(axis=axis,
-          angle=random.uniform(0,0.057), deg=True)
+      s0_2 = self.s0.rotate_around_origin(axis=axis, angle=random.uniform(0, 0.057), deg=True)
 
       # alter the wavelength by up to about 0.1%
-      s0_2 = s0_2 * random.uniform(0.999,1.001)
+      s0_2 = s0_2 * random.uniform(0.999, 1.001)
 
       # now try to generate indices
-      r = ReekeIndexGenerator(ub_beg, ub_end, space_group_type, self.axis,
-        self.s0, s0_2, self.dmin, self.margin)
+      r = ReekeIndexGenerator(ub_beg, ub_end, space_group_type, self.axis, self.s0, s0_2, self.dmin, self.margin)
       hkl = r.to_array()
       hkl_sets.append(set(list(hkl)))
 
@@ -97,15 +90,11 @@ class Test:
     import scitbx.math
 
     angle_beg = frame * 1
-    angle_end = (frame+1) * 1
+    angle_end = (frame + 1) * 1
 
-    r_osc_beg = matrix.sqr(
-      scitbx.math.r3_rotation_axis_and_angle_as_matrix(
-      axis = self.axis, angle = angle_beg, deg=True))
+    r_osc_beg = matrix.sqr(scitbx.math.r3_rotation_axis_and_angle_as_matrix(axis=self.axis, angle=angle_beg, deg=True))
 
-    r_osc_end = matrix.sqr(
-      scitbx.math.r3_rotation_axis_and_angle_as_matrix(
-      axis = self.axis, angle = angle_end, deg=True))
+    r_osc_end = matrix.sqr(scitbx.math.r3_rotation_axis_and_angle_as_matrix(axis=self.axis, angle=angle_end, deg=True))
 
     ub_beg = r_osc_beg * self.ub
     ub_end = r_osc_end * self.ub
@@ -127,8 +116,6 @@ class Test:
     r = ReekeIndexGenerator(ub_beg, ub_end, space_group_type, self.axis, self.s0, self.dmin, self.margin)
     hkl = r.to_array()
     return sorted(list(hkl))
-
-
 
 if __name__ == '__main__':
   from dials.test import cd_auto

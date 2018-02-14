@@ -11,7 +11,6 @@ help_message = '''
 %s experiments.json reflections.pickle
 ''' % libtbx.env.dispatcher_name
 
-
 from libtbx.phil import parse
 phil_scope = parse('''
   padding = 0
@@ -34,12 +33,12 @@ class Script(object):
 
     # Create the parser
     self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      epilog=help_message,
-      read_experiments=True,
-      read_reflections=True,
-      read_datablocks=True)
+        usage=usage,
+        phil=phil_scope,
+        epilog=help_message,
+        read_experiments=True,
+        read_reflections=True,
+        read_datablocks=True)
 
   def run(self):
     ''' Extract the shoeboxes. '''
@@ -88,8 +87,8 @@ class Script(object):
       reflections = reflections[0]
 
     # Check the reflections contain the necessary stuff
-    assert("bbox" in reflections)
-    assert("panel" in reflections)
+    assert ("bbox" in reflections)
+    assert ("panel" in reflections)
 
     # Get some models
     detector = imageset.get_detector()
@@ -140,10 +139,9 @@ class Script(object):
       # smooth over scale corresponding to max shoebox size
       d = max(flex.max(_x1 - _x0), flex.max(_y1 - _y0))
 
-      summed_background = summed_area(data, (d,d))
-      summed_mask = summed_area(imask, (d,d))
-      mean_background = (summed_background /
-                         summed_mask.as_double())
+      summed_background = summed_area(data, (d, d))
+      summed_mask = summed_area(imask, (d, d))
+      mean_background = (summed_background / summed_mask.as_double())
       data.as_1d().set_selected(mask.as_1d(), mean_background.as_1d())
       print flex.sum(data.select(data.as_1d() > 0))
 

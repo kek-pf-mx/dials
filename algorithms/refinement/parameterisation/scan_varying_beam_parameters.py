@@ -15,13 +15,11 @@ from dials.algorithms.refinement.parameterisation.scan_varying_model_parameters 
                GaussianSmoother
 from dials.algorithms.refinement.parameterisation.beam_parameters import BeamMixin
 
-class ScanVaryingBeamParameterisation(
-  ScanVaryingModelParameterisation, BeamMixin):
+class ScanVaryingBeamParameterisation(ScanVaryingModelParameterisation, BeamMixin):
   """A scan-varying parameterisation for the beam with angles expressed in
   mrad and wavenumber in inverse Angstroms."""
 
-  def __init__(self, beam, t_range, num_intervals, goniometer=None,
-      experiment_ids=None):
+  def __init__(self, beam, t_range, num_intervals, goniometer=None, experiment_ids=None):
 
     if experiment_ids is None:
       experiment_ids = [0]
@@ -57,9 +55,7 @@ class ScanVaryingBeamParameterisation(
     p_list = self._build_p_list(s0, goniometer, parameter_type=parameter_type)
 
     # Set up the base class
-    ScanVaryingModelParameterisation.__init__(self, beam, istate,
-                                              p_list, smoother,
-                                              experiment_ids=experiment_ids)
+    ScanVaryingModelParameterisation.__init__(self, beam, istate, p_list, smoother, experiment_ids=experiment_ids)
 
     return
 
@@ -83,16 +79,18 @@ class ScanVaryingBeamParameterisation(
     dnu_dp = nu_weights * (1. / nu_sumweights)
 
     # calculate new s0 and its derivatives wrt the values mu1, mu2 and nu
-    self._s0_at_t, ds0_dval = self._compose_core(is0, mu1, mu2, nu,
-      mu1_axis=mu1_set.axis, mu2_axis=mu2_set.axis)
+    self._s0_at_t, ds0_dval = self._compose_core(is0, mu1, mu2, nu, mu1_axis=mu1_set.axis, mu2_axis=mu2_set.axis)
 
     # calculate derivatives of state wrt underlying smoother parameters
     ds0_dp1 = [None] * dmu1_dp.size
-    for (i, v) in dmu1_dp: ds0_dp1[i] = ds0_dval[0] * v
+    for (i, v) in dmu1_dp:
+      ds0_dp1[i] = ds0_dval[0] * v
     ds0_dp2 = [None] * dmu2_dp.size
-    for (i, v) in dmu2_dp: ds0_dp2[i] = ds0_dval[1] * v
+    for (i, v) in dmu2_dp:
+      ds0_dp2[i] = ds0_dval[1] * v
     ds0_dp3 = [None] * dnu_dp.size
-    for (i, v) in dnu_dp: ds0_dp3[i] = ds0_dval[2] * v
+    for (i, v) in dnu_dp:
+      ds0_dp3[i] = ds0_dval[2] * v
 
     # store derivatives as list-of-lists
     self._dstate_dp = [ds0_dp1, ds0_dp2, ds0_dp3]

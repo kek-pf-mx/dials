@@ -26,11 +26,11 @@ class ParameterReporter(object):
   """
 
   def __init__(self,
-               detector_parameterisations = None,
-               beam_parameterisations = None,
-               xl_orientation_parameterisations = None,
-               xl_unit_cell_parameterisations = None,
-               goniometer_parameterisations = None):
+               detector_parameterisations=None,
+               beam_parameterisations=None,
+               xl_orientation_parameterisations=None,
+               xl_unit_cell_parameterisations=None,
+               goniometer_parameterisations=None):
 
     if detector_parameterisations is None:
       detector_parameterisations = []
@@ -76,11 +76,10 @@ class ParameterReporter(object):
 
   def __str__(self):
 
-    s =  "Parameter Report:\n"
+    s = "Parameter Report:\n"
     if self._detector_parameterisations:
       s += "Detector parameters:\n"
-      det_plists = [x.get_params()
-                    for x in self._detector_parameterisations]
+      det_plists = [x.get_params() for x in self._detector_parameterisations]
       params = [x for l in det_plists for x in l]
       for p in params:
         tmp = self._indent(p)
@@ -96,8 +95,7 @@ class ParameterReporter(object):
 
     if self._xl_orientation_parameterisations:
       s += "Crystal orientation parameters:\n"
-      xlo_plists = [x.get_params()
-                    for x in self._xl_orientation_parameterisations]
+      xlo_plists = [x.get_params() for x in self._xl_orientation_parameterisations]
       params = [x for l in xlo_plists for x in l]
       for p in params:
         tmp = self._indent(p)
@@ -105,8 +103,7 @@ class ParameterReporter(object):
 
     if self._xl_unit_cell_parameterisations:
       s += "Crystal unit cell parameters:\n"
-      xluc_plists = [x.get_params()
-                     for x in self._xl_unit_cell_parameterisations]
+      xluc_plists = [x.get_params() for x in self._xl_unit_cell_parameterisations]
       params = [x for l in xluc_plists for x in l]
       for p in params:
         tmp = self._indent(p)
@@ -114,8 +111,7 @@ class ParameterReporter(object):
 
     if self._goniometer_parameterisations:
       s += "Goniometer parameters:\n"
-      gon_plists = [x.get_params()
-                    for x in self._goniometer_parameterisations]
+      gon_plists = [x.get_params() for x in self._goniometer_parameterisations]
       params = [x for l in gon_plists for x in l]
       for p in params:
         tmp = self._indent(p)
@@ -131,15 +127,12 @@ class ParameterReporter(object):
     image_numbers = range(image_range[0], image_range[1] + 1)
     columns = [TableColumn("Image", image_numbers)]
 
-    for parameterisation in (self._detector_parameterisations +
-                             self._beam_parameterisations +
-                             self._xl_orientation_parameterisations +
-                             self._xl_unit_cell_parameterisations +
-                             self._goniometer_parameterisations):
+    for parameterisation in (
+        self._detector_parameterisations + self._beam_parameterisations + self._xl_orientation_parameterisations +
+        self._xl_unit_cell_parameterisations + self._goniometer_parameterisations):
       for p in parameterisation.get_params():
         try:
-          vals = [parameterisation.get_smoothed_parameter_value(i, p)
-                  for i in image_numbers]
+          vals = [parameterisation.get_smoothed_parameter_value(i, p) for i in image_numbers]
           columns.append(TableColumn(p.name_stem, vals))
         except AttributeError:
           continue
@@ -160,11 +153,9 @@ class ParameterReporter(object):
     in the global model"""
 
     global_p_list = []
-    for parameterisation in (self._detector_parameterisations +
-                             self._beam_parameterisations +
-                             self._xl_orientation_parameterisations +
-                             self._xl_unit_cell_parameterisations +
-                             self._goniometer_parameterisations):
+    for parameterisation in (
+        self._detector_parameterisations + self._beam_parameterisations + self._xl_orientation_parameterisations +
+        self._xl_unit_cell_parameterisations + self._goniometer_parameterisations):
       global_p_list.extend(parameterisation.get_params(only_free))
 
     return global_p_list
@@ -188,22 +179,19 @@ class ParameterReporter(object):
       param_names.extend(params)
 
     if self._xl_orientation_parameterisations:
-      xlo_param_name_lists = [x.get_param_names(only_free) for x
-                    in self._xl_orientation_parameterisations]
+      xlo_param_name_lists = [x.get_param_names(only_free) for x in self._xl_orientation_parameterisations]
       params = ["Crystal%d" % (i + 1) + x for i, l \
                 in enumerate(xlo_param_name_lists) for x in l]
       param_names.extend(params)
 
     if self._xl_unit_cell_parameterisations:
-      xluc_param_name_lists = [x.get_param_names(only_free) for x
-                     in self._xl_unit_cell_parameterisations]
+      xluc_param_name_lists = [x.get_param_names(only_free) for x in self._xl_unit_cell_parameterisations]
       params = ["Crystal%d" % (i + 1) + x for i, l \
                 in enumerate(xluc_param_name_lists) for x in l]
       param_names.extend(params)
 
     if self._goniometer_parameterisations:
-      gon_param_name_lists = [x.get_param_names(only_free) for x
-                     in self._goniometer_parameterisations]
+      gon_param_name_lists = [x.get_param_names(only_free) for x in self._goniometer_parameterisations]
       params = ["Goniometer%d" % (i + 1) + x for i, l \
                 in enumerate(gon_param_name_lists) for x in l]
       param_names.extend(params)

@@ -90,15 +90,8 @@ phil_scope = parse('''
 
 ''')
 
-
 class Model(ProfileModelIface):
-
-  def __init__(self,
-               params,
-               n_sigma,
-               sigma_b,
-               sigma_m,
-               deg=False):
+  def __init__(self, params, n_sigma, sigma_b, sigma_m, deg=False):
     ''' Initialise with the parameters. '''
     from math import pi
     from dials.array_family import flex
@@ -110,19 +103,19 @@ class Model(ProfileModelIface):
     else:
       self._sigma_b = sigma_b
       self._sigma_m = sigma_m
-    assert(self._n_sigma > 0)
+    assert (self._n_sigma > 0)
     if isinstance(self._sigma_b, flex.double):
       self._scan_varying = True
     else:
       self._scan_varying = False
     if self._scan_varying:
-      assert(self._sigma_b.all_gt(0))
-      assert(self._sigma_m.all_gt(0))
-      assert(len(self._sigma_b) == len(self._sigma_m))
+      assert (self._sigma_b.all_gt(0))
+      assert (self._sigma_m.all_gt(0))
+      assert (len(self._sigma_b) == len(self._sigma_m))
     else:
-      assert(self._sigma_b > 0)
-      assert(self._sigma_m >= 0)
-      assert(self._n_sigma > 0)
+      assert (self._sigma_b > 0)
+      assert (self._sigma_m >= 0)
+      assert (self._n_sigma > 0)
 
   @classmethod
   def from_dict(cls, obj):
@@ -133,7 +126,7 @@ class Model(ProfileModelIface):
     sigma_b = obj['sigma_b']
     sigma_m = obj['sigma_m']
     if isinstance(sigma_b, list):
-      assert(len(sigma_b) == len(sigma_m))
+      assert (len(sigma_b) == len(sigma_m))
       sigma_b = flex.double(sigma_b)
       sigma_m = flex.double(sigma_m)
     return cls(None, n_sigma, sigma_b, sigma_m, deg=True)
@@ -147,12 +140,7 @@ class Model(ProfileModelIface):
     else:
       sigma_b = self.sigma_b(deg=True)
       sigma_m = self.sigma_m(deg=True)
-    return {
-      '__id__' : 'gaussian_rs',
-      'n_sigma' : n_sigma,
-      'sigma_b' : sigma_b,
-      'sigma_m' : sigma_m
-    }
+    return {'__id__': 'gaussian_rs', 'n_sigma': n_sigma, 'sigma_b': sigma_b, 'sigma_m': sigma_m}
 
   def sigma_b(self, index=None, deg=True):
     ''' Return sigma_b. '''
@@ -195,20 +183,12 @@ class Model(ProfileModelIface):
   def num_scan_points(self):
     ''' Return number of scan points. '''
     if self._scan_varying:
-      assert(len(self._sigma_m) == len(self._sigma_b))
+      assert (len(self._sigma_m) == len(self._sigma_b))
       return len(self._sigma_m)
     return 1
 
   @classmethod
-  def create(cls,
-             params,
-             reflections,
-             crystal,
-             beam,
-             detector,
-             goniometer=None,
-             scan=None,
-             profile=None):
+  def create(cls, params, reflections, crystal, beam, detector, goniometer=None, scan=None, profile=None):
     '''
     Create the profile model from data.
 
@@ -223,38 +203,21 @@ class Model(ProfileModelIface):
 
     '''
     if reflections is not None:
-      model = cls.create_from_reflections(
-        params,
-        reflections,
-        crystal,
-        beam,
-        detector,
-        goniometer,
-        scan,
-        profile)
+      model = cls.create_from_reflections(params, reflections, crystal, beam, detector, goniometer, scan, profile)
     else:
-      model = cls.create_from_parameters(
-        params,
-        reflections,
-        crystal,
-        beam,
-        detector,
-        goniometer,
-        scan,
-        profile)
+      model = cls.create_from_parameters(params, reflections, crystal, beam, detector, goniometer, scan, profile)
     return model
-
 
   @classmethod
   def create_from_parameters(cls,
-             params,
-             reflections,
-             crystal,
-             beam,
-             detector,
-             goniometer=None,
-             scan=None,
-             profile=None):
+                             params,
+                             reflections,
+                             crystal,
+                             beam,
+                             detector,
+                             goniometer=None,
+                             scan=None,
+                             profile=None):
     '''
     Create the profile model from parameters.
 
@@ -283,25 +246,18 @@ class Model(ProfileModelIface):
     logger.info("Creating profile model with parameters:")
     logger.info("  sigma_b: %f" % sigma_b)
     logger.info("  sigma_m: %f" % sigma_m)
-    return cls(
-      params=params,
-      n_sigma=3.0,
-      sigma_b=sigma_b,
-      sigma_m=sigma_m,
-      deg=True)
-
-
+    return cls(params=params, n_sigma=3.0, sigma_b=sigma_b, sigma_m=sigma_m, deg=True)
 
   @classmethod
   def create_from_reflections(cls,
-             params,
-             reflections,
-             crystal,
-             beam,
-             detector,
-             goniometer=None,
-             scan=None,
-             profile=None):
+                              params,
+                              reflections,
+                              crystal,
+                              beam,
+                              detector,
+                              goniometer=None,
+                              scan=None,
+                              profile=None):
     '''
     Create the profile model from data.
 
@@ -335,13 +291,8 @@ class Model(ProfileModelIface):
             A solution may be to try changing parameters:
               profile.gaussian_rs.min_spots.per_degree=%d
               profile.gaussian_rs.min_spots.overall=%d
-            ''' % (
-              params.gaussian_rs.min_spots.per_degree,
-              params.gaussian_rs.min_spots.overall,
-              spots_per_degree,
-              len(reflections),
-              params.gaussian_rs.min_spots.per_degree,
-              params.gaussian_rs.min_spots.overall))
+            ''' % (params.gaussian_rs.min_spots.per_degree, params.gaussian_rs.min_spots.overall, spots_per_degree,
+                   len(reflections), params.gaussian_rs.min_spots.per_degree, params.gaussian_rs.min_spots.overall))
       else:
         raise RuntimeError('''
           Too few reflections for profile modelling:
@@ -351,47 +302,38 @@ class Model(ProfileModelIface):
           A solution may be to try changing parameters:
             profile.gaussian_rs.min_spots.per_degree=%d
             profile.gaussian_rs.min_spots.overall=%d
-          ''' % (
-            params.gaussian_rs.min_spots.overall,
-            len(reflections),
-            params.gaussian_rs.min_spots.per_degree,
-            params.gaussian_rs.min_spots.overall))
+          ''' % (params.gaussian_rs.min_spots.overall, len(reflections), params.gaussian_rs.min_spots.per_degree,
+                 params.gaussian_rs.min_spots.overall))
     if not len(reflections) > 0:
       raise RuntimeError('''
         No reflections remaining for profile modelling.
       ''')
 
     # Check the override parameters
-    if [params.gaussian_rs.parameters.sigma_b,
-        params.gaussian_rs.parameters.sigma_m].count(None) == 1:
+    if [params.gaussian_rs.parameters.sigma_b, params.gaussian_rs.parameters.sigma_m].count(None) == 1:
       raise RuntimeError('sigma_b and sigma_m parameters must both be set')
-    if (params.gaussian_rs.parameters.sigma_b is not None and
-        params.gaussian_rs.parameters.sigma_m is not None):
+    if (params.gaussian_rs.parameters.sigma_b is not None and params.gaussian_rs.parameters.sigma_m is not None):
       return cls(
-        params=params,
-        n_sigma=3.0,
-        sigma_b=params.gaussian_rs.parameters.sigma_b,
-        sigma_m=params.gaussian_rs.parameters.sigma_m,
-        deg=True)
+          params=params,
+          n_sigma=3.0,
+          sigma_b=params.gaussian_rs.parameters.sigma_b,
+          sigma_m=params.gaussian_rs.parameters.sigma_m,
+          deg=True)
 
     if not params.gaussian_rs.scan_varying:
       Calculator = ProfileModelCalculator
     else:
       Calculator = ScanVaryingProfileModelCalculator
     calculator = Calculator(
-      reflections,
-      crystal,
-      beam,
-      detector,
-      goniometer,
-      scan,
-      params.gaussian_rs.filter.min_zeta,
-      algorithm=params.gaussian_rs.sigma_m_algorithm)
-    return cls(
-      params=params,
-      n_sigma=3.0,
-      sigma_b=calculator.sigma_b(),
-      sigma_m=calculator.sigma_m())
+        reflections,
+        crystal,
+        beam,
+        detector,
+        goniometer,
+        scan,
+        params.gaussian_rs.filter.min_zeta,
+        algorithm=params.gaussian_rs.sigma_m_algorithm)
+    return cls(params=params, n_sigma=3.0, sigma_b=calculator.sigma_b(), sigma_m=calculator.sigma_m())
 
   def predict_reflections(self,
                           imageset,
@@ -420,28 +362,15 @@ class Model(ProfileModelIface):
     from dials.algorithms.spot_prediction.reflection_predictor \
       import ReflectionPredictor
     predict = ReflectionPredictor(
-      Experiment(
-        imageset=imageset,
-        crystal=crystal,
-        beam=beam,
-        detector=detector,
-        goniometer=goniometer,
-        scan=scan),
-      dmin=dmin,
-      dmax=dmax,
-      margin=margin,
-      force_static=force_static,
-      padding=padding)
+        Experiment(imageset=imageset, crystal=crystal, beam=beam, detector=detector, goniometer=goniometer, scan=scan),
+        dmin=dmin,
+        dmax=dmax,
+        margin=margin,
+        force_static=force_static,
+        padding=padding)
     return predict()
 
-  def compute_partiality(self,
-                         reflections,
-                         crystal,
-                         beam,
-                         detector,
-                         goniometer=None,
-                         scan=None,
-                         **kwargs):
+  def compute_partiality(self, reflections, crystal, beam, detector, goniometer=None, scan=None, **kwargs):
     '''
     Given an experiment and list of reflections, compute the partiality of the
     reflections
@@ -458,19 +387,10 @@ class Model(ProfileModelIface):
     from dials.algorithms.profile_model.gaussian_rs import PartialityCalculator
 
     # Create the partiality calculator
-    calculate = PartialityCalculator(
-      crystal,
-      beam,
-      detector,
-      goniometer,
-      scan,
-      self._sigma_m)
+    calculate = PartialityCalculator(crystal, beam, detector, goniometer, scan, self._sigma_m)
 
     # Compute the partiality
-    partiality = calculate(
-      reflections['s1'],
-      reflections['xyzcal.px'].parts()[2],
-      reflections['bbox'])
+    partiality = calculate(reflections['s1'], reflections['xyzcal.px'].parts()[2], reflections['bbox'])
 
     # Return the partiality
     return partiality
@@ -498,7 +418,7 @@ class Model(ProfileModelIface):
     from dials.algorithms.profile_model.gaussian_rs import BBoxCalculator
 
     # Check the input
-    assert(sigma_b_multiplier >= 1.0)
+    assert (sigma_b_multiplier >= 1.0)
 
     # Compute the size in reciprocal space. Add a sigma_b multiplier to enlarge
     # the region of background in the shoebox
@@ -506,33 +426,15 @@ class Model(ProfileModelIface):
     delta_m = self._n_sigma * self._sigma_m
 
     # Create the bbox calculator
-    calculate = BBoxCalculator(
-      crystal,
-      beam,
-      detector,
-      goniometer,
-      scan,
-      delta_b,
-      delta_m)
+    calculate = BBoxCalculator(crystal, beam, detector, goniometer, scan, delta_b, delta_m)
 
     # Calculate the bounding boxes of all the reflections
-    bbox = calculate(
-      reflections['s1'],
-      reflections['xyzcal.px'].parts()[2],
-      reflections['panel'])
+    bbox = calculate(reflections['s1'], reflections['xyzcal.px'].parts()[2], reflections['panel'])
 
     # Return the bounding boxes
     return bbox
 
-  def compute_mask(self,
-                   reflections,
-                   crystal,
-                   beam,
-                   detector,
-                   goniometer=None,
-                   scan=None,
-                   image_volume=None,
-                   **kwargs):
+  def compute_mask(self, reflections, crystal, beam, detector, goniometer=None, scan=None, image_volume=None, **kwargs):
     '''
     Given an experiment and list of reflections, compute the
     foreground/background mask of the reflections.
@@ -553,29 +455,15 @@ class Model(ProfileModelIface):
     delta_m = self._n_sigma * self._sigma_m
 
     # Create the mask calculator
-    mask_foreground = MaskCalculator(
-      crystal,
-      beam,
-      detector,
-      goniometer,
-      scan,
-      delta_b,
-      delta_m)
+    mask_foreground = MaskCalculator(crystal, beam, detector, goniometer, scan, delta_b, delta_m)
 
     # Mask the foreground region
     if image_volume is None:
-      return mask_foreground(
-        reflections['shoebox'],
-        reflections['s1'],
-        reflections['xyzcal.px'].parts()[2],
-        reflections['panel'])
+      return mask_foreground(reflections['shoebox'], reflections['s1'], reflections['xyzcal.px'].parts()[2],
+                             reflections['panel'])
     else:
-      return mask_foreground(
-        image_volume,
-        reflections['bbox'],
-        reflections['s1'],
-        reflections['xyzcal.px'].parts()[2],
-        reflections['panel'])
+      return mask_foreground(image_volume, reflections['bbox'], reflections['s1'], reflections['xyzcal.px'].parts()[2],
+                             reflections['panel'])
 
   def fitting_class(self):
     '''
@@ -600,17 +488,15 @@ class Model(ProfileModelIface):
       from math import ceil
 
       # Return if no scan or gonio
-      if (experiment.scan is None or
-          experiment.goniometer is None or
-          experiment.scan.get_oscillation()[1] == 0):
+      if (experiment.scan is None or experiment.goniometer is None or experiment.scan.get_oscillation()[1] == 0):
         return None
 
       # Compute the scan step
       phi0, phi1 = experiment.scan.get_oscillation_range(deg=True)
-      assert(phi1 > phi0)
+      assert (phi1 > phi0)
       phi_range = phi1 - phi0
       num_scan_points = int(ceil(phi_range / self.params.gaussian_rs.fitting.scan_step))
-      assert(num_scan_points > 0)
+      assert (num_scan_points > 0)
 
       # Create the grid method
       GridMethod = GaussianRSProfileModeller.GridMethod
@@ -626,19 +512,10 @@ class Model(ProfileModelIface):
         sigma_m = self.sigma_m(deg=False)
 
       # Create the modeller
-      return GaussianRSProfileModeller(
-        experiment.beam,
-        experiment.detector,
-        experiment.goniometer,
-        experiment.scan,
-        sigma_b,
-        sigma_m,
-        self.n_sigma() * 1.5,
-        self.params.gaussian_rs.fitting.grid_size,
-        num_scan_points,
-        self.params.gaussian_rs.fitting.threshold,
-        grid_method,
-        fit_method)
+      return GaussianRSProfileModeller(experiment.beam, experiment.detector, experiment.goniometer, experiment.scan,
+                                       sigma_b, sigma_m,
+                                       self.n_sigma() * 1.5, self.params.gaussian_rs.fitting.grid_size, num_scan_points,
+                                       self.params.gaussian_rs.fitting.threshold, grid_method, fit_method)
 
     # Return the wrapper function
     return wrapper
@@ -649,10 +526,8 @@ class Model(ProfileModelIface):
       out = sys.stdout
     print >> out, "Profile model:"
     print >> out, "    type: gaussian_rs"
-    print >> out, "    delta_b (sigma_b): %f (%f)" %(
-      self.delta_b(), self.sigma_b())
-    print >> out, "    delta_m (sigma_m): %f (%f)" %(
-      self.delta_m(), self.sigma_m())
+    print >> out, "    delta_b (sigma_b): %f (%f)" % (self.delta_b(), self.sigma_b())
+    print >> out, "    delta_m (sigma_m): %f (%f)" % (self.delta_m(), self.sigma_m())
 
   def __str__(self):
     from cStringIO import StringIO

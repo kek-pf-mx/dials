@@ -7,16 +7,12 @@ from math import pi
 import logging
 logger = logging.getLogger(__name__)
 
-RAD2DEG = 180./pi
+RAD2DEG = 180. / pi
 
 class CentroidOutlier(object):
   """Base class for centroid outlier detection algorithms"""
 
-  def __init__(self, cols=None,
-               min_num_obs=20,
-               separate_experiments=True,
-               separate_panels=True,
-               block_width=None):
+  def __init__(self, cols=None, min_num_obs=20, separate_experiments=True, separate_panels=True, block_width=None):
 
     # column names of the data in which to look for outliers
     if cols is None:
@@ -74,11 +70,11 @@ class CentroidOutlier(object):
     """Identify outliers in the input and set the centroid_outlier flag.
     Return True if any outliers were detected, otherwise False"""
 
-    logger.info("Detecting centroid outliers using the {0} algorithm".format(
-      type(self).__name__))
+    logger.info("Detecting centroid outliers using the {0} algorithm".format(type(self).__name__))
 
     # check the columns are present
-    for col in self._cols: assert col in reflections
+    for col in self._cols:
+      assert col in reflections
 
     sel = reflections.get_flags(reflections.flags.used_in_refinement)
     all_data = reflections.select(sel)
@@ -90,13 +86,11 @@ class CentroidOutlier(object):
       # split the data set by experiment id
       for iexp in xrange(nexp):
         sel = all_data['id'] == iexp
-        job = {'id':iexp, 'panel':'all', 'data':all_data.select(sel),
-               'indices':all_data_indices.select(sel)}
+        job = {'id': iexp, 'panel': 'all', 'data': all_data.select(sel), 'indices': all_data_indices.select(sel)}
         jobs.append(job)
     else:
       # keep the whole dataset across all experiment ids
-      job = {'id':'all', 'panel':'all', 'data':all_data,
-             'indices':all_data_indices}
+      job = {'id': 'all', 'panel': 'all', 'data': all_data, 'indices': all_data_indices}
       jobs.append(job)
 
     jobs2 = []
@@ -108,8 +102,7 @@ class CentroidOutlier(object):
         indices = job['indices']
         for ipanel in xrange(flex.max(data['panel']) + 1):
           sel = data['panel'] == ipanel
-          job = {'id':iexp, 'panel':ipanel, 'data':data.select(sel),
-                  'indices':indices.select(sel)}
+          job = {'id': iexp, 'panel': ipanel, 'data': data.select(sel), 'indices': indices.select(sel)}
           jobs2.append(job)
     else:
       # keep the splits as they are
@@ -145,17 +138,17 @@ class CentroidOutlier(object):
           block_end = (iblock + 1) * real_width
           sel = (phi >=  (phi_low + block_start)) & \
                 (phi < (phi_low + block_end))
-          job = {'id':iexp, 'panel':ipanel, 'data':data.select(sel),
-                 'indices':indices.select(sel),
-                 'phi_start':RAD2DEG*(phi_low + block_start),
-                 'phi_end':RAD2DEG*(phi_low + block_end)}
+          job = {
+              'id': iexp, 'panel': ipanel, 'data': data.select(sel), 'indices': indices.select(sel), 'phi_start':
+              RAD2DEG * (phi_low + block_start), 'phi_end': RAD2DEG * (phi_low + block_end)
+          }
           jobs3.append(job)
         # now last block
         sel = phi >= (phi_low + block_end)
-        job = {'id':iexp, 'panel':ipanel, 'data':data.select(sel),
-               'indices':indices.select(sel),
-               'phi_start':RAD2DEG*(phi_low + block_end),
-               'phi_end':RAD2DEG*(phi_low + phi_range)}
+        job = {
+            'id': iexp, 'panel': ipanel, 'data': data.select(sel), 'indices': indices.select(sel), 'phi_start':
+            RAD2DEG * (phi_low + block_end), 'phi_end': RAD2DEG * (phi_low + phi_range)
+        }
         jobs3.append(job)
     else:
       # keep the splits as they are
@@ -191,8 +184,7 @@ class CentroidOutlier(object):
 
       elif nref > 0:
         # too few reflections in the job
-        msg = "For job {0}, fewer than {1} reflections are present.".format(
-          i + 1, self._min_num_obs)
+        msg = "For job {0}, fewer than {1} reflections are present.".format(i + 1, self._min_num_obs)
         msg += " All reflections flagged as possible outliers."
         logger.debug(msg)
         ioutliers = indices
@@ -204,8 +196,7 @@ class CentroidOutlier(object):
       # set the centroid_outlier flag in the original reflection table
       nout = len(ioutliers)
       if nout > 0:
-        reflections.set_flags(ioutliers,
-          reflections.flags.centroid_outlier)
+        reflections.set_flags(ioutliers, reflections.flags.centroid_outlier)
         self.nreject += nout
 
       # Add job data to the table
@@ -216,14 +207,13 @@ class CentroidOutlier(object):
         try:
           row.append('{phi_start:.2f} - {phi_end:.2f}'.format(**job))
         except KeyError:
-          row.append('{0:.2f} - {1:.2f}'.format(0.0,0.0))
+          row.append('{0:.2f} - {1:.2f}'.format(0.0, 0.0))
       if nref == 0:
         p100 = 0
       else:
         p100 = nout / nref * 100.0
         if p100 > 30.0:
-          msg = ("{0:3.1f}% of reflections were flagged as outliers from job"
-                 " {1}").format(p100, i + 1)
+          msg = ("{0:3.1f}% of reflections were flagged as outliers from job" " {1}").format(p100, i + 1)
       row.extend([str(nref), str(nout), '%3.1f' % p100])
       rows.append(row)
 
@@ -366,7 +356,6 @@ outlier
 phil_scope = parse(phil_str)
 
 class CentroidOutlierFactory(object):
-
   @classmethod
   def from_parameters_and_colnames(cls, params, colnames, verbosity=0):
 
@@ -392,20 +381,20 @@ class CentroidOutlierFactory(object):
     if not params.outlier.separate_blocks:
       params.outlier.block_width = None
     od = outlier_detector(
-      cols=colnames,
-      min_num_obs=params.outlier.minimum_number_of_reflections,
-      separate_experiments=params.outlier.separate_experiments,
-      separate_panels=params.outlier.separate_panels,
-      block_width=params.outlier.block_width,
-      **kwargs)
+        cols=colnames,
+        min_num_obs=params.outlier.minimum_number_of_reflections,
+        separate_experiments=params.outlier.separate_experiments,
+        separate_panels=params.outlier.separate_panels,
+        block_width=params.outlier.block_width,
+        **kwargs)
     od.set_verbosity(verbosity)
     return od
 
 if __name__ == "__main__":
 
   # test construction
-  params=phil_scope.extract()
-  params.outlier.algorithm="tukey"
+  params = phil_scope.extract()
+  params.outlier.algorithm = "tukey"
   print CentroidOutlierFactory.from_parameters_and_colnames(params, [1, 2, 3])
-  params.outlier.algorithm="mcd"
+  params.outlier.algorithm = "mcd"
   print CentroidOutlierFactory.from_parameters_and_colnames(params, [1, 2, 3])

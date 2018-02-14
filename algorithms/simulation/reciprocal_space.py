@@ -9,7 +9,6 @@
 
 from __future__ import absolute_import, division
 
-
 class Simulator(object):
   ''' Class to help with simulation from reciprocal space. '''
 
@@ -23,13 +22,8 @@ class Simulator(object):
   def with_given_intensity(self, N, I, Ba, Bb, Bc, Bd):
     ''' Generate reflections with a given intensity and background. '''
     from dials.array_family import flex
-    return self.with_individual_given_intensity(
-      N,
-      flex.int(N, I),
-      flex.int(N, Ba),
-      flex.int(N, Bb),
-      flex.int(N, Bc),
-      flex.int(N, Bd))
+    return self.with_individual_given_intensity(N, flex.int(N, I), flex.int(N, Ba), flex.int(N, Bb), flex.int(N, Bc),
+                                                flex.int(N, Bd))
 
   def with_random_intensity(self, N, Imax, Bamax, Bbmax, Bcmax, Bdmax):
     ''' Generate reflections with a random intensity and background. '''
@@ -65,11 +59,11 @@ class Simulator(object):
       random_background_plane2
 
     # Check the lengths
-    assert(N == len(I))
-    assert(N == len(Ba))
-    assert(N == len(Bb))
-    assert(N == len(Bc))
-    assert(N == len(Bd))
+    assert (N == len(I))
+    assert (N == len(Ba))
+    assert (N == len(Bb))
+    assert (N == len(Bc))
+    assert (N == len(Bd))
 
     # Generate some predictions
     refl = self.generate_predictions(N)
@@ -85,19 +79,9 @@ class Simulator(object):
     for i in range(len(refl)):
       if I[i] > 0:
         data = shoebox[i].data.as_double()
-        I_exp[i] = simulate_reciprocal_space_gaussian(
-          self.experiment.beam,
-          self.experiment.detector,
-          self.experiment.goniometer,
-          self.experiment.scan,
-          self.sigma_b,
-          self.sigma_m,
-          s1[i],
-          phi[i],
-          bbox[i],
-          I[i],
-          data,
-          shoebox[i].mask)
+        I_exp[i] = simulate_reciprocal_space_gaussian(self.experiment.beam, self.experiment.detector,
+                                                      self.experiment.goniometer, self.experiment.scan, self.sigma_b,
+                                                      self.sigma_m, s1[i], phi[i], bbox[i], I[i], data, shoebox[i].mask)
         shoebox[i].data = data.as_float()
       if i % m == 0:
         progress.update(100.0 * float(i) / len(refl))
@@ -124,21 +108,21 @@ class Simulator(object):
     #I_exp = flex.double(len(refl), 0)
     #m = int(len(refl) / 100)
     #for i in range(len(refl)):
-      #if I[i] > 0:
-        #I_exp[i] = integrate_reciprocal_space_gaussian(
-          #self.experiment.beam,
-          #self.experiment.detector,
-          #self.experiment.goniometer,
-          #self.experiment.scan,
-          #self.sigma_b,
-          #self.sigma_m,
-          #s1[i],
-          #phi[i],
-          #bbox[i],
-          #10000,
-          #shoebox[i].mask) / 10000.0
-      #if i % m == 0:
-        #progress.update(100.0 * float(i) / len(refl))
+    #if I[i] > 0:
+    #I_exp[i] = integrate_reciprocal_space_gaussian(
+    #self.experiment.beam,
+    #self.experiment.detector,
+    #self.experiment.goniometer,
+    #self.experiment.scan,
+    #self.sigma_b,
+    #self.sigma_m,
+    #s1[i],
+    #phi[i],
+    #bbox[i],
+    #10000,
+    #shoebox[i].mask) / 10000.0
+    #if i % m == 0:
+    #progress.update(100.0 * float(i) / len(refl))
     #progress.finished('Integrated expected signal impacts for %d reflections' % len(refl))
 
     # Save the expected intensity and background
@@ -163,11 +147,7 @@ class Simulator(object):
     import random
 
     # Set the profile model
-    self.experiment.profile = ProfileModel(
-      None,
-      self.n_sigma,
-      self.sigma_b,
-      self.sigma_m)
+    self.experiment.profile = ProfileModel(None, self.n_sigma, self.sigma_b, self.sigma_m)
 
     # Generate a list of reflections
     refl = flex.reflection_table.from_predictions(self.experiment)
@@ -176,10 +156,7 @@ class Simulator(object):
     # Filter by zeta
     zeta = 0.05
     Command.start('Filtering by zeta >= %f' % zeta)
-    mask = filtering.by_zeta(
-      self.experiment.goniometer,
-      self.experiment.beam,
-      refl['s1'], zeta)
+    mask = filtering.by_zeta(self.experiment.goniometer, self.experiment.beam, refl['s1'], zeta)
     refl.del_selected(mask != True)
     Command.end('Filtered %d reflections by zeta >= %f' % (len(refl), zeta))
 
@@ -191,9 +168,7 @@ class Simulator(object):
     bbox = refl['bbox']
     for i in range(len(refl)):
       x0, x1, y0, y1, z0, z1 = bbox[i]
-      if (x0 < 0 or x1 > image_size[0] or
-          y0 < 0 or y1 > image_size[1] or
-          z0 < array_range[0] or z1 > array_range[1]):
+      if (x0 < 0 or x1 > image_size[0] or y0 < 0 or y1 > image_size[1] or z0 < array_range[0] or z1 > array_range[1]):
         index.append(i)
     refl.del_selected(flex.size_t(index))
 
@@ -210,25 +185,15 @@ class Simulator(object):
 
     # Get the function object to mask the foreground
     Command.start('Masking Foreground for %d reflections' % len(refl))
-    mask_foreground = MaskCalculator3D(
-      self.experiment.beam,
-      self.experiment.detector,
-      self.experiment.goniometer,
-      self.experiment.scan,
-      self.n_sigma * self.sigma_b,
-      self.n_sigma * self.sigma_m)
+    mask_foreground = MaskCalculator3D(self.experiment.beam, self.experiment.detector, self.experiment.goniometer,
+                                       self.experiment.scan, self.n_sigma * self.sigma_b, self.n_sigma * self.sigma_m)
 
     # Mask the foreground
-    mask_foreground(
-      refl['shoebox'],
-      refl['s1'],
-      refl['xyzcal.px'].parts()[2],
-      refl['panel'])
+    mask_foreground(refl['shoebox'], refl['s1'], refl['xyzcal.px'].parts()[2], refl['panel'])
     Command.end('Masked foreground for %d reflections' % len(refl))
 
     # Return the reflections
     return refl
-
 
 if __name__ == '__main__':
 
@@ -241,15 +206,12 @@ if __name__ == '__main__':
 
   have_dials_regression = libtbx.env.has_module("dials_regression")
   if have_dials_regression:
-    dials_regression = libtbx.env.find_in_repositories(
-      relative_path="dials_regression",
-      test=os.path.isdir)
+    dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=os.path.isdir)
   else:
     exit(0)
 
   experiments = ExperimentListFactory.from_json_file(
-    join(dials_regression, "centroid_test_data", "experiments.json"),
-    check_format=False)
+      join(dials_regression, "centroid_test_data", "experiments.json"), check_format=False)
   sigma_b = 0.058 * pi / 180
   sigma_m = 0.157 * pi / 180
   n_sigma = 3

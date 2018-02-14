@@ -29,8 +29,7 @@ dev.dials.make_radial_average experiments.json
 
 # Create the phil scope
 from libtbx.phil import parse
-phil_scope = parse(
-'''
+phil_scope = parse('''
 
   output {
     filename = 'table.txt'
@@ -56,7 +55,6 @@ phil_scope = parse(
 
 ''')
 
-
 class Script(object):
   ''' The integration program. '''
 
@@ -66,15 +64,11 @@ class Script(object):
     import libtbx.load_env
 
     # The script usage
-    usage  = "usage: %s [options] experiment.json" % libtbx.env.dispatcher_name
+    usage = "usage: %s [options] experiment.json" % libtbx.env.dispatcher_name
 
     # Create the parser
     self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      epilog=help_message,
-      read_experiments=True,
-      read_datablocks=True)
+        usage=usage, phil=phil_scope, epilog=help_message, read_experiments=True, read_datablocks=True)
 
   def run(self):
     ''' Perform the integration. '''
@@ -133,8 +127,8 @@ class Script(object):
         summed_mask = mask
         summed_data = data
       else:
-        summed_data = [ sd + d for sd, d in zip(summed_data, data) ]
-        summed_mask = [ sm & m for sm, m in zip(summed_mask, mask) ]
+        summed_data = [sd + d for sd, d in zip(summed_data, data)]
+        summed_mask = [sm & m for sm, m in zip(summed_mask, mask)]
 
     # Compute min and max and num
     if params.num_bins is None:

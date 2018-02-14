@@ -27,7 +27,8 @@ Examples::
 
 '''
 
-phil_scope = parse('''
+phil_scope = parse(
+    '''
   output = predicted.pickle
     .type = str
     .help = "The filename for the predicted reflections"
@@ -50,8 +51,8 @@ phil_scope = parse('''
     .help = "Minimum d-spacing of predicted reflections"
 
     include scope dials.algorithms.profile_model.factory.phil_scope
-''', process_includes=True)
-
+''',
+    process_includes=True)
 
 class Script(object):
   '''A class for running the script.'''
@@ -69,11 +70,7 @@ class Script(object):
 
     # Create the parser
     self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      epilog=help_message,
-      check_format=True,
-      read_experiments=True)
+        usage=usage, phil=phil_scope, epilog=help_message, check_format=True, read_experiments=True)
 
   def run(self):
     '''Execute the script.'''
@@ -99,16 +96,11 @@ class Script(object):
         scan = expt.scan
         image_range = scan.get_image_range()
         oscillation = scan.get_oscillation()
-        scan.set_image_range((image_range[0]-params.buffer_size,
-                              image_range[1]+params.buffer_size))
-        scan.set_oscillation((oscillation[0]-params.buffer_size*oscillation[1],
-                              oscillation[1]))
+        scan.set_image_range((image_range[0] - params.buffer_size, image_range[1] + params.buffer_size))
+        scan.set_oscillation((oscillation[0] - params.buffer_size * oscillation[1], oscillation[1]))
 
       # Populate the reflection table with predictions
-      predicted = flex.reflection_table.from_predictions(
-        expt,
-        force_static=params.force_static,
-        dmin=params.d_min)
+      predicted = flex.reflection_table.from_predictions(expt, force_static=params.force_static, dmin=params.d_min)
       predicted['id'] = flex.int(len(predicted), i_expt)
       predicted_all.extend(predicted)
 
@@ -118,8 +110,7 @@ class Script(object):
     if not params.ignore_shadows:
       from dials.algorithms.shadowing.filter import filter_shadowed_reflections
 
-      shadowed = filter_shadowed_reflections(experiments, predicted_all,
-                                             experiment_goniometer=True)
+      shadowed = filter_shadowed_reflections(experiments, predicted_all, experiment_goniometer=True)
       predicted_all = predicted_all.select(~shadowed)
 
     try:
@@ -128,12 +119,9 @@ class Script(object):
       pass
 
     # Save the reflections to file
-    Command.start('Saving {0} reflections to {1}'.format(
-        len(predicted_all), params.output))
+    Command.start('Saving {0} reflections to {1}'.format(len(predicted_all), params.output))
     predicted_all.as_pickle(params.output)
-    Command.end('Saved {0} reflections to {1}'.format(
-        len(predicted_all), params.output))
-
+    Command.end('Saved {0} reflections to {1}'.format(len(predicted_all), params.output))
 
 if __name__ == '__main__':
   from dials.util import halraiser

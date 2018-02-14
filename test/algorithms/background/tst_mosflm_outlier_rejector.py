@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division
 
 class Test(object):
-
   def __init__(self):
     from dials.algorithms.background.simple import Creator
     from dials.algorithms.background.simple import MosflmOutlierRejector
@@ -15,11 +14,7 @@ class Test(object):
       exit(0)
 
     # The directory path
-    path = join(
-      dials_regression,
-      "integration_test_data",
-      "i04-weak-data",
-      "jmp_mosflm_test")
+    path = join(dials_regression, "integration_test_data", "i04-weak-data", "jmp_mosflm_test")
 
     # The input files
     self.reflection_filename = join(path, "mosflm_reflections.pickle")
@@ -28,9 +23,7 @@ class Test(object):
     self.n_sigma = 4
     self.outlier_rejector = MosflmOutlierRejector(self.fraction, self.n_sigma)
     self.linear_modeller = Linear2dModeller()
-    self.background_creator = Creator(
-      self.linear_modeller,
-      self.outlier_rejector)
+    self.background_creator = Creator(self.linear_modeller, self.outlier_rejector)
 
   def run(self):
     from dials.array_family import flex
@@ -41,8 +34,8 @@ class Test(object):
     # Read the data
     rtable = flex.reflection_table.from_pickle(self.reflection_filename)
     shoeboxes, masks = pickle.load(open(self.shoebox_filename, "r"))
-    assert(len(rtable) == len(shoeboxes))
-    assert(len(rtable) == len(masks))
+    assert (len(rtable) == len(shoeboxes))
+    assert (len(rtable) == len(masks))
 
     # Compute the background for each reflection and check against the values
     # read from the mosflm.lp file. Currently this fails for 1 strange
@@ -69,8 +62,8 @@ class Test(object):
       nsigma = 4
       try:
         # model = PlaneModel(data, mask, fraction, nsigma)
-        assert(len(data.all()) == 2)
-        assert(len(mask.all()) == 2)
+        assert (len(data.all()) == 2)
+        assert (len(mask.all()) == 2)
         data.reshape(flex.grid(1, *data.all()))
         mask.reshape(flex.grid(1, *mask.all()))
         self.outlier_rejector(data, mask)
@@ -82,13 +75,13 @@ class Test(object):
         raise
         continue
       # n = model.noutlier()
-      assert(len(model.params()) == 3)
+      assert (len(model.params()) == 3)
       hy = data.all()[1] // 2
       hx = data.all()[2] // 2
       c1 = model.params()[0]
       a1 = model.params()[1]
       b1 = model.params()[2]
-      c3 = c1 + a1*(0.5 + hx) + b1*(0.5 + hy)
+      c3 = c1 + a1 * (0.5 + hx) + b1 * (0.5 + hy)
       # a1 = model.a()
       # b1 = model.b()
       # c1 = model.c()
@@ -97,14 +90,14 @@ class Test(object):
       c2 = rtable[i]['background'][2]
 
       try:
-        assert(abs(a1 - b2) < 0.01)
-        assert(abs(b1 + a2) < 0.01)
-        assert(abs(c3 - c2) < 0.1)
+        assert (abs(a1 - b2) < 0.01)
+        assert (abs(b1 + a2) < 0.01)
+        assert (abs(c3 - c2) < 0.1)
       except Exception:
         count += 1
         continue
         #print "BG %d:(%.2f, %.2f, %.1f), (%.2f, %.2f, %.1f): %d" % \
-          #(i, a1, b1, c1, a2, b2, c2, n)
+        #(i, a1, b1, c1, a2, b2, c2, n)
         #print "X, Y: ", xdet, ydet
         #print "NX, NY: ", nx, ny
         #print "NRX, NRY, NC", nrx, nry, nc
@@ -126,7 +119,7 @@ class Test(object):
           # y = jj - hy
           x = ii + 0.5
           y = jj + 0.5
-          background[0, jj,ii] = a1 * x + b1 * y + c1
+          background[0, jj, ii] = a1 * x + b1 * y + c1
 
       # Test the summation results. Edge reflections use profile fitted
       # intensity in MOSFLM. Therefore ignore these. There also appears to be a
@@ -143,8 +136,8 @@ class Test(object):
         VAR2.append(sqrt(Ivar2))
         DIFF.append(sqrt(Ivar1) - sqrt(Ivar2))
         try:
-          assert(abs(I1 - I2) < 1.0)
-          assert(abs(sqrt(Ivar1) - sqrt(Ivar2)) < 1.0)
+          assert (abs(I1 - I2) < 1.0)
+          assert (abs(sqrt(Ivar1) - sqrt(Ivar2)) < 1.0)
         except Exception:
           count += 1
           #import numpy
@@ -154,7 +147,7 @@ class Test(object):
           #print "DEBUG: ", c1 * 25
           #print "PF: %f" % rtable[i]['intensity.prf.value']
           #print "BG (%.4f, %.4f, %.4f), (%.2f, %.2f, %.1f): %d" % \
-            #(a1, b1, c1, a2, b2, c2, n)
+          #(a1, b1, c1, a2, b2, c2, n)
           #print "X, Y: ", xdet, ydet
           #print "NX, NY: ", nx, ny
           #print "NRX, NRY, NC", nrx, nry, nc
@@ -174,9 +167,8 @@ class Test(object):
           continue
 
     # Only 1 should fail
-    assert(count == 1)
+    assert (count == 1)
     print 'OK'
-
 
 if __name__ == '__main__':
   test = Test()

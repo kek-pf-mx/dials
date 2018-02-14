@@ -4,8 +4,8 @@ def evaluate_gaussian(x, a, x0, sx):
 
   from math import exp
 
-  assert(len(x) == len(x0))
-  assert(len(x) == len(sx))
+  assert (len(x) == len(x0))
+  assert (len(x) == len(sx))
 
   g = 0.0
   for xi, x0i, sxi in zip(x, x0, sx):

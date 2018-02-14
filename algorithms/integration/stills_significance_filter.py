@@ -4,7 +4,6 @@ from dials.array_family import flex
 from cctbx.crystal import symmetry
 from libtbx import table_utils
 import math
-
 """
 Class to find a reasonable cutoff for integration based on work in LABELIT.
 Bins the reflection table by resolution, then finds the first bin that goes
@@ -34,11 +33,11 @@ class SignificanceFilter(object):
 
   def __call__(self, experiments, reflections):
     results = flex.reflection_table()
-    table_header = ["","","","I","IsigI","N >","RMSD","Cutoff"]
-    table_header2 = ["Bin","Resolution Range","Completeness","","","cutoff","(um)",""]
+    table_header = ["", "", "", "I", "IsigI", "N >", "RMSD", "Cutoff"]
+    table_header2 = ["Bin", "Resolution Range", "Completeness", "", "", "cutoff", "(um)", ""]
 
     for exp_id in xrange(len(experiments)):
-      print "*"*80
+      print "*" * 80
       print "Significance filtering experiment", exp_id
       table_data = []
       table_data.append(table_header)
@@ -48,9 +47,9 @@ class SignificanceFilter(object):
       # Find the bins for this experiment
       crystal = experiment.crystal
       refls = reflections.select(reflections['id'] == exp_id)
-      sym = symmetry(unit_cell = crystal.get_unit_cell(), space_group = crystal.get_space_group())
+      sym = symmetry(unit_cell=crystal.get_unit_cell(), space_group=crystal.get_space_group())
       d = crystal.get_unit_cell().d(refls['miller_index'])
-      mset = sym.miller_set(indices = refls['miller_index'], anomalous_flag=False)
+      mset = sym.miller_set(indices=refls['miller_index'], anomalous_flag=False)
       binner = mset.setup_binner(n_bins=self.params.n_bins)
       acceptable_resolution_bins = []
 
@@ -62,41 +61,45 @@ class SignificanceFilter(object):
         bin_refls = refls.select(sel)
         n_refls = len(bin_refls)
         avg_i = flex.mean(bin_refls['intensity.sum.value']) if n_refls > 0 else 0
-        avg_i_sigi = flex.mean(bin_refls['intensity.sum.value'] /
-                               flex.sqrt(bin_refls['intensity.sum.variance'])) if n_refls > 0 else 0
+        avg_i_sigi = flex.mean(
+            bin_refls['intensity.sum.value'] / flex.sqrt(bin_refls['intensity.sum.variance'])) if n_refls > 0 else 0
         acceptable_resolution_bins.append(avg_i_sigi >= self.params.isigi_cutoff)
 
-        bright_refls = bin_refls.select((bin_refls['intensity.sum.value']/flex.sqrt(bin_refls['intensity.sum.variance'])) >= self.params.isigi_cutoff)
+        bright_refls = bin_refls.select((bin_refls['intensity.sum.value'] / flex.
+                                         sqrt(bin_refls['intensity.sum.variance'])) >= self.params.isigi_cutoff)
         n_bright = len(bright_refls)
 
-        rmsd_obs = 1000*math.sqrt((bright_refls['xyzcal.mm']-bright_refls['xyzobs.mm.value']).sum_sq()/n_bright) if n_bright > 0 else 0
+        rmsd_obs = 1000 * math.sqrt(
+            (bright_refls['xyzcal.mm'] - bright_refls['xyzobs.mm.value']).sum_sq() / n_bright) if n_bright > 0 else 0
 
         table_row = []
-        table_row.append("%3d"%i)
-        table_row.append("%-13s"%binner.bin_legend(i_bin=i,show_bin_number=False,show_bin_range=False,
-                                                   show_d_range=True, show_counts=False))
-        table_row.append("%13s"%binner.bin_legend(i_bin=i,show_bin_number=False,show_bin_range=False,
-                                                  show_d_range=False, show_counts=True))
+        table_row.append("%3d" % i)
+        table_row.append("%-13s" % binner.bin_legend(
+            i_bin=i, show_bin_number=False, show_bin_range=False, show_d_range=True, show_counts=False))
+        table_row.append("%13s" % binner.bin_legend(
+            i_bin=i, show_bin_number=False, show_bin_range=False, show_d_range=False, show_counts=True))
 
-        table_row.append("%.1f"%(avg_i))
-        table_row.append("%.1f"%(avg_i_sigi))
-        table_row.append("%3d"%n_bright)
-        table_row.append("%.1f"%(rmsd_obs))
+        table_row.append("%.1f" % (avg_i))
+        table_row.append("%.1f" % (avg_i_sigi))
+        table_row.append("%3d" % n_bright)
+        table_row.append("%.1f" % (rmsd_obs))
         table_data.append(table_row)
 
       # Throw out bins that go back above the cutoff after the first non-passing bin is found
-      acceptable_resolution_bins = [acceptable_resolution_bins[i] for i in xrange(len(acceptable_resolution_bins))
-                                    if False not in acceptable_resolution_bins[:i+1]]
+      acceptable_resolution_bins = [
+          acceptable_resolution_bins[i] for i in xrange(len(acceptable_resolution_bins))
+          if False not in acceptable_resolution_bins[:i + 1]
+      ]
 
       for b, row in zip(acceptable_resolution_bins, table_data[2:]):
         if b:
           row.append("X")
-      print table_utils.format(table_data,has_header=2,justify='center',delim=" ")
+      print table_utils.format(table_data, has_header=2, justify='center', delim=" ")
 
       # Save the results
       if any(acceptable_resolution_bins):
-        best_index = acceptable_resolution_bins.count(True)-1
-        best_row = table_data[best_index+2]
+        best_index = acceptable_resolution_bins.count(True) - 1
+        best_row = table_data[best_index + 2]
         d_min = binner.bin_d_range(binner.range_used()[best_index])[1]
         print "best row:", " ".join(best_row)
         if self.params.enable:

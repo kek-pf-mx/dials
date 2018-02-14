@@ -14,9 +14,8 @@ def centroid_px_to_mm(detector, scan, position, variance, sd_error):
   '''Convenience function to calculate centroid in mm/rad from px'''
 
   # Get the pixel to millimeter function
-  assert(len(detector) == 1)
-  return centroid_px_to_mm_panel(
-      detector[0], scan, position, variance, sd_error)
+  assert (len(detector) == 1)
+  return centroid_px_to_mm_panel(detector[0], scan, position, variance, sd_error)
 
 def centroid_px_to_mm_panel(panel, scan, position, variance, sd_error):
   '''Convenience function to calculate centroid in mm/rad from px'''
@@ -25,10 +24,10 @@ def centroid_px_to_mm_panel(panel, scan, position, variance, sd_error):
   # Get the pixel to millimeter function
   pixel_size = panel.get_pixel_size()
   if scan is None:
-    oscillation = (0,0)
+    oscillation = (0, 0)
   else:
     oscillation = scan.get_oscillation(deg=False)
-  scale = pixel_size + (oscillation[1],)
+  scale = pixel_size + (oscillation[1], )
   scale2 = map(mul, scale, scale)
 
   if isinstance(position, tuple):
@@ -44,7 +43,7 @@ def centroid_px_to_mm_panel(panel, scan, position, variance, sd_error):
     # Set the position, variance and squared width in mm/rad
     # N.B assuming locally flat pixel to millimeter transform
     # for variance calculation.
-    position_mm = xy_mm + (z_rad,)
+    position_mm = xy_mm + (z_rad, )
     variance_mm = map(mul, variance, scale2)
     sd_error_mm = map(mul, sd_error, scale2)
 
@@ -65,9 +64,9 @@ def centroid_px_to_mm_panel(panel, scan, position, variance, sd_error):
     x_mm, y_mm = xy_mm.parts()
     position_mm = flex.vec3_double(x_mm, y_mm, z_rad)
     v0, v1, v2 = variance.parts()
-    variance_mm = flex.vec3_double(v0*scale2[0], v1*scale2[1], v2*scale2[2])
+    variance_mm = flex.vec3_double(v0 * scale2[0], v1 * scale2[1], v2 * scale2[2])
     s0, s1, s2 = sd_error.parts()
-    sd_error_mm = flex.vec3_double(s0*scale2[0], s1*scale2[1], s2*scale2[2])
+    sd_error_mm = flex.vec3_double(s0 * scale2[0], s1 * scale2[1], s2 * scale2[2])
 
   # Return the stuff in mm/rad
   return position_mm, variance_mm, sd_error_mm

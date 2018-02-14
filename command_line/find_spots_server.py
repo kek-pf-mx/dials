@@ -8,8 +8,7 @@ import sys
 
 import libtbx.load_env
 import logging
-logger = logging.getLogger(
-  __name__ if __name__ != '__main__' else libtbx.env.dispatcher_name)
+logger = logging.getLogger(__name__ if __name__ != '__main__' else libtbx.env.dispatcher_name)
 
 help_message = '''\
 A client/server version of dials.find_spots with additional analysis including
@@ -76,10 +75,9 @@ indexing_min_spots = 10
   .type = int(value_min=1)
 ''')
   if not os.access(filename, os.R_OK):
-    raise RuntimeError("Server does not have read access to file %s" %filename)
+    raise RuntimeError("Server does not have read access to file %s" % filename)
   interp = phil_scope.command_line_argument_interpreter()
-  params, unhandled = interp.process_and_fetch(
-    cl, custom_processor='collect_remaining')
+  params, unhandled = interp.process_and_fetch(cl, custom_processor='collect_remaining')
   filter_ice = params.extract().filter_ice
   index = params.extract().index
   integrate = params.extract().integrate
@@ -89,8 +87,7 @@ indexing_min_spots = 10
   from dxtbx.datablock import DataBlockFactory
   from dials.array_family import flex
   interp = find_spots_phil_scope.command_line_argument_interpreter()
-  phil_scope, unhandled = interp.process_and_fetch(
-    unhandled, custom_processor='collect_remaining')
+  phil_scope, unhandled = interp.process_and_fetch(unhandled, custom_processor='collect_remaining')
   logger.info('The following spotfinding parameters have been modified:')
   logger.info(find_spots_phil_scope.fetch_diff(source=phil_scope).as_str())
   params = phil_scope.extract()
@@ -100,7 +97,7 @@ indexing_min_spots = 10
   t0 = time.time()
   reflections = flex.reflection_table.from_observations(datablock, params)
   t1 = time.time()
-  logger.info('Spotfinding took %.2f seconds' %(t1-t0))
+  logger.info('Spotfinding took %.2f seconds' % (t1 - t0))
   from dials.algorithms.spot_finding import per_image_analysis
   imageset = datablock.extract_imagesets()[0]
   scan = imageset.get_scan()
@@ -108,50 +105,44 @@ indexing_min_spots = 10
     i = scan.get_array_range()[0]
   else:
     i = 0
-  stats = per_image_analysis.stats_single_image(
-    imageset, reflections, i=i, plot=False, filter_ice=filter_ice)
+  stats = per_image_analysis.stats_single_image(imageset, reflections, i=i, plot=False, filter_ice=filter_ice)
   stats = stats.__dict__
   t2 = time.time()
-  logger.info('Resolution analysis took %.2f seconds' %(t2-t1))
+  logger.info('Resolution analysis took %.2f seconds' % (t2 - t1))
 
   if index and stats['n_spots_no_ice'] > indexing_min_spots:
     import logging
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
     from dials.algorithms.indexing import indexer
     interp = indexer.master_phil_scope.command_line_argument_interpreter()
-    phil_scope, unhandled = interp.process_and_fetch(
-      unhandled, custom_processor='collect_remaining')
+    phil_scope, unhandled = interp.process_and_fetch(unhandled, custom_processor='collect_remaining')
     imagesets = [imageset]
     logger.info('The following indexing parameters have been modified:')
     indexer.master_phil_scope.fetch_diff(source=phil_scope).show()
     params = phil_scope.extract()
-    params.indexing.scan_range=[]
+    params.indexing.scan_range = []
 
-    if (imageset.get_goniometer() is not None and
-        imageset.get_scan() is not None and
-        imageset.get_scan().get_oscillation()[1] == 0):
+    if (imageset.get_goniometer() is not None and imageset.get_scan() is not None
+        and imageset.get_scan().get_oscillation()[1] == 0):
       imageset.set_goniometer(None)
       imageset.set_scan(None)
 
     try:
-      idxr = indexer.indexer_base.from_parameters(
-        reflections, imagesets, params=params)
+      idxr = indexer.indexer_base.from_parameters(reflections, imagesets, params=params)
       indexing_results = []
       idxr.index()
-      indexed_sel = idxr.refined_reflections.get_flags(
-        idxr.refined_reflections.flags.indexed)
-      indexed_sel &= ~(idxr.refined_reflections.get_flags(
-        idxr.refined_reflections.flags.centroid_outlier))
+      indexed_sel = idxr.refined_reflections.get_flags(idxr.refined_reflections.flags.indexed)
+      indexed_sel &= ~(idxr.refined_reflections.get_flags(idxr.refined_reflections.flags.centroid_outlier))
       for i_expt, expt in enumerate(idxr.refined_experiments):
         sel = idxr.refined_reflections['id'] == i_expt
         sel &= indexed_sel
         indexing_results.append({
-          'crystal': expt.crystal.to_dict(),
-          'n_indexed': sel.count(True),
-          'fraction_indexed': sel.count(True)/sel.size()})
+            'crystal': expt.crystal.to_dict(), 'n_indexed': sel.count(True), 'fraction_indexed':
+            sel.count(True) / sel.size()
+        })
       stats['lattices'] = indexing_results
       stats['n_indexed'] = indexed_sel.count(True)
-      stats['fraction_indexed'] = indexed_sel.count(True)/len(reflections)
+      stats['fraction_indexed'] = indexed_sel.count(True) / len(reflections)
     except Exception as e:
       logger.error(e)
       stats['error'] = str(e)
@@ -160,7 +151,7 @@ indexing_min_spots = 10
       #stats.fraction_indexed = None
     finally:
       t3 = time.time()
-      logger.info('Indexing took %.2f seconds' %(t3-t2))
+      logger.info('Indexing took %.2f seconds' % (t3 - t2))
 
     if integrate and 'lattices' in stats:
 
@@ -168,8 +159,7 @@ indexing_min_spots = 10
       from dials.algorithms.integration.integrator import IntegratorFactory
       from dials.command_line.integrate import phil_scope as integrate_phil_scope
       interp = integrate_phil_scope.command_line_argument_interpreter()
-      phil_scope, unhandled = interp.process_and_fetch(
-        unhandled, custom_processor='collect_remaining')
+      phil_scope, unhandled = interp.process_and_fetch(unhandled, custom_processor='collect_remaining')
       imagesets = [imageset]
       logger.error('The following integration parameters have been modified:')
       integrate_phil_scope.fetch_diff(source=phil_scope).show()
@@ -182,16 +172,15 @@ indexing_min_spots = 10
         reference = idxr.refined_reflections
 
         predicted = flex.reflection_table.from_predictions_multi(
-          experiments,
-          dmin=params.prediction.d_min,
-          dmax=params.prediction.d_max,
-          margin=params.prediction.margin,
-          force_static=params.prediction.force_static
-          )
+            experiments,
+            dmin=params.prediction.d_min,
+            dmax=params.prediction.d_max,
+            margin=params.prediction.margin,
+            force_static=params.prediction.force_static)
 
         matched, reference, unmatched = predicted.match_with_reference(reference)
-        assert(len(matched) == len(predicted))
-        assert(matched.count(True) <= len(reference))
+        assert (len(matched) == len(predicted))
+        assert (matched.count(True) <= len(reference))
         if matched.count(True) == 0:
           raise Sorry('''
             Invalid input for reference reflections.
@@ -200,8 +189,8 @@ indexing_min_spots = 10
         elif matched.count(True) != len(reference):
           logger.info('')
           logger.info('*' * 80)
-          logger.info('Warning: %d reference spots were not matched to predictions' % (
-            len(reference) - matched.count(True)))
+          logger.info('Warning: %d reference spots were not matched to predictions' %
+                      (len(reference) - matched.count(True)))
           logger.info('*' * 80)
           logger.info('')
 
@@ -225,7 +214,7 @@ indexing_min_spots = 10
         stats['error'] = str(e)
       finally:
         t4 = time.time()
-        logger.info('Integration took %.2f seconds' %(t4-t3))
+        logger.info('Integration took %.2f seconds' % (t4 - t3))
 
   return stats
 
@@ -266,7 +255,6 @@ def serve(httpd):
     pass
   return
 
-
 import libtbx.phil
 phil_scope = libtbx.phil.parse('''\
 nproc = Auto
@@ -275,14 +263,13 @@ port = 1701
   .type = int(value_min=1)
 ''')
 
-
 def main(nproc, port):
   server_class = server_base.HTTPServer
   httpd = server_class(('', port), handler)
   print time.asctime(), 'Serving %d processes on port %d' % (nproc, port)
 
   for j in range(nproc - 1):
-    proc = Process(target=serve, args=(httpd,))
+    proc = Process(target=serve, args=(httpd, ))
     proc.daemon = True
     proc.start()
   serve(httpd)
@@ -293,8 +280,7 @@ if __name__ == '__main__':
   usage = '%s [options]' % libtbx.env.dispatcher_name
 
   from dials.util.options import OptionParser
-  parser = OptionParser(
-    usage=usage, phil=phil_scope, epilog=help_message)
+  parser = OptionParser(usage=usage, phil=phil_scope, epilog=help_message)
   params, options = parser.parse_args(show_diff_phil=True)
   if params.nproc is libtbx.Auto:
     from libtbx.introspection import number_of_processors

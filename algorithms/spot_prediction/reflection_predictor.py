@@ -44,7 +44,6 @@ phil_scope = parse('''
 
 ''')
 
-
 class ReflectionPredictor(object):
   '''
   A reflection predictor that takes a number of experiments and does the proper
@@ -52,13 +51,7 @@ class ReflectionPredictor(object):
 
   '''
 
-  def __init__(self,
-               experiment,
-               dmin=None,
-               dmax=None,
-               margin=1,
-               force_static=False,
-               padding=0):
+  def __init__(self, experiment, dmin=None, dmax=None, margin=1, force_static=False, padding=0):
     '''
     Initialise a predictor for each experiment.
 
@@ -79,10 +72,11 @@ class ReflectionPredictor(object):
       def __init__(self, name, func):
         self.name = name
         self.func = func
+
       def __call__(self):
         result = self.func()
         if dmax is not None:
-          assert(dmax > 0)
+          assert (dmax > 0)
           result.compute_d_single(experiment)
           mask = result['d'] > dmax
           result.del_selected(mask)
@@ -91,8 +85,7 @@ class ReflectionPredictor(object):
     # Check prediction to maximum resolution is possible
     wl = experiment.beam.get_wavelength()
     if dmin is not None and dmin < 0.5 * wl:
-      raise Sorry("Prediction at d_min of {0} is not possible "
-                  "with wavelength {1}".format(dmin, wl))
+      raise Sorry("Prediction at d_min of {0} is not possible " "with wavelength {1}".format(dmin, wl))
 
     # Select the predictor class
     if isinstance(experiment.imageset, ImageSweep):
@@ -102,53 +95,32 @@ class ReflectionPredictor(object):
 
       sv_compatible = (xl_nsp == nim + 1) or (bm_nsp == nim + 1)
       if not force_static and sv_compatible:
-        predictor = ScanVaryingReflectionPredictor(
-          experiment,
-          dmin=dmin,
-          margin=margin,
-          padding=padding)
+        predictor = ScanVaryingReflectionPredictor(experiment, dmin=dmin, margin=margin, padding=padding)
 
         if bm_nsp == 0:
           # Only varying crystal
-          A = [experiment.crystal.get_A_at_scan_point(i) for i in
-                 range(experiment.crystal.num_scan_points)]
-          predict = Predictor(
-            "scan varying crystal prediction",
-            lambda: predictor.for_ub(flex.mat3_double(A)))
+          A = [experiment.crystal.get_A_at_scan_point(i) for i in range(experiment.crystal.num_scan_points)]
+          predict = Predictor("scan varying crystal prediction", lambda: predictor.for_ub(flex.mat3_double(A)))
 
         else:
           # Any allowed model may vary
           if xl_nsp == nim + 1:
-            A = [experiment.crystal.get_A_at_scan_point(i) for i in
-                 range(experiment.crystal.num_scan_points)]
+            A = [experiment.crystal.get_A_at_scan_point(i) for i in range(experiment.crystal.num_scan_points)]
           else:
             A = [experiment.crystal.get_A() for i in range(nim + 1)]
           if bm_nsp == nim + 1:
-            s0 = [experiment.beam.get_s0_at_scan_point(i) for i in
-                 range(experiment.beam.num_scan_points)]
+            s0 = [experiment.beam.get_s0_at_scan_point(i) for i in range(experiment.beam.num_scan_points)]
           else:
             s0 = [experiment.beam.get_s0() for i in range(nim + 1)]
-          predict = Predictor(
-            "scan varying model prediction",
-            lambda: predictor.for_varying_models(
-                flex.mat3_double(A),
-                flex.vec3_double(s0)))
+          predict = Predictor("scan varying model prediction",
+                              lambda: predictor.for_varying_models(flex.mat3_double(A), flex.vec3_double(s0)))
       else:
-        predictor = ScanStaticReflectionPredictor(
-          experiment,
-          dmin=dmin,
-          padding=padding)
-        predict = Predictor(
-          "scan static prediction",
-          lambda: predictor.for_ub(experiment.crystal.get_A()))
+        predictor = ScanStaticReflectionPredictor(experiment, dmin=dmin, padding=padding)
+        predict = Predictor("scan static prediction", lambda: predictor.for_ub(experiment.crystal.get_A()))
     else:
-      predictor = StillsReflectionPredictor(
-        experiment,
-        dmin=dmin)
+      predictor = StillsReflectionPredictor(experiment, dmin=dmin)
 
-      predict = Predictor(
-        "stills prediction",
-        lambda: predictor.for_ub(experiment.crystal.get_A()))
+      predict = Predictor("stills prediction", lambda: predictor.for_ub(experiment.crystal.get_A()))
 
     # Create and add the predictor class
     self._predict = predict

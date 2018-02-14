@@ -33,23 +33,21 @@ class Test(object):
         experiments = %s
           .type = experiment_list
       }
-    ''' % (self.reflections_path,
-           self.datablock_path,
-           self.experiments_path))
+    ''' % (self.reflections_path, self.datablock_path, self.experiments_path))
 
     params = phil_scope.extract()
     # Check the right filenames were parsed
-    assert(params.input.reflections.filename == self.reflections_path)
-    assert(params.input.datablock.filename == self.datablock_path)
-    assert(params.input.experiments.filename == self.experiments_path)
+    assert (params.input.reflections.filename == self.reflections_path)
+    assert (params.input.datablock.filename == self.datablock_path)
+    assert (params.input.experiments.filename == self.experiments_path)
     # Check that we got the expected objects back
     assert isinstance(params.input.reflections.data, Mock)
     assert isinstance(params.input.datablock.data, Mock)
     assert isinstance(params.input.experiments.data, Mock)
     # Check we had the correct calls made
     flex.reflection_table.from_pickle.assert_called_once_with(self.reflections_path)
-    assert DataBlockFactory.from_json_file.call_args[0] == (self.datablock_path,)
-    assert ExperimentListFactory.from_json_file.call_args[0] == (self.experiments_path,)
+    assert DataBlockFactory.from_json_file.call_args[0] == (self.datablock_path, )
+    assert ExperimentListFactory.from_json_file.call_args[0] == (self.experiments_path, )
 
     print 'OK'
 

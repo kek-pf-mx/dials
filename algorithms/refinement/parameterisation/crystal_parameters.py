@@ -40,8 +40,7 @@ class CrystalOrientationMixin(object):
 
     return p_list
 
-class CrystalOrientationParameterisation(ModelParameterisation,
-  CrystalOrientationMixin):
+class CrystalOrientationParameterisation(ModelParameterisation, CrystalOrientationMixin):
   """Parameterisation for crystal orientation, with angles expressed in
   mrad"""
 
@@ -64,8 +63,7 @@ class CrystalOrientationParameterisation(ModelParameterisation,
     p_list = self._build_p_list()
 
     # set up the base class
-    ModelParameterisation.__init__(self, crystal, istate, p_list,
-                                   experiment_ids=experiment_ids)
+    ModelParameterisation.__init__(self, crystal, istate, p_list, experiment_ids=experiment_ids)
 
     # call compose to calculate all the derivatives
     self.compose()
@@ -82,9 +80,7 @@ class CrystalOrientationParameterisation(ModelParameterisation,
     phi1, phi2, phi3 = self._param
 
     # calculate using the helper class
-    coc = CrystalOrientationCompose(U0, phi1.value, phi1.axis,
-                                    phi2.value, phi2.axis,
-                                    phi3.value, phi3.axis)
+    coc = CrystalOrientationCompose(U0, phi1.value, phi1.axis, phi2.value, phi2.axis, phi3.value, phi3.axis)
 
     # compose new state
     self._model.set_U(coc.U())
@@ -128,8 +124,7 @@ class CrystalUnitCellMixin(object):
 
     # set parameter values in the symmetrizing object and obtain new B
     try:
-      newB = matrix.sqr(
-            self._S.backward_orientation(vals).reciprocal_matrix())
+      newB = matrix.sqr(self._S.backward_orientation(vals).reciprocal_matrix())
     except RuntimeError as e:
       from libtbx.utils import Sorry
       # write original error to debug log
@@ -172,8 +167,7 @@ class CrystalUnitCellParameterisation(ModelParameterisation, CrystalUnitCellMixi
     p_list = self._build_p_list(crystal)
 
     # set up the base class
-    ModelParameterisation.__init__(self, crystal, istate, p_list,
-                                   experiment_ids=experiment_ids)
+    ModelParameterisation.__init__(self, crystal, istate, p_list, experiment_ids=experiment_ids)
 
     # call compose to calculate all the derivatives
     self.compose()

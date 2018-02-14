@@ -8,7 +8,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """
 A simple test of stills refinement using fake data.
 Only the crystal is perturbed while the beam and detector are known.
@@ -54,10 +53,12 @@ from cctbx.sgtbx import space_group, space_group_symbols
 #############################
 
 args = sys.argv[1:]
-master_phil = parse("""
+master_phil = parse(
+    """
     include scope dials.test.algorithms.refinement.geometry_phil
     include scope dials.test.algorithms.refinement.minimiser_phil
-    """, process_includes=True)
+    """,
+    process_includes=True)
 
 # build models, with a larger crystal than default in order to get enough
 # reflections on the 'still' image
@@ -66,8 +67,7 @@ geometry.parameters.crystal.a.length.range=40 50;
 geometry.parameters.crystal.b.length.range=40 50;
 geometry.parameters.crystal.c.length.range=40 50;
 geometry.parameters.random_seed = 42"""
-models = setup_geometry.Extract(master_phil, cmdline_args = args,
-                        local_overrides=param)
+models = setup_geometry.Extract(master_phil, cmdline_args=args, local_overrides=param)
 
 crystal = models.crystal
 mydetector = models.detector
@@ -77,23 +77,17 @@ mybeam = models.beam
 # Build a mock scan for a 1.5 degree wedge. Only used for generating indices near
 # the Ewald sphere
 sf = ScanFactory()
-myscan = sf.make_scan(image_range = (1,1),
-                      exposure_times = 0.1,
-                      oscillation = (0, 1.5),
-                      epochs = range(1),
-                      deg = True)
+myscan = sf.make_scan(image_range=(1, 1), exposure_times=0.1, oscillation=(0, 1.5), epochs=range(1), deg=True)
 sweep_range = myscan.get_oscillation_range(deg=False)
 im_width = myscan.get_oscillation(deg=False)[1]
 assert approx_equal(im_width, 1.5 * pi / 180.)
 
 # Build experiment lists
 stills_experiments = ExperimentList()
-stills_experiments.append(Experiment(
-      beam=mybeam, detector=mydetector, crystal=crystal, imageset=None))
+stills_experiments.append(Experiment(beam=mybeam, detector=mydetector, crystal=crystal, imageset=None))
 scans_experiments = ExperimentList()
-scans_experiments.append(Experiment(
-      beam=mybeam, detector=mydetector, crystal=crystal, goniometer = mygonio,
-      scan=myscan, imageset=None))
+scans_experiments.append(
+    Experiment(beam=mybeam, detector=mydetector, crystal=crystal, goniometer=mygonio, scan=myscan, imageset=None))
 
 ##########################################################
 # Parameterise the models (only for perturbing geometry) #
@@ -119,8 +113,7 @@ xluc_p_vals = []
 p_vals = xluc_param.get_param_vals()
 xluc_p_vals.append(p_vals)
 cell_params = crystal.get_unit_cell().parameters()
-cell_params = [a + b for a, b in zip(cell_params, [1.0, 1.0, -1.0, 0.0,
-                                                   0.0, 0.5])]
+cell_params = [a + b for a, b in zip(cell_params, [1.0, 1.0, -1.0, 0.0, 0.0, 0.5])]
 new_uc = unit_cell(cell_params)
 newB = matrix.sqr(new_uc.fractionalization_matrix()).transpose()
 S = symmetrize_reduce_enlarge(crystal.get_space_group())
@@ -138,8 +131,7 @@ target_crystal = deepcopy(crystal)
 
 # All indices in a 2.0 Angstrom sphere for crystal
 resolution = 2.0
-index_generator = IndexGenerator(crystal.get_unit_cell(),
-                space_group(space_group_symbols(1).hall()).type(), resolution)
+index_generator = IndexGenerator(crystal.get_unit_cell(), space_group(space_group_symbols(1).hall()).type(), resolution)
 indices = index_generator.to_array()
 
 # Build a ray predictor and predict rays close to the Ewald sphere by using
@@ -184,15 +176,14 @@ params = phil_scope.fetch(source=parse('')).extract()
 
 # Change this to get a plot
 do_plot = False
-if do_plot: params.refinement.refinery.journal.track_parameter_correlation=True
+if do_plot: params.refinement.refinery.journal.track_parameter_correlation = True
 
 from dials.algorithms.refinement.refiner import RefinerFactory
 # decrease bin_size_fraction to terminate on RMSD convergence
-params.refinement.target.bin_size_fraction=0.01
-params.refinement.parameterisation.beam.fix="all"
-params.refinement.parameterisation.detector.fix="all"
-refiner = RefinerFactory.from_parameters_data_experiments(params,
-  obs_refs_stills, stills_experiments, verbosity=0)
+params.refinement.target.bin_size_fraction = 0.01
+params.refinement.parameterisation.beam.fix = "all"
+params.refinement.parameterisation.detector.fix = "all"
+refiner = RefinerFactory.from_parameters_data_experiments(params, obs_refs_stills, stills_experiments, verbosity=0)
 
 # run refinement
 history = refiner.run()
@@ -206,8 +197,7 @@ uc2 = target_crystal.get_unit_cell()
 assert uc1.is_similar_to(uc2)
 
 if do_plot:
-  plt = refiner.parameter_correlation_plot(len(history["parameter_correlation"])-1)
+  plt = refiner.parameter_correlation_plot(len(history["parameter_correlation"]) - 1)
   plt.show()
 
 print "OK"
-

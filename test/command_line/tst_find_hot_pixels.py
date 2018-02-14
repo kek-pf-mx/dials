@@ -7,7 +7,6 @@ from libtbx import easy_run
 from glob import glob
 
 class Test(object):
-
   def __init__(self):
 
     # Check we have dials_regression
@@ -17,8 +16,7 @@ class Test(object):
 
     # set the directory
     self.directory = libtbx.env.find_in_repositories(
-      relative_path="dials_regression/centroid_test_data",
-      test=os.path.isdir)
+        relative_path="dials_regression/centroid_test_data", test=os.path.isdir)
 
   def run(self):
 
@@ -26,10 +24,8 @@ class Test(object):
 
     template = glob(join(self.directory, "centroid*.cbf"))
     args = [
-      "dials.find_spots", ' '.join(template),
-      "output.datablock=datablock.json",
-      "output.reflections=spotfinder.pickle",
-      "output.shoeboxes=True"
+        "dials.find_spots", ' '.join(template), "output.datablock=datablock.json",
+        "output.reflections=spotfinder.pickle", "output.shoeboxes=True"
     ]
     result = easy_run.fully_buffered(command=" ".join(args)).raise_if_errors()
 
@@ -37,10 +33,8 @@ class Test(object):
     assert exists("spotfinder.pickle")
 
     args = [
-      "dials.find_hot_pixels",
-      "input.datablock=datablock.json",
-      "input.reflections=spotfinder.pickle",
-      "output.mask=hot_mask.pickle"
+        "dials.find_hot_pixels", "input.datablock=datablock.json", "input.reflections=spotfinder.pickle",
+        "output.mask=hot_mask.pickle"
     ]
     result = easy_run.fully_buffered(command=" ".join(args)).raise_if_errors()
 

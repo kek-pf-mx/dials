@@ -7,7 +7,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """Contains classes used to manage the reflections used during scaling,
 principally ObservationManager."""
 
@@ -19,7 +18,7 @@ from dials_scaling_helpers_ext import GroupedObservations, minimum_multiplicity_
 from libtbx import phil
 from libtbx.utils import Sorry
 
-observation_manager_phil_str='''
+observation_manager_phil_str = '''
 observations
 {
   integration_type = *sum prf mix
@@ -44,13 +43,11 @@ class ObservationManager(object):
     if params is None: params = om_scope.extract()
 
     # initial filter
-    reflections = reflections.select(reflections.get_flags(
-      reflections.flags.integrated))
+    reflections = reflections.select(reflections.get_flags(reflections.flags.integrated))
 
     # create new column containing the reduced Miller index
     xl = experiment.crystal
-    symm = cctbx.crystal.symmetry(xl.get_unit_cell(),
-                                  space_group=xl.get_space_group())
+    symm = cctbx.crystal.symmetry(xl.get_unit_cell(), space_group=xl.get_space_group())
     hkl_set = cctbx.miller.set(symm, reflections['miller_index'])
     asu_set = hkl_set.map_to_asu()
     reflections['asu_miller_index'] = asu_set.indices()
@@ -72,8 +69,7 @@ class ObservationManager(object):
       sel = ios >= params.observations.i_over_sigma_cutoff
       reflections = reflections.select(sel)
     if params.observations.min_multiplicity > 0:
-      sel = minimum_multiplicity_selection(reflections['asu_miller_index'],
-        params.observations.min_multiplicity)
+      sel = minimum_multiplicity_selection(reflections['asu_miller_index'], params.observations.min_multiplicity)
       reflections = reflections.select(sel)
 
     # extract columns of interest
@@ -132,7 +128,6 @@ class ObservationManager(object):
     # delegate to the GroupedObservations object
     return self._go.get_average_intensity()
 
-
 class Script(object):
   '''A class for running the script.'''
 
@@ -144,18 +139,17 @@ class Script(object):
 
     # The script usage
     import __main__
-    usage  = ("usage: dials.python {0} [options] [param.phil] "
-              "integrated.pickle refined_experiments.json").format(
-      __main__.__file__)
+    usage = ("usage: dials.python {0} [options] [param.phil] "
+             "integrated.pickle refined_experiments.json").format(__main__.__file__)
 
     # Create the parser
     self.parser = OptionParser(
-      usage=usage,
-      #phil=working_phil,
-      read_reflections=True,
-      read_experiments=True,
-      check_format=False,
-      epilog="Test script for the ObservationManager class.")
+        usage=usage,
+        #phil=working_phil,
+        read_reflections=True,
+        read_experiments=True,
+        check_format=False,
+        epilog="Test script for the ObservationManager class.")
 
     return
 

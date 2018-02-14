@@ -37,7 +37,8 @@ Examples::
 
 # The phil scope
 from libtbx.phil import parse
-phil_scope = parse('''
+phil_scope = parse(
+    '''
 
   output {
     experiments = refined_cell.json
@@ -119,7 +120,8 @@ phil_scope = parse('''
       .help = "If true remove symmetry constraints and refine a triclinic cell"
               "by converting to P 1"
   }
-''', process_includes=True)
+''',
+    process_includes=True)
 
 working_phil = phil_scope.fetch()
 
@@ -138,12 +140,12 @@ class Script(object):
 
     # Create the parser
     self.parser = OptionParser(
-      usage=usage,
-      phil=working_phil,
-      read_reflections=True,
-      read_experiments=True,
-      check_format=False,
-      epilog=help_message)
+        usage=usage,
+        phil=working_phil,
+        read_reflections=True,
+        read_experiments=True,
+        check_format=False,
+        epilog=help_message)
 
   @staticmethod
   def check_input(reflections):
@@ -166,15 +168,17 @@ class Script(object):
     '''Replace all crystals in the experiments list with the first crystal'''
 
     from dxtbx.model.experiment_list import Experiment, ExperimentList
-    new_experiments=ExperimentList()
+    new_experiments = ExperimentList()
     ref_crystal = experiments[0].crystal
     for exp in experiments:
-      new_experiments.append(Experiment(beam=exp.beam,
-                                        detector=exp.detector,
-                                        scan=exp.scan,
-                                        goniometer=exp.goniometer,
-                                        crystal=ref_crystal,
-                                        imageset=exp.imageset))
+      new_experiments.append(
+          Experiment(
+              beam=exp.beam,
+              detector=exp.detector,
+              scan=exp.scan,
+              goniometer=exp.goniometer,
+              crystal=ref_crystal,
+              imageset=exp.imageset))
     return new_experiments
 
   @staticmethod
@@ -192,7 +196,7 @@ class Script(object):
     reflections = reflections.select(mask)
 
     logger.info('{0} out of {1} reflections remain after filtering to keep only strong'
-        ' and integrated centroids'.format(len(reflections), orig_len))
+                ' and integrated centroids'.format(len(reflections), orig_len))
     return reflections
 
   @staticmethod
@@ -230,20 +234,16 @@ class Script(object):
     xluc_params = []
     for icrystal, crystal in enumerate(experiments.crystals()):
       exp_ids = experiments.indices(crystal)
-      xluc_params.append(CrystalUnitCellParameterisation(crystal,
-                        experiment_ids=exp_ids))
+      xluc_params.append(CrystalUnitCellParameterisation(crystal, experiment_ids=exp_ids))
 
     # Two theta prediction equation parameterisation
-    pred_param = TwoThetaPredictionParameterisation(experiments,
-      det_params, beam_params, xlo_params, xluc_params)
-    param_reporter = ParameterReporter(det_params, beam_params,
-                                       xlo_params, xluc_params)
+    pred_param = TwoThetaPredictionParameterisation(experiments, det_params, beam_params, xlo_params, xluc_params)
+    param_reporter = ParameterReporter(det_params, beam_params, xlo_params, xluc_params)
 
     # ReflectionManager, currently without outlier rejection
     # Note: If not all reflections are used, then the filtering must be
     # communicated to generate_cif/mmcif() to be included in the CIF file!
-    refman = TwoThetaReflectionManager(reflections, experiments,
-       outlier_detector=None, verbosity=verb)
+    refman = TwoThetaReflectionManager(reflections, experiments, outlier_detector=None, verbosity=verb)
 
     # Reflection predictor
     ref_predictor = TwoThetaExperimentsPredictor(experiments)
@@ -261,23 +261,25 @@ class Script(object):
     # Minimisation engine - hardcoded to LevMar for now.
     from dials.algorithms.refinement.engine \
       import LevenbergMarquardtIterations as Refinery
-    refinery = Refinery(target = target,
-                        prediction_parameterisation = pred_param,
-                        log = None,
-                        verbosity = verb,
-                        tracking = journal,
-                        max_iterations = 20)
+    refinery = Refinery(
+        target=target,
+        prediction_parameterisation=pred_param,
+        log=None,
+        verbosity=verb,
+        tracking=journal,
+        max_iterations=20)
 
     # Refiner
     from dials.algorithms.refinement.refiner import Refiner
-    refiner = Refiner(reflections=reflections,
-                      experiments=experiments,
-                      pred_param=pred_param,
-                      param_reporter=param_reporter,
-                      refman=refman,
-                      target=target,
-                      refinery=refinery,
-                      verbosity=verb)
+    refiner = Refiner(
+        reflections=reflections,
+        experiments=experiments,
+        pred_param=pred_param,
+        param_reporter=param_reporter,
+        refman=refman,
+        target=target,
+        refinery=refinery,
+        verbosity=verb)
 
     return refiner
 
@@ -309,11 +311,10 @@ class Script(object):
 
     open(file, 'w').write('\n'.join([
         'TITLE    Auto-generated .p4p file from dials.two_theta_refine',
-        'CELL     %.4f %.4f %.4f %.4f %.4f %.4f %.4f' % tuple(
-            cell + (vol,)),
-        'CELLSD   %.4f %.4f %.4f %.4f %.4f %.4f %.4f' % tuple(
-            esd + (vol_esd,)),
-        'SOURCE   SYNCH   %.6f' % beam.get_wavelength(), '']))
+        'CELL     %.4f %.4f %.4f %.4f %.4f %.4f %.4f' % tuple(cell + (vol, )),
+        'CELLSD   %.4f %.4f %.4f %.4f %.4f %.4f %.4f' % tuple(esd + (vol_esd, )),
+        'SOURCE   SYNCH   %.6f' % beam.get_wavelength(), ''
+    ]))
     return
 
   @staticmethod
@@ -327,13 +328,13 @@ class Script(object):
     block = iotbx.cif.model.block()
     block["_audit_creation_method"] = dials_version()
     block["_audit_creation_date"] = datetime.date.today().isoformat()
-#   block["_publ_section_references"] = '' # once there is a reference...
+    #   block["_publ_section_references"] = '' # once there is a reference...
 
-    for cell, esd, cifname in zip(crystal.get_unit_cell().parameters(),
-                                  crystal.get_cell_parameter_sd(),
+    for cell, esd, cifname in zip(crystal.get_unit_cell().parameters(), crystal.get_cell_parameter_sd(),
                                   ['length_a', 'length_b', 'length_c', 'angle_alpha', 'angle_beta', 'angle_gamma']):
       block['_cell_%s' % cifname] = format_float_with_standard_uncertainty(cell, esd)
-    block['_cell_volume'] = format_float_with_standard_uncertainty(crystal.get_unit_cell().volume(), crystal.get_cell_volume_sd())
+    block['_cell_volume'] = format_float_with_standard_uncertainty(crystal.get_unit_cell().volume(),
+                                                                   crystal.get_cell_volume_sd())
 
     used_reflections = refiner.get_matches()
     block['_cell_measurement_reflns_used'] = len(used_reflections)
@@ -368,10 +369,9 @@ class Script(object):
     block = iotbx.cif.model.block()
     block["_audit.creation_method"] = dials_version()
     block["_audit.creation_date"] = datetime.date.today().isoformat()
-#   block["_publ.section_references"] = '' # once there is a reference...
+    #   block["_publ.section_references"] = '' # once there is a reference...
 
-    for cell, esd, cifname in zip(crystal.get_unit_cell().parameters(),
-                                  crystal.get_cell_parameter_sd(),
+    for cell, esd, cifname in zip(crystal.get_unit_cell().parameters(), crystal.get_cell_parameter_sd(),
                                   ['length_a', 'length_b', 'length_c', 'angle_alpha', 'angle_beta', 'angle_gamma']):
       block['_cell.%s' % cifname] = "%.8f" % cell
       block['_cell.%s_esd' % cifname] = "%.8f" % esd
@@ -416,12 +416,11 @@ class Script(object):
     reflections = flex.reflection_table()
     global_id = 0
     from dxtbx.model.experiment_list import ExperimentList
-    experiments=ExperimentList()
+    experiments = ExperimentList()
 
     # loop through the input, building up the global lists
     nrefs_per_exp = []
-    for ref_wrapper, exp_wrapper in zip(params.input.reflections,
-                                        params.input.experiments):
+    for ref_wrapper, exp_wrapper in zip(params.input.reflections, params.input.experiments):
       refs = ref_wrapper.data
       exps = exp_wrapper.data
       for i, exp in enumerate(exps):
@@ -447,8 +446,7 @@ class Script(object):
     self.check_input(reflections)
 
     # Configure the logging
-    log.config(info=params.output.log,
-      debug=params.output.debug_log)
+    log.config(info=params.output.log, debug=params.output.debug_log)
     logger.info(dials_version())
 
     # Log the diff phil
@@ -508,7 +506,7 @@ class Script(object):
       if not ext: ext = ".pdf"
 
       steps = params.output.correlation_plot.steps
-      if steps is None: steps = [history.get_nrows()-1]
+      if steps is None: steps = [history.get_nrows() - 1]
 
       # extract individual column names or indices
       col_select = params.output.correlation_plot.col_select
@@ -535,7 +533,7 @@ class Script(object):
             for k, corrmat in corrmats.items():
               corrmats[k] = corrmat.as_scitbx_matrix()
             logger.info('Saving parameter correlation matrices to {0}'.format(mat_fname))
-            pickle.dump({'corrmats':corrmats, 'labels':labels}, handle)
+            pickle.dump({'corrmats': corrmats, 'labels': labels}, handle)
 
       if num_plots == 0:
         msg = "Sorry, no parameter correlation plots were produced. Please set " \
@@ -547,8 +545,7 @@ class Script(object):
       self.generate_cif(crystals[0], refiner, file=params.output.cif)
 
     if params.output.p4p is not None:
-      self.generate_p4p(crystals[0], experiments[0].beam,
-                        file=params.output.p4p)
+      self.generate_p4p(crystals[0], experiments[0].beam, file=params.output.p4p)
 
     if params.output.mmcif is not None:
       self.generate_mmcif(crystals[0], refiner, file=params.output.mmcif)

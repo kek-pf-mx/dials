@@ -46,27 +46,12 @@ class ProfileModelFactory(object):
     create_profile_model = True
     if hasattr(params, 'create_profile_model'):
       create_profile_model = params.create_profile_model
-    if (create_profile_model and
-        reflections is not None and
-        "shoebox" in reflections):
+    if (create_profile_model and reflections is not None and "shoebox" in reflections):
       for expr, indices in reflections.iterate_experiments_and_indices(experiments):
-        expr.profile = Algorithm.create(
-          params.profile,
-          reflections.select(indices),
-          expr.crystal,
-          expr.beam,
-          expr.detector,
-          expr.goniometer,
-          expr.scan)
+        expr.profile = Algorithm.create(params.profile, reflections.select(indices), expr.crystal, expr.beam,
+                                        expr.detector, expr.goniometer, expr.scan)
     else:
       for expr in experiments:
-        expr.profile = Algorithm.create(
-          params.profile,
-          None,
-          expr.crystal,
-          expr.beam,
-          expr.detector,
-          expr.goniometer,
-          expr.scan,
-          expr.profile)
+        expr.profile = Algorithm.create(params.profile, None, expr.crystal, expr.beam, expr.detector, expr.goniometer,
+                                        expr.scan, expr.profile)
     return experiments

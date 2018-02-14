@@ -1,8 +1,6 @@
-
 from __future__ import absolute_import, division
 
 class Test(object):
-
   def __init__(self):
     import libtbx.load_env
     try:
@@ -14,12 +12,11 @@ class Test(object):
     import dials
     import os
 
-    filename = os.path.join(dials_regression,
-        'centroid_test_data', 'experiments.json')
+    filename = os.path.join(dials_regression, 'centroid_test_data', 'experiments.json')
 
     from dxtbx.model.experiment_list import ExperimentListFactory
     self.exlist = ExperimentListFactory.from_json_file(filename)
-    assert(len(self.exlist) == 1)
+    assert (len(self.exlist) == 1)
 
     from dials.array_family import flex
     self.rlist = flex.reflection_table.from_predictions_multi(self.exlist)
@@ -30,24 +27,19 @@ class Test(object):
 
     corrector = CorrectionsMulti()
     for experiment in self.exlist:
-      corrector.append(Corrections(
-        experiment.beam,
-        experiment.goniometer,
-        experiment.detector))
+      corrector.append(Corrections(experiment.beam, experiment.goniometer, experiment.detector))
 
     lp1 = corrector.lp(self.rlist['id'], self.rlist['s1'])
 
     lp2 = self.compute_expected()
 
     diff = flex.abs(lp1 - lp2)
-    assert(diff.all_lt(1e-7))
+    assert (diff.all_lt(1e-7))
     print 'OK'
 
   def compute_expected(self):
     from dials.array_family import flex
-    lp = flex.double(
-      [self.LP_calculations(self.exlist[i], s1)
-       for i, s1 in zip(self.rlist['id'], self.rlist['s1'])])
+    lp = flex.double([self.LP_calculations(self.exlist[i], s1) for i, s1 in zip(self.rlist['id'], self.rlist['s1'])])
     return lp
 
   def LP_calculations(self, experiment, s1):

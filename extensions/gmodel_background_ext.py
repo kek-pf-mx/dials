@@ -12,7 +12,6 @@ from __future__ import absolute_import, division
 
 from dials.interfaces import BackgroundIface
 
-
 class GModelBackgroundExt(BackgroundIface):
   ''' An extension class implementing a robust GLM background algorithm. '''
 
@@ -64,11 +63,11 @@ class GModelBackgroundExt(BackgroundIface):
 
     # Create the algorithm
     self._algorithm = BackgroundAlgorithm(
-      experiments,
-      model           = params.model,
-      robust          = params.robust.algorithm,
-      tuning_constant = params.robust.tuning_constant,
-      min_pixels      = params.min_pixels)
+        experiments,
+        model=params.model,
+        robust=params.robust.algorithm,
+        tuning_constant=params.robust.tuning_constant,
+        min_pixels=params.min_pixels)
 
   def compute_background(self, reflections, image_volume=None):
     '''
@@ -77,5 +76,4 @@ class GModelBackgroundExt(BackgroundIface):
     :param reflections: The list of reflections
 
     '''
-    return self._algorithm.compute_background(
-      reflections, image_volume=image_volume)
+    return self._algorithm.compute_background(reflections, image_volume=image_volume)

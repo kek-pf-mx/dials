@@ -10,7 +10,6 @@
 
 from __future__ import absolute_import, division
 
-
 class ValidatedMultiExpProfileModeller(object):
   '''
   A class to wrap profile modeller for validation
@@ -46,7 +45,7 @@ class ValidatedMultiExpProfileModeller(object):
     '''
     from dials.array_family import flex
     if 'profile.index' not in reflections:
-      assert(len(self.modellers) == 1)
+      assert (len(self.modellers) == 1)
       self.modellers[0].model(reflections)
     else:
       for i, modeller in enumerate(self.modellers):
@@ -83,7 +82,7 @@ class ValidatedMultiExpProfileModeller(object):
     Accumulate the modellers
 
     '''
-    assert(len(self) == len(other))
+    assert (len(self) == len(other))
     for ms, mo in zip(self, other):
       ms.accumulate(mo)
 

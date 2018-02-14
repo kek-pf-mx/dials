@@ -36,8 +36,7 @@ class BackgroundAlgorithm(object):
     # Do the background subtraction
     if image_volume is None:
       success = create(reflections['shoebox'])
-      reflections['background.mean'] = flex.double([
-        sbox.background[0] for sbox in reflections['shoebox']])
+      reflections['background.mean'] = flex.double([sbox.background[0] for sbox in reflections['shoebox']])
     else:
       success = create(reflections, image_volume)
     reflections.set_flags(success != True, reflections.flags.dont_integrate)

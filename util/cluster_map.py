@@ -1,4 +1,3 @@
-
 from __future__ import absolute_import, division
 
 class InputWriter(object):
@@ -25,19 +24,9 @@ class InputWriter(object):
     import cPickle as pickle
     for i, item in enumerate(self.iterable, start=1):
       with open(join(self.directory, "%d.input" % i), "wb") as outfile:
-        pickle.dump(
-          (self.function, item),
-          outfile,
-          protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump((self.function, item), outfile, protocol=pickle.HIGHEST_PROTOCOL)
 
-
-def cluster_map(
-    func,
-    iterable,
-    callback=None,
-    nslots=1,
-    njobs=1,
-    job_category="low"):
+def cluster_map(func, iterable, callback=None, nslots=1, njobs=1, job_category="low"):
   '''
   A function to map stuff on cluster using drmaa
 
@@ -65,11 +54,7 @@ def cluster_map(
   cwd = tempfile.mkdtemp(prefix="dials_cluster_map_", dir=os.getcwd())
 
   # Start outputting the input files in a separate process
-  process = multiprocessing.Process(
-    target = InputWriter(
-      cwd,
-      func,
-      iterable))
+  process = multiprocessing.Process(target=InputWriter(cwd, func, iterable))
   process.start()
   process.join()
 
@@ -78,15 +63,15 @@ def cluster_map(
 
     # Create the job template
     jt = s.createJobTemplate()
-    jt.remoteCommand    = "cluster.dials.exec"
-    jt.args             = [cwd]
-    jt.jobName          = "dials"
-    jt.joinFiles        = True
-    jt.jobEnvironment   = os.environ
+    jt.remoteCommand = "cluster.dials.exec"
+    jt.args = [cwd]
+    jt.jobName = "dials"
+    jt.joinFiles = True
+    jt.jobEnvironment = os.environ
     jt.workingDirectory = cwd
-    jt.outputPath       = ":" + join(cwd, "%s.stdout" % drmaa.JobTemplate.PARAMETRIC_INDEX)
-    jt.errorPath        = ":" + join(cwd, "%s.stderr" % drmaa.JobTemplate.PARAMETRIC_INDEX)
-    jt.jobCategory      = job_category
+    jt.outputPath = ":" + join(cwd, "%s.stdout" % drmaa.JobTemplate.PARAMETRIC_INDEX)
+    jt.errorPath = ":" + join(cwd, "%s.stderr" % drmaa.JobTemplate.PARAMETRIC_INDEX)
+    jt.jobCategory = job_category
 
     # FIXME Currently no portable way of specifying this
     # In order to select a cluster node with N cores
@@ -124,9 +109,7 @@ def cluster_map(
     except KeyboardInterrupt:
 
       # Delete the jobs
-      s.control(
-        drmaa.Session.JOB_IDS_SESSION_ALL,
-        drmaa.JobControlAction.TERMINATE)
+      s.control(drmaa.Session.JOB_IDS_SESSION_ALL, drmaa.JobControlAction.TERMINATE)
 
       # Delete job template
       s.deleteJobTemplate(jt)
@@ -137,9 +120,6 @@ def cluster_map(
   # Return the result
   return result
 
-
-
-
 if __name__ == '__main__':
 
   def callback(x):
@@ -148,11 +128,7 @@ if __name__ == '__main__':
   from dials.util.cluster_func_test import func
   from dials.util.mp import MultiNodeClusterFunction
 
-
-
   print cluster_map(
-    func,
-    list(range(100)),
-    nslots=4
-   # callback=callback,
-    )
+      func, list(range(100)), nslots=4
+      # callback=callback,
+  )

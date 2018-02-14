@@ -7,7 +7,6 @@
 #
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
-
 """Test derivatives of the Hamilton, Rollett and Sparks least-squares target
 (http://doi.org/10.1107/S0365110X65000233)"""
 
@@ -24,8 +23,8 @@ def av_I(I, w, g):
   assert len(w) == nobs
   assert len(g) == nobs
 
-  numerator = sum([a*b*c for (a,b,c) in zip(w, g, I)])
-  denominator = sum([a*b*b for (a,b) in zip(w, g)])
+  numerator = sum([a * b * c for (a, b, c) in zip(w, g, I)])
+  denominator = sum([a * b * b for (a, b) in zip(w, g)])
 
   assert denominator > 0
   return numerator / denominator
@@ -47,11 +46,11 @@ def grad_av_I(I, w, g, iparam):
 
   dg = dg_dp(g, iparam)
 
-  u = sum([a*b*c for (a,b,c) in zip(w, g, I)])
-  v = sum([a*b*b for (a,b) in zip(w, g)])
+  u = sum([a * b * c for (a, b, c) in zip(w, g, I)])
+  v = sum([a * b * b for (a, b) in zip(w, g)])
 
-  du_dp = sum([a*b*c for (a,b,c) in zip(w, dg, I)])
-  dv_dp = sum([2.*a*b*c for (a,b,c) in zip(w, g, dg)])
+  du_dp = sum([a * b * c for (a, b, c) in zip(w, dg, I)])
+  dv_dp = sum([2. * a * b * c for (a, b, c) in zip(w, g, dg)])
 
   result = (du_dp * v - dv_dp * u) / (v**2)
   return result
@@ -96,9 +95,9 @@ def grad_r(I, w, g, iparam):
   mrgI = av_I(I, w, g)
 
   term1 = -1. * mrgI * dgl
-  term2a = sum([2.*a*b*c for (a,b,c) in zip(w, g, dg)]) * mrgI
-  term2b = sum([a*b*c for (a,b,c) in zip(w, dg, I)])
-  term2c = sum([a*b*b for (a,b) in zip(w, g)])
+  term2a = sum([2. * a * b * c for (a, b, c) in zip(w, g, dg)]) * mrgI
+  term2b = sum([a * b * c for (a, b, c) in zip(w, dg, I)])
+  term2c = sum([a * b * b for (a, b) in zip(w, g)])
 
   result = term1 + gl * (term2a - term2b) / term2c
   return result
@@ -132,15 +131,15 @@ if __name__ == '__main__':
   nobs = 10
 
   # known scale factors
-  K = [1 + e/40. for e in range(nobs)]
-  g = [1./e for e in K]
+  K = [1 + e / 40. for e in range(nobs)]
+  g = [1. / e for e in K]
 
   # intensities
   means = [100 * e for e in K]
   I = [variate(poisson_distribution(e))() for e in means]
 
   # weights (inverse variances of I)
-  w = [1./e for e in means]
+  w = [1. / e for e in means]
 
   mrgI = av_I(I, w, g)
 

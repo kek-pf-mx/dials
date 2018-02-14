@@ -1,9 +1,6 @@
-
 from __future__ import absolute_import, division
 
-
 class Test(object):
-
   def __init__(self):
     from os.path import join
     from dials.array_family import flex
@@ -29,29 +26,20 @@ class Test(object):
     from dials.array_family import flex
 
     # Call dials.merge_reflection_lists
-    easy_run.fully_buffered([
-      'dev.dials.merge_reflection_lists',
-      'temp1.pickle',
-      'temp2.pickle',
-      'method=update'
-    ]).raise_if_errors()
+    easy_run.fully_buffered(['dev.dials.merge_reflection_lists', 'temp1.pickle', 'temp2.pickle',
+                             'method=update']).raise_if_errors()
 
     table = flex.reflection_table.from_pickle('merged.pickle')
-    assert(len(table) == 360)
+    assert (len(table) == 360)
     print 'OK'
 
     # Call dials.merge_reflection_lists
-    easy_run.fully_buffered([
-      'dev.dials.merge_reflection_lists',
-      'temp1.pickle',
-      'temp2.pickle',
-      'method=extend'
-    ]).raise_if_errors()
+    easy_run.fully_buffered(['dev.dials.merge_reflection_lists', 'temp1.pickle', 'temp2.pickle',
+                             'method=extend']).raise_if_errors()
 
     table = flex.reflection_table.from_pickle('merged.pickle')
-    assert(len(table) == 720)
+    assert (len(table) == 720)
     print 'OK'
-
 
 if __name__ == '__main__':
   from dials.test import cd_auto

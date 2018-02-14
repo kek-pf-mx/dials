@@ -35,7 +35,6 @@ from dials.algorithms.refinement.parameterisation.scan_varying_goniometer_parame
     import ScanVaryingGoniometerParameterisation
 
 class Test(object):
-
   def create_models(self, cmdline_overrides=None):
 
     if cmdline_overrides is None:
@@ -44,12 +43,13 @@ class Test(object):
 geometry.parameters.crystal.b.length.range = 10 50
 geometry.parameters.crystal.c.length.range = 10 50"""
 
-    master_phil = parse("""
+    master_phil = parse(
+        """
     include scope dials.test.algorithms.refinement.geometry_phil
     """, process_includes=True)
 
     # Extract models
-    models = Extract(master_phil, overrides, cmdline_args = cmdline_overrides)
+    models = Extract(master_phil, overrides, cmdline_args=cmdline_overrides)
     self.detector = models.detector
     self.goniometer = models.goniometer
     self.crystal = models.crystal
@@ -57,28 +57,28 @@ geometry.parameters.crystal.c.length.range = 10 50"""
 
     # Make a scan of 1-360 * 0.5 deg images
     sf = ScanFactory()
-    self.scan = sf.make_scan((1,360), 0.5, (0, 0.5), range(360))
+    self.scan = sf.make_scan((1, 360), 0.5, (0, 0.5), range(360))
 
     # Generate an ExperimentList
     self.experiments = ExperimentList()
-    self.experiments.append(Experiment(
-          beam=self.beam, detector=self.detector, goniometer=self.goniometer,
-          scan=self.scan, crystal=self.crystal, imageset=None))
+    self.experiments.append(
+        Experiment(
+            beam=self.beam,
+            detector=self.detector,
+            goniometer=self.goniometer,
+            scan=self.scan,
+            crystal=self.crystal,
+            imageset=None))
 
     # Create a reflection predictor for the experiments
     self.ref_predictor = ExperimentsPredictor(self.experiments)
 
     # Create scan-varying parameterisations of these models, with 5 samples
-    self.det_param = ScanVaryingDetectorParameterisationSinglePanel(
-            self.detector, self.scan.get_array_range(), 5)
-    self.s0_param = ScanVaryingBeamParameterisation(
-            self.beam, self.scan.get_array_range(), 5, self.goniometer)
-    self.xlo_param = ScanVaryingCrystalOrientationParameterisation(
-            self.crystal, self.scan.get_array_range(), 5)
-    self.xluc_param = ScanVaryingCrystalUnitCellParameterisation(
-            self.crystal, self.scan.get_array_range(), 5)
-    self.gon_param = ScanVaryingGoniometerParameterisation(
-            self.goniometer, self.scan.get_array_range(), 5, self.beam)
+    self.det_param = ScanVaryingDetectorParameterisationSinglePanel(self.detector, self.scan.get_array_range(), 5)
+    self.s0_param = ScanVaryingBeamParameterisation(self.beam, self.scan.get_array_range(), 5, self.goniometer)
+    self.xlo_param = ScanVaryingCrystalOrientationParameterisation(self.crystal, self.scan.get_array_range(), 5)
+    self.xluc_param = ScanVaryingCrystalUnitCellParameterisation(self.crystal, self.scan.get_array_range(), 5)
+    self.gon_param = ScanVaryingGoniometerParameterisation(self.goniometer, self.scan.get_array_range(), 5, self.beam)
 
     return
 
@@ -86,8 +86,7 @@ geometry.parameters.crystal.c.length.range = 10 50"""
     sweep_range = self.scan.get_oscillation_range(deg=False)
     resolution = 2.0
     index_generator = IndexGenerator(self.crystal.get_unit_cell(),
-                          space_group(space_group_symbols(1).hall()).type(),
-                          resolution)
+                                     space_group(space_group_symbols(1).hall()).type(), resolution)
     indices = index_generator.to_array()
 
     # Predict rays within the sweep range
@@ -135,19 +134,17 @@ geometry.parameters.crystal.c.length.range = 10 50"""
     # use a ReflectionManager to exclude reflections too close to the spindle,
     # plus set the frame numbers
     from dials.algorithms.refinement.reflection_manager import ReflectionManager
-    refman = ReflectionManager(reflections, self.experiments,
-      outlier_detector=None)
+    refman = ReflectionManager(reflections, self.experiments, outlier_detector=None)
 
     # create prediction parameterisation of the requested type
-    pred_param = ScanVaryingPredictionParameterisation(self.experiments,
-        [self.det_param], [self.s0_param], [self.xlo_param], [self.xluc_param],
-        [self.gon_param])
+    pred_param = ScanVaryingPredictionParameterisation(self.experiments, [self.det_param], [self.s0_param],
+                                                       [self.xlo_param], [self.xluc_param], [self.gon_param])
 
     # make a target to ensure reflections are predicted and refman is finalised
     from dials.algorithms.refinement.target import \
       LeastSquaresPositionalResidualWithRmsdCutoff
-    target = LeastSquaresPositionalResidualWithRmsdCutoff(self.experiments,
-        self.ref_predictor, refman, pred_param, restraints_parameterisation=None)
+    target = LeastSquaresPositionalResidualWithRmsdCutoff(
+        self.experiments, self.ref_predictor, refman, pred_param, restraints_parameterisation=None)
 
     # keep only those reflections that pass inclusion criteria and have predictions
     reflections = refman.get_matches()
@@ -189,11 +186,11 @@ geometry.parameters.crystal.c.length.range = 10 50"""
       phi_grads /= deltas[i]
 
       try:
-        for n, (a,b) in enumerate(zip(x_grads, an_grads[i]["dX_dp"])):
+        for n, (a, b) in enumerate(zip(x_grads, an_grads[i]["dX_dp"])):
           assert approx_equal(a, b, eps=1.e-5)
-        for n, (a,b) in enumerate(zip(y_grads, an_grads[i]["dY_dp"])):
+        for n, (a, b) in enumerate(zip(y_grads, an_grads[i]["dY_dp"])):
           assert approx_equal(a, b, eps=1.e-5)
-        for n, (a,b) in enumerate(zip(phi_grads, an_grads[i]["dphi_dp"])):
+        for n, (a, b) in enumerate(zip(phi_grads, an_grads[i]["dphi_dp"])):
           assert approx_equal(a, b, eps=1.e-5)
       except AssertionError:
         print "Failure for {0}".format(p_names[i])
@@ -217,4 +214,4 @@ if __name__ == "__main__":
   test1(cmdline_overrides)
 
   finish_time = time()
-  print "Time Taken: ",finish_time - start_time
+  print "Time Taken: ", finish_time - start_time

@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division
 
 class Test:
-
   def __init__(self):
     pass
 
@@ -23,9 +22,9 @@ class Test:
     for i in range(10000):
       i = randint(10, 1990)
       j = randint(10, 1990)
-      v = sa[j,i]
-      e = flex.sum(image[j-3:j+4,i-3:i+4])
-      assert(abs(e - v) <= eps)
+      v = sa[j, i]
+      e = flex.sum(image[j - 3:j + 4, i - 3:i + 4])
+      assert (abs(e - v) <= eps)
 
     # Test passed
     print 'OK'

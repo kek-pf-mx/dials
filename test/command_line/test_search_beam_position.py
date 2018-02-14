@@ -35,11 +35,7 @@ def test_thing_1(tmpdir, dials_regression):
 
   tmpdir.chdir()
 
-  args = ["dials.search_beam_position",
-          datablock_path1,
-          datablock_path2,
-          pickle_path1,
-          pickle_path2]
+  args = ["dials.search_beam_position", datablock_path1, datablock_path2, pickle_path1, pickle_path2]
 
   print(args)
   result = libtbx.procrunner.run_process(args)
@@ -49,12 +45,10 @@ def test_thing_1(tmpdir, dials_regression):
   from dxtbx.serialize import load
   datablocks = load.datablock(datablock_path1, check_format=False)
   original_imageset = datablocks[0].extract_imagesets()[0]
-  optimized_datablock = load.datablock('optimized_datablock.json',
-                                       check_format=False)
+  optimized_datablock = load.datablock('optimized_datablock.json', check_format=False)
   detector_1 = original_imageset.get_detector()
   detector_2 = optimized_datablock[0].unique_detectors()[0]
-  shift = (scitbx.matrix.col(detector_1[0].get_origin()) -
-           scitbx.matrix.col(detector_2[0].get_origin()))
+  shift = (scitbx.matrix.col(detector_1[0].get_origin()) - scitbx.matrix.col(detector_2[0].get_origin()))
   assert shift.elems == pytest.approx((0.037, 0.061, 0.0), abs=1e-1)
 
 def test_thing_2(tmpdir, xia2_regression_build):
@@ -76,16 +70,14 @@ def test_thing_2(tmpdir, xia2_regression_build):
   assert os.path.exists('datablock.json')
 
   # spot-finding, just need a subset of the data
-  args = ["dials.find_spots", "datablock.json",
-          "scan_range=1,10", "scan_range=531,540"]
+  args = ["dials.find_spots", "datablock.json", "scan_range=1,10", "scan_range=531,540"]
   print(args)
   result = libtbx.procrunner.run_process(args)
   assert result['stderr'] == '' and result['exitcode'] == 0
   assert os.path.exists('strong.pickle')
 
   # actually run the beam centre search
-  args = ["dials.search_beam_position", "datablock.json",
-          "strong.pickle"]
+  args = ["dials.search_beam_position", "datablock.json", "strong.pickle"]
   print(args)
   result = libtbx.procrunner.run_process(args)
   assert result['stderr'] == '' and result['exitcode'] == 0
@@ -95,25 +87,20 @@ def test_thing_2(tmpdir, xia2_regression_build):
   from dxtbx.serialize import load
   datablocks = load.datablock("datablock.json", check_format=False)
   original_imageset = datablocks[0].extract_imagesets()[0]
-  optimized_datablock = load.datablock('optimized_datablock.json',
-                                       check_format=False)
+  optimized_datablock = load.datablock('optimized_datablock.json', check_format=False)
   detector_1 = original_imageset.get_detector()
   detector_2 = optimized_datablock[0].unique_detectors()[0]
-  shift = (scitbx.matrix.col(detector_1[0].get_origin()) -
-           scitbx.matrix.col(detector_2[0].get_origin()))
+  shift = (scitbx.matrix.col(detector_1[0].get_origin()) - scitbx.matrix.col(detector_2[0].get_origin()))
   print(shift)
 
   # check we can actually index the resulting optimized datablock
   from cctbx import uctbx
   from dials.test.algorithms.indexing.tst_index import run_one_indexing
-  expected_unit_cell = uctbx.unit_cell(
-    (57.780, 57.800, 150.017, 89.991, 89.990, 90.007))
+  expected_unit_cell = uctbx.unit_cell((57.780, 57.800, 150.017, 89.991, 89.990, 90.007))
   expected_rmsds = (0.06, 0.05, 0.001)
   expected_hall_symbol = ' P 1'
-  run_one_indexing(
-    (tmpdir / 'strong.pickle').strpath,
-    (tmpdir / 'optimized_datablock.json').strpath, [],
-    expected_unit_cell, expected_rmsds, expected_hall_symbol)
+  run_one_indexing((tmpdir / 'strong.pickle').strpath, (tmpdir / 'optimized_datablock.json').strpath, [],
+                   expected_unit_cell, expected_rmsds, expected_hall_symbol)
 
 def test_thing_3(tmpdir, dials_regression):
   '''Would you like to know more about what this test is supposed to do?
@@ -125,8 +112,7 @@ def test_thing_3(tmpdir, dials_regression):
 
   tmpdir.chdir()
 
-  args = ["dials.search_beam_position",
-          datablock_path, pickle_path]
+  args = ["dials.search_beam_position", datablock_path, pickle_path]
   print(args)
   result = libtbx.procrunner.run_process(args)
   assert result['stderr'] == '' and result['exitcode'] == 0
@@ -135,10 +121,8 @@ def test_thing_3(tmpdir, dials_regression):
   from dxtbx.serialize import load
   datablocks = load.datablock(datablock_path, check_format=False)
   original_imageset = datablocks[0].extract_imagesets()[0]
-  optimized_datablock = load.datablock('optimized_datablock.json',
-                                       check_format=False)
+  optimized_datablock = load.datablock('optimized_datablock.json', check_format=False)
   detector_1 = original_imageset.get_detector()
   detector_2 = optimized_datablock[0].unique_detectors()[0]
-  shift = (scitbx.matrix.col(detector_1[0].get_origin()) -
-           scitbx.matrix.col(detector_2[0].get_origin()))
+  shift = (scitbx.matrix.col(detector_1[0].get_origin()) - scitbx.matrix.col(detector_2[0].get_origin()))
   assert shift.elems == pytest.approx((-0.976, 2.497, 0.0), abs=1e-1)

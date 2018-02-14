@@ -7,12 +7,12 @@ def print_profile(r):
   for i in range(_i):
     for j in range(_j):
       for k in range(_k):
-        print '%5d' % int(s[i,j,k]),
+        print '%5d' % int(s[i, j, k]),
       print ''
     print ''
     print ''
 
-def show_profiles(integrated_pickle, isig_limit = None):
+def show_profiles(integrated_pickle, isig_limit=None):
   from dials.array_family import flex
   import math
 
@@ -32,4 +32,4 @@ if __name__ == '__main__':
   if len(sys.argv) == 2:
     show_profiles(sys.argv[1], None)
   else:
-    show_profiles(sys.argv[1], isig_limit = float(sys.argv[2]))
+    show_profiles(sys.argv[1], isig_limit=float(sys.argv[2]))

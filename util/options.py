@@ -1,4 +1,3 @@
-
 #
 # options.py
 #
@@ -90,7 +89,8 @@ tolerance
 }
 ''')
 
-geometry_phil_scope = libtbx.phil.parse('''
+geometry_phil_scope = libtbx.phil.parse(
+    '''
 geometry
   .help = "Allow overrides of experimental geometry"
   .expert_level = 2
@@ -110,8 +110,8 @@ geometry
     .help = "When overriding the scan, convert sweeps into stills"
     .short_caption = "Convert sweeps into stills"
 }
-''', process_includes=True)
-
+''',
+    process_includes=True)
 
 format_phil_scope = libtbx.phil.parse('''
 format
@@ -127,7 +127,6 @@ format
             "(Not supported by all detector formats)"
 }
 ''')
-
 
 class ConfigWriter(object):
   '''Class to write configuration to file.'''
@@ -160,14 +159,14 @@ class ConfigWriter(object):
       f.write(text)
 
 # Simple tuple to hold basic information on why an argument failed
-ArgumentHandlingErrorInfo = namedtuple(
-    "ArgumentHandlingErrorInfo",
-    ["name", "validation", "message", "traceback", "type", "exception"])
+ArgumentHandlingErrorInfo = namedtuple("ArgumentHandlingErrorInfo",
+                                       ["name", "validation", "message", "traceback", "type", "exception"])
 
 class Importer(object):
   ''' A class to import the command line arguments. '''
 
-  def __init__(self, args,
+  def __init__(self,
+               args,
                read_datablocks=False,
                read_experiments=False,
                read_reflections=False,
@@ -208,53 +207,38 @@ class Importer(object):
     self.reflections = []
     self.unhandled = args
     # Keep track of any errors whilst handling arguments
-    self.handling_errors =  defaultdict(list)
+    self.handling_errors = defaultdict(list)
 
     # First try to read image files
     if read_datablocks_from_images:
-      self.unhandled = self.try_read_datablocks_from_images(
-        self.unhandled,
-        verbose,
-        compare_beam,
-        compare_detector,
-        compare_goniometer,
-        scan_tolerance,
-        format_kwargs)
+      self.unhandled = self.try_read_datablocks_from_images(self.unhandled, verbose, compare_beam, compare_detector,
+                                                            compare_goniometer, scan_tolerance, format_kwargs)
 
     # Second try to read data block files
     if read_datablocks:
-      self.unhandled = self.try_read_datablocks(
-        self.unhandled, check_format, verbose)
+      self.unhandled = self.try_read_datablocks(self.unhandled, check_format, verbose)
 
     # Third try to read experiment files
     if read_experiments:
-      self.unhandled = self.try_read_experiments(
-        self.unhandled, check_format, verbose)
+      self.unhandled = self.try_read_experiments(self.unhandled, check_format, verbose)
 
     # Fourth try to read reflection files
     if read_reflections:
-      self.unhandled = self.try_read_reflections(
-        self.unhandled, verbose)
+      self.unhandled = self.try_read_reflections(self.unhandled, verbose)
 
   def _handle_converter_error(self, argument, exception, type, validation=False):
     "Record information about errors that occured processing an argument"
-    self.handling_errors[argument].append(ArgumentHandlingErrorInfo(
-          name=argument,
-          validation=validation,
-          message=exception.message,
-          traceback=traceback.format_exc(),
-          type=type,
-          exception=exception)
-    )
+    self.handling_errors[argument].append(
+        ArgumentHandlingErrorInfo(
+            name=argument,
+            validation=validation,
+            message=exception.message,
+            traceback=traceback.format_exc(),
+            type=type,
+            exception=exception))
 
-  def try_read_datablocks_from_images(self,
-                                      args,
-                                      verbose,
-                                      compare_beam,
-                                      compare_detector,
-                                      compare_goniometer,
-                                      scan_tolerance,
-                                      format_kwargs):
+  def try_read_datablocks_from_images(self, args, verbose, compare_beam, compare_detector, compare_goniometer,
+                                      scan_tolerance, format_kwargs):
     '''
     Try to import images.
 
@@ -278,14 +262,14 @@ class Importer(object):
 
     unhandled = []
     datablocks = DataBlockFactory.from_filenames(
-      args,
-      verbose=verbose,
-      unhandled=unhandled,
-      compare_beam=compare_beam,
-      compare_detector=compare_detector,
-      compare_goniometer=compare_goniometer,
-      scan_tolerance=scan_tolerance,
-      format_kwargs=format_kwargs)
+        args,
+        verbose=verbose,
+        unhandled=unhandled,
+        compare_beam=compare_beam,
+        compare_detector=compare_detector,
+        compare_goniometer=compare_goniometer,
+        scan_tolerance=scan_tolerance,
+        format_kwargs=format_kwargs)
     if len(datablocks) > 0:
       filename = "<image files>"
       obj = FilenameDataWrapper(filename, datablocks)
@@ -361,14 +345,16 @@ class Importer(object):
       try:
         self.reflections.append(converter.from_string(argument))
       except (pickle.UnpicklingError, cPickle.UnpicklingError) as e:
-        self._handle_converter_error(argument, pickle.UnpicklingError("Appears to be an invalid pickle file"),
-            type="Reflections", validation=True)
+        self._handle_converter_error(
+            argument,
+            pickle.UnpicklingError("Appears to be an invalid pickle file"),
+            type="Reflections",
+            validation=True)
         unhandled.append(argument)
       except Exception as e:
         self._handle_converter_error(argument, e, type="Reflections")
         unhandled.append(argument)
     return unhandled
-
 
 class PhilCommandParser(object):
   ''' A class to parse phil parameters from positional arguments '''
@@ -491,9 +477,7 @@ class PhilCommandParser(object):
         unhandled.append(arg)
 
     # Fetch the phil parameters
-    self._phil, unused = self.system_phil.fetch(
-      sources=user_phils,
-      track_unused_definitions=True)
+    self._phil, unused = self.system_phil.fetch(sources=user_phils, track_unused_definitions=True)
 
     # Print if bad definitions
     if len(unused) > 0:
@@ -511,26 +495,26 @@ class PhilCommandParser(object):
     # Create some comparison functions
     if self._read_datablocks_from_images:
       compare_beam = BeamComparison(
-        wavelength_tolerance=params.input.tolerance.beam.wavelength,
-        direction_tolerance=params.input.tolerance.beam.direction,
-        polarization_normal_tolerance=params.input.tolerance.beam.polarization_normal,
-        polarization_fraction_tolerance=params.input.tolerance.beam.polarization_fraction)
+          wavelength_tolerance=params.input.tolerance.beam.wavelength,
+          direction_tolerance=params.input.tolerance.beam.direction,
+          polarization_normal_tolerance=params.input.tolerance.beam.polarization_normal,
+          polarization_fraction_tolerance=params.input.tolerance.beam.polarization_fraction)
       compare_detector = DetectorComparison(
-        fast_axis_tolerance=params.input.tolerance.detector.fast_axis,
-        slow_axis_tolerance=params.input.tolerance.detector.slow_axis,
-        origin_tolerance=params.input.tolerance.detector.origin)
+          fast_axis_tolerance=params.input.tolerance.detector.fast_axis,
+          slow_axis_tolerance=params.input.tolerance.detector.slow_axis,
+          origin_tolerance=params.input.tolerance.detector.origin)
       compare_goniometer = GoniometerComparison(
-        rotation_axis_tolerance=params.input.tolerance.goniometer.rotation_axis,
-        fixed_rotation_tolerance=params.input.tolerance.goniometer.fixed_rotation,
-        setting_rotation_tolerance=params.input.tolerance.goniometer.setting_rotation)
+          rotation_axis_tolerance=params.input.tolerance.goniometer.rotation_axis,
+          fixed_rotation_tolerance=params.input.tolerance.goniometer.fixed_rotation,
+          setting_rotation_tolerance=params.input.tolerance.goniometer.setting_rotation)
       scan_tolerance = params.input.tolerance.scan.oscillation
 
       # FIXME Should probably make this smarter since it requires editing here
       # and in dials.import phil scope
       try:
         format_kwargs = {
-          'dynamic_shadowing' : params.format.dynamic_shadowing,
-          'multi_panel' : params.format.multi_panel,
+            'dynamic_shadowing': params.format.dynamic_shadowing,
+            'multi_panel': params.format.multi_panel,
         }
       except Exception:
         format_kwargs = None
@@ -543,18 +527,18 @@ class PhilCommandParser(object):
 
     # Try to import everything
     importer = Importer(
-      unhandled,
-      read_datablocks=self._read_datablocks,
-      read_experiments=self._read_experiments,
-      read_reflections=self._read_reflections,
-      read_datablocks_from_images=self._read_datablocks_from_images,
-      check_format=self._check_format,
-      verbose=verbose,
-      compare_beam=compare_beam,
-      compare_detector=compare_detector,
-      compare_goniometer=compare_goniometer,
-      scan_tolerance=scan_tolerance,
-      format_kwargs=format_kwargs)
+        unhandled,
+        read_datablocks=self._read_datablocks,
+        read_experiments=self._read_experiments,
+        read_reflections=self._read_reflections,
+        read_datablocks_from_images=self._read_datablocks_from_images,
+        check_format=self._check_format,
+        verbose=verbose,
+        compare_beam=compare_beam,
+        compare_detector=compare_detector,
+        compare_goniometer=compare_goniometer,
+        scan_tolerance=scan_tolerance,
+        format_kwargs=format_kwargs)
 
     # Grab a copy of the errors that occured in case the caller wants them
     self.handling_errors = importer.handling_errors
@@ -582,16 +566,13 @@ class PhilCommandParser(object):
     from dials.util.phil import parse
 
     # Create the input scope
-    require_input_scope = (
-      self._read_datablocks or
-      self._read_experiments or
-      self._read_reflections or
-      self._read_datablocks_from_images)
+    require_input_scope = (self._read_datablocks or self._read_experiments or self._read_reflections
+                           or self._read_datablocks_from_images)
     if not require_input_scope:
       return None
     input_phil_scope = parse('input {}')
     main_scope = input_phil_scope.get_without_substitution("input")
-    assert(len(main_scope) == 1)
+    assert (len(main_scope) == 1)
     main_scope = main_scope[0]
 
     # Add the datablock phil scope
@@ -631,14 +612,10 @@ class PhilCommandParser(object):
     # Return the input scope
     return input_phil_scope
 
-
 class OptionParserBase(optparse.OptionParser, object):
   ''' The base class for the option parser. '''
 
-  def __init__(self,
-               config_options=False,
-               sort_options=False,
-               **kwargs):
+  def __init__(self, config_options=False, sort_options=False, **kwargs):
     '''
     Initialise the class.
 
@@ -653,46 +630,39 @@ class OptionParserBase(optparse.OptionParser, object):
     # Add an option to show configuration parameters
     if config_options:
       self.add_option(
-        '-c', '--show-config',
-        action='store_true',
-        default=False,
-        dest='show_config',
-        help='Show the configuration parameters.')
+          '-c',
+          '--show-config',
+          action='store_true',
+          default=False,
+          dest='show_config',
+          help='Show the configuration parameters.')
       self.add_option(
-        '-a', '--attributes-level',
-        default=0,
-        type='int',
-        dest='attributes_level',
-        help='Set the attributes level for showing configuration parameters')
+          '-a',
+          '--attributes-level',
+          default=0,
+          type='int',
+          dest='attributes_level',
+          help='Set the attributes level for showing configuration parameters')
       self.add_option(
-        '-e', '--expert-level',
-        type='int',
-        default=0,
-        dest='expert_level',
-        help='Set the expert level for showing configuration parameters')
+          '-e',
+          '--expert-level',
+          type='int',
+          default=0,
+          dest='expert_level',
+          help='Set the expert level for showing configuration parameters')
       self.add_option(
-        '--export-autocomplete-hints',
-        action='store_true',
-        default=False,
-        dest='export_autocomplete_hints',
-        help=optparse.SUPPRESS_HELP)
+          '--export-autocomplete-hints',
+          action='store_true',
+          default=False,
+          dest='export_autocomplete_hints',
+          help=optparse.SUPPRESS_HELP)
 
     # Add an option to sort
     if sort_options:
-      self.add_option(
-        '-s', '--sort',
-        action='store_true',
-        dest='sort',
-        default=False,
-        help='Sort the arguments')
+      self.add_option('-s', '--sort', action='store_true', dest='sort', default=False, help='Sort the arguments')
 
     # Set a verbosity parameter
-    self.add_option(
-      '-v',
-      action='count',
-      default=0,
-      dest='verbose',
-      help='Increase verbosity')
+    self.add_option('-v', action='count', default=0, dest='verbose', help='Increase verbosity')
 
   def parse_args(self, args=None, quick_parse=False):
     '''
@@ -732,7 +702,6 @@ class OptionParserBase(optparse.OptionParser, object):
       return ''
     return self.epilog
 
-
 class OptionParser(OptionParserBase):
   '''A class to parse command line options and get the system configuration.
   The class extends optparse.OptionParser to include the reading of phil
@@ -763,18 +732,16 @@ class OptionParser(OptionParserBase):
 
     # Create the phil parser
     self._phil_parser = PhilCommandParser(
-      phil=phil,
-      read_datablocks=read_datablocks,
-      read_experiments=read_experiments,
-      read_reflections=read_reflections,
-      read_datablocks_from_images=read_datablocks_from_images,
-      check_format=check_format)
+        phil=phil,
+        read_datablocks=read_datablocks,
+        read_experiments=read_experiments,
+        read_reflections=read_reflections,
+        read_datablocks_from_images=read_datablocks_from_images,
+        check_format=check_format)
 
     # Initialise the option parser
     super(OptionParser, self).__init__(
-      sort_options=sort_options,
-      config_options=self.system_phil.as_str() != '',
-      **kwargs)
+        sort_options=sort_options, config_options=self.system_phil.as_str() != '', **kwargs)
 
   def parse_args(self,
                  args=None,
@@ -800,20 +767,14 @@ class OptionParser(OptionParserBase):
     # Parse the command line arguments, this will separate out
     # options (e.g. -o, --option) and positional arguments, in
     # which phil options will be included.
-    options, args = super(OptionParser, self).parse_args(
-      args=args, quick_parse=quick_parse)
+    options, args = super(OptionParser, self).parse_args(args=args, quick_parse=quick_parse)
 
     # Show config
     if hasattr(options, 'show_config') and options.show_config:
-      print (
-        'Showing configuration parameters with:\n'
-        '  attributes_level = %d\n'
-        '  expert_level = %d\n' % (
-          options.attributes_level,
-          options.expert_level))
-      print self.phil.as_str(
-        expert_level=options.expert_level,
-        attributes_level=options.attributes_level)
+      print('Showing configuration parameters with:\n'
+            '  attributes_level = %d\n'
+            '  expert_level = %d\n' % (options.attributes_level, options.expert_level))
+      print self.phil.as_str(expert_level=options.expert_level, attributes_level=options.attributes_level)
       exit(0)
 
     if hasattr(options, 'export_autocomplete_hints') and options.export_autocomplete_hints:
@@ -822,10 +783,7 @@ class OptionParser(OptionParserBase):
 
     # Parse the phil parameters
     params, args = self._phil_parser.parse_args(
-      args,
-      options.verbose > 0,
-      return_unhandled=return_unhandled,
-      quick_parse=quick_parse)
+        args, options.verbose > 0, return_unhandled=return_unhandled, quick_parse=quick_parse)
 
     # Print the diff phil
     if show_diff_phil:
@@ -874,26 +832,22 @@ class OptionParser(OptionParserBase):
         err = list(err)
         # Grouping the errors by message lets us avoid repeating messages
         if len(err) > 1:
-          msg.append("  \"{}\" failed repeatedly during processing:\n{}\n".format(
-            arg, "    " + err[0].message))
+          msg.append("  \"{}\" failed repeatedly during processing:\n{}\n".format(arg, "    " + err[0].message))
         elif isinstance(err[0].exception, Sorry):
-          msg.append("  \"{}\" failed during {} processing:\n    {}\n".format(
-            arg, err[0].type, err[0].message))
+          msg.append("  \"{}\" failed during {} processing:\n    {}\n".format(arg, err[0].type, err[0].message))
         else:
-          msg.append("  \"{}\" failed during {} processing:\n{}\n".format(
-            arg, err[0].type,
-            "\n".join("    " + x for x in err[0].traceback.splitlines())))
+          msg.append("  \"{}\" failed during {} processing:\n{}\n".format(arg, err[0].type, "\n".join(
+              "    " + x for x in err[0].traceback.splitlines())))
 
       # Otherwise (or if asked for verbosity), list the validation errors
       if valid and (not non_valid or verbosity):
-        msg.append("  {} did not appear to conform to any{} expected format:".format(arg,
-          " other" if non_valid else " "))
+        msg.append("  {} did not appear to conform to any{} expected format:".format(
+            arg, " other" if non_valid else " "))
         slen = max(len(x.type) for x in valid)
         for err in valid:
-          msg.append("    - {} {}".format("{}:".format(err.type).ljust(slen+1), err.message))
+          msg.append("    - {} {}".format("{}:".format(err.type).ljust(slen + 1), err.message))
 
     return "\n".join(msg)
-
 
   @property
   def phil(self):
@@ -977,11 +931,11 @@ class OptionParser(OptionParserBase):
       """ Construct a tree of parameters, grouped by common prefixes """
 
       # Split parameter paths at '.' character
-      paths = [ p.split('.', 1) for p in paths ]
+      paths = [p.split('.', 1) for p in paths]
 
       # Identify all names that are directly on this level
       # or represent parameter groups with a common prefix
-      top_elements = { "%s%s" % (x[0], "=" if len(x) == 1 else ".") for x in paths }
+      top_elements = {"%s%s" % (x[0], "=" if len(x) == 1 else ".") for x in paths}
 
       # Partition all names that are further down the tree by their prefix
       subpaths = {}
@@ -997,7 +951,7 @@ class OptionParser(OptionParserBase):
           top_elements.add("%s.%s=" % (s, subpaths[s][0]))
           del subpaths[s]
 
-      result = { '': top_elements }
+      result = {'': top_elements}
       # Revursively process each group
       for n, x in subpaths.iteritems():
         result[n] = construct_completion_tree(x)
@@ -1034,7 +988,8 @@ class OptionParser(OptionParserBase):
         if subkey != '':
           _tree_to_bash(prefix + subkey + '.', tree[subkey])
           print '\n  %s*)' % (prefix + subkey + '.')
-          print '    _dials_autocomplete_values="%s";;' % " ".join(sorted([prefix + subkey + '.' + x for x in tree[subkey]['']]))
+          print '    _dials_autocomplete_values="%s";;' % " ".join(
+              sorted([prefix + subkey + '.' + x for x in tree[subkey]['']]))
 
     print 'function _dials_autocomplete_hints ()'
     print '{'
@@ -1047,7 +1002,6 @@ class OptionParser(OptionParserBase):
     print '    _dials_autocomplete_values="%s";;' % " ".join(sorted(toplevelset))
     print ' esac'
     print '}'
-
 
 def flatten_reflections(filename_object_list):
   '''

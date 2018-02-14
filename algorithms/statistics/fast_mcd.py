@@ -34,7 +34,7 @@ def cov(*args):
   cov = flex.double(flex.grid(ncols, ncols))
   for i in range(ncols):
     for j in range(i, ncols):
-      cov[i,j] = sample_covariance(args[i], args[j])
+      cov[i, j] = sample_covariance(args[i], args[j])
 
   cov.matrix_copy_upper_to_lower_triangle_in_place()
   return cov
@@ -65,35 +65,25 @@ def mcd_finite_sample(p, n, alpha):
   from math import log, exp
   from scitbx.lstbx import normal_eqns
   if p > 2:
-    coeffqpkwad500=[[-1.42764571687802,1.26263336932151,2],
-                    [-1.06141115981725,1.28907991440387,3]]
-    coeffqpkwad875=[[-0.455179464070565,1.11192541278794,2],
-                    [-0.294241208320834,1.09649329149811,3]]
+    coeffqpkwad500 = [[-1.42764571687802, 1.26263336932151, 2], [-1.06141115981725, 1.28907991440387, 3]]
+    coeffqpkwad875 = [[-0.455179464070565, 1.11192541278794, 2], [-0.294241208320834, 1.09649329149811, 3]]
 
-    y_500 = [log(-coeffqpkwad500[0][0] / p**coeffqpkwad500[0][1]),
-             log(-coeffqpkwad500[1][0] / p**coeffqpkwad500[1][1])]
-    y_875 = [log(-coeffqpkwad875[0][0] / p**coeffqpkwad875[0][1]),
-             log(-coeffqpkwad875[1][0] / p**coeffqpkwad875[1][1])]
-    A_500 = [[1, -log(coeffqpkwad500[0][2]*p**2)],
-             [1, -log(coeffqpkwad500[1][2]*p**2)]]
-    A_875 = [[1, -log(coeffqpkwad875[0][2]*p**2)],
-             [1, -log(coeffqpkwad875[1][2]*p**2)]]
+    y_500 = [log(-coeffqpkwad500[0][0] / p**coeffqpkwad500[0][1]), log(-coeffqpkwad500[1][0] / p**coeffqpkwad500[1][1])]
+    y_875 = [log(-coeffqpkwad875[0][0] / p**coeffqpkwad875[0][1]), log(-coeffqpkwad875[1][0] / p**coeffqpkwad875[1][1])]
+    A_500 = [[1, -log(coeffqpkwad500[0][2] * p**2)], [1, -log(coeffqpkwad500[1][2] * p**2)]]
+    A_875 = [[1, -log(coeffqpkwad875[0][2] * p**2)], [1, -log(coeffqpkwad875[1][2] * p**2)]]
 
     # solve the set of equations labelled _500
     eqs = normal_eqns.linear_ls(2)
     for i in range(2):
-      eqs.add_equation(right_hand_side=y_500[i],
-                     design_matrix_row=flex.double(A_500[i]),
-                     weight=1)
+      eqs.add_equation(right_hand_side=y_500[i], design_matrix_row=flex.double(A_500[i]), weight=1)
     eqs.solve()
     coeffic_500 = eqs.solution()
 
     # solve the set of equations labelled _875
     eqs = normal_eqns.linear_ls(2)
     for i in range(2):
-      eqs.add_equation(right_hand_side=y_875[i],
-                       design_matrix_row=flex.double(A_875[i]),
-                       weight=1)
+      eqs.add_equation(right_hand_side=y_875[i], design_matrix_row=flex.double(A_875[i]), weight=1)
     eqs.solve()
     coeffic_875 = eqs.solution()
 
@@ -109,19 +99,18 @@ def mcd_finite_sample(p, n, alpha):
     fp_875_n = 1 - exp(-0.351584646688712) / n**1.01646567502486
 
   if alpha <= 0.875:
-    fp_alpha_n = fp_500_n + (fp_875_n - fp_500_n)/0.375 * (alpha - 0.5)
+    fp_alpha_n = fp_500_n + (fp_875_n - fp_500_n) / 0.375 * (alpha - 0.5)
 
   if 0.875 < alpha and alpha <= 1:
-    fp_alpha_n = fp_875_n + (1 - fp_875_n)/0.125 * (alpha - 0.875)
+    fp_alpha_n = fp_875_n + (1 - fp_875_n) / 0.125 * (alpha - 0.875)
 
-  return 1/fp_alpha_n
+  return 1 / fp_alpha_n
 
 class FastMCD(object):
   """Experimental implementation of the FAST-MCD algorithm of Rousseeuw and
   van Driessen"""
 
-  def __init__(self, data, alpha=0.5, max_n_groups=5, min_group_size=300,
-    n_trials=500, k1=2, k2=2, k3=100):
+  def __init__(self, data, alpha=0.5, max_n_groups=5, min_group_size=300, n_trials=500, k1=2, k2=2, k3=100):
     """data expected to be a list of flex.double arrays of the same length,
     representing the vectors of observations in each dimension"""
 
@@ -145,7 +134,7 @@ class FastMCD(object):
     # default initial subset size
     self._alpha = alpha
     n2 = (self._n + self._p + 1) // 2
-    self._h = int(floor(2 * n2 - self._n + 2 * (self._n - n2) *  alpha))
+    self._h = int(floor(2 * n2 - self._n + 2 * (self._n - n2) * alpha))
     # In the original FAST-MCD, if h == n it reports a single
     # location and scatter estimate for the whole dataset and stops. Currently
     # limit this implementation to h < n
@@ -245,7 +234,7 @@ class FastMCD(object):
 
     # split into groups
     groups = []
-    for s,e in blocks:
+    for s, e in blocks:
       groups.append([col[s:e] for col in permuted])
 
     return groups
@@ -301,7 +290,7 @@ class FastMCD(object):
         # detS3 < detS2 < detS1 by Theorem 1. In practice (rounding errors?)
         # this is not always the case here. Ensure that detScurr is no smaller than
         # one billionth the value of detSnew less than detSnew
-        assert detScurr > (detSnew - detSnew/1.e9)
+        assert detScurr > (detSnew - detSnew / 1.e9)
         detScurr, Tcurr, Scurr = detSnew, Tnew, Snew
 
       trials.append((detSnew, Tnew, Snew))
@@ -340,7 +329,7 @@ class FastMCD(object):
       sample_size = self._min_group_size * self._max_n_groups
 
     # sample the data and split into groups
-    sampled = self.sample_data(self._data, sample_size = sample_size)
+    sampled = self.sample_data(self._data, sample_size=sample_size)
     groups = self.split_into_groups(sample=sampled, ngroups=ngroups)
 
     # work within the groups now
@@ -368,7 +357,7 @@ class FastMCD(object):
           # detS3 < detS2 < detS1 by Theorem 1. In practice (rounding errors?)
           # this is not always the case here. Ensure that detScurr is no smaller than
           # one billionth the value of detSnew less than detSnew
-          assert detScurr > (detSnew - detSnew/1.e9)
+          assert detScurr > (detSnew - detSnew / 1.e9)
           detScurr, Tcurr, Scurr = detSnew, Tnew, Snew
 
         gp_trials.append((detSnew, Tnew, Snew))

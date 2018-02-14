@@ -40,7 +40,6 @@ phil_scope = parse('''
 
 ''')
 
-
 class Script(object):
   ''' A class to encapsulate the script. '''
 
@@ -51,11 +50,7 @@ class Script(object):
 
     # The script usage
     usage = "usage: %s [options] /path/to/image/reflection/files" % libtbx.env.dispatcher_name
-    self.parser = OptionParser(
-      epilog=help_message,
-      usage=usage,
-      phil=phil_scope,
-      read_reflections=True)
+    self.parser = OptionParser(epilog=help_message, usage=usage, phil=phil_scope, read_reflections=True)
 
   def run(self):
     ''' Run the script. '''
@@ -77,12 +72,12 @@ class Script(object):
 
     # Merge the reflection lists
     if params.method == "update":
-      assert(all(n == nrows[0] for n in nrows[1:]))
+      assert (all(n == nrows[0] for n in nrows[1:]))
       table = tables[0]
       for t in tables[1:]:
         table.update(t)
     elif params.method == "extend":
-      assert(all(n == ncols[0] for n in ncols[1:]))
+      assert (all(n == ncols[0] for n in ncols[1:]))
       table = tables[0]
       for t in tables[1:]:
         table.extend(t)
@@ -94,8 +89,7 @@ class Script(object):
     table.as_pickle(params.output)
     Command.end('Wrote %d reflections to %s' % (len(table), params.output))
 
-
-if __name__  == '__main__':
+if __name__ == '__main__':
   from dials.util import halraiser
   try:
     script = Script()

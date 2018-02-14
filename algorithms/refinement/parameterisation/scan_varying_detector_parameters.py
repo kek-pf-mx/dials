@@ -20,8 +20,7 @@ from dials.algorithms.refinement.parameterisation.detector_parameters import \
 # bucket to provide value and axis attributes to model the Parameter class
 Param = namedtuple('Param', ['value', 'axis'])
 
-class ScanVaryingDetectorParameterisationSinglePanel(
-  ScanVaryingModelParameterisation, DetectorMixin):
+class ScanVaryingDetectorParameterisationSinglePanel(ScanVaryingModelParameterisation, DetectorMixin):
   """A scan-varying parameterisation for a single abstract panel plane, with
   angles expressed in mrad"""
 
@@ -44,8 +43,8 @@ class ScanVaryingDetectorParameterisationSinglePanel(
     self._d_at_t = matrix.sqr(detector[0].get_d_matrix())
 
     # set up the base class
-    ScanVaryingModelParameterisation.__init__(self, detector, dat['istate'],
-      dat['p_list'], smoother, experiment_ids=experiment_ids)
+    ScanVaryingModelParameterisation.__init__(
+        self, detector, dat['istate'], dat['p_list'], smoother, experiment_ids=experiment_ids)
 
     return
 
@@ -56,18 +55,12 @@ class ScanVaryingDetectorParameterisationSinglePanel(
     dist_set, shift1_set, shift2_set, tau1_set, tau2_set, tau3_set = self._param
 
     # extract data at time t using the smoother
-    dist, dist_weights, dist_sumweights = self._smoother.value_weight(
-      t, dist_set)
-    shift1, shift1_weights, shift1_sumweights = self._smoother.value_weight(
-      t, shift1_set)
-    shift2, shift2_weights, shift2_sumweights = self._smoother.value_weight(
-      t, shift2_set)
-    tau1, tau1_weights, tau1_sumweights = self._smoother.value_weight(
-      t, tau1_set)
-    tau2, tau2_weights, tau2_sumweights = self._smoother.value_weight(
-      t, tau2_set)
-    tau3, tau3_weights, tau3_sumweights = self._smoother.value_weight(
-      t, tau3_set)
+    dist, dist_weights, dist_sumweights = self._smoother.value_weight(t, dist_set)
+    shift1, shift1_weights, shift1_sumweights = self._smoother.value_weight(t, shift1_set)
+    shift2, shift2_weights, shift2_sumweights = self._smoother.value_weight(t, shift2_set)
+    tau1, tau1_weights, tau1_sumweights = self._smoother.value_weight(t, tau1_set)
+    tau2, tau2_weights, tau2_sumweights = self._smoother.value_weight(t, tau2_set)
+    tau3, tau3_weights, tau3_sumweights = self._smoother.value_weight(t, tau3_set)
 
     # calculate derivatives of values at image t wrt underlying parameters.
     ddist_dp = dist_weights * (1. / dist_sumweights)
@@ -80,12 +73,8 @@ class ScanVaryingDetectorParameterisationSinglePanel(
     # calculate new [d] and derivatives wrt the values dist, shift1, shift2,
     # tau1, tau2 and tau3
     new_state, dd_dval = self._compose_core(
-      Param(dist, dist_set.axis),
-      Param(shift1, shift1_set.axis),
-      Param(shift2, shift2_set.axis),
-      Param(tau1, tau1_set.axis),
-      Param(tau2, tau2_set.axis),
-      Param(tau3, tau3_set.axis))
+        Param(dist, dist_set.axis), Param(shift1, shift1_set.axis), Param(shift2, shift2_set.axis),
+        Param(tau1, tau1_set.axis), Param(tau2, tau2_set.axis), Param(tau3, tau3_set.axis))
 
     # 'fast' axis elements
     f1, f2, f3 = new_state['d1']
@@ -96,23 +85,27 @@ class ScanVaryingDetectorParameterisationSinglePanel(
     # origin vector elements
     o1, o2, o3 = new_state['origin']
 
-    self._d_at_t = matrix.sqr((f1, s1, o1,
-                               f2, s2, o2,
-                               f3, s3, o3))
+    self._d_at_t = matrix.sqr((f1, s1, o1, f2, s2, o2, f3, s3, o3))
 
     # calculate derivatives of state wrt underlying smoother parameters
     dd_dp1 = [None] * ddist_dp.size
-    for (i, v) in ddist_dp: dd_dp1[i] = dd_dval[0] * v
+    for (i, v) in ddist_dp:
+      dd_dp1[i] = dd_dval[0] * v
     dd_dp2 = [None] * dshift1_dp.size
-    for (i, v) in dshift1_dp: dd_dp2[i] = dd_dval[1] * v
+    for (i, v) in dshift1_dp:
+      dd_dp2[i] = dd_dval[1] * v
     dd_dp3 = [None] * dshift2_dp.size
-    for (i, v) in dshift2_dp: dd_dp3[i] = dd_dval[2] * v
+    for (i, v) in dshift2_dp:
+      dd_dp3[i] = dd_dval[2] * v
     dd_dp4 = [None] * dtau1_dp.size
-    for (i, v) in dtau1_dp: dd_dp4[i] = dd_dval[3] * v
+    for (i, v) in dtau1_dp:
+      dd_dp4[i] = dd_dval[3] * v
     dd_dp5 = [None] * dtau2_dp.size
-    for (i, v) in dtau2_dp: dd_dp5[i] = dd_dval[4] * v
+    for (i, v) in dtau2_dp:
+      dd_dp5[i] = dd_dval[4] * v
     dd_dp6 = [None] * dtau3_dp.size
-    for (i, v) in dtau3_dp: dd_dp6[i] = dd_dval[5] * v
+    for (i, v) in dtau3_dp:
+      dd_dp6[i] = dd_dval[5] * v
 
     # store derivatives as list-of-lists
     self._dstate_dp = [dd_dp1, dd_dp2, dd_dp3, dd_dp4, dd_dp5, dd_dp6]

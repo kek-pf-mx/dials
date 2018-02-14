@@ -5,7 +5,8 @@ help_message = '''
 
 '''
 
-phil_scope= libtbx.phil.parse("""
+phil_scope = libtbx.phil.parse(
+    """
 include scope dials.util.options.geometry_phil_scope
 output {
   datablock = modified_datablock.json
@@ -13,8 +14,8 @@ output {
   experiments = modified_experiments.json
     .type = path
 }
-""", process_includes=True)
-
+""",
+    process_includes=True)
 
 def run(args):
 
@@ -23,16 +24,15 @@ def run(args):
   from dials.util.options import flatten_experiments
   import libtbx.load_env
 
-  usage = "%s [options] datablock.json | experiments.json" %(
-    libtbx.env.dispatcher_name)
+  usage = "%s [options] datablock.json | experiments.json" % (libtbx.env.dispatcher_name)
 
   parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_datablocks=True,
-    read_experiments=True,
-    check_format=False,
-    epilog=help_message)
+      usage=usage,
+      phil=phil_scope,
+      read_datablocks=True,
+      read_experiments=True,
+      check_format=False,
+      epilog=help_message)
 
   params, options = parser.parse_args(show_diff_phil=True)
   experiments = flatten_experiments(params.input.experiments)
@@ -62,10 +62,10 @@ def run(args):
 
   from dxtbx.serialize import dump
   if len(experiments):
-    print "Saving modified experiments to %s" %params.output.experiments
+    print "Saving modified experiments to %s" % params.output.experiments
     dump.experiment_list(experiments, params.output.experiments)
   elif len(datablocks):
-    print "Saving modified datablock to %s" %params.output.datablock
+    print "Saving modified datablock to %s" % params.output.datablock
     dump.datablock(datablocks, params.output.datablock)
 
 if __name__ == '__main__':

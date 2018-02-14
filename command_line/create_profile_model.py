@@ -29,7 +29,8 @@ Examples::
 
 '''
 
-phil_scope = parse('''
+phil_scope = parse(
+    '''
   subtract_background = False
     .type = bool
     .help = "Subtract background from pixel data before computing profile"
@@ -40,7 +41,8 @@ phil_scope = parse('''
 
   include scope dials.algorithms.profile_model.factory.phil_scope
   include scope dials.algorithms.spot_prediction.reflection_predictor.phil_scope
-''', process_includes=True)
+''',
+    process_includes=True)
 
 class Script(object):
   ''' Encapsulate the script in a class. '''
@@ -54,12 +56,12 @@ class Script(object):
     usage  = "usage: %s [options] experiments.json spots.pickle" \
       % libtbx.env.dispatcher_name
     self.parser = OptionParser(
-      usage=usage,
-      epilog=help_message,
-      phil=phil_scope,
-      read_reflections=True,
-      read_experiments=True,
-      check_format=False)
+        usage=usage,
+        epilog=help_message,
+        phil=phil_scope,
+        read_reflections=True,
+        read_experiments=True,
+        check_format=False)
 
   def run(self):
     ''' Run the script. '''
@@ -99,17 +101,17 @@ class Script(object):
     logger.info("Predicting reflections")
     logger.info("")
     predicted = flex.reflection_table.from_predictions_multi(
-      experiments,
-      dmin=params.prediction.d_min,
-      dmax=params.prediction.d_max,
-      margin=params.prediction.margin,
-      force_static=params.prediction.force_static,
-      padding=params.prediction.padding)
+        experiments,
+        dmin=params.prediction.d_min,
+        dmax=params.prediction.d_max,
+        margin=params.prediction.margin,
+        force_static=params.prediction.force_static,
+        padding=params.prediction.padding)
 
     # Match with predicted
     matched, reflections, unmatched = predicted.match_with_reference(reflections)
-    assert(len(matched) == len(predicted))
-    assert(matched.count(True) <= len(reflections))
+    assert (len(matched) == len(predicted))
+    assert (matched.count(True) <= len(reflections))
     if matched.count(True) == 0:
       raise Sorry('''
         Invalid input for reference reflections.
@@ -118,8 +120,7 @@ class Script(object):
     elif len(unmatched) != 0:
       logger.info('')
       logger.info('*' * 80)
-      logger.info('Warning: %d reference spots were not matched to predictions' % (
-        len(unmatched)))
+      logger.info('Warning: %d reference spots were not matched to predictions' % (len(unmatched)))
       logger.info('*' * 80)
       logger.info('')
 
@@ -152,15 +153,15 @@ class Script(object):
     if reference is None:
       return None, None
     st = time()
-    assert("miller_index" in reference)
-    assert("id" in reference)
+    assert ("miller_index" in reference)
+    assert ("id" in reference)
     logger.info('Processing reference reflections')
     logger.info(' read %d strong spots' % len(reference))
     mask = reference.get_flags(reference.flags.indexed)
     rubbish = reference.select(mask == False)
     if mask.count(False) > 0:
       reference.del_selected(mask == False)
-      logger.info(' removing %d unindexed reflections' %  mask.count(False))
+      logger.info(' removing %d unindexed reflections' % mask.count(False))
     if len(reference) == 0:
       raise Sorry('''
         Invalid input for reference reflections.
@@ -170,12 +171,12 @@ class Script(object):
     if mask.count(True) > 0:
       rubbish.extend(reference.select(mask))
       reference.del_selected(mask)
-      logger.info(' removing %d reflections marked as centroid outliers' %  mask.count(True))
+      logger.info(' removing %d reflections marked as centroid outliers' % mask.count(True))
     mask = reference['miller_index'] == (0, 0, 0)
     if mask.count(True) > 0:
       rubbish.extend(reference.select(mask))
       reference.del_selected(mask)
-      logger.info(' removing %d reflections with hkl (0,0,0)' %  mask.count(True))
+      logger.info(' removing %d reflections with hkl (0,0,0)' % mask.count(True))
     mask = reference['id'] < 0
     if mask.count(True) > 0:
       raise Sorry('''
@@ -186,8 +187,7 @@ class Script(object):
     logger.info(' found %d junk reflections' % len(rubbish))
     from dials.array_family import flex
     if 'background.mean' in reference and params.subtract_background:
-      logger.info(' subtracting background from %d reference reflections' %
-           len(reference))
+      logger.info(' subtracting background from %d reference reflections' % len(reference))
       for spot in reference:
         spot['shoebox'].data -= spot['background.mean']
     logger.info(' time taken: %g' % (time() - st))
@@ -201,13 +201,8 @@ class Script(object):
     modified_count = 0
     for experiment, indices in reference.iterate_experiments_and_indices(experiments):
       subset = reference.select(indices)
-      modified = subset['shoebox'].mask_neighbouring(
-        subset['miller_index'],
-        experiment.beam,
-        experiment.detector,
-        experiment.goniometer,
-        experiment.scan,
-        experiment.crystal)
+      modified = subset['shoebox'].mask_neighbouring(subset['miller_index'], experiment.beam, experiment.detector,
+                                                     experiment.goniometer, experiment.scan, experiment.crystal)
       modified_count += modified.count(True)
       reference.set_selected(indices, subset)
     logger.info(" masked neighbouring pixels in %d shoeboxes" % modified_count)

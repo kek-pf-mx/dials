@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-
 """Testing functions for multivariate outlier rejection by the FAST-MCD
 algorithm"""
 from __future__ import absolute_import, division
-
 
 def test_maha():
 
@@ -44,8 +42,9 @@ def test_maha():
   maha = maha_dist_sq(cols, center, covmat)
 
   from libtbx.test_utils import approx_equal
-  R_result = [2.1838336, 1.9673401, 1.3335029, 4.9191627, 2.1246818,
-              5.3297995, 4.9022487, 2.5335913, 0.1952562, 1.5105832]
+  R_result = [
+      2.1838336, 1.9673401, 1.3335029, 4.9191627, 2.1246818, 5.3297995, 4.9022487, 2.5335913, 0.1952562, 1.5105832
+  ]
   assert approx_equal(list(maha), R_result)
   print "OK"
   return
@@ -146,21 +145,19 @@ def test_fast_mcd_small():
   fast_mcd = FastMCD([x1, x2, x3])
   T, S = fast_mcd.get_raw_T_and_S()
   from libtbx.test_utils import approx_equal
-  assert approx_equal(T,
-    [1.5333333333333334, 2.4564102564102566, 1.6076923076923078])
-  assert approx_equal(S, flex.double(
-    [[1.18964912281, 0.00464912280702, 0.217368421053],
-     [0.00464912280702, 0.37620782726, 0.182186234818],
-     [0.217368421053, 0.182186234818, 0.910728744939]]))
+  assert approx_equal(T, [1.5333333333333334, 2.4564102564102566, 1.6076923076923078])
+  assert approx_equal(S,
+                      flex.double([[1.18964912281, 0.00464912280702,
+                                    0.217368421053], [0.00464912280702, 0.37620782726, 0.182186234818],
+                                   [0.217368421053, 0.182186234818, 0.910728744939]]))
 
   # Fast MCD corrected estimates
   T, S = fast_mcd.get_corrected_T_and_S()
-  assert approx_equal(T,
-    [1.5333333333333334, 2.4564102564102566, 1.6076923076923078])
-  assert approx_equal(S, flex.double(
-    [[3.17735853174, 0.012417047794, 0.58055555535],
-     [0.01241704779, 1.00478967011, 0.486589681332],
-     [0.58055555535, 0.486589681332, 2.43240775146]]))
+  assert approx_equal(T, [1.5333333333333334, 2.4564102564102566, 1.6076923076923078])
+  assert approx_equal(S,
+                      flex.double([[3.17735853174, 0.012417047794,
+                                    0.58055555535], [0.01241704779, 1.00478967011, 0.486589681332],
+                                   [0.58055555535, 0.486589681332, 2.43240775146]]))
 
   # Correction factors
   assert approx_equal(fast_mcd._consistency_fac, 2.36792847084)
@@ -188,13 +185,10 @@ def test_fast_mcd_large():
 
   # load data
   import os
-  dials_regression = libtbx.env.find_in_repositories(
-      relative_path="dials_regression",
-      test=os.path.isdir)
-  data_pth = os.path.join(dials_regression, "refinement_test_data",
-    "outlier_rejection", "residuals.dat")
+  dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=os.path.isdir)
+  data_pth = os.path.join(dials_regression, "refinement_test_data", "outlier_rejection", "residuals.dat")
 
-  with(open(data_pth, "r")) as f:
+  with (open(data_pth, "r")) as f:
     residuals = f.readlines()
 
   # ignore first line, which is a header
@@ -209,21 +203,19 @@ def test_fast_mcd_large():
   fast_mcd = FastMCD([X_resid_mm, Y_resid_mm, Phi_resid_mm])
   T, S = fast_mcd.get_raw_T_and_S()
   from libtbx.test_utils import approx_equal
-  assert approx_equal(T,
-    [-0.009702392946856687, 0.008866136837504363, -0.04909037126352747])
-  assert approx_equal(S, flex.double(
-    [[0.00527965256891, 0.000864300169087, -0.00145971018701],
-     [0.000864300169087, 0.00842807897907, -0.00184047321286],
-     [-0.00145971018701, -0.00184047321286, 0.00698461269031]]))
+  assert approx_equal(T, [-0.009702392946856687, 0.008866136837504363, -0.04909037126352747])
+  assert approx_equal(S,
+                      flex.double([[0.00527965256891, 0.000864300169087,
+                                    -0.00145971018701], [0.000864300169087, 0.00842807897907, -0.00184047321286],
+                                   [-0.00145971018701, -0.00184047321286, 0.00698461269031]]))
 
   # Fast MCD corrected estimates
   T, S = fast_mcd.get_corrected_T_and_S()
-  assert approx_equal(T,
-    [-0.009702392946856687, 0.008866136837504363, -0.04909037126352747])
-  assert approx_equal(S, flex.double(
-    [[0.0129950608638, 0.00212734325892, -0.00359285435473],
-     [0.00212734325892, 0.0207444330604, -0.00453004456394],
-     [-0.00359285435473, -0.00453004456394, 0.0171915605878]]))
+  assert approx_equal(T, [-0.009702392946856687, 0.008866136837504363, -0.04909037126352747])
+  assert approx_equal(S,
+                      flex.double([[0.0129950608638, 0.00212734325892,
+                                    -0.00359285435473], [0.00212734325892, 0.0207444330604, -0.00453004456394],
+                                   [-0.00359285435473, -0.00453004456394, 0.0171915605878]]))
 
   # Correction factors
   assert approx_equal(fast_mcd._consistency_fac, 2.45659976388)

@@ -43,7 +43,6 @@ class MaskCalculatorFactory(object):
     # Create the mask algorithm
     return algorithm
 
-
 class BackgroundCalculatorFactory(object):
   '''
   A factory function to return a background calculator object
@@ -73,11 +72,7 @@ class BackgroundCalculatorFactory(object):
       params = params.integration.background.simple
 
       # Create some keyword parameters
-      kwargs = {
-        'model'      : params.model.algorithm,
-        'outlier'    : params.outlier.algorithm,
-        'min_pixels' : params.min_pixels
-      }
+      kwargs = {'model': params.model.algorithm, 'outlier': params.outlier.algorithm, 'min_pixels': params.min_pixels}
 
       # Create all the keyword parameters
       if params.outlier.algorithm == 'null':
@@ -107,10 +102,10 @@ class BackgroundCalculatorFactory(object):
 
       # Create the algorithm
       algorithm = GLMBackgroundCalculatorFactory.create(
-        experiments,
-        model           = params.model.algorithm,
-        tuning_constant = params.robust.tuning_constant,
-        min_pixels      = params.min_pixels)
+          experiments,
+          model=params.model.algorithm,
+          tuning_constant=params.robust.tuning_constant,
+          min_pixels=params.min_pixels)
 
     elif selection == "gmodel":
 
@@ -119,18 +114,17 @@ class BackgroundCalculatorFactory(object):
 
       # Create the algorithm
       algorithm = GModelBackgroundCalculatorFactory.create(
-        experiments,
-        model           = params.model,
-        robust          = params.robust.algorithm,
-        tuning_constant = params.robust.tuning_constant,
-        min_pixels      = params.min_pixels)
+          experiments,
+          model=params.model,
+          robust=params.robust.algorithm,
+          tuning_constant=params.robust.tuning_constant,
+          min_pixels=params.min_pixels)
 
     else:
       raise RuntimeError("Unknown background algorithm")
 
     # Return the background calculator
     return algorithm
-
 
 class IntensityCalculatorFactory(object):
   '''
@@ -168,16 +162,13 @@ class IntensityCalculatorFactory(object):
 
       # Create the algorithm
       algorithm = GaussianRSIntensityCalculatorFactory.create(
-        reference_profiles,
-        detector_space = detector_space,
-        deconvolution  = params.detector_space.deconvolution)
+          reference_profiles, detector_space=detector_space, deconvolution=params.detector_space.deconvolution)
 
     else:
       raise RuntimeError("Unknown profile model algorithm")
 
     # Return the algorithm
     return algorithm
-
 
 class ReferenceCalculatorFactory(object):
   '''
@@ -207,17 +198,13 @@ class ReferenceCalculatorFactory(object):
 
       # Create the algorithm
       algorithm = GaussianRSReferenceCalculatorFactory.create(
-        experiments,
-        grid_size   = params.grid_size,
-        scan_step   = params.scan_step,
-        grid_method = params.grid_method)
+          experiments, grid_size=params.grid_size, scan_step=params.scan_step, grid_method=params.grid_method)
 
     else:
       raise RuntimeError("Unknown profile model algorithm")
 
     # Return the algorithm
     return algorithm
-
 
 def assert_enough_memory(required_memory, max_memory_usage):
   '''
@@ -236,7 +223,7 @@ def assert_enough_memory(required_memory, max_memory_usage):
   if total_memory is None:
     raise RuntimeError("Inspection of system memory failed")
   assert total_memory > 0, "Your system appears to have no memory!"
-  assert max_memory_usage >  0.0, "maximum memory usage must be > 0"
+  assert max_memory_usage > 0.0, "maximum memory usage must be > 0"
   assert max_memory_usage <= 1.0, "maximum memory usage must be <= 1"
   limit_memory = total_memory * max_memory_usage
   if required_memory > limit_memory:
@@ -248,15 +235,14 @@ def assert_enough_memory(required_memory, max_memory_usage):
       Total system memory: %g GB
       Limit image memory: %g GB
       Required image memory: %g GB
-    ''' % (total_memory/1e9, limit_memory/1e9, required_memory/1e9))
+    ''' % (total_memory / 1e9, limit_memory / 1e9, required_memory / 1e9))
   else:
     logger.info('')
     logger.info(' Memory usage:')
-    logger.info('  Total system memory: %g GB' % (total_memory/1e9))
-    logger.info('  Limit image memory: %g GB' % (limit_memory/1e9))
-    logger.info('  Required image memory: %g GB' % (required_memory/1e9))
+    logger.info('  Total system memory: %g GB' % (total_memory / 1e9))
+    logger.info('  Limit image memory: %g GB' % (limit_memory / 1e9))
+    logger.info('  Required image memory: %g GB' % (required_memory / 1e9))
     logger.info('')
-
 
 class Result(object):
   '''
@@ -276,20 +262,13 @@ class Result(object):
     self.reflections = reflections
     self.reference = reference
 
-
 class IntegrationJob(object):
   '''
   A class to represent an integration job
 
   '''
 
-  def __init__(self,
-               index,
-               job,
-               experiments,
-               reflections,
-               reference,
-               params=None):
+  def __init__(self, index, job, experiments, reflections, reference, params=None):
     '''
     Initialise the task.
 
@@ -310,7 +289,7 @@ class IntegrationJob(object):
       params = phil_scope.extract()
 
     assert len(reflections) > 0, "Zero reflections given"
-    assert params.integration.block.max_memory_usage >  0.0, "Max memory % must be > 0"
+    assert params.integration.block.max_memory_usage > 0.0, "Max memory % must be > 0"
     assert params.integration.block.max_memory_usage <= 1.0, "Max memory % must be < 1"
     self.index = index
     self.job = job
@@ -362,9 +341,7 @@ class IntegrationJob(object):
       raise RuntimeError('Programmer Error: bad array range')
 
     # Check the memory requirements
-    assert_enough_memory(
-      self.compute_required_memory(imageset),
-      self.params.integration.block.max_memory_usage)
+    assert_enough_memory(self.compute_required_memory(imageset), self.params.integration.block.max_memory_usage)
 
     # Integrate
     self.integrate(imageset)
@@ -380,9 +357,7 @@ class IntegrationJob(object):
     Compute the required memory
 
     '''
-    return MultiThreadedIntegrator.compute_required_memory(
-      imageset,
-      self.params.integration.block.size)
+    return MultiThreadedIntegrator.compute_required_memory(imageset, self.params.integration.block.size)
 
   def integrate(self, imageset):
     '''
@@ -429,33 +404,26 @@ class IntegrationJob(object):
       logger.info('')
 
     # Construct the mask algorithm
-    compute_mask = MaskCalculatorFactory.create(
-      self.experiments,
-      self.params)
+    compute_mask = MaskCalculatorFactory.create(self.experiments, self.params)
 
     # Construct the background algorithm
-    compute_background = BackgroundCalculatorFactory.create(
-      self.experiments,
-      self.params)
+    compute_background = BackgroundCalculatorFactory.create(self.experiments, self.params)
 
     # Construct the intensity algorithm
-    compute_intensity  = IntensityCalculatorFactory.create(
-      self.experiments,
-      self.reference,
-      self.params)
+    compute_intensity = IntensityCalculatorFactory.create(self.experiments, self.reference, self.params)
 
     # Call the multi threaded integrator
     integrator = MultiThreadedIntegrator(
-      reflections        = self.reflections,
-      imageset           = imageset,
-      compute_mask       = compute_mask,
-      compute_background = compute_background,
-      compute_intensity  = compute_intensity,
-      logger             = Logger(logger),
-      nthreads           = self.params.integration.mp.nproc,
-      buffer_size        = self.params.integration.block.size,
-      use_dynamic_mask   = self.params.integration.use_dynamic_mask,
-      debug              = self.params.integration.debug.output)
+        reflections=self.reflections,
+        imageset=imageset,
+        compute_mask=compute_mask,
+        compute_background=compute_background,
+        compute_intensity=compute_intensity,
+        logger=Logger(logger),
+        nthreads=self.params.integration.mp.nproc,
+        buffer_size=self.params.integration.block.size,
+        use_dynamic_mask=self.params.integration.use_dynamic_mask,
+        debug=self.params.integration.debug.output)
 
     # Assign the reflections
     self.reflections = integrator.reflections()
@@ -483,7 +451,6 @@ class IntegrationJob(object):
     # Delete the shoeboxes
     if debug.separate_files or not debug.output:
       del self.reflections['shoebox']
-
 
 class IntegrationManager(object):
   '''
@@ -536,10 +503,7 @@ class IntegrationManager(object):
     self.compute_jobs()
 
     # Create the reflection manager
-    self.manager = SimpleReflectionManager(
-      self.blocks,
-      self.reflections,
-      self.params.integration.mp.njobs)
+    self.manager = SimpleReflectionManager(self.blocks, self.reflections, self.params.integration.mp.njobs)
 
     # Parallel reading of HDF5 from the same handle is not allowed. Python
     # multiprocessing is a bit messed up and used fork on linux so need to
@@ -560,17 +524,15 @@ class IntegrationManager(object):
     reflections = self.manager.split(index)
     if len(reflections) == 0:
       logger.warn("*** WARNING: no reflections in job %d ***" % index)
-      task = NullTask(
-        index=index,
-        reflections=reflections)
+      task = NullTask(index=index, reflections=reflections)
     else:
       task = IntegrationJob(
-        index       = index,
-        job         = frames,
-        experiments = experiments,
-        reflections = reflections,
-        reference   = reference,
-        params      = self.params)
+          index=index,
+          job=frames,
+          experiments=experiments,
+          reflections=reflections,
+          reference=reference,
+          params=self.params)
     return task
 
   def tasks(self):
@@ -647,12 +609,10 @@ class IntegrationManager(object):
     if total_memory is None:
       raise RuntimeError("Inspection of system memory failed")
     assert total_memory > 0, "Your system appears to have no memory!"
-    assert max_memory_usage >  0.0, "maximum memory usage must be > 0"
+    assert max_memory_usage > 0.0, "maximum memory usage must be > 0"
     assert max_memory_usage <= 1.0, "maximum memory usage must be <= 1"
     limit_memory = int(floor(total_memory * max_memory_usage))
-    return MultiThreadedIntegrator.compute_max_block_size(
-      self.experiments[0].imageset,
-      max_memory_usage = limit_memory)
+    return MultiThreadedIntegrator.compute_max_block_size(self.experiments[0].imageset, max_memory_usage=limit_memory)
 
   def compute_blocks(self):
     '''
@@ -667,7 +627,7 @@ class IntegrationManager(object):
       assert block.threshold > 0, "Threshold must be > 0"
       assert block.threshold <= 1.0, "Threshold must be < 1"
       nframes = sorted([b[5] - b[4] for b in self.reflections['bbox']])
-      cutoff = int(block.threshold*len(nframes))
+      cutoff = int(block.threshold * len(nframes))
       block_size = nframes[cutoff] * 2
       if block_size > max_block_size:
         logger.warn("Computed block size (%s) > maximum block size (%s).")
@@ -717,11 +677,7 @@ class IntegrationManager(object):
 
     # Compute the task table
     if self.experiments.all_stills():
-      rows = [["#",
-               "Group",
-               "Frame From",
-               "Frame To",
-               "# Reflections"]]
+      rows = [["#", "Group", "Frame From", "Frame To", "# Reflections"]]
       for i in range(len(self)):
         job = self.manager.job(i)
         group = job.index()
@@ -729,12 +685,7 @@ class IntegrationManager(object):
         n = self.manager.num_reflections(i)
         rows.append([str(i), str(group), str(f0), str(f1), str(n)])
     elif self.experiments.all_sweeps():
-      rows = [["#",
-               "Frame From",
-               "Frame To",
-               "Angle From",
-               "Angle To",
-               "# Reflections"]]
+      rows = [["#", "Frame From", "Frame To", "Angle From", "Angle To", "# Reflections"]]
       for i in range(len(self)):
         f0, f1 = self.manager.job(i)
         scan = self.experiments[0].scan
@@ -753,16 +704,8 @@ class IntegrationManager(object):
       block_size = "auto"
     else:
       block_size = str(self.params.integration.block.size)
-    fmt = (
-      'Processing reflections in the following blocks of images:\n'
-      '\n'
-      ' block_size: %s %s\n'
-      '\n'
-      '%s\n'
-    )
+    fmt = ('Processing reflections in the following blocks of images:\n' '\n' ' block_size: %s %s\n' '\n' '%s\n')
     return fmt % (block_size, self.params.integration.block.units, task_table)
-
-
 
 class ReferenceCalculatorJob(object):
   '''
@@ -770,12 +713,7 @@ class ReferenceCalculatorJob(object):
 
   '''
 
-  def __init__(self,
-               index,
-               job,
-               experiments,
-               reflections,
-               params=None):
+  def __init__(self, index, job, experiments, reflections, params=None):
     '''
     Initialise the task.
 
@@ -796,7 +734,7 @@ class ReferenceCalculatorJob(object):
       params = phil_scope.extract()
 
     assert len(reflections) > 0, "Zero reflections given"
-    assert params.integration.block.max_memory_usage >  0.0, "Max memory % must be > 0"
+    assert params.integration.block.max_memory_usage > 0.0, "Max memory % must be > 0"
     assert params.integration.block.max_memory_usage <= 1.0, "Max memory % must be < 1"
     self.index = index
     self.job = job
@@ -847,9 +785,7 @@ class ReferenceCalculatorJob(object):
       raise RuntimeError('Programmer Error: bad array range')
 
     # Check the memory requirements
-    assert_enough_memory(
-      self.compute_required_memory(imageset),
-      self.params.integration.block.max_memory_usage)
+    assert_enough_memory(self.compute_required_memory(imageset), self.params.integration.block.max_memory_usage)
 
     # Integrate
     self.compute_reference_profiles(imageset)
@@ -865,9 +801,7 @@ class ReferenceCalculatorJob(object):
     Compute the required memory
 
     '''
-    return MultiThreadedIntegrator.compute_required_memory(
-      imageset,
-      self.params.integration.block.size)
+    return MultiThreadedIntegrator.compute_required_memory(imageset, self.params.integration.block.size)
 
   def compute_reference_profiles(self, imageset):
     '''
@@ -914,32 +848,26 @@ class ReferenceCalculatorJob(object):
       logger.info('')
 
     # Construct the mask algorithm
-    compute_mask = MaskCalculatorFactory.create(
-      self.experiments,
-      self.params)
+    compute_mask = MaskCalculatorFactory.create(self.experiments, self.params)
 
     # Construct the background algorithm
-    compute_background = BackgroundCalculatorFactory.create(
-      self.experiments,
-      self.params)
+    compute_background = BackgroundCalculatorFactory.create(self.experiments, self.params)
 
     # Construct the intensity algorithm
-    compute_reference = ReferenceCalculatorFactory.create(
-      self.experiments,
-      self.params)
+    compute_reference = ReferenceCalculatorFactory.create(self.experiments, self.params)
 
     # Call the multi threaded integrator
     reference_calculator = MultiThreadedReferenceProfiler(
-      reflections        = self.reflections,
-      imageset           = imageset,
-      compute_mask       = compute_mask,
-      compute_background = compute_background,
-      compute_reference  = compute_reference,
-      logger             = Logger(logger),
-      nthreads           = self.params.integration.mp.nproc,
-      buffer_size        = self.params.integration.block.size,
-      use_dynamic_mask   = self.params.integration.use_dynamic_mask,
-      debug              = self.params.integration.debug.output)
+        reflections=self.reflections,
+        imageset=imageset,
+        compute_mask=compute_mask,
+        compute_background=compute_background,
+        compute_reference=compute_reference,
+        logger=Logger(logger),
+        nthreads=self.params.integration.mp.nproc,
+        buffer_size=self.params.integration.block.size,
+        use_dynamic_mask=self.params.integration.use_dynamic_mask,
+        debug=self.params.integration.debug.output)
 
     # Assign the reflections
     self.reflections = reference_calculator.reflections()
@@ -949,10 +877,8 @@ class ReferenceCalculatorJob(object):
 
     # Write some log output
     fmt = "Used %d / %d reflections to create reference profiles"
-    dont_integrate = self.reflections.get_flags(
-      self.reflections.flags.dont_integrate)
-    used_in_modelling = self.reflections.get_flags(
-      self.reflections.flags.used_in_modelling)
+    dont_integrate = self.reflections.get_flags(self.reflections.flags.dont_integrate)
+    used_in_modelling = self.reflections.get_flags(self.reflections.flags.used_in_modelling)
     n_tot = dont_integrate.count(False)
     n_mod = (used_in_modelling & ~dont_integrate).count(True)
     logger.info("")
@@ -981,7 +907,6 @@ class ReferenceCalculatorJob(object):
     # Delete the shoeboxes
     if debug.separate_files or not debug.output:
       del self.reflections['shoebox']
-
 
 class ReferenceCalculatorManager(object):
   '''
@@ -1039,10 +964,7 @@ class ReferenceCalculatorManager(object):
     self.compute_jobs()
 
     # Create the reflection manager
-    self.manager = SimpleReflectionManager(
-      self.blocks,
-      self.reflections,
-      self.params.integration.mp.njobs)
+    self.manager = SimpleReflectionManager(self.blocks, self.reflections, self.params.integration.mp.njobs)
 
     # Parallel reading of HDF5 from the same handle is not allowed. Python
     # multiprocessing is a bit messed up and used fork on linux so need to
@@ -1063,16 +985,10 @@ class ReferenceCalculatorManager(object):
     reflections = self.manager.split(index)
     if len(reflections) == 0:
       logger.warn("*** WARNING: no reflections in job %d ***" % index)
-      task = NullTask(
-        index=index,
-        reflections=reflections)
+      task = NullTask(index=index, reflections=reflections)
     else:
       task = ReferenceCalculatorJob(
-        index       = index,
-        job         = frames,
-        experiments = experiments,
-        reflections = reflections,
-        params      = self.params)
+          index=index, job=frames, experiments=experiments, reflections=reflections, params=self.params)
     return task
 
   def tasks(self):
@@ -1158,12 +1074,11 @@ class ReferenceCalculatorManager(object):
     if total_memory is None:
       raise RuntimeError("Inspection of system memory failed")
     assert total_memory > 0, "Your system appears to have no memory!"
-    assert max_memory_usage >  0.0, "maximum memory usage must be > 0"
+    assert max_memory_usage > 0.0, "maximum memory usage must be > 0"
     assert max_memory_usage <= 1.0, "maximum memory usage must be <= 1"
     limit_memory = int(floor(total_memory * max_memory_usage))
     return MultiThreadedReferenceProfiler.compute_max_block_size(
-      self.experiments[0].imageset,
-      max_memory_usage = limit_memory)
+        self.experiments[0].imageset, max_memory_usage=limit_memory)
 
   def compute_blocks(self):
     '''
@@ -1178,7 +1093,7 @@ class ReferenceCalculatorManager(object):
       assert block.threshold > 0, "Threshold must be > 0"
       assert block.threshold <= 1.0, "Threshold must be < 1"
       nframes = sorted([b[5] - b[4] for b in self.reflections['bbox']])
-      cutoff = int(block.threshold*len(nframes))
+      cutoff = int(block.threshold * len(nframes))
       block_size = nframes[cutoff] * 2
       if block_size > max_block_size:
         logger.warn("Computed block size (%s) > maximum block size (%s).")
@@ -1228,11 +1143,7 @@ class ReferenceCalculatorManager(object):
 
     # Compute the task table
     if self.experiments.all_stills():
-      rows = [["#",
-               "Group",
-               "Frame From",
-               "Frame To",
-               "# Reflections"]]
+      rows = [["#", "Group", "Frame From", "Frame To", "# Reflections"]]
       for i in range(len(self)):
         job = self.manager.job(i)
         group = job.index()
@@ -1240,12 +1151,7 @@ class ReferenceCalculatorManager(object):
         n = self.manager.num_reflections(i)
         rows.append([str(i), str(group), str(f0), str(f1), str(n)])
     elif self.experiments.all_sweeps():
-      rows = [["#",
-               "Frame From",
-               "Frame To",
-               "Angle From",
-               "Angle To",
-               "# Reflections"]]
+      rows = [["#", "Frame From", "Frame To", "Angle From", "Angle To", "# Reflections"]]
       for i in range(len(self)):
         f0, f1 = self.manager.job(i)
         scan = self.experiments[0].scan
@@ -1264,29 +1170,15 @@ class ReferenceCalculatorManager(object):
       block_size = "auto"
     else:
       block_size = str(self.params.integration.block.size)
-    fmt = (
-      'Processing reflections in the following blocks of images:\n'
-      '\n'
-      ' block_size: %s %s\n'
-      '\n'
-      '%s\n'
-    )
+    fmt = ('Processing reflections in the following blocks of images:\n' '\n' ' block_size: %s %s\n' '\n' '%s\n')
     return fmt % (block_size, self.params.integration.block.units, task_table)
 
-
 class ReferenceCalculatorProcessor(object):
-
-  def __init__(self,
-               experiments,
-               reflections,
-               params = None):
+  def __init__(self, experiments, reflections, params=None):
     from dials.util import pprint
 
     # Create the reference manager
-    reference_manager = ReferenceCalculatorManager(
-      experiments,
-      reflections,
-      params)
+    reference_manager = ReferenceCalculatorManager(experiments, reflections, params)
 
     # Print some output
     logger.info(reference_manager.summary())
@@ -1329,22 +1221,11 @@ class ReferenceCalculatorProcessor(object):
   def profiles(self):
     return self._profiles
 
-
-
 class IntegratorProcessor(object):
-
-  def __init__(self,
-               experiments,
-               reflections,
-               reference = None,
-               params = None):
+  def __init__(self, experiments, reflections, reference=None, params=None):
 
     # Create the reference manager
-    integration_manager = IntegrationManager(
-      experiments,
-      reflections,
-      reference,
-      params)
+    integration_manager = IntegrationManager(experiments, reflections, reference, params)
 
     # Print some output
     logger.info(integration_manager.summary())

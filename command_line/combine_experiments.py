@@ -27,7 +27,8 @@ Examples::
 '''
 
 # The phil scope
-phil_scope = parse('''
+phil_scope = parse(
+    '''
 
   reference_from_experiment{
     beam = None
@@ -152,12 +153,11 @@ phil_scope = parse('''
       .help = "If not None, throw out any experiment with fewer than this"
               "many reflections"
   }
-''', process_includes=True)
+''',
+    process_includes=True)
 
 class CombineWithReference(object):
-
-  def __init__(self, beam=None, goniometer=None, scan=None,
-                     crystal=None, detector=None, params=None):
+  def __init__(self, beam=None, goniometer=None, scan=None, crystal=None, detector=None, params=None):
 
     self.ref_beam = beam
     self.ref_goniometer = goniometer
@@ -181,18 +181,18 @@ class CombineWithReference(object):
 
     if self.tolerance:
       compare_beam = BeamComparison(
-        wavelength_tolerance=self.tolerance.beam.wavelength,
-        direction_tolerance=self.tolerance.beam.direction,
-        polarization_normal_tolerance=self.tolerance.beam.polarization_normal,
-        polarization_fraction_tolerance=self.tolerance.beam.polarization_fraction)
+          wavelength_tolerance=self.tolerance.beam.wavelength,
+          direction_tolerance=self.tolerance.beam.direction,
+          polarization_normal_tolerance=self.tolerance.beam.polarization_normal,
+          polarization_fraction_tolerance=self.tolerance.beam.polarization_fraction)
       compare_detector = DetectorComparison(
-        fast_axis_tolerance=self.tolerance.detector.fast_axis,
-        slow_axis_tolerance=self.tolerance.detector.slow_axis,
-        origin_tolerance=self.tolerance.detector.origin)
+          fast_axis_tolerance=self.tolerance.detector.fast_axis,
+          slow_axis_tolerance=self.tolerance.detector.slow_axis,
+          origin_tolerance=self.tolerance.detector.origin)
       compare_goniometer = GoniometerComparison(
-        rotation_axis_tolerance=self.tolerance.goniometer.rotation_axis,
-        fixed_rotation_tolerance=self.tolerance.goniometer.fixed_rotation,
-        setting_rotation_tolerance=self.tolerance.goniometer.setting_rotation)
+          rotation_axis_tolerance=self.tolerance.goniometer.rotation_axis,
+          fixed_rotation_tolerance=self.tolerance.goniometer.fixed_rotation,
+          setting_rotation_tolerance=self.tolerance.goniometer.setting_rotation)
 
     else:
       compare_beam = None
@@ -201,7 +201,7 @@ class CombineWithReference(object):
 
     if self.ref_beam:
       if compare_beam:
-        assert(compare_beam(self.ref_beam, experiment.beam))
+        assert (compare_beam(self.ref_beam, experiment.beam))
       beam = self.ref_beam
     else:
       beam = experiment.beam
@@ -210,14 +210,14 @@ class CombineWithReference(object):
       detector = self.ref_detector
     elif self.ref_detector and not self.average_detector:
       if compare_detector:
-        assert(compare_detector(self.ref_detector, experiment.detector))
+        assert (compare_detector(self.ref_detector, experiment.detector))
       detector = self.ref_detector
     else:
       detector = experiment.detector
 
     if self.ref_goniometer:
       if compare_goniometer:
-        assert(compare_goniometer(self.ref_goniometer, experiment.goniometer))
+        assert (compare_goniometer(self.ref_goniometer, experiment.goniometer))
       goniometer = self.ref_goniometer
     else:
       goniometer = experiment.goniometer
@@ -233,42 +233,32 @@ class CombineWithReference(object):
       crystal = experiment.crystal
 
     from dxtbx.model.experiment_list import Experiment
-    return Experiment(beam=beam,
-                      detector=detector,
-                      scan=scan,
-                      goniometer=goniometer,
-                      crystal=crystal,
-                      imageset=experiment.imageset)
+    return Experiment(
+        beam=beam, detector=detector, scan=scan, goniometer=goniometer, crystal=crystal, imageset=experiment.imageset)
 
 class Cluster(object):
-
-  def __init__(self, experiments, reflections,
-    dendrogram=False, threshold=1000, n_max=None):
+  def __init__(self, experiments, reflections, dendrogram=False, threshold=1000, n_max=None):
     try:
       from xfel.clustering.cluster import Cluster
       from xfel.clustering.cluster_groups import unit_cell_info
     except ImportError:
       raise Sorry("clustering is not configured")
     import matplotlib.pyplot as plt
-    ucs = Cluster.from_expts(
-      refl_table=reflections,
-      expts_list=experiments,
-      n_images=n_max)
+    ucs = Cluster.from_expts(refl_table=reflections, expts_list=experiments, n_images=n_max)
     self.clusters, axes = ucs.ab_cluster(
-      threshold=threshold,
-      log=True, # log scale
-      ax=plt.gca() if dendrogram else None,
-      write_file_lists=False,
-      schnell=False,
-      doplot=dendrogram)
+        threshold=threshold,
+        log=True, # log scale
+        ax=plt.gca() if dendrogram else None,
+        write_file_lists=False,
+        schnell=False,
+        doplot=dendrogram)
     print unit_cell_info(self.clusters)
-    self.clustered_frames = {int(c.cname.split("_")[1]):c.members for c in self.clusters}
+    self.clustered_frames = {int(c.cname.split("_")[1]): c.members for c in self.clusters}
     if dendrogram:
       plt.tight_layout()
       plt.show()
 
 class Script(object):
-
   def __init__(self):
     '''Initialise the script.'''
     from dials.util.options import OptionParser
@@ -282,12 +272,12 @@ class Script(object):
 
     # Create the parser
     self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      read_reflections=True,
-      read_experiments=True,
-      check_format=False,
-      epilog=help_message)
+        usage=usage,
+        phil=phil_scope,
+        read_reflections=True,
+        read_experiments=True,
+        check_format=False,
+        epilog=help_message)
 
   def run(self):
     '''Execute the script.'''
@@ -310,8 +300,7 @@ class Script(object):
     try:
       assert len(params.input.reflections) == len(params.input.experiments)
     except AssertionError:
-      raise Sorry("The number of input reflections files does not match the "
-        "number of input experiments")
+      raise Sorry("The number of input reflections files does not match the " "number of input experiments")
 
     flat_exps = flatten_experiments(params.input.experiments)
 
@@ -354,44 +343,49 @@ class Script(object):
     elif params.reference_from_experiment.average_detector:
       # Average all of the detectors together
       from scitbx.matrix import col
+
       def average_detectors(target, panelgroups, depth):
         # Recursive function to do the averaging
 
         if params.reference_from_experiment.average_hierarchy_level is None or \
             depth == params.reference_from_experiment.average_hierarchy_level:
           n = len(panelgroups)
-          sum_fast = col((0.0,0.0,0.0))
-          sum_slow = col((0.0,0.0,0.0))
-          sum_ori  = col((0.0,0.0,0.0))
+          sum_fast = col((0.0, 0.0, 0.0))
+          sum_slow = col((0.0, 0.0, 0.0))
+          sum_ori = col((0.0, 0.0, 0.0))
 
           # Average the d matrix vectors
           for pg in panelgroups:
             sum_fast += col(pg.get_local_fast_axis())
             sum_slow += col(pg.get_local_slow_axis())
-            sum_ori  += col(pg.get_local_origin())
+            sum_ori += col(pg.get_local_origin())
           sum_fast /= n
           sum_slow /= n
-          sum_ori  /= n
+          sum_ori /= n
 
           # Re-orthagonalize the slow and the fast vectors by rotating around the cross product
           c = sum_fast.cross(sum_slow)
-          a = sum_fast.angle(sum_slow, deg=True)/2
-          sum_fast = sum_fast.rotate(c, a-45, deg=True)
-          sum_slow = sum_slow.rotate(c, -(a-45), deg=True)
+          a = sum_fast.angle(sum_slow, deg=True) / 2
+          sum_fast = sum_fast.rotate(c, a - 45, deg=True)
+          sum_slow = sum_slow.rotate(c, -(a - 45), deg=True)
 
-          target.set_local_frame(sum_fast,sum_slow,sum_ori)
+          target.set_local_frame(sum_fast, sum_slow, sum_ori)
 
         if target.is_group():
           # Recurse
           for i, target_pg in enumerate(target):
-            average_detectors(target_pg, [pg[i] for pg in panelgroups], depth+1)
+            average_detectors(target_pg, [pg[i] for pg in panelgroups], depth + 1)
 
       ref_detector = flat_exps[0].detector
       average_detectors(ref_detector.hierarchy(), [e.detector.hierarchy() for e in flat_exps], 0)
 
-    combine = CombineWithReference(beam=ref_beam, goniometer=ref_goniometer,
-                  scan=ref_scan, crystal=ref_crystal, detector=ref_detector,
-                  params=params)
+    combine = CombineWithReference(
+        beam=ref_beam,
+        goniometer=ref_goniometer,
+        scan=ref_scan,
+        crystal=ref_crystal,
+        detector=ref_detector,
+        params=params)
 
     # set up global experiments and reflections lists
     from dials.array_family import flex
@@ -399,12 +393,11 @@ class Script(object):
     global_id = 0
     skipped_expts = 0
     from dxtbx.model.experiment_list import ExperimentList
-    experiments=ExperimentList()
+    experiments = ExperimentList()
 
     # loop through the input, building up the global lists
     nrefs_per_exp = []
-    for ref_wrapper, exp_wrapper in zip(params.input.reflections,
-                                        params.input.experiments):
+    for ref_wrapper, exp_wrapper in zip(params.input.reflections, params.input.experiments):
       refs = ref_wrapper.data
       exps = exp_wrapper.data
       for i, exp in enumerate(exps):
@@ -427,7 +420,7 @@ class Script(object):
     if params.output.min_reflections_per_experiment is not None and \
         skipped_expts > 0:
       print "Removed {0} experiments with fewer than {1} reflections".format(
-        skipped_expts, params.output.min_reflections_per_experiment)
+          skipped_expts, params.output.min_reflections_per_experiment)
 
     # print number of reflections per experiment
     from libtbx.table_utils import simple_table
@@ -445,14 +438,14 @@ class Script(object):
         n_picked = 0
         indices = range(len(experiments))
         while n_picked < params.output.n_subset:
-          idx = indices.pop(random.randint(0, len(indices)-1))
+          idx = indices.pop(random.randint(0, len(indices) - 1))
           subset_exp.append(experiments[idx])
           refls = reflections.select(reflections['id'] == idx)
           refls['id'] = flex.int(len(refls), n_picked)
           subset_refls.extend(refls)
           n_picked += 1
         print "Selecting a random subset of {0} experiments out of {1} total.".format(
-          params.output.n_subset, len(experiments))
+            params.output.n_subset, len(experiments))
       elif params.output.n_subset_method == "n_refl":
         if params.output.n_refl_panel_list is None:
           refls_subset = reflections
@@ -464,14 +457,14 @@ class Script(object):
         refl_counts = flex.int()
         for expt_id in xrange(len(experiments)):
           refl_counts.append(len(refls_subset.select(refls_subset['id'] == expt_id)))
-        sort_order = flex.sort_permutation(refl_counts,reverse=True)
+        sort_order = flex.sort_permutation(refl_counts, reverse=True)
         for expt_id, idx in enumerate(sort_order[:params.output.n_subset]):
           subset_exp.append(experiments[idx])
           refls = reflections.select(reflections['id'] == idx)
           refls['id'] = flex.int(len(refls), expt_id)
           subset_refls.extend(refls)
         print "Selecting a subset of {0} experiments with highest number of reflections out of {1} total.".format(
-          params.output.n_subset, len(experiments))
+            params.output.n_subset, len(experiments))
 
       experiments = subset_exp
       reflections = subset_refls
@@ -489,7 +482,7 @@ class Script(object):
       from dxtbx.command_line.image_average import splitit
       import os
       result = []
-      for i, indices in enumerate(splitit(range(len(experiments)), (len(experiments)//batch_size)+1)):
+      for i, indices in enumerate(splitit(range(len(experiments)), (len(experiments) // batch_size) + 1)):
         batch_expts = ExperimentList()
         batch_refls = flex.reflection_table()
         for sub_id, sub_idx in enumerate(indices):
@@ -497,8 +490,8 @@ class Script(object):
           sub_refls = reflections.select(reflections['id'] == sub_idx)
           sub_refls['id'] = flex.int(len(sub_refls), sub_id)
           batch_refls.extend(sub_refls)
-        exp_filename = os.path.splitext(exp_name)[0] + "_%03d.json"%i
-        ref_filename = os.path.splitext(refl_name)[0] + "_%03d.pickle"%i
+        exp_filename = os.path.splitext(exp_name)[0] + "_%03d.json" % i
+        ref_filename = os.path.splitext(refl_name)[0] + "_%03d.pickle" % i
         save_output(batch_expts, batch_refls, exp_filename, ref_filename)
 
     def combine_in_clusters(experiments_l, reflections_l, exp_name, refl_name, end_count):
@@ -521,10 +514,11 @@ class Script(object):
     # cluster the resulting experiments if requested
     if params.clustering.use:
       clustered = Cluster(
-        experiments, reflections,
-        dendrogram=params.clustering.dendrogram,
-        threshold=params.clustering.threshold,
-        n_max=params.clustering.max_crystals)
+          experiments,
+          reflections,
+          dendrogram=params.clustering.dendrogram,
+          threshold=params.clustering.threshold,
+          n_max=params.clustering.max_crystals)
       n_clusters = len(clustered.clustered_frames)
       if params.clustering.max_clusters is not None:
         not_too_many = lambda keeps: len(keeps) < params.clustering.max_clusters
@@ -539,7 +533,8 @@ class Script(object):
       clustered_experiments = [[f.experiment for f in frame_cluster] for frame_cluster in keep_frames]
       clustered_reflections = [[f.reflections for f in frame_cluster] for frame_cluster in keep_frames]
       list_of_combined = combine_in_clusters(clustered_experiments, clustered_reflections,
-        params.output.experiments_filename, params.output.reflections_filename, n_clusters)
+                                             params.output.experiments_filename, params.output.reflections_filename,
+                                             n_clusters)
       for i in xrange(len(list_of_combined)):
         savable_tuple = list_of_combined[i]
         if params.output.max_batch_size is None:
@@ -550,8 +545,12 @@ class Script(object):
       if params.output.max_batch_size is None:
         save_output(experiments, reflections, params.output.experiments_filename, params.output.reflections_filename)
       else:
-        save_in_batches(experiments, reflections, params.output.experiments_filename, params.output.reflections_filename,
-          batch_size=params.output.max_batch_size)
+        save_in_batches(
+            experiments,
+            reflections,
+            params.output.experiments_filename,
+            params.output.reflections_filename,
+            batch_size=params.output.max_batch_size)
     return
 
 if __name__ == "__main__":

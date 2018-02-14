@@ -11,7 +11,6 @@
 
 from __future__ import absolute_import, division
 
-
 def import_sub_modules(paths):
   '''
   Import all sub modules.
@@ -64,7 +63,6 @@ def grab_extensions(modules):
       if isclass(obj) and issubclass(obj, Interface):
         ext.append((name, obj))
   return ext
-
 
 # Import sub modules
 _modules = import_extensions()

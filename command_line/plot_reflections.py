@@ -32,7 +32,7 @@ output {
 def run(args):
   import libtbx.load_env
   usage = """\
-%s datablock.json reflections.pickle [options]""" %libtbx.env.dispatcher_name
+%s datablock.json reflections.pickle [options]""" % libtbx.env.dispatcher_name
   from dials.util.options import OptionParser
   from dials.util.options import flatten_datablocks
   from dials.util.options import flatten_experiments
@@ -41,12 +41,12 @@ def run(args):
   from scitbx import matrix
   from libtbx.utils import Sorry
   parser = OptionParser(
-    usage=usage,
-    phil=master_phil_scope,
-    read_datablocks=True,
-    read_experiments=True,
-    read_reflections=True,
-    check_format=False)
+      usage=usage,
+      phil=master_phil_scope,
+      read_datablocks=True,
+      read_experiments=True,
+      read_reflections=True,
+      check_format=False)
 
   params, options = parser.parse_args(show_diff_phil=True)
   datablocks = flatten_datablocks(params.input.datablock)
@@ -68,7 +68,7 @@ def run(args):
   detector = imageset.get_detector()
   scan = imageset.get_scan()
 
-  panel_origin_shifts = {0: (0,0,0)}
+  panel_origin_shifts = {0: (0, 0, 0)}
   try:
     hierarchy = detector.hierarchy()
   except AttributeError:
@@ -114,8 +114,7 @@ def run(args):
       perm = perm[:min(reflection_list.size(), params.first_n_reflections)]
       reflection_list = reflection_list.select(perm)
     if params.crystal_id is not None:
-      reflection_list = reflection_list.select(
-        reflection_list['id'] == params.crystal_id)
+      reflection_list = reflection_list.select(reflection_list['id'] == params.crystal_id)
 
     xyzcal_px = None
     xyzcal_px = None
@@ -138,10 +137,9 @@ def run(args):
         xyzobs_px_panel = xyzobs_px.select(panel_ids == i_panel)
 
         from dials.algorithms.centroid import centroid_px_to_mm_panel
-        xyzobs_mm_panel, _, _ = centroid_px_to_mm_panel(
-          detector[i_panel], scan, xyzobs_px_panel,
-          flex.vec3_double(xyzobs_px_panel.size()),
-          flex.vec3_double(xyzobs_px_panel.size()))
+        xyzobs_mm_panel, _, _ = centroid_px_to_mm_panel(detector[i_panel], scan, xyzobs_px_panel,
+                                                        flex.vec3_double(xyzobs_px_panel.size()),
+                                                        flex.vec3_double(xyzobs_px_panel.size()))
         xyzobs_mm.extend(xyzobs_mm_panel)
 
     if xyzobs_mm is not None:
@@ -174,14 +172,14 @@ def run(args):
   #assert len(detector) == 1
   panel = detector[0]
   #if len(detector) > 1:
-  xmin = max([detector[i_panel].get_image_size_mm()[0] + panel_origin_shifts[i_panel][0]
-              for i_panel in range(len(detector))])
-  xmax = max([detector[i_panel].get_image_size_mm()[0] + panel_origin_shifts[i_panel][0]
-              for i_panel in range(len(detector))])
-  ymax = max([detector[i_panel].get_image_size_mm()[1] + panel_origin_shifts[i_panel][1]
-              for i_panel in range(len(detector))])
-  ymax = max([detector[i_panel].get_image_size_mm()[1] + panel_origin_shifts[i_panel][1]
-              for i_panel in range(len(detector))])
+  xmin = max(
+      [detector[i_panel].get_image_size_mm()[0] + panel_origin_shifts[i_panel][0] for i_panel in range(len(detector))])
+  xmax = max(
+      [detector[i_panel].get_image_size_mm()[0] + panel_origin_shifts[i_panel][0] for i_panel in range(len(detector))])
+  ymax = max(
+      [detector[i_panel].get_image_size_mm()[1] + panel_origin_shifts[i_panel][1] for i_panel in range(len(detector))])
+  ymax = max(
+      [detector[i_panel].get_image_size_mm()[1] + panel_origin_shifts[i_panel][1] for i_panel in range(len(detector))])
   try:
     beam_centre = hierarchy.get_beam_centre(imageset.get_beam().get_s0())
   except Exception:
@@ -194,13 +192,10 @@ def run(args):
   pyplot.xlabel('x-coordinate (mm)')
   pyplot.ylabel('y-coordinate (mm)')
   if params.output.file_name is not None:
-    pyplot.savefig(params.output.file_name,
-                   size_inches=params.output.size_inches,
-                   dpi=params.output.dpi,
-                   bbox_inches='tight')
+    pyplot.savefig(
+        params.output.file_name, size_inches=params.output.size_inches, dpi=params.output.dpi, bbox_inches='tight')
   if params.output.show_plot:
     pyplot.show()
-
 
 if __name__ == '__main__':
   import sys

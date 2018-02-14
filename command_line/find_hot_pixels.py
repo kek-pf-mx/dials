@@ -9,7 +9,8 @@ import libtbx.load_env
 import logging
 logger = logging.getLogger(libtbx.env.dispatcher_name)
 
-phil_scope = iotbx.phil.parse("""\
+phil_scope = iotbx.phil.parse(
+    """\
 output {
   mask = hot_pixels.pickle
     .type = path
@@ -18,7 +19,8 @@ output {
 verbosity = 1
   .type = int(value_min=0)
   .help = "The verbosity level"
-""", process_includes=True)
+""",
+    process_includes=True)
 
 help_message = '''
 
@@ -50,21 +52,18 @@ def run(args):
 
   # Create the option parser
   parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_reflections=True,
-    read_datablocks=True,
-    check_format=False,
-    epilog=help_message)
+      usage=usage,
+      phil=phil_scope,
+      read_reflections=True,
+      read_datablocks=True,
+      check_format=False,
+      epilog=help_message)
 
   # Get the parameters
   params, options = parser.parse_args(show_diff_phil=False)
 
   # Configure the log
-  log.config(
-    params.verbosity,
-    info='dials.find_hot_pixels.log',
-    debug='dials.find_hot_pixels.debug.log')
+  log.config(params.verbosity, info='dials.find_hot_pixels.log', debug='dials.find_hot_pixels.debug.log')
 
   # Log the diff phil
   diff_phil = parser.diff_phil.as_str()
@@ -88,7 +87,7 @@ def run(args):
   if len(reflections) > 1:
     raise Sorry("Multiple reflections lists provided in input")
 
-  assert(len(reflections) == 1)
+  assert (len(reflections) == 1)
   reflections = reflections[0]
 
   mask = hot_pixel_mask(imagesets[0], reflections)
@@ -110,7 +109,7 @@ def hot_pixel_mask(imageset, reflections):
 
   print 'Found %d hot pixels' % len(xylist)
 
-  return (mask,)
+  return (mask, )
 
 def filter_reflections(reflections, depth):
   xylist = []

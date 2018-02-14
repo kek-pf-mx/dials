@@ -10,7 +10,6 @@
 from __future__ import absolute_import, division
 from scitbx import matrix
 from dials.array_family import flex
-
 """The PredictionParameterisation class ties together parameterisations for
 individual experimental models: beam, crystal orientation, crystal unit cell
 detector and goniometer into a parameterisation for the reflection prediction
@@ -56,11 +55,11 @@ class PredictionParameterisation(object):
 
   def __init__(self,
                experiments,
-               detector_parameterisations = None,
-               beam_parameterisations = None,
-               xl_orientation_parameterisations = None,
-               xl_unit_cell_parameterisations = None,
-               goniometer_parameterisations = None):
+               detector_parameterisations=None,
+               beam_parameterisations=None,
+               xl_orientation_parameterisations=None,
+               xl_unit_cell_parameterisations=None,
+               goniometer_parameterisations=None):
 
     if detector_parameterisations is None:
       detector_parameterisations = []
@@ -102,10 +101,11 @@ class PredictionParameterisation(object):
     e2gp = {ids: i for i, p in enumerate(goniometer_parameterisations) \
                  for ids in p.get_experiment_ids()}
     from collections import namedtuple
-    ParamSet = namedtuple('ParamSet', ['beam_param', 'xl_ori_param',
-        'xl_uc_param', 'det_param', 'gonio_param'])
-    self._exp_to_param = {i: ParamSet(e2bp.get(i), e2xop.get(i), e2xucp.get(i),
-        e2dp.get(i), e2gp.get(i)) for i, _ in enumerate(experiments)}
+    ParamSet = namedtuple('ParamSet', ['beam_param', 'xl_ori_param', 'xl_uc_param', 'det_param', 'gonio_param'])
+    self._exp_to_param = {
+        i: ParamSet(e2bp.get(i), e2xop.get(i), e2xucp.get(i), e2dp.get(i), e2gp.get(i))
+        for i, _ in enumerate(experiments)
+    }
 
   # accessors for the lists of parameterisations of different types
   def get_detector_parameterisations(self):
@@ -148,32 +148,27 @@ class PredictionParameterisation(object):
 
     global_p_list = []
     if self._detector_parameterisations:
-      det_plists = [x.get_param_vals() for x
-                    in self._detector_parameterisations]
+      det_plists = [x.get_param_vals() for x in self._detector_parameterisations]
       params = [x for l in det_plists for x in l]
       global_p_list.extend(params)
 
     if self._beam_parameterisations:
-      src_plists = [x.get_param_vals() for x
-                    in self._beam_parameterisations]
+      src_plists = [x.get_param_vals() for x in self._beam_parameterisations]
       params = [x for l in src_plists for x in l]
       global_p_list.extend(params)
 
     if self._xl_orientation_parameterisations:
-      xlo_plists = [x.get_param_vals() for x
-                    in self._xl_orientation_parameterisations]
+      xlo_plists = [x.get_param_vals() for x in self._xl_orientation_parameterisations]
       params = [x for l in xlo_plists for x in l]
       global_p_list.extend(params)
 
     if self._xl_unit_cell_parameterisations:
-      xluc_plists = [x.get_param_vals() for x
-                     in self._xl_unit_cell_parameterisations]
+      xluc_plists = [x.get_param_vals() for x in self._xl_unit_cell_parameterisations]
       params = [x for l in xluc_plists for x in l]
       global_p_list.extend(params)
 
     if self._goniometer_parameterisations:
-      gon_plists = [x.get_param_vals() for x
-                    in self._goniometer_parameterisations]
+      gon_plists = [x.get_param_vals() for x in self._goniometer_parameterisations]
       params = [x for l in gon_plists for x in l]
       global_p_list.extend(params)
 
@@ -185,36 +180,31 @@ class PredictionParameterisation(object):
 
     param_names = []
     if self._detector_parameterisations:
-      det_param_name_lists = [x.get_param_names() for x in
-          self._detector_parameterisations]
+      det_param_name_lists = [x.get_param_names() for x in self._detector_parameterisations]
       names = ["Detector%d" % (i + 1) + x for i, l \
                in enumerate(det_param_name_lists) for x in l]
       param_names.extend(names)
 
     if self._beam_parameterisations:
-      beam_param_name_lists = [x.get_param_names() for x in
-          self._beam_parameterisations]
+      beam_param_name_lists = [x.get_param_names() for x in self._beam_parameterisations]
       params = ["Beam%d" % (i + 1) + x for i, l \
                 in enumerate(beam_param_name_lists) for x in l]
       param_names.extend(params)
 
     if self._xl_orientation_parameterisations:
-      xlo_param_name_lists = [x.get_param_names() for x in
-          self._xl_orientation_parameterisations]
+      xlo_param_name_lists = [x.get_param_names() for x in self._xl_orientation_parameterisations]
       params = ["Crystal%d" % (i + 1) + x for i, l \
                 in enumerate(xlo_param_name_lists) for x in l]
       param_names.extend(params)
 
     if self._xl_unit_cell_parameterisations:
-      xluc_param_name_lists = [x.get_param_names() for x in
-          self._xl_unit_cell_parameterisations]
+      xluc_param_name_lists = [x.get_param_names() for x in self._xl_unit_cell_parameterisations]
       params = ["Crystal%d" % (i + 1) + x for i, l \
                 in enumerate(xluc_param_name_lists) for x in l]
       param_names.extend(params)
 
     if self._goniometer_parameterisations:
-      gon_param_name_lists = [x.get_param_names() for x in
-          self._goniometer_parameterisations]
+      gon_param_name_lists = [x.get_param_names() for x in self._goniometer_parameterisations]
       params = ["Goniometer%d" % (i + 1) + x for i, l \
                 in enumerate(gon_param_name_lists) for x in l]
       param_names.extend(params)
@@ -229,11 +219,9 @@ class PredictionParameterisation(object):
     assert len(vals) == len(self)
     it = iter(vals)
 
-    for model in (self._detector_parameterisations +
-                  self._beam_parameterisations +
-                  self._xl_orientation_parameterisations +
-                  self._xl_unit_cell_parameterisations +
-                  self._goniometer_parameterisations):
+    for model in (
+        self._detector_parameterisations + self._beam_parameterisations + self._xl_orientation_parameterisations +
+        self._xl_unit_cell_parameterisations + self._goniometer_parameterisations):
       tmp = [next(it) for i in range(model.num_free())]
       model.set_param_vals(tmp)
     return
@@ -247,11 +235,9 @@ class PredictionParameterisation(object):
     assert len(esds) == len(self)
     it = iter(esds)
 
-    for model in (self._detector_parameterisations +
-                  self._beam_parameterisations +
-                  self._xl_orientation_parameterisations +
-                  self._xl_unit_cell_parameterisations +
-                  self._goniometer_parameterisations):
+    for model in (
+        self._detector_parameterisations + self._beam_parameterisations + self._xl_orientation_parameterisations +
+        self._xl_unit_cell_parameterisations + self._goniometer_parameterisations):
       tmp = [next(it) for i in range(model.num_free())]
       model.set_param_esds(tmp)
     return
@@ -264,11 +250,9 @@ class PredictionParameterisation(object):
     calculate its own uncertainty of state."""
 
     i = 0
-    for model in (self._detector_parameterisations +
-                  self._beam_parameterisations +
-                  self._xl_orientation_parameterisations +
-                  self._xl_unit_cell_parameterisations +
-                  self._goniometer_parameterisations):
+    for model in (
+        self._detector_parameterisations + self._beam_parameterisations + self._xl_orientation_parameterisations +
+        self._xl_unit_cell_parameterisations + self._goniometer_parameterisations):
       n = model.num_free()
       sub = var_cov.matrix_copy_block(i, i, n, n)
       state_covs = model.calculate_state_uncertainties(sub)
@@ -328,7 +312,7 @@ class PredictionParameterisation(object):
     # Quantities derived from pv, precalculated for efficiency
     u, v, w = self._pv.parts()
     assert w.all_ne(0)
-    self._w_inv = 1./w
+    self._w_inv = 1. / w
     self._u_w_inv = u * self._w_inv
     self._v_w_inv = v * self._w_inv
 
@@ -389,10 +373,10 @@ class PredictionParameterisation(object):
       sel = panels == ipanel
       D.set_selected(sel, D_mat)
 
-    result = {'s0':experiment.beam.get_s0(),
-              'U':matrix.sqr(experiment.crystal.get_U()),
-              'B':matrix.sqr(experiment.crystal.get_B()),
-              'D':D}
+    result = {
+        's0': experiment.beam.get_s0(), 'U': matrix.sqr(experiment.crystal.get_U()), 'B': matrix.sqr(
+            experiment.crystal.get_B()), 'D': D
+    }
 
     # If a goniometer is present, get the setting matrix too
     if experiment.goniometer:
@@ -402,8 +386,7 @@ class PredictionParameterisation(object):
 
   # The detector derivatives calculation is shared by scans and stills type
   # prediction, so this method is here, in the base class.
-  def _detector_derivatives(self, isel, panel_id, parameterisation=None,
-                            dd_ddet_p=None, reflections=None):
+  def _detector_derivatives(self, isel, panel_id, parameterisation=None, dd_ddet_p=None, reflections=None):
     """Helper function to convert derivatives of the detector state to
     derivatives of the vector pv. Derivatives that would all be null vectors
     are replaced with None"""
@@ -415,8 +398,7 @@ class PredictionParameterisation(object):
     if dd_ddet_p is None:
 
       # get the derivatives of detector d matrix for this panel
-      dd_ddet_p = parameterisation.get_ds_dp(multi_state_elt=panel_id,
-                                             use_none_as_null=True)
+      dd_ddet_p = parameterisation.get_ds_dp(multi_state_elt=panel_id, use_none_as_null=True)
 
       # replace explicit null derivatives with None
       dd_ddet_p = [None if e is None else \
@@ -446,8 +428,7 @@ class PredictionParameterisation(object):
       panel = reflections['panel'].select(isel)
 
       # Extend derivative vectors for this detector parameterisation
-      results = self._extend_gradient_vectors(results, self._nref, dp.num_free(),
-        keys=self._grad_names)
+      results = self._extend_gradient_vectors(results, self._nref, dp.num_free(), keys=self._grad_names)
 
       # loop through the panels in this detector
       for panel_id, _ in enumerate(detector):
@@ -458,16 +439,14 @@ class PredictionParameterisation(object):
           # if no reflections intersect this panel, skip calculation
           continue
 
-        dpv_ddet_p = self._detector_derivatives(sub_isel, panel_id,
-          parameterisation=dp, reflections=reflections)
+        dpv_ddet_p = self._detector_derivatives(sub_isel, panel_id, parameterisation=dp, reflections=reflections)
 
         # convert to dX/dp, dY/dp and assign the elements of the vectors
         # corresponding to this experiment and panel
         sub_w_inv = self._w_inv.select(sub_isel)
         sub_u_w_inv = self._u_w_inv.select(sub_isel)
         sub_v_w_inv = self._v_w_inv.select(sub_isel)
-        dX_ddet_p, dY_ddet_p = self._calc_dX_dp_and_dY_dp_from_dpv_dp(
-          sub_w_inv, sub_u_w_inv, sub_v_w_inv, dpv_ddet_p)
+        dX_ddet_p, dY_ddet_p = self._calc_dX_dp_and_dY_dp_from_dpv_dp(sub_w_inv, sub_u_w_inv, sub_v_w_inv, dpv_ddet_p)
 
         # use a local parameter index pointer because we set all derivatives
         # for this panel before moving on to the next
@@ -504,8 +483,7 @@ class PredictionParameterisation(object):
         isel.extend(self._experiment_to_idx[exp_id])
 
       # Extend derivative vectors for this beam parameterisation
-      results = self._extend_gradient_vectors(results, self._nref, bp.num_free(),
-        keys=self._grad_names)
+      results = self._extend_gradient_vectors(results, self._nref, bp.num_free(), keys=self._grad_names)
 
       if len(isel) == 0:
         # if no reflections are in this experiment, skip calculation of
@@ -522,13 +500,11 @@ class PredictionParameterisation(object):
       u_w_inv = self._u_w_inv.select(isel)
       v_w_inv = self._v_w_inv.select(isel)
 
-      dpv_dbeam_p, dAngle_dbeam_p = self._beam_derivatives(isel,
-        parameterisation=bp, reflections=reflections)
+      dpv_dbeam_p, dAngle_dbeam_p = self._beam_derivatives(isel, parameterisation=bp, reflections=reflections)
 
       # convert to dX/dp, dY/dp and assign the elements of the vectors
       # corresponding to this experiment
-      dX_dbeam_p, dY_dbeam_p = self._calc_dX_dp_and_dY_dp_from_dpv_dp(
-        w_inv, u_w_inv, v_w_inv, dpv_dbeam_p)
+      dX_dbeam_p, dY_dbeam_p = self._calc_dX_dp_and_dY_dp_from_dpv_dp(w_inv, u_w_inv, v_w_inv, dpv_dbeam_p)
       for dX, dY, dAngle in zip(dX_dbeam_p, dY_dbeam_p, dAngle_dbeam_p):
         if dX is not None:
           results[self._iparam][self._grad_names[0]].set_selected(isel, dX)
@@ -556,8 +532,7 @@ class PredictionParameterisation(object):
         isel.extend(self._experiment_to_idx[exp_id])
 
       # Extend derivative vectors for this crystal orientation parameterisation
-      results = self._extend_gradient_vectors(results, self._nref, xlop.num_free(),
-        keys=self._grad_names)
+      results = self._extend_gradient_vectors(results, self._nref, xlop.num_free(), keys=self._grad_names)
 
       if len(isel) == 0:
         # if no reflections are in this experiment, skip calculation of
@@ -574,13 +549,11 @@ class PredictionParameterisation(object):
       u_w_inv = self._u_w_inv.select(isel)
       v_w_inv = self._v_w_inv.select(isel)
 
-      dpv_dxlo_p, dAngle_dxlo_p = self._xl_orientation_derivatives(isel,
-        parameterisation=xlop, reflections=reflections)
+      dpv_dxlo_p, dAngle_dxlo_p = self._xl_orientation_derivatives(isel, parameterisation=xlop, reflections=reflections)
 
       # convert to dX/dp, dY/dp and assign the elements of the vectors
       # corresponding to this experiment
-      dX_dxlo_p, dY_dxlo_p = self._calc_dX_dp_and_dY_dp_from_dpv_dp(
-        w_inv, u_w_inv, v_w_inv, dpv_dxlo_p)
+      dX_dxlo_p, dY_dxlo_p = self._calc_dX_dp_and_dY_dp_from_dpv_dp(w_inv, u_w_inv, v_w_inv, dpv_dxlo_p)
       for dX, dY, dAngle in zip(dX_dxlo_p, dY_dxlo_p, dAngle_dxlo_p):
         if dX is not None:
           results[self._iparam][self._grad_names[0]].set_selected(isel, dX)
@@ -608,8 +581,7 @@ class PredictionParameterisation(object):
         isel.extend(self._experiment_to_idx[exp_id])
 
       # Extend derivative vectors for this crystal unit cell parameterisation
-      results = self._extend_gradient_vectors(results, self._nref, xlucp.num_free(),
-        keys=self._grad_names)
+      results = self._extend_gradient_vectors(results, self._nref, xlucp.num_free(), keys=self._grad_names)
 
       if len(isel) == 0:
         # if no reflections are in this experiment, skip calculation of
@@ -626,13 +598,12 @@ class PredictionParameterisation(object):
       u_w_inv = self._u_w_inv.select(isel)
       v_w_inv = self._v_w_inv.select(isel)
 
-      dpv_dxluc_p, dAngle_dxluc_p =  self._xl_unit_cell_derivatives(isel,
-        parameterisation=xlucp, reflections=reflections)
+      dpv_dxluc_p, dAngle_dxluc_p = self._xl_unit_cell_derivatives(
+          isel, parameterisation=xlucp, reflections=reflections)
 
       # convert to dX/dp, dY/dp and assign the elements of the vectors
       # corresponding to this experiment
-      dX_dxluc_p, dY_dxluc_p = self._calc_dX_dp_and_dY_dp_from_dpv_dp(
-        w_inv, u_w_inv, v_w_inv, dpv_dxluc_p)
+      dX_dxluc_p, dY_dxluc_p = self._calc_dX_dp_and_dY_dp_from_dpv_dp(w_inv, u_w_inv, v_w_inv, dpv_dxluc_p)
       for dX, dY, dAngle in zip(dX_dxluc_p, dY_dxluc_p, dAngle_dxluc_p):
         if dX is not None:
           results[self._iparam][self._grad_names[0]].set_selected(isel, dX)
@@ -660,8 +631,7 @@ class PredictionParameterisation(object):
         isel.extend(self._experiment_to_idx[exp_id])
 
       # Extend derivative vectors for this goniometer parameterisation
-      results = self._extend_gradient_vectors(results, self._nref,
-          gonp.num_free(), keys=self._grad_names)
+      results = self._extend_gradient_vectors(results, self._nref, gonp.num_free(), keys=self._grad_names)
 
       if len(isel) == 0:
         # if no reflections are in this experiment, skip calculation of
@@ -678,13 +648,11 @@ class PredictionParameterisation(object):
       u_w_inv = self._u_w_inv.select(isel)
       v_w_inv = self._v_w_inv.select(isel)
 
-      dpv_dgon_p, dAngle_dgon_p = self._goniometer_derivatives(isel,
-        parameterisation=gonp, reflections=reflections)
+      dpv_dgon_p, dAngle_dgon_p = self._goniometer_derivatives(isel, parameterisation=gonp, reflections=reflections)
 
       # convert to dX/dp, dY/dp and assign the elements of the vectors
       # corresponding to this experiment
-      dX_dgon_p, dY_dgon_p = self._calc_dX_dp_and_dY_dp_from_dpv_dp(
-        w_inv, u_w_inv, v_w_inv, dpv_dgon_p)
+      dX_dgon_p, dY_dgon_p = self._calc_dX_dp_and_dY_dp_from_dpv_dp(w_inv, u_w_inv, v_w_inv, dpv_dgon_p)
       for dX, dY, dAngle in zip(dX_dgon_p, dY_dgon_p, dAngle_dgon_p):
         if dX is not None:
           results[self._iparam][self._grad_names[0]].set_selected(isel, dX)
@@ -704,8 +672,7 @@ class SparseGradientVectorMixin(object):
   prediction formula"""
 
   @staticmethod
-  def _extend_gradient_vectors(results, m, n,
-                               keys=("dX_dp", "dY_dp", "dZ_dp")):
+  def _extend_gradient_vectors(results, m, n, keys=("dX_dp", "dY_dp", "dZ_dp")):
     """Extend results list by n empty results. These will each be a dictionary
     indexed by the given keys. The value for each key will be an empty vector of
     size m, to store the derivatives of n parameters, for m reflections.
@@ -776,15 +743,13 @@ class XYPhiPredictionParameterisation(PredictionParameterisation):
       print "where r =", self._r[imin]
       print "e =", self._axis[imin]
       print "s0 =", self._s0[imin]
-      print ("this reflection forms angle with the equatorial plane "
-             "normal:")
+      print("this reflection forms angle with the equatorial plane " "normal:")
       vecn = matrix.col(self._s0[imin]).cross(matrix.col(self._axis[imin])).normalize()
       print matrix.col(reflections['s1'][imin]).accute_angle(vecn)
       raise e
     return
 
-  def _beam_derivatives(self, isel, parameterisation=None,
-    ds0_dbeam_p=None, reflections=None):
+  def _beam_derivatives(self, isel, parameterisation=None, ds0_dbeam_p=None, reflections=None):
     """helper function to extend the derivatives lists by derivatives of the
     beam parameterisations."""
 
@@ -822,8 +787,7 @@ class XYPhiPredictionParameterisation(PredictionParameterisation):
 
     return dpv_dp, dphi_dp
 
-  def _xl_orientation_derivatives(self, isel, parameterisation=None,
-    dU_dxlo_p=None, reflections=None):
+  def _xl_orientation_derivatives(self, isel, parameterisation=None, dU_dxlo_p=None, reflections=None):
     """helper function to extend the derivatives lists by derivatives of the
     crystal orientation parameterisations"""
 
@@ -870,8 +834,7 @@ class XYPhiPredictionParameterisation(PredictionParameterisation):
 
     return dpv_dp, dphi_dp
 
-  def _xl_unit_cell_derivatives(self, isel, parameterisation=None,
-    dB_dxluc_p=None, reflections=None):
+  def _xl_unit_cell_derivatives(self, isel, parameterisation=None, dB_dxluc_p=None, reflections=None):
     """helper function to extend the derivatives lists by
     derivatives of the crystal unit cell parameterisations"""
 
@@ -917,8 +880,7 @@ class XYPhiPredictionParameterisation(PredictionParameterisation):
 
     return dpv_dp, dphi_dp
 
-  def _goniometer_derivatives(self, isel, parameterisation=None,
-    dS_dgon_p=None, reflections=None):
+  def _goniometer_derivatives(self, isel, parameterisation=None, dS_dgon_p=None, reflections=None):
     """helper function to extend the derivatives lists by
     derivatives of the goniometer parameterisations"""
 
@@ -983,8 +945,7 @@ class XYPhiPredictionParameterisation(PredictionParameterisation):
 
     return dX_dp, dY_dp
 
-class XYPhiPredictionParameterisationSparse(SparseGradientVectorMixin,
-  XYPhiPredictionParameterisation):
+class XYPhiPredictionParameterisationSparse(SparseGradientVectorMixin, XYPhiPredictionParameterisation):
   """A version of XYPhiPredictionParameterisation that uses a sparse matrix
   data structure for memory efficiency when there are a large number of
   Experiments"""

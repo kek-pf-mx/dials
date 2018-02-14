@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division
 
 class Test(object):
-
   def __init__(self):
     import libtbx.load_env
     import os
@@ -12,12 +11,9 @@ class Test(object):
       print 'FAIL: dials_regression not configured'
       exit(0)
 
-    self.sweep_filename = os.path.join(dials_regression,
-        'centroid_test_data', 'sweep.json')
+    self.sweep_filename = os.path.join(dials_regression, 'centroid_test_data', 'sweep.json')
 
-    self.crystal_filename = os.path.join(dials_regression,
-        'centroid_test_data', 'crystal.json')
-
+    self.crystal_filename = os.path.join(dials_regression, 'centroid_test_data', 'crystal.json')
 
   def run(self):
     from dxtbx.serialize import load
@@ -30,13 +26,11 @@ class Test(object):
 
     # Get the reflections and overlaps
     reflections, adjacency_list = self.predict_reflections()
-    reflections['shoebox'] = flex.shoebox(
-      reflections['panel'],
-      reflections['bbox'])
+    reflections['shoebox'] = flex.shoebox(reflections['panel'], reflections['bbox'])
     reflections['shoebox'].allocate_with_value(shoebox.MaskCode.Valid)
 
     # If the adjacency list is given, then create the reflection mask
-    assert(len(self.detector) == 1)
+    assert (len(self.detector) == 1)
     image_size = self.detector[0].get_image_size()
     shoeboxes = reflections['shoebox']
     coords = reflections['xyzcal.px']
@@ -54,17 +48,15 @@ class Test(object):
     overlapping = set(overlapping)
 
     # Ensure we have some overlaps
-    assert(len(overlapping) > 0)
+    assert (len(overlapping) > 0)
 
     # Get all non-overlapping reflections
     all_r = set(range(len(reflections)))
     non_overlapping = all_r.difference(overlapping)
 
     # Run the tests
-    self.tst_non_overlapping(reflections, non_overlapping,
-        self.detector[0].get_image_size())
-    self.tst_overlapping(reflections, overlapping, adjacency_list,
-        image_size)
+    self.tst_non_overlapping(reflections, non_overlapping, self.detector[0].get_image_size())
+    self.tst_overlapping(reflections, overlapping, adjacency_list, image_size)
 
   def tst_non_overlapping(self, reflections, non_overlapping, image_size):
     '''Ensure non-overlapping reflections have all their values 1.'''
@@ -74,13 +66,12 @@ class Test(object):
     shoeboxes = reflections['shoebox']
     for i in non_overlapping:
       mask = shoeboxes[i].mask
-      assert(mask.all_eq(shoebox.MaskCode.Valid))
+      assert (mask.all_eq(shoebox.MaskCode.Valid))
 
     # Passed that test
     print "OK"
 
-  def tst_overlapping(self, reflections, overlapping,
-      adjacency_list, image_size):
+  def tst_overlapping(self, reflections, overlapping, adjacency_list, image_size):
     '''Ensure masks for overlapping reflections are set properly.'''
     import numpy
     from scitbx import matrix
@@ -95,11 +86,9 @@ class Test(object):
       r1_coord = matrix.col(coord[i])
 
       # Create a mask that we expect
-      r1_size = (bbox_1[5] - bbox_1[4],
-                 bbox_1[3] - bbox_1[2],
-                 bbox_1[1] - bbox_1[0])
-      expected_mask = numpy.zeros(shape = r1_size, dtype=numpy.int32)
-      expected_mask[:,:,:] = shoebox.MaskCode.Valid
+      r1_size = (bbox_1[5] - bbox_1[4], bbox_1[3] - bbox_1[2], bbox_1[1] - bbox_1[0])
+      expected_mask = numpy.zeros(shape=r1_size, dtype=numpy.int32)
+      expected_mask[:, :, :] = shoebox.MaskCode.Valid
 
       # Loop through all reflections which this reflection overlaps
       for j in adjacency_list.adjacent_vertices(i):
@@ -108,29 +97,27 @@ class Test(object):
         r2_coord = matrix.col(coord[j])
 
         # Get bounding box of intersection
-        bbox_3 = (max(bbox_1[0], bbox_2[0]), min(bbox_1[1], bbox_2[1]),
-                  max(bbox_1[2], bbox_2[2]), min(bbox_1[3], bbox_2[3]),
-                  max(bbox_1[4], bbox_2[4]), min(bbox_1[5], bbox_2[5]))
+        bbox_3 = (max(bbox_1[0], bbox_2[0]), min(bbox_1[1], bbox_2[1]), max(bbox_1[2], bbox_2[2]),
+                  min(bbox_1[3], bbox_2[3]), max(bbox_1[4], bbox_2[4]), min(bbox_1[5], bbox_2[5]))
 
         # Check intersection is valid
-        assert(bbox_3[0] < bbox_3[1])
-        assert(bbox_3[2] < bbox_3[3])
-        assert(bbox_3[4] < bbox_3[5])
+        assert (bbox_3[0] < bbox_3[1])
+        assert (bbox_3[2] < bbox_3[3])
+        assert (bbox_3[4] < bbox_3[5])
 
         # Get the coordinates are all mask values
         mask_coord = []
         for k in range(bbox_3[4], bbox_3[5]):
           for j in range(bbox_3[2], bbox_3[3]):
             for i in range(bbox_3[0], bbox_3[1]):
-              mask_coord.append(matrix.col((i+0.5, j+0.5, k+0.5)))
+              mask_coord.append(matrix.col((i + 0.5, j + 0.5, k + 0.5)))
 
         def dist(a, m):
           return numpy.array([(a - b).length() for b in m])
 
         # Find the indices in the intersection area where r2 is closer to
         # the point than r1
-        ind = numpy.where(dist(r1_coord, mask_coord) >
-                          dist(r2_coord, mask_coord))[0]
+        ind = numpy.where(dist(r1_coord, mask_coord) > dist(r2_coord, mask_coord))[0]
 
         # Set the mask values for r1 where r2 is closer to 0
         k0, k1 = bbox_3[4] - bbox_1[4], bbox_3[5] - bbox_1[4]
@@ -139,12 +126,12 @@ class Test(object):
         intersect_mask = expected_mask[k0:k1, j0:j1, i0:i1]
         intersect_mask_1d = intersect_mask.reshape((-1))
         intersect_mask_1d[ind] = 0
-        intersect_mask[:,:] = intersect_mask_1d.reshape(intersect_mask.shape)
+        intersect_mask[:, :] = intersect_mask_1d.reshape(intersect_mask.shape)
         expected_mask[k0:k1, j0:j1, i0:i1] = intersect_mask
 
       # Check the masks are the same
       calculated_mask = r1.mask.as_numpy_array()
-      assert(numpy.all(calculated_mask == expected_mask))
+      assert (numpy.all(calculated_mask == expected_mask))
 
     # Passed the test
     print "OK"
@@ -166,15 +153,15 @@ class Test(object):
     sigma_m = self.crystal.get_mosaicity(deg=True)
 
     exlist = ExperimentList()
-    exlist.append(Experiment(
-      imageset=self.sweep,
-      beam=self.beam,
-      detector=self.detector,
-      goniometer=self.gonio,
-      scan=self.scan,
-      crystal=self.crystal,
-      profile=Model(
-        None, 3, sigma_b, sigma_m, deg=True)))
+    exlist.append(
+        Experiment(
+            imageset=self.sweep,
+            beam=self.beam,
+            detector=self.detector,
+            goniometer=self.gonio,
+            scan=self.scan,
+            crystal=self.crystal,
+            profile=Model(None, 3, sigma_b, sigma_m, deg=True)))
 
     predicted = flex.reflection_table.from_predictions(exlist[0])
     predicted['id'] = flex.int(len(predicted), 0)

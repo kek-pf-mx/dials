@@ -1,8 +1,6 @@
-
 from __future__ import absolute_import, division
 
 class Test(object):
-
   def __init__(self):
     from os.path import join, exists
     import dials
@@ -30,12 +28,7 @@ class Test(object):
     goniometer = self.experiments[0].goniometer
     scan = self.experiments[0].scan
 
-    sampler = EwaldSphereSampler(
-      beam,
-      detector,
-      goniometer,
-      scan,
-      1)
+    sampler = EwaldSphereSampler(beam, detector, goniometer, scan, 1)
 
     self.tst_nearest_n(sampler)
 

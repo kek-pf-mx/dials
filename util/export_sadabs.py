@@ -6,9 +6,15 @@ logger = logging.getLogger(__name__)
 from dials.util.export_mtz import sum_partial_reflections
 from dials.util.export_mtz import scale_partial_reflections
 
-def export_sadabs(integrated_data, experiment_list, hklout, run=0,
-                  summation=False, include_partials=False, keep_partials=False,
-                  debug=False, predict=True):
+def export_sadabs(integrated_data,
+                  experiment_list,
+                  hklout,
+                  run=0,
+                  summation=False,
+                  include_partials=False,
+                  keep_partials=False,
+                  debug=False,
+                  predict=True):
   '''Export data from integrated_data corresponding to experiment_list to a
   file for input to SADABS. FIXME probably need to make a .p4p file as
   well...'''
@@ -20,26 +26,23 @@ def export_sadabs(integrated_data, experiment_list, hklout, run=0,
   # for the moment assume (and assert) that we will convert data from exactly
   # one lattice...
 
-  assert(len(experiment_list) == 1)
+  assert (len(experiment_list) == 1)
   # select reflections that are assigned to an experiment (i.e. non-negative id)
 
   integrated_data = integrated_data.select(integrated_data['id'] >= 0)
   assert max(integrated_data['id']) == 0
 
   if not summation:
-    assert('intensity.prf.value' in integrated_data)
+    assert ('intensity.prf.value' in integrated_data)
 
   # strip out negative variance reflections: these should not really be there
   # FIXME Doing select on summation results. Should do on profile result if
   # present? Yes
 
   if 'intensity.prf.variance' in integrated_data:
-    selection = integrated_data.get_flags(
-      integrated_data.flags.integrated,
-      all=True)
+    selection = integrated_data.get_flags(integrated_data.flags.integrated, all=True)
   else:
-    selection = integrated_data.get_flags(
-      integrated_data.flags.integrated_sum)
+    selection = integrated_data.get_flags(integrated_data.flags.integrated_sum)
   integrated_data = integrated_data.select(selection)
 
   selection = integrated_data['intensity.sum.variance'] <= 0
@@ -67,7 +70,7 @@ def export_sadabs(integrated_data, experiment_list, hklout, run=0,
         selection.count(True))
 
   experiment = experiment_list[0]
-  assert(not experiment.scan is None)
+  assert (not experiment.scan is None)
 
   # sort data before output
   nref = len(integrated_data['miller_index'])
@@ -90,17 +93,15 @@ def export_sadabs(integrated_data, experiment_list, hklout, run=0,
     m_format = '%6.3f%6.3f%6.3f\n%6.3f%6.3f%6.3f\n%6.3f%6.3f%6.3f'
     c_format = '%.2f %.2f %.2f %.2f %.2f %.2f'
 
-    logger.info('Unit cell parameters from experiment: %s' % (c_format %
-         unit_cell.parameters()))
-    logger.info('Symmetry: %s' % experiment.crystal.get_space_group().type(
-         ).lookup_symbol())
+    logger.info('Unit cell parameters from experiment: %s' % (c_format % unit_cell.parameters()))
+    logger.info('Symmetry: %s' % experiment.crystal.get_space_group().type().lookup_symbol())
 
     logger.info('Goniometer fixed matrix:\n%s' % (m_format % F.elems))
     logger.info('Goniometer setting matrix:\n%s' % (m_format % S.elems))
     logger.info('Goniometer scan axis:\n%6.3f%6.3f%6.3f' % (axis.elems))
 
   # detector scaling info
-  assert(len(experiment.detector) == 1)
+  assert (len(experiment.detector) == 1)
   panel = experiment.detector[0]
   dims = panel.get_image_size()
   pixel = panel.get_pixel_size()

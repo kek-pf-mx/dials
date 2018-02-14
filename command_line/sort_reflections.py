@@ -51,17 +51,13 @@ class Sort(object):
     ''')
 
     # The script usage
-    usage  = """
+    usage = """
       usage: %s [options] reflections.pickle
 
     """ % libtbx.env.dispatcher_name
 
     # Initialise the base class
-    self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      read_reflections=True,
-      epilog=help_message)
+    self.parser = OptionParser(usage=usage, phil=phil_scope, read_reflections=True, epilog=help_message)
 
   @staticmethod
   def sort_permutation(column, reverse=False):
@@ -86,7 +82,7 @@ class Sort(object):
     reflections = reflections[0]
 
     # Check the key is valid
-    assert(params.key in reflections)
+    assert (params.key in reflections)
 
     # Sort the reflections
     print "Sorting by %s with reverse=%r" % (params.key, params.reverse)
@@ -97,7 +93,7 @@ class Sort(object):
       print "Head of sorted list " + attr + ":"
       n = min(len(reflections), 10)
       for i in range(10):
-        print (reflections[i][attr])
+        print(reflections[i][attr])
 
     # Save sorted reflections to file
     if params.output:

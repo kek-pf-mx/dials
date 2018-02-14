@@ -35,12 +35,7 @@ def run(args):
   usage = "%s [options] experiment_0.json ..." % \
     libtbx.env.dispatcher_name
 
-  parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_experiments=True,
-    check_format=False,
-    epilog=help_message)
+  parser = OptionParser(usage=usage, phil=phil_scope, read_experiments=True, check_format=False, epilog=help_message)
 
   params, options = parser.parse_args(show_diff_phil=True)
   experiments = params.input.experiments
@@ -48,13 +43,13 @@ def run(args):
   # check input
   space_group = None
   for experiment in experiments:
-    assert(len(experiment.data.goniometers()) == 1)
-    assert(len(experiment.data.crystals()) == 1)
+    assert (len(experiment.data.goniometers()) == 1)
+    assert (len(experiment.data.crystals()) == 1)
     crystal = experiment.data.crystals()[0]
     if space_group is None:
       space_group = crystal.get_space_group()
     else:
-      assert(crystal.get_space_group() == space_group)
+      assert (crystal.get_space_group() == space_group)
 
   reference_U = None
   reference_space_group = None
@@ -73,13 +68,11 @@ def run(args):
     r2d = 180 / pi
     abc = [a, b, c]
     abc_names = 'abc'
-    distances = [(r2d * (min(axis.angle(_a), pi - axis.angle(_a))), k)
-                 for k, _a in enumerate(abc)]
+    distances = [(r2d * (min(axis.angle(_a), pi - axis.angle(_a))), k) for k, _a in enumerate(abc)]
     close = sorted(distances)[0]
     if reference_U is None:
       reference_U = U
-      reference_space_group = lattice_symmetry_group(crystal.get_unit_cell(),
-                                                     max_delta=0.0)
+      reference_space_group = lattice_symmetry_group(crystal.get_unit_cell(), max_delta=0.0)
       print '%s possible lattice ops' % len(reference_space_group.all_ops())
 
     print 'Experiment %d' % j

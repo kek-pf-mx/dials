@@ -8,7 +8,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """ Test the situation that led to https://github.com/dials/dials/issues/423.
 In that case instantiating a Refiner for an experiment list with an I23
 detector model caused the panel origins to move before any refinement took
@@ -27,21 +26,16 @@ from dials.array_family import flex
 from dials.algorithms.refinement import RefinerFactory
 
 class Test(object):
-
   def __init__(self):
 
-    dials_regression = libtbx.env.find_in_repositories(
-      relative_path="dials_regression",
-      test=os.path.isdir)
+    dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=os.path.isdir)
 
-    data_dir = os.path.join(dials_regression, "refinement_test_data",
-        "dials-423")
+    data_dir = os.path.join(dials_regression, "refinement_test_data", "dials-423")
     exp_file = os.path.join(data_dir, 'experiments.json')
     ref_file = os.path.join(data_dir, 'subset.pickle')
 
     self._reflections = flex.reflection_table.from_pickle(ref_file)
-    self._experiments = ExperimentListFactory.from_json_file(exp_file,
-        check_format=False)
+    self._experiments = ExperimentListFactory.from_json_file(exp_file, check_format=False)
 
   def run(self):
     """Test that the detector remains similar after refiner construction"""
@@ -50,10 +44,9 @@ class Test(object):
     params = phil_scope.fetch(source=phil.parse('')).extract()
 
     # disable outlier rejection for speed of refiner construction
-    params.refinement.reflections.outlier.algorithm='null'
+    params.refinement.reflections.outlier.algorithm = 'null'
 
-    refiner = RefinerFactory.from_parameters_data_experiments(params,
-        self._reflections, self._experiments)
+    refiner = RefinerFactory.from_parameters_data_experiments(params, self._reflections, self._experiments)
 
     d1 = self._experiments[0].detector
     d2 = refiner.get_experiments()[0].detector

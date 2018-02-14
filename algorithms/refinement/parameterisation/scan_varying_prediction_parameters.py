@@ -114,11 +114,11 @@ class ScanVaryingPredictionParameterisation(XYPhiPredictionParameterisation):
 
   def __init__(self,
                experiments,
-               detector_parameterisations = None,
-               beam_parameterisations = None,
-               xl_orientation_parameterisations = None,
-               xl_unit_cell_parameterisations = None,
-               goniometer_parameterisations = None):
+               detector_parameterisations=None,
+               beam_parameterisations=None,
+               xl_orientation_parameterisations=None,
+               xl_unit_cell_parameterisations=None,
+               goniometer_parameterisations=None):
 
     if detector_parameterisations is None:
       detector_parameterisations = []
@@ -132,16 +132,11 @@ class ScanVaryingPredictionParameterisation(XYPhiPredictionParameterisation):
       goniometer_parameterisations = []
 
     # determine once here which types of parameterisations are scan-varying
-    self._varying_detectors = any(hasattr(p, 'num_sets')
-      for p in detector_parameterisations)
-    self._varying_beams = any(hasattr(p, 'num_sets')
-      for p in beam_parameterisations)
-    self._varying_xl_orientations = any(hasattr(p, 'num_sets')
-      for p in xl_orientation_parameterisations)
-    self._varying_xl_unit_cells = any(hasattr(p, 'num_sets')
-      for p in xl_unit_cell_parameterisations)
-    self._varying_goniometers = any(hasattr(p, 'num_sets')
-      for p in goniometer_parameterisations)
+    self._varying_detectors = any(hasattr(p, 'num_sets') for p in detector_parameterisations)
+    self._varying_beams = any(hasattr(p, 'num_sets') for p in beam_parameterisations)
+    self._varying_xl_orientations = any(hasattr(p, 'num_sets') for p in xl_orientation_parameterisations)
+    self._varying_xl_unit_cells = any(hasattr(p, 'num_sets') for p in xl_unit_cell_parameterisations)
+    self._varying_goniometers = any(hasattr(p, 'num_sets') for p in goniometer_parameterisations)
 
     to_cache = []
     if self._varying_detectors:
@@ -158,12 +153,12 @@ class ScanVaryingPredictionParameterisation(XYPhiPredictionParameterisation):
 
     # set up base class
     super(ScanVaryingPredictionParameterisation, self).__init__(
-      experiments,
-      detector_parameterisations = detector_parameterisations,
-      beam_parameterisations = beam_parameterisations,
-      xl_orientation_parameterisations = xl_orientation_parameterisations,
-      xl_unit_cell_parameterisations = xl_unit_cell_parameterisations,
-      goniometer_parameterisations = goniometer_parameterisations)
+        experiments,
+        detector_parameterisations=detector_parameterisations,
+        beam_parameterisations=beam_parameterisations,
+        xl_orientation_parameterisations=xl_orientation_parameterisations,
+        xl_unit_cell_parameterisations=xl_unit_cell_parameterisations,
+        goniometer_parameterisations=goniometer_parameterisations)
 
   def _get_xl_orientation_parameterisation(self, experiment_id):
     """Return the crystal orientation parameterisation for the requested
@@ -222,20 +217,18 @@ class ScanVaryingPredictionParameterisation(XYPhiPredictionParameterisation):
 
     return gp
 
-  def _get_state_from_parameterisation(self, parameterisation, frame,
-                                       multi_state_elt=None):
+  def _get_state_from_parameterisation(self, parameterisation, frame, multi_state_elt=None):
     """Get the model state from the parameterisation at the specified frame,
     taking care of whether it is a scan-varying parameterisation or not"""
 
     if parameterisation is None: return None
-    if hasattr(parameterisation, 'num_sets') and not self._current_frame.get(
-        parameterisation) == frame:
+    if hasattr(parameterisation, 'num_sets') and not self._current_frame.get(parameterisation) == frame:
       parameterisation.compose(frame)
       self._current_frame[parameterisation] = frame
     if multi_state_elt is None:
       state = parameterisation.get_state()
     else:
-      state = parameterisation.get_state(multi_state_elt = multi_state_elt)
+      state = parameterisation.get_state(multi_state_elt=multi_state_elt)
     return state
 
   def _prepare_for_compose(self, reflections, skip_derivatives=False):
@@ -291,8 +284,7 @@ class ScanVaryingPredictionParameterisation(XYPhiPredictionParameterisation):
       self._current_frame = {}
 
       # get state and derivatives for each block
-      for block in xrange(flex.min(blocks),
-                          flex.max(blocks) + 1):
+      for block in xrange(flex.min(blocks), flex.max(blocks) + 1):
 
         # determine the subset of reflections this affects
         subsel = isel.select(blocks == block)
@@ -340,22 +332,20 @@ class ScanVaryingPredictionParameterisation(XYPhiPredictionParameterisation):
               # if no reflections intersect this panel, skip calculation
               continue
 
-            dmat  = self._get_state_from_parameterisation(dp,
-              frame, multi_state_elt=panel_id)
+            dmat = self._get_state_from_parameterisation(dp, frame, multi_state_elt=panel_id)
             if dmat is None: dmat = exp.detector[panel_id].get_d_matrix()
             Dmat = exp.detector[panel_id].get_D_matrix()
             reflections['d_matrix'].set_selected(subsel2, dmat)
             reflections['D_matrix'].set_selected(subsel2, Dmat)
 
             if dp is not None and self._varying_detectors and not skip_derivatives:
-              for j, dd in enumerate(dp.get_ds_dp(multi_state_elt=panel_id,
-                                                  use_none_as_null=True)):
+              for j, dd in enumerate(dp.get_ds_dp(multi_state_elt=panel_id, use_none_as_null=True)):
                 if dd is None: continue
                 self._derivative_cache.append(dp, j, dd, subsel)
 
         else: # set states and derivatives for single panel detector
 
-          dmat  = self._get_state_from_parameterisation(dp, frame)
+          dmat = self._get_state_from_parameterisation(dp, frame)
           if dmat is None: dmat = exp.detector[0].get_d_matrix()
           Dmat = exp.detector[0].get_D_matrix()
           reflections['d_matrix'].set_selected(subsel, dmat)
@@ -405,7 +395,7 @@ class ScanVaryingPredictionParameterisation(XYPhiPredictionParameterisation):
     B = self._get_state_from_parameterisation(xl_ucp, obs_image_number)
     if B is None: B = matrix.sqr(self._experiments[experiment_id].crystal.get_B())
 
-    return U*B
+    return U * B
 
   # called by refiner.run for setting the beam scan points
   def get_s0(self, obs_image_number, experiment_id):
@@ -427,11 +417,10 @@ class ScanVaryingPredictionParameterisation(XYPhiPredictionParameterisation):
     experiment. In this scan-varying overload this is trivial because these
     values are already set as arrays in the reflection table"""
 
-    return {'s0':reflections['s0_vector'],
-            'U':reflections['u_matrix'],
-            'B':reflections['b_matrix'],
-            'D':reflections['D_matrix'],
-            'S':reflections['S_matrix']}
+    return {
+        's0': reflections['s0_vector'], 'U': reflections['u_matrix'], 'B': reflections['b_matrix'], 'D':
+        reflections['D_matrix'], 'S': reflections['S_matrix']
+    }
 
   def _beam_derivatives(self, isel, parameterisation, reflections):
     """Determine whether ds0_dp was precalculated then call the base class
@@ -442,13 +431,11 @@ class ScanVaryingPredictionParameterisation(XYPhiPredictionParameterisation):
         imatch = reflections['imatch']
       else:
         imatch = None
-      ds0_dxluc_p = self._derivative_cache.build_gradients(
-        parameterisation=parameterisation, isel=isel, imatch=imatch)
+      ds0_dxluc_p = self._derivative_cache.build_gradients(parameterisation=parameterisation, isel=isel, imatch=imatch)
     else:
       ds0_dxluc_p = None
 
-    return super(ScanVaryingPredictionParameterisation,
-      self)._beam_derivatives(isel, parameterisation, ds0_dxluc_p)
+    return super(ScanVaryingPredictionParameterisation, self)._beam_derivatives(isel, parameterisation, ds0_dxluc_p)
 
   def _xl_orientation_derivatives(self, isel, parameterisation, reflections):
     """Determine whether dU_dp was precalculated then call the base class
@@ -459,13 +446,12 @@ class ScanVaryingPredictionParameterisation(XYPhiPredictionParameterisation):
         imatch = reflections['imatch']
       else:
         imatch = None
-      dU_dxlo_p = self._derivative_cache.build_gradients(
-        parameterisation=parameterisation, isel=isel, imatch=imatch)
+      dU_dxlo_p = self._derivative_cache.build_gradients(parameterisation=parameterisation, isel=isel, imatch=imatch)
     else:
       dU_dxlo_p = None
 
-    return super(ScanVaryingPredictionParameterisation,
-      self)._xl_orientation_derivatives(isel, parameterisation, dU_dxlo_p)
+    return super(ScanVaryingPredictionParameterisation, self)._xl_orientation_derivatives(
+        isel, parameterisation, dU_dxlo_p)
 
   def _xl_unit_cell_derivatives(self, isel, parameterisation, reflections):
     """Determine whether dB_dp was precalculated then call the base class
@@ -476,13 +462,12 @@ class ScanVaryingPredictionParameterisation(XYPhiPredictionParameterisation):
         imatch = reflections['imatch']
       else:
         imatch = None
-      dB_dxluc_p = self._derivative_cache.build_gradients(
-        parameterisation=parameterisation, isel=isel, imatch=imatch)
+      dB_dxluc_p = self._derivative_cache.build_gradients(parameterisation=parameterisation, isel=isel, imatch=imatch)
     else:
       dB_dxluc_p = None
 
-    return super(ScanVaryingPredictionParameterisation,
-      self)._xl_unit_cell_derivatives(isel, parameterisation, dB_dxluc_p)
+    return super(ScanVaryingPredictionParameterisation, self)._xl_unit_cell_derivatives(
+        isel, parameterisation, dB_dxluc_p)
 
   def _detector_derivatives(self, isel, panel_id, parameterisation, reflections):
     """Determine whether dd_dp was precalculated then call the base class
@@ -493,13 +478,12 @@ class ScanVaryingPredictionParameterisation(XYPhiPredictionParameterisation):
         imatch = reflections['imatch']
       else:
         imatch = None
-      dd_ddet_p = self._derivative_cache.build_gradients(
-        parameterisation=parameterisation, isel=isel, imatch=imatch)
+      dd_ddet_p = self._derivative_cache.build_gradients(parameterisation=parameterisation, isel=isel, imatch=imatch)
     else:
       dd_ddet_p = None
 
-    return super(ScanVaryingPredictionParameterisation,
-      self)._detector_derivatives(isel, panel_id, parameterisation, dd_ddet_p)
+    return super(ScanVaryingPredictionParameterisation, self)._detector_derivatives(isel, panel_id, parameterisation,
+                                                                                    dd_ddet_p)
 
   def _goniometer_derivatives(self, isel, parameterisation, reflections):
     """Determine whether dS_dp was precalculated then call the base class
@@ -510,17 +494,13 @@ class ScanVaryingPredictionParameterisation(XYPhiPredictionParameterisation):
         imatch = reflections['imatch']
       else:
         imatch = None
-      dS_dgon_p = self._derivative_cache.build_gradients(
-        parameterisation=parameterisation, isel=isel, imatch=imatch)
+      dS_dgon_p = self._derivative_cache.build_gradients(parameterisation=parameterisation, isel=isel, imatch=imatch)
     else:
       dS_dgon_p = None
 
-    return super(ScanVaryingPredictionParameterisation,
-      self)._goniometer_derivatives(isel, parameterisation, dS_dgon_p)
+    return super(ScanVaryingPredictionParameterisation, self)._goniometer_derivatives(isel, parameterisation, dS_dgon_p)
 
-  def calculate_model_state_uncertainties(self, var_cov=None,
-                                          obs_image_number=None,
-                                          experiment_id=None):
+  def calculate_model_state_uncertainties(self, var_cov=None, obs_image_number=None, experiment_id=None):
     """Take a variance-covariance matrix of all free parameters (probably
     calculated by a minimisation engine). For each parameterisation in the
     global model, extract the subset of this matrix for the associated block
@@ -538,8 +518,7 @@ class ScanVaryingPredictionParameterisation(XYPhiPredictionParameterisation):
     # first call, only a variance-covariance matrix is supplied
     if var_cov is not None:
       assert [obs_image_number, experiment_id].count(None) == 2
-      super(ScanVaryingPredictionParameterisation,
-            self).calculate_model_state_uncertainties(var_cov)
+      super(ScanVaryingPredictionParameterisation, self).calculate_model_state_uncertainties(var_cov)
       return
 
     # later calls, only an experiment and image number are supplied
@@ -568,8 +547,7 @@ class ScanVaryingPredictionParameterisation(XYPhiPredictionParameterisation):
 
     return result
 
-  def set_model_state_uncertainties(self, u_cov_list, b_cov_list,
-                                          experiment_id=None):
+  def set_model_state_uncertainties(self, u_cov_list, b_cov_list, experiment_id=None):
     """Identify the crystal parameterisations and set the list of covariance
     matrices, if available. They will only be available if the parameterisation
     is a scan-varying type, otherwise they are None"""
@@ -591,7 +569,5 @@ class ScanVaryingPredictionParameterisation(XYPhiPredictionParameterisation):
 
     return
 
-
-class ScanVaryingPredictionParameterisationSparse(
-    SparseGradientVectorMixin, ScanVaryingPredictionParameterisation):
+class ScanVaryingPredictionParameterisationSparse(SparseGradientVectorMixin, ScanVaryingPredictionParameterisation):
   pass

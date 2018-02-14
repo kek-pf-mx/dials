@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division
 
 class Test(object):
-
   def __init__(self):
     pass
 
@@ -29,22 +28,22 @@ class Test(object):
       z1 = randint(1, 10) + z0
       shoebox[i] = Shoebox((x0, x1, y0, y1, z0, z1))
 
-    assert(shoebox.is_consistent() == flex.bool(10, False))
+    assert (shoebox.is_consistent() == flex.bool(10, False))
 
     for i in range(10):
       shoebox[i].allocate()
 
-    assert(shoebox.is_consistent() == flex.bool(10, True))
+    assert (shoebox.is_consistent() == flex.bool(10, True))
 
     for i in [0, 2, 4, 6, 8]:
       shoebox[i].data.resize(flex.grid(10, 10, 10))
 
-    assert(shoebox.is_consistent() == flex.bool([False, True] * 5))
+    assert (shoebox.is_consistent() == flex.bool([False, True] * 5))
 
     for i in range(10):
       shoebox[i].deallocate()
 
-    assert(shoebox.is_consistent() == flex.bool(10, False))
+    assert (shoebox.is_consistent() == flex.bool(10, False))
 
     # Test passed
     print 'OK'
@@ -65,8 +64,8 @@ class Test(object):
     shoebox[5] = Shoebox((10, 20, 10, 1020, 10, 20))
     shoebox[6] = Shoebox((10, 20, 10, 20, 10, 1020))
 
-    assert(shoebox.is_bbox_within_image_volume(isize, srange) ==
-      flex.bool([True, False, False, False, False, False, False]))
+    assert (shoebox.is_bbox_within_image_volume(isize,
+                                                srange) == flex.bool([True, False, False, False, False, False, False]))
 
     # Test passed
     print 'OK'
@@ -79,8 +78,8 @@ class Test(object):
     mask = flex.bool(flex.grid(100, 100), True)
     for j in range(100):
       for i in range(40, 60):
-        mask[j,i] = False
-        mask[i,j] = False
+        mask[j, i] = False
+        mask[i, j] = False
 
     shoebox = flex.shoebox(1000)
     res = flex.bool(1000)
@@ -106,7 +105,7 @@ class Test(object):
 
       res[i] = res2
 
-    assert(shoebox.does_bbox_contain_bad_pixels(mask) == res)
+    assert (shoebox.does_bbox_contain_bad_pixels(mask) == res)
 
     # Test passed
     print 'OK'
@@ -135,7 +134,7 @@ class Test(object):
       for j in indices:
         shoebox[i].mask[j] = value
 
-    assert(shoebox.count_mask_values(value) == num)
+    assert (shoebox.count_mask_values(value) == num)
 
     # Test passed
     print 'OK'
@@ -159,11 +158,10 @@ class Test(object):
 
     bbox2 = shoebox.bounding_boxes()
     for i in range(10):
-      assert(bbox2[i] == bbox[i])
+      assert (bbox2[i] == bbox[i])
 
     # Test passed
     print 'OK'
-
 
 if __name__ == '__main__':
   from dials.test import cd_auto

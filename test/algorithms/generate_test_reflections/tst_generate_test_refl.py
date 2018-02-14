@@ -1,11 +1,13 @@
 from __future__ import absolute_import, division
+
 def tst_generate_test_reflections():
   from dials.algorithms.simulation.generate_test_reflections import main
   from dials.algorithms.simulation.generate_test_reflections import \
     master_phil
   from libtbx.phil import command_line
-  cmd = command_line.argument_interpreter(master_params = master_phil)
-  working_phil = cmd.process_and_fetch(args = ["""nrefl = 10
+  cmd = command_line.argument_interpreter(master_params=master_phil)
+  working_phil = cmd.process_and_fetch(args=[
+      """nrefl = 10
 shoebox_size {
   x = 20
   y = 20
@@ -45,7 +47,8 @@ rotation {
   angle = 45
 }
 
-"""])
+"""
+  ])
   main(working_phil.extract())
   print 'OK'
 
@@ -53,4 +56,3 @@ if __name__ == '__main__':
   from dials.test import cd_auto
   with cd_auto(__file__):
     tst_generate_test_reflections()
-

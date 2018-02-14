@@ -1,9 +1,6 @@
-
 from __future__ import absolute_import, division
 
-
 class Test(object):
-
   def __init__(self):
     from os.path import join
     from libtbx import easy_run
@@ -38,12 +35,7 @@ class Test(object):
     from os.path import exists
 
     # Call dials.export
-    easy_run.fully_buffered([
-      'dials.export',
-      'format=nxs',
-      self.experiments,
-      self.reflections
-    ]).raise_if_errors()
+    easy_run.fully_buffered(['dials.export', 'format=nxs', self.experiments, self.reflections]).raise_if_errors()
 
     assert exists("integrated.nxs")
 
@@ -54,12 +46,7 @@ class Test(object):
     from os.path import exists
 
     # Call dials.export
-    easy_run.fully_buffered([
-      'dials.export',
-      'format=mtz',
-      self.experiments,
-      self.reflections
-    ]).raise_if_errors()
+    easy_run.fully_buffered(['dials.export', 'format=mtz', self.experiments, self.reflections]).raise_if_errors()
 
     assert exists("integrated.mtz")
 
@@ -71,22 +58,13 @@ class Test(object):
     from libtbx.test_utils import approx_equal
 
     # Call dials.export
-    easy_run.fully_buffered([
-      'dials.export',
-      'summation=true',
-      'format=xds_ascii',
-      self.experiments,
-      self.reflections
-    ]).raise_if_errors()
+    easy_run.fully_buffered(['dials.export', 'summation=true', 'format=xds_ascii', self.experiments,
+                             self.reflections]).raise_if_errors()
 
     assert exists("DIALS.HKL")
 
-    psi_values = {
-      (-9, 7, -10):153.430361,
-      (-5, 11, -26):175.559441,
-      (-4, 23, 24):129.468070,
-      (2, 10, 20):147.947274
-      }
+    psi_values = {(-9, 7, -10): 153.430361, (-5, 11, -26): 175.559441, (-4, 23, 24): 129.468070, (2, 10, 20):
+                  147.947274}
 
     for record in open('DIALS.HKL', 'r'):
       if record.startswith('!'):
@@ -106,22 +84,15 @@ class Test(object):
     from libtbx.test_utils import approx_equal
 
     # Call dials.export
-    easy_run.fully_buffered([
-      'dials.export',
-      'summation=true',
-      'format=sadabs',
-      self.experiments,
-      self.reflections
-    ]).raise_if_errors()
+    easy_run.fully_buffered(['dials.export', 'summation=true', 'format=sadabs', self.experiments,
+                             self.reflections]).raise_if_errors()
 
     assert exists("integrated.sad")
 
-    direction_cosines = {
-      (-9, 7, -10):(0.51253, -0.72107, 0.84696, -0.68476, -0.14130, -0.10561),
-      (-5, 11, -26):(0.51310, -0.62895, 0.84711, -0.59223, -0.13830, -0.50366),
-      (-4, 23, 24):(0.51308, -0.60578, 0.84711, -0.31416, -0.13840, 0.73099),
-      (2, 10, 20):(0.51239, -0.46605, 0.84693, -0.61521, -0.14204, 0.63586)
-      }
+    direction_cosines = {(-9, 7, -10): (0.51253, -0.72107, 0.84696, -0.68476, -0.14130, -0.10561), (-5, 11, -26):
+                         (0.51310, -0.62895, 0.84711, -0.59223, -0.13830,
+                          -0.50366), (-4, 23, 24): (0.51308, -0.60578, 0.84711, -0.31416, -0.13840, 0.73099),
+                         (2, 10, 20): (0.51239, -0.46605, 0.84693, -0.61521, -0.14204, 0.63586)}
 
     for record in open('integrated.sad', 'r'):
       record = record.replace('-', ' -')
@@ -142,13 +113,7 @@ class Test(object):
     from dxtbx.datablock import DataBlockFactory
 
     # Call dials.export
-    easy_run.fully_buffered([
-      'dials.export',
-      'format=json',
-      self.datablock,
-      self.strong
-    ]).raise_if_errors()
-
+    easy_run.fully_buffered(['dials.export', 'format=json', self.datablock, self.strong]).raise_if_errors()
 
     assert exists('rlp.json')
     with open('rlp.json', 'rb') as f:
@@ -164,13 +129,13 @@ class Test(object):
 
     # Call dials.export
     easy_run.fully_buffered([
-      'dials.export',
-      'format=json',
-      self.experiments,
-      self.reflections,
-      'json.filename=integrated.json',
-      'n_digits=4',
-      'compact=False',
+        'dials.export',
+        'format=json',
+        self.experiments,
+        self.reflections,
+        'json.filename=integrated.json',
+        'n_digits=4',
+        'compact=False',
     ]).raise_if_errors()
 
     assert exists('integrated.json')

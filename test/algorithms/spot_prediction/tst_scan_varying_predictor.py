@@ -8,7 +8,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """
 Test prediction of reflections using the scan-varying reflection
 predictor.
@@ -41,11 +40,12 @@ def setup_models(args):
   """setup the experimental models"""
 
   # Setup experimental models
-  master_phil = parse("""
+  master_phil = parse(
+      """
       include scope dials.test.algorithms.refinement.geometry_phil
       """, process_includes=True)
 
-  models = setup_geometry.Extract(master_phil, cmdline_args = args)
+  models = setup_geometry.Extract(master_phil, cmdline_args=args)
 
   detector = models.detector
   goniometer = models.goniometer
@@ -54,20 +54,15 @@ def setup_models(args):
 
   # Build a mock scan for a 180 degree sweep
   sf = ScanFactory()
-  scan = sf.make_scan(image_range = (1,180),
-                        exposure_times = 0.1,
-                        oscillation = (0, 1.0),
-                        epochs = range(180),
-                        deg = True)
+  scan = sf.make_scan(image_range=(1, 180), exposure_times=0.1, oscillation=(0, 1.0), epochs=range(180), deg=True)
   sweep_range = scan.get_oscillation_range(deg=False)
   im_width = scan.get_oscillation(deg=False)[1]
   assert sweep_range == (0., pi)
   assert approx_equal(im_width, 1.0 * pi / 180.)
 
   experiments = ExperimentList()
-  experiments.append(Experiment(
-        beam=beam, detector=detector, goniometer=goniometer,
-        scan=scan, crystal=crystal, imageset=None))
+  experiments.append(
+      Experiment(beam=beam, detector=detector, goniometer=goniometer, scan=scan, crystal=crystal, imageset=None))
 
   return experiments
 
@@ -82,8 +77,7 @@ def ref_gen_static(experiments):
 
   # All indices to the detector max resolution
   dmin = detector.get_max_resolution(beam.get_s0())
-  index_generator = IndexGenerator(crystal.get_unit_cell(),
-                  space_group(space_group_symbols(1).hall()).type(), dmin)
+  index_generator = IndexGenerator(crystal.get_unit_cell(), space_group(space_group_symbols(1).hall()).type(), dmin)
   indices = index_generator.to_array()
 
   # Predict rays within the sweep range
@@ -116,12 +110,11 @@ def ref_gen_varying(experiments):
   # last image. These are all the same - we want to compare the scan-varying
   # predictor with the scan-static one for a flat scan.
   ar_range = scan.get_array_range()
-  UBlist = [crystal.get_A() for t in range(ar_range[0], ar_range[1]+1)]
+  UBlist = [crystal.get_A() for t in range(ar_range[0], ar_range[1] + 1)]
   dmin = detector.get_max_resolution(beam.get_s0())
 
   from dials.algorithms.spot_prediction import ScanVaryingReflectionPredictor
-  sv_predictor = ScanVaryingReflectionPredictor(experiments[0],
-                                                dmin=dmin)
+  sv_predictor = ScanVaryingReflectionPredictor(experiments[0], dmin=dmin)
   refs = sv_predictor.for_ub(flex.mat3_double(UBlist))
 
   return refs
@@ -135,7 +128,6 @@ def sort_refs(reflections):
   refs_sorted = sorted(refs_sorted, key=lambda x: x['miller_index'][0])
 
   return refs_sorted
-
 
 def run_tst(args):
 

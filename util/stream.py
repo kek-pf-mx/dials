@@ -3,12 +3,12 @@ from __future__ import absolute_import, division
 import logging
 logger = logging.getLogger(__name__)
 
-
 class ZMQStream():
   '''
   A class to listen to a zeromq stream
 
   '''
+
   def __init__(self, host, port=9999):
     """
     create stream listener object
@@ -47,7 +47,7 @@ class ZMQStream():
 
     """
     logger.info("Waiting for frame")
-    frames = self.receiver.recv_multipart(copy = False)
+    frames = self.receiver.recv_multipart(copy=False)
     return frames
 
   def close(self):
@@ -58,12 +58,12 @@ class ZMQStream():
     logger.info("Closing stream")
     return self.receiver.close()
 
-
 class Result(object):
   '''
   A class to represent a result
 
   '''
+
   def __init__(self):
     pass
 
@@ -87,7 +87,6 @@ class Result(object):
 
     '''
     return False
-
 
 class Header(Result):
   '''
@@ -125,10 +124,7 @@ class Header(Result):
 
     # Save the header data
     self.header = {
-      'htype' : 'eiger-stream',
-      'directory' : directory,
-      'image_template' : image_template,
-      'configuration' : conf
+        'htype': 'eiger-stream', 'directory': directory, 'image_template': image_template, 'configuration': conf
     }
 
   def is_header(self):
@@ -151,7 +147,6 @@ class Header(Result):
 
     # Create the sweep
     return ImageSweep(reader)
-
 
 class Image(Result):
   '''
@@ -210,7 +205,6 @@ class Image(Result):
     '''
     return True
 
-
 class EndOfSeries(Result):
   '''
   Class to represent the end of a series
@@ -223,7 +217,6 @@ class EndOfSeries(Result):
 
     '''
     return True
-
 
 class Decoder(object):
   """

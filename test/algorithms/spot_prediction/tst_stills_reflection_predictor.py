@@ -13,8 +13,7 @@ from scitbx import matrix
 from math import sqrt
 
 class Test(object):
-
-  def __init__(self, test_nave_model = False):
+  def __init__(self, test_nave_model=False):
 
     # Set up experimental models with regular geometry
     from dxtbx.model import BeamFactory
@@ -22,8 +21,7 @@ class Test(object):
     from dxtbx.model import DetectorFactory
 
     # Beam along the Z axis
-    self.beam = BeamFactory.make_beam(unit_s0 = matrix.col((0, 0, 1)),
-                                       wavelength = 1.0)
+    self.beam = BeamFactory.make_beam(unit_s0=matrix.col((0, 0, 1)), wavelength=1.0)
 
     # Goniometer (used only for index generation) along X axis
     self.goniometer = GoniometerFactory.known_axis(matrix.col((1, 0, 0)))
@@ -35,13 +33,9 @@ class Test(object):
     centre = matrix.col((0, 0, 200))
     npx_fast = npx_slow = 1000
     pix_size = 0.2
-    origin = centre - (0.5 * npx_fast * pix_size * dir1 +
-                       0.5 * npx_slow * pix_size * dir2)
-    self.detector = DetectorFactory.make_detector("PAD",
-                        dir1, dir2, origin,
-                        (pix_size, pix_size),
-                        (npx_fast, npx_slow),
-                        (0, 1.e6))
+    origin = centre - (0.5 * npx_fast * pix_size * dir1 + 0.5 * npx_slow * pix_size * dir2)
+    self.detector = DetectorFactory.make_detector("PAD", dir1, dir2, origin, (pix_size, pix_size), (npx_fast, npx_slow),
+                                                  (0, 1.e6))
 
     # Cubic 100 A^3 crystal
     a = matrix.col((100, 0, 0))
@@ -50,17 +44,17 @@ class Test(object):
 
     if test_nave_model:
       from dxtbx.model import MosaicCrystalSauter2014
-      self.crystal = MosaicCrystalSauter2014(a, b, c, space_group_symbol = "P 1")
+      self.crystal = MosaicCrystalSauter2014(a, b, c, space_group_symbol="P 1")
       self.crystal.set_half_mosaicity_deg(500)
       self.crystal.set_domain_size_ang(0.2)
     else:
       from dxtbx.model import Crystal
-      self.crystal = Crystal(a, b, c, space_group_symbol = "P 1")
+      self.crystal = Crystal(a, b, c, space_group_symbol="P 1")
 
     # Collect these models in an Experiment (ignoring the goniometer)
     from dxtbx.model.experiment_list import Experiment
-    self.experiment = Experiment(beam=self.beam, detector=self.detector,
-      goniometer=None, scan=None, crystal=self.crystal, imageset=None)
+    self.experiment = Experiment(
+        beam=self.beam, detector=self.detector, goniometer=None, scan=None, crystal=self.crystal, imageset=None)
 
     # Generate some reflections
     self.reflections = self.generate_reflections()
@@ -93,13 +87,13 @@ class Test(object):
     from dials.array_family import flex
     table = flex.reflection_table()
     table['flags'] = flex.size_t(nref, 0)
-    table['id']    = flex.int(nref, 0)
+    table['id'] = flex.int(nref, 0)
     table['panel'] = flex.size_t(nref, 0)
     table['miller_index'] = flex.miller_index(hkl)
-    table['entering']     = flex.bool(nref, True)
-    table['s1']           = flex.vec3_double(nref)
-    table['xyzcal.mm']    = flex.vec3_double(nref)
-    table['xyzcal.px']    = flex.vec3_double(nref)
+    table['entering'] = flex.bool(nref, True)
+    table['s1'] = flex.vec3_double(nref)
+    table['xyzcal.mm'] = flex.vec3_double(nref)
+    table['xyzcal.px'] = flex.vec3_double(nref)
 
     return table
 
@@ -124,7 +118,7 @@ class Test(object):
       q = UB * matrix.col(ref['miller_index'])
       tst_radius = (s0 + q).length()
       sgn = -1 if tst_radius > es_radius else 1
-      delpsi = sgn*r.accute_angle(q)
+      delpsi = sgn * r.accute_angle(q)
       assert approx_equal(delpsi, ref['delpsical.rad'])
 
     print "OK"
@@ -154,7 +148,6 @@ class Test(object):
 
     print "OK"
 
-
 if __name__ == '__main__':
 
   test = Test()
@@ -163,4 +156,3 @@ if __name__ == '__main__':
 
   test = Test(test_nave_model=True)
   test.run()
-

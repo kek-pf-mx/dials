@@ -11,12 +11,11 @@ def run():
     print 'FAIL: dials_regression not configured'
     exit(0)
 
-  path = os.path.join(
-    dials_regression, "centroid_test_data/centroid_####.cbf")
+  path = os.path.join(dials_regression, "centroid_test_data/centroid_####.cbf")
 
   print os.getcwd()
 
-  cmd = "dials.import template=%s" %path
+  cmd = "dials.import template=%s" % path
   result = easy_run.fully_buffered(cmd).raise_if_errors()
   cmd = "dials.find_spots datablock.json"
   result = easy_run.fully_buffered(cmd).raise_if_errors()
@@ -89,7 +88,6 @@ BEAM            219.865  212.610
 # end of parameter file for BEST
 """)
   return
-
 
 if __name__ == '__main__':
   from dials.test import cd_auto

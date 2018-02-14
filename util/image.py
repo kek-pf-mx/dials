@@ -13,6 +13,7 @@ from __future__ import absolute_import, division
 
 class reader:
   """A class to read the CBF files used in DIALS"""
+
   def __init__(self):
     pass
 
@@ -55,7 +56,6 @@ class reader:
 
     # Return the image
     return image
-
 
 if __name__ == '__main__':
   import sys

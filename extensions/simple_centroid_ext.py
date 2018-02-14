@@ -12,7 +12,6 @@ from __future__ import absolute_import, division
 
 from dials.interfaces import CentroidIface
 
-
 class SimpleCentroidExt(CentroidIface):
   ''' An extension class implementing a simple centroid algorithm. '''
 

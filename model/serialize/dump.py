@@ -16,7 +16,6 @@ from dxtbx.serialize.dump import imageset as sweep # implicit import
 from dxtbx.serialize.dump import imageset_to_string as sweep_to_string # implicit import
 from dxtbx.serialize.dump import datablock # implicit import
 
-
 def reflections(obj, outfile):
   '''
   Dump the given object to file

@@ -86,12 +86,12 @@ ParamIndex = namedtuple('ParamIndex', ['parameterisation', 'istart'])
 RestraintIndex = namedtuple('RestraintIndex', ['restraint', 'istart'])
 
 class RestraintsParameterisation(object):
-
-  def __init__(self, detector_parameterisations = None,
-               beam_parameterisations = None,
-               xl_orientation_parameterisations = None,
-               xl_unit_cell_parameterisations = None,
-               goniometer_parameterisations = None):
+  def __init__(self,
+               detector_parameterisations=None,
+               beam_parameterisations=None,
+               xl_orientation_parameterisations=None,
+               xl_unit_cell_parameterisations=None,
+               goniometer_parameterisations=None):
 
     if detector_parameterisations is None:
       detector_parameterisations = []
@@ -175,8 +175,7 @@ class RestraintsParameterisation(object):
   #
   #  return
 
-  def add_restraints_to_target_xl_unit_cell(self,
-    experiment_id, values, sigma):
+  def add_restraints_to_target_xl_unit_cell(self, experiment_id, values, sigma):
 
     # On input we will have one id value, 6 target values and 6 sigmas.
 
@@ -192,9 +191,7 @@ class RestraintsParameterisation(object):
                   "additional restraint with experiment {0}".format(experiment_id))
 
     # create new restraint
-    tie = SingleUnitCellTie(model_parameterisation=param_i.parameterisation,
-                            target=values,
-                            sigma=sigma)
+    tie = SingleUnitCellTie(model_parameterisation=param_i.parameterisation, target=values, sigma=sigma)
 
     # add to the restraint list along with the global parameter index
     self._single_model_restraints.append(RestraintIndex(tie, param_i.istart))
@@ -240,19 +237,16 @@ class RestraintsParameterisation(object):
     for param in params:
       if param in self._param_to_restraint:
         raise Sorry("Parameterisation already restrained. Cannot create "
-                    "additional group restraint for experiment(s) {0}".format(str(
-                      param_i.parameterisation.get_experiment_ids())))
+                    "additional group restraint for experiment(s) {0}".format(
+                        str(param_i.parameterisation.get_experiment_ids())))
 
     # create new group of restraints
     if target == 'mean':
-      tie = MeanUnitCellTie(model_parameterisations=params,
-                            sigma=sigma)
+      tie = MeanUnitCellTie(model_parameterisations=params, sigma=sigma)
     elif target == 'low_memory_mean':
-      tie = LowMemoryMeanUnitCellTie(model_parameterisations=params,
-                            sigma=sigma)
+      tie = LowMemoryMeanUnitCellTie(model_parameterisations=params, sigma=sigma)
     elif target == 'median':
-      tie = MedianUnitCellTie(model_parameterisations=params,
-                            sigma=sigma)
+      tie = MedianUnitCellTie(model_parameterisations=params, sigma=sigma)
     else:
       raise Sorry("target type {0} not available".format(target))
 

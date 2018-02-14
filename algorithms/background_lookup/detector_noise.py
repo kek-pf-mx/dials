@@ -31,10 +31,10 @@ class ComputeDetectorNoise(object):
     height, width = image.all()
 
     # Add pixels to the list
-    self._pixels.append(image[0,0])
-    self._pixels.append(image[0,width-1])
-    self._pixels.append(image[height-1,0])
-    self._pixels.append(image[height-1,width-1])
+    self._pixels.append(image[0, 0])
+    self._pixels.append(image[0, width - 1])
+    self._pixels.append(image[height - 1, 0])
+    self._pixels.append(image[height - 1, width - 1])
 
   def pixels(self):
     '''Get the pixels used in the calculation.

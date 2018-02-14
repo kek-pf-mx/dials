@@ -1,9 +1,7 @@
 from __future__ import absolute_import, division
 from dials.array_family import flex # import dependency
 
-
 class Test(object):
-
   def __init__(self):
     from os.path import join
     import libtbx.load_env
@@ -23,33 +21,30 @@ class Test(object):
 
     # Run a few commands from stdin
     stdin_lines = [
-      "import template=%s" % join(self.path, "centroid_####.cbf"),
-      "find_spots",
-      "search_beam_position",
-      "index",
-      "refine_bravais_settings",
-      "reindex solution=22",
-      "refine",
-      "goto 6",
+        "import template=%s" % join(self.path, "centroid_####.cbf"),
+        "find_spots",
+        "search_beam_position",
+        "index",
+        "refine_bravais_settings",
+        "reindex solution=22",
+        "refine",
+        "goto 6",
     ]
 
-    easy_run.fully_buffered(
-      'idials',
-      stdin_lines=stdin_lines).raise_if_errors()
+    easy_run.fully_buffered('idials', stdin_lines=stdin_lines).raise_if_errors()
     print 'OK'
 
     # Check that state works
     stdin_lines = [
-      "refine",
-      "integrate profile.fitting=False",
-      "export ignore_profile_fitting=True keep_partials=True include_partials=True",
-      "goto 7",
-      "integrate profile.fitting=False",
-      "export ignore_profile_fitting=True keep_partials=True include_partials=True",
+        "refine",
+        "integrate profile.fitting=False",
+        "export ignore_profile_fitting=True keep_partials=True include_partials=True",
+        "goto 7",
+        "integrate profile.fitting=False",
+        "export ignore_profile_fitting=True keep_partials=True include_partials=True",
     ]
 
-    easy_run.fully_buffered('idials',
-                            stdin_lines=stdin_lines).raise_if_errors()
+    easy_run.fully_buffered('idials', stdin_lines=stdin_lines).raise_if_errors()
 
     print 'OK'
 

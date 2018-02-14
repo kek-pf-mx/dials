@@ -227,7 +227,6 @@ phil_scope = parse('''
   }
 ''')
 
-
 class MTZExporter(object):
   '''
   A class to export stuff in MTZ format
@@ -262,17 +261,17 @@ class MTZExporter(object):
     '''
     from dials.util.export_mtz import export_mtz
     m = export_mtz(
-      self.reflections,
-      self.experiments,
-      self.params.mtz.hklout,
-      include_partials=params.mtz.include_partials,
-      keep_partials=params.mtz.keep_partials,
-      scale_partials=params.mtz.scale_partials,
-      min_isigi=params.mtz.min_isigi,
-      force_static_model=params.mtz.force_static_model,
-      filter_ice_rings=params.mtz.filter_ice_rings,
-      ignore_profile_fitting=params.mtz.ignore_profile_fitting,
-      apply_scales=params.mtz.apply_scales)
+        self.reflections,
+        self.experiments,
+        self.params.mtz.hklout,
+        include_partials=params.mtz.include_partials,
+        keep_partials=params.mtz.keep_partials,
+        scale_partials=params.mtz.scale_partials,
+        min_isigi=params.mtz.min_isigi,
+        force_static_model=params.mtz.force_static_model,
+        filter_ice_rings=params.mtz.filter_ice_rings,
+        ignore_profile_fitting=params.mtz.ignore_profile_fitting,
+        apply_scales=params.mtz.apply_scales)
     from cStringIO import StringIO
     summary = StringIO()
     m.show_summary(out=summary)
@@ -309,15 +308,15 @@ class SadabsExporter(object):
   def export(self):
     from dials.util.export_sadabs import export_sadabs
     export_sadabs(
-      self.reflections,
-      self.experiments,
-      self.params.sadabs.hklout,
-      run=self.params.sadabs.run,
-      summation=self.params.summation,
-      include_partials=params.mtz.include_partials,
-      keep_partials=params.mtz.keep_partials,
-      debug=params.debug,
-      predict=params.sadabs.predict)
+        self.reflections,
+        self.experiments,
+        self.params.sadabs.hklout,
+        run=self.params.sadabs.run,
+        summation=self.params.summation,
+        include_partials=params.mtz.include_partials,
+        keep_partials=params.mtz.keep_partials,
+        debug=params.debug,
+        predict=params.sadabs.predict)
 
 class XDSASCIIExporter(object):
   '''
@@ -349,12 +348,12 @@ class XDSASCIIExporter(object):
   def export(self):
     from dials.util.export_xds_ascii import export_xds_ascii
     export_xds_ascii(
-      self.reflections,
-      self.experiments,
-      self.params.xds_ascii.hklout,
-      summation=self.params.summation,
-      include_partials=params.mtz.include_partials,
-      keep_partials=params.mtz.keep_partials)
+        self.reflections,
+        self.experiments,
+        self.params.xds_ascii.hklout,
+        summation=self.params.summation,
+        include_partials=params.mtz.include_partials,
+        keep_partials=params.mtz.keep_partials)
 
 class NexusExporter(object):
   '''
@@ -389,10 +388,7 @@ class NexusExporter(object):
 
     '''
     from dials.util.nexus import dump
-    dump(
-      self.experiments,
-      self.reflections,
-      self.params.nxs.hklout)
+    dump(self.experiments, self.reflections, self.params.nxs.hklout)
 
 class MMCIFExporter(object):
   '''
@@ -430,7 +426,6 @@ class MMCIFExporter(object):
     outfile = MMCIFOutputFile(self.params.mmcif.hklout)
     outfile.write(self.experiments, self.reflections)
 
-
 class MosflmExporter(object):
   '''
   A class to export stuff in mosflm format
@@ -463,10 +458,7 @@ class MosflmExporter(object):
 
     '''
     from dials.util.mosflm import dump
-    dump(
-      self.experiments,
-      self.params.mosflm.directory)
-
+    dump(self.experiments, self.params.mosflm.directory)
 
 class XDSExporter(object):
   '''
@@ -502,11 +494,7 @@ class XDSExporter(object):
 
     '''
     from dials.util.xds import dump
-    dump(
-      self.experiments,
-      self.reflections,
-      self.params.xds.directory)
-
+    dump(self.experiments, self.reflections, self.params.xds.directory)
 
 class BestExporter(object):
   '''
@@ -546,22 +534,19 @@ class BestExporter(object):
     reflections = self.reflections[0]
     partiality = reflections['partiality']
     sel = partiality >= self.params.best.min_partiality
-    logger.info('Selecting %s/%s reflections with partiality >= %s' %(
-      sel.count(True), sel.size(), self.params.best.min_partiality))
+    logger.info('Selecting %s/%s reflections with partiality >= %s' % (sel.count(True), sel.size(),
+                                                                       self.params.best.min_partiality))
     if sel.count(True) == 0:
-      raise Sorry(
-      "No reflections remaining after filtering for minimum partiality (min_partiality=%f)"
-       %(self.params.best.min_partiality))
+      raise Sorry("No reflections remaining after filtering for minimum partiality (min_partiality=%f)" %
+                  (self.params.best.min_partiality))
     reflections = reflections.select(sel)
 
     imageset = experiment.imageset
     prefix = self.params.best.prefix
 
-    best.write_background_file(
-      '%s.dat' %prefix, imageset, n_bins=self.params.best.n_bins)
+    best.write_background_file('%s.dat' % prefix, imageset, n_bins=self.params.best.n_bins)
     best.write_integrated_hkl(prefix, reflections)
-    best.write_par_file('%s.par' %prefix, experiment)
-
+    best.write_par_file('%s.par' % prefix, experiment)
 
 class JsonExporter(object):
   '''
@@ -622,9 +607,10 @@ class JsonExporter(object):
     exporter = export_json.ReciprocalLatticeJson(settings=self.params)
     exporter.load_models(imagesets, reflections)
     exporter.as_json(
-      filename=params.json.filename, compact=params.json.compact,
-      n_digits=params.json.n_digits, datablocks=datablocks)
-
+        filename=params.json.filename,
+        compact=params.json.compact,
+        n_digits=params.json.n_digits,
+        datablocks=datablocks)
 
 if __name__ == '__main__':
   import libtbx.load_env
@@ -637,35 +623,32 @@ if __name__ == '__main__':
   from libtbx.utils import Sorry
   import os
 
-  usage = '%s experiments.json reflections.pickle [options]' % (
-              libtbx.env.dispatcher_name)
+  usage = '%s experiments.json reflections.pickle [options]' % (libtbx.env.dispatcher_name)
 
   # Create the option parser
   if 'DIALS_EXPORT_DO_NOT_CHECK_FORMAT' in os.environ:
     parser = OptionParser(
-      usage=usage,
-      read_experiments=True,
-      read_reflections=True,
-      read_datablocks=True,
-      check_format=False,
-      phil=phil_scope,
-      epilog=help_message)
+        usage=usage,
+        read_experiments=True,
+        read_reflections=True,
+        read_datablocks=True,
+        check_format=False,
+        phil=phil_scope,
+        epilog=help_message)
   else:
     parser = OptionParser(
-      usage=usage,
-      read_experiments=True,
-      read_reflections=True,
-      read_datablocks=True,
-      phil=phil_scope,
-      epilog=help_message)
+        usage=usage,
+        read_experiments=True,
+        read_reflections=True,
+        read_datablocks=True,
+        phil=phil_scope,
+        epilog=help_message)
 
   # Get the parameters
   params, options = parser.parse_args(show_diff_phil=False)
 
   # Configure the logging
-  log.config(
-    info=params.output.log,
-    debug=params.output.debug_log)
+  log.config(info=params.output.log, debug=params.output.debug_log)
 
   # Print the version number
   logger.info(dials_version())
@@ -703,8 +686,7 @@ if __name__ == '__main__':
   elif params.format == 'best':
     exporter = BestExporter(params, experiments, reflections)
   elif params.format == 'json':
-    exporter = JsonExporter(
-      params, reflections, datablocks=datablocks, experiments=experiments)
+    exporter = JsonExporter(params, reflections, datablocks=datablocks, experiments=experiments)
   else:
     raise Sorry('Unknown format: %s' % params.format)
 

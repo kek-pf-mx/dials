@@ -8,7 +8,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """
 Test command line program dials.two_theta_refine by running a job with saved
 data and comparing with expected output.
@@ -25,9 +24,7 @@ from dxtbx.model.experiment_list import ExperimentListFactory
 
 def test1():
 
-  dials_regression = libtbx.env.find_in_repositories(
-    relative_path="dials_regression",
-    test=os.path.isdir)
+  dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=os.path.isdir)
 
   # use multiple scan small molecule data for this test
   data_dir = os.path.join(dials_regression, "xia2-28")
@@ -52,8 +49,7 @@ def test1():
   os.chdir(tmp_dir)
   try:
     result = easy_run.fully_buffered(command=cmd).raise_if_errors()
-    ref_exp = ExperimentListFactory.from_json_file("refined_cell.json",
-                check_format=False)
+    ref_exp = ExperimentListFactory.from_json_file("refined_cell.json", check_format=False)
   finally:
     os.chdir(cwd)
 
@@ -62,10 +58,8 @@ def test1():
   xl = xls[0]
 
   # test refined crystal model against expected values
-  assert approx_equal(xl.get_unit_cell().parameters(),
-    (5.428022880, 8.144145476, 12.039666971, 90.0, 90.0, 90.0))
-  assert approx_equal(xl.get_cell_parameter_sd(),
-    (9.58081e-5, 0.000149909, 0.000215765, 0, 0, 0))
+  assert approx_equal(xl.get_unit_cell().parameters(), (5.428022880, 8.144145476, 12.039666971, 90.0, 90.0, 90.0))
+  assert approx_equal(xl.get_cell_parameter_sd(), (9.58081e-5, 0.000149909, 0.000215765, 0, 0, 0))
   assert approx_equal(xl.get_cell_volume_sd(), 0.0116254298)
 
   print "OK"

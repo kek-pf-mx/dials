@@ -131,8 +131,7 @@ class ConstraintManager(object):
       constrained_jacobian.matrix_paste_column_in_place(col, i)
 
     # copy the constrained block into the result
-    constrained_jacobian.matrix_paste_block_in_place(
-      constr_block, 0, self._n_unconstrained_params)
+    constrained_jacobian.matrix_paste_block_in_place(constr_block, 0, self._n_unconstrained_params)
 
     return constrained_jacobian
 
@@ -150,7 +149,6 @@ class ConstraintManager(object):
     return result
 
 class SparseConstraintManager(ConstraintManager):
-
   def constrain_jacobian(self, jacobian):
     '''sparse matrix version of constrain_jacobian'''
 
@@ -163,13 +161,13 @@ class SparseConstraintManager(ConstraintManager):
     mask = flex.bool(jacobian.n_rows, True)
     for i, (gp, c) in enumerate(zip(self._constrained_gps, constr_block.cols())):
       # this copies, so c is no longer the matrix column but a new vector
-      for j in gp: c += jacobian.col(j)
+      for j in gp:
+        c += jacobian.col(j)
       # so assign back into the matrix directly
-      constr_block[:,i] = c
+      constr_block[:, i] = c
 
     # construct the constrained Jacobian
-    constrained_jacobian = sparse.matrix(jacobian.n_rows,
-      unconstr_block.n_cols + constr_block.n_cols)
+    constrained_jacobian = sparse.matrix(jacobian.n_rows, unconstr_block.n_cols + constr_block.n_cols)
     constrained_jacobian.assign_block(unconstr_block, 0, 0)
     constrained_jacobian.assign_block(constr_block, 0, unconstr_block.n_cols)
 
@@ -211,11 +209,11 @@ class ConstraintManagerFactory(object):
         if n_samples == 0: n_samples = ns
         if ns != n_samples:
           raise Sorry("Constraints cannot be created between scan-varying "
-            "parameterisations when these have a different number of "
-            "sample points.")
+                      "parameterisations when these have a different number of "
+                      "sample points.")
       for j in p.get_experiment_ids():
         if j in constraint_scope.id:
-          prefixes.append(model_type + '{0}'.format(i+1))
+          prefixes.append(model_type + '{0}'.format(i + 1))
           break
 
     # ignore model name prefixes
@@ -239,8 +237,9 @@ class ConstraintManagerFactory(object):
       if len(indices) == 1: continue
       if self._verbosity > 1:
         logger.debug('\nThe following parameters will be constrained '
-          'to enforce equal shifts at each step of refinement:')
-        for k in indices: logger.debug(self._all_names[k])
+                     'to enforce equal shifts at each step of refinement:')
+        for k in indices:
+          logger.debug(self._all_names[k])
     return EqualShiftConstraint(indices, self._all_vals)
 
   def __call__(self):
@@ -255,8 +254,7 @@ class ConstraintManagerFactory(object):
     cell_c = options.crystal.unit_cell.constraints
 
     # quit early if there are no constraints to apply
-    n_constraints = sum([len(e) for e in [detector_c, beam_c, orientation_c,
-      cell_c]])
+    n_constraints = sum([len(e) for e in [detector_c, beam_c, orientation_c, cell_c]])
     if n_constraints == 0: return None
 
     logger.debug("\nConfiguring constraints")

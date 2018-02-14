@@ -1,9 +1,7 @@
-
 from __future__ import absolute_import, division
 import logging
 logger = logging.getLogger(__name__)
 from dials_algorithms_background_modeller_ext import *
-
 
 class FinalizeModel(object):
   '''
@@ -36,10 +34,7 @@ class FinalizeModel(object):
     self.experiment = experiment
 
     # Create the transform object
-    self.transform = PolarTransform(
-      experiment.beam,
-      experiment.detector[0],
-      experiment.goniometer)
+    self.transform = PolarTransform(experiment.beam, experiment.detector[0], experiment.goniometer)
 
   def finalize(self, data, mask):
     '''
@@ -137,21 +132,21 @@ class FinalizeModel(object):
     # Return the result
     return data
 
-
 class BackgroundModellerResult(object):
   '''
   A class to contain the modelling result
 
   '''
+
   def __init__(self,
-               mean = None,
-               variance = None,
-               dispersion = None,
-               mask = None,
-               min_image = None,
-               max_image = None,
-               model = None,
-               polar_model = None):
+               mean=None,
+               variance=None,
+               dispersion=None,
+               mask=None,
+               min_image=None,
+               max_image=None,
+               model=None,
+               polar_model=None):
     '''
     Init the result
 
@@ -165,9 +160,7 @@ class BackgroundModellerResult(object):
     self.model = model
     self.polar_model = polar_model
 
-
 class BackgroundModellerExecutor(object):
-
   def __init__(self, experiments, params):
     assert len(experiments) == 1
     self.min_images = params.modeller.min_images
@@ -176,26 +169,23 @@ class BackgroundModellerExecutor(object):
     self.image_type = params.modeller.image_type
 
     self.finalizer = FinalizeModel(
-      experiments = experiments,
-      filter_type = params.modeller.filter_type,
-      kernel_size = params.modeller.kernel_size,
-      niter       = params.modeller.niter)
+        experiments=experiments,
+        filter_type=params.modeller.filter_type,
+        kernel_size=params.modeller.kernel_size,
+        niter=params.modeller.niter)
     self.result = None
 
   def process(self, image_volume, experiments, reflections):
     from dials.algorithms.integration.processor import job
 
     # Write some output
-    logger.info(" Background modelling; job: %d; frames: %d -> %d; # Reflections: %d" % (
-      job.index,
-      image_volume.frame0(),
-      image_volume.frame1(),
-      len(reflections)))
+    logger.info(" Background modelling; job: %d; frames: %d -> %d; # Reflections: %d" % (job.index,
+                                                                                         image_volume.frame0(),
+                                                                                         image_volume.frame1(),
+                                                                                         len(reflections)))
 
     # Compute the shoebox mask
-    reflections.compute_mask(
-      experiments  = experiments,
-      image_volume = image_volume)
+    reflections.compute_mask(experiments=experiments, image_volume=image_volume)
 
     # Compute the sum, sum^2 and the number of contributing pixels
     return MultiPanelBackgroundStatistics(image_volume)
@@ -233,17 +223,17 @@ class BackgroundModellerExecutor(object):
         raise RuntimeError('Unknown image_type: %s' % self.image_type)
 
       # Add to the list
-      result.append(BackgroundModellerResult(
-        mean       = mean,
-        variance   = variance,
-        dispersion = dispersion,
-        mask       = mask,
-        min_image  = min_image,
-        max_image  = max_image,
-        model      = model))
+      result.append(
+          BackgroundModellerResult(
+              mean=mean,
+              variance=variance,
+              dispersion=dispersion,
+              mask=mask,
+              min_image=min_image,
+              max_image=max_image,
+              model=model))
 
     return result
-
 
 class BackgroundModeller(object):
   '''
@@ -251,10 +241,7 @@ class BackgroundModeller(object):
 
   '''
 
-  def __init__(self,
-               experiments,
-               reflections,
-               params):
+  def __init__(self, experiments, reflections, params):
     '''
     Initialize the modeller
 
@@ -287,27 +274,20 @@ class BackgroundModeller(object):
     self.integration_report = None
 
     # Create summary format
-    fmt = (
-      ' Processing the following experiments:\n'
-      '\n'
-      ' Experiments: %d\n'
-      ' Beams:       %d\n'
-      ' Detectors:   %d\n'
-      ' Goniometers: %d\n'
-      ' Scans:       %d\n'
-      ' Crystals:    %d\n'
-      ' Imagesets:   %d\n'
-    )
+    fmt = (' Processing the following experiments:\n'
+           '\n'
+           ' Experiments: %d\n'
+           ' Beams:       %d\n'
+           ' Detectors:   %d\n'
+           ' Goniometers: %d\n'
+           ' Scans:       %d\n'
+           ' Crystals:    %d\n'
+           ' Imagesets:   %d\n')
 
     # Print the summary
-    logger.info(fmt % (
-      len(self.experiments),
-      len(self.experiments.beams()),
-      len(self.experiments.detectors()),
-      len(self.experiments.goniometers()),
-      len(self.experiments.scans()),
-      len(self.experiments.crystals()),
-      len(self.experiments.imagesets())))
+    logger.info(fmt % (len(self.experiments), len(self.experiments.beams()), len(self.experiments.detectors()),
+                       len(self.experiments.goniometers()), len(self.experiments.scans()),
+                       len(self.experiments.crystals()), len(self.experiments.imagesets())))
 
     # Print a heading
     logger.info("=" * 80)
@@ -321,13 +301,8 @@ class BackgroundModeller(object):
     self.reflections.compute_bbox(self.experiments)
 
     # Construvt the image integrator processor
-    processor = ProcessorImage(
-      self.experiments,
-      self.reflections,
-      self.params)
-    processor.executor = BackgroundModellerExecutor(
-      self.experiments,
-      self.params)
+    processor = ProcessorImage(self.experiments, self.reflections, self.params)
+    processor.executor = BackgroundModellerExecutor(self.experiments, self.params)
 
     # Do the processing
     _, time_info = processor.process()

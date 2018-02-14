@@ -8,7 +8,7 @@ from cctbx import sgtbx
 help_message = '''
 '''
 
-phil_scope= iotbx.phil.parse('''
+phil_scope = iotbx.phil.parse('''
 threshold = 5000
   .type = float(value_min=0)
   .help = 'Threshold value for the clustering'
@@ -23,27 +23,17 @@ plot {
 }
 ''')
 
-
 def run(args):
 
   from dials.util.options import OptionParser
   from dials.util.options import flatten_experiments
   import libtbx.load_env
 
-  usage = "%s [options] datablock.json" %(
-    libtbx.env.dispatcher_name)
+  usage = "%s [options] datablock.json" % (libtbx.env.dispatcher_name)
 
-  parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_experiments=True,
-    check_format=False,
-    epilog=help_message)
+  parser = OptionParser(usage=usage, phil=phil_scope, read_experiments=True, check_format=False, epilog=help_message)
 
-  params, options, args = parser.parse_args(
-    show_diff_phil=True,
-    return_unhandled=True
-  )
+  params, options, args = parser.parse_args(show_diff_phil=True, return_unhandled=True)
   experiments = flatten_experiments(params.input.experiments)
   crystal_symmetries = []
 
@@ -63,9 +53,9 @@ def run(args):
   else:
     from cctbx import crystal
     crystal_symmetries = [
-      crystal.symmetry(unit_cell=expt.crystal.get_unit_cell(),
-                       space_group=expt.crystal.get_space_group())
-      for expt in experiments]
+        crystal.symmetry(unit_cell=expt.crystal.get_unit_cell(), space_group=expt.crystal.get_space_group())
+        for expt in experiments
+    ]
 
   do_cluster_analysis(crystal_symmetries, params)
 
@@ -85,12 +75,12 @@ def do_cluster_analysis(crystal_symmetries, params):
     plt.figure("Andrews-Bernstein distance dendogram", figsize=(12, 8))
     ax = plt.gca()
     clusters, cluster_axes = ucs.ab_cluster(
-      params.threshold,
-      log=params.plot.log,
-      ax=ax,
-      write_file_lists=False,
-      #schnell=_args.schnell,
-      doplot=True)
+        params.threshold,
+        log=params.plot.log,
+        ax=ax,
+        write_file_lists=False,
+        #schnell=_args.schnell,
+        doplot=True)
     print unit_cell_info(clusters)
     plt.tight_layout()
     if params.plot.name is not None:
@@ -100,15 +90,14 @@ def do_cluster_analysis(crystal_symmetries, params):
 
   else:
     clusters, cluster_axes = ucs.ab_cluster(
-      params.threshold,
-      log=params.plot.log,
-      write_file_lists=False,
-      #schnell=_args.schnell,
-      doplot=False)
+        params.threshold,
+        log=params.plot.log,
+        write_file_lists=False,
+        #schnell=_args.schnell,
+        doplot=False)
     print unit_cell_info(clusters)
 
   return clusters
-
 
 if __name__ == '__main__':
   import sys

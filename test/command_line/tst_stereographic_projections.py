@@ -11,13 +11,8 @@ def run():
     exit(0)
 
   path = os.path.join(dials_regression, "experiment_test_data")
-  cmd = " ".join((
-    "dials.stereographic_projection",
-    "%s/experiment_1.json" %path,
-    "hkl_limit=4",
-    "plot.show=False",
-    "plot.filename=proj.png",
-    "json.filename=proj.json"))
+  cmd = " ".join(("dials.stereographic_projection", "%s/experiment_1.json" % path, "hkl_limit=4", "plot.show=False",
+                  "plot.filename=proj.png", "json.filename=proj.json"))
   print cmd
   result = easy_run.fully_buffered(cmd).raise_if_errors()
   assert os.path.exists("projections.txt")

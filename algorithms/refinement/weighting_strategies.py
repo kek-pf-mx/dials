@@ -6,7 +6,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """Contains classes used to provide weighting schemes as strategies for
 ReflectionManagers."""
 from __future__ import absolute_import, division
@@ -25,7 +24,7 @@ class StatisticalWeightingStrategy(object):
     parts = weights.parts()
     for w in parts:
       sel = w > 0.
-      w.set_selected(sel, 1./w.select(sel))
+      w.set_selected(sel, 1. / w.select(sel))
     reflections['xyzobs.mm.weights'] = flex.vec3_double(*parts)
 
     return reflections
@@ -44,8 +43,7 @@ class StillsWeightingStrategy(StatisticalWeightingStrategy):
     # call parent class method to set X and Y weights
     reflections = super(StillsWeightingStrategy, self).calculate_weights(reflections)
 
-    reflections['delpsical.weights'] = flex.double(
-        len(reflections), self._delpsi_constant)
+    reflections['delpsical.weights'] = flex.double(len(reflections), self._delpsi_constant)
 
     return reflections
 
@@ -60,8 +58,7 @@ class ExternalDelPsiWeightingStrategy(StatisticalWeightingStrategy):
     provided in the reflection table"""
 
     # call parent class method to set X and Y weights
-    reflections = super(ExternalDelPsiWeightingStrategy,
-                        self).calculate_weights(reflections)
+    reflections = super(ExternalDelPsiWeightingStrategy, self).calculate_weights(reflections)
 
     if not 'delpsical.weights' in reflections:
       from libtbx.utils import Sorry
@@ -70,7 +67,6 @@ class ExternalDelPsiWeightingStrategy(StatisticalWeightingStrategy):
     return reflections
 
 class ConstantWeightingStrategy(object):
-
   def __init__(self, wx, wy, wz, stills=False):
     self._wx = wx
     self._wy = wy
@@ -93,4 +89,3 @@ class ConstantWeightingStrategy(object):
       reflections['xyzobs.mm.weights'] = flex.vec3_double(wx, wy, wz)
 
     return reflections
-

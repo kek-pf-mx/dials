@@ -37,7 +37,6 @@ def get_tid():
   else:
     raise KeyError('Could not find task id')
 
-
 if __name__ == '__main__':
   import traceback
   from os.path import join, exists

@@ -14,8 +14,7 @@
 from __future__ import absolute_import, division
 import math
 
-def display_reference_profiles(reference_pickle_file, profile_number,
-                               printing=True, plot_name=None):
+def display_reference_profiles(reference_pickle_file, profile_number, printing=True, plot_name=None):
   '''Display the reference profiles found in the reference_pickle_file generated
   by dials integration using intensity.algorithm=fitrs'''
 
@@ -48,22 +47,19 @@ def display_reference_profiles(reference_pickle_file, profile_number,
     from matplotlib import pyplot
 
     # try and make a square-ish grid
-    ncols = size_z//int(round(math.sqrt(size_z)))
-    nrows = size_z//ncols
-    if (nrows*ncols) < size_z:
+    ncols = size_z // int(round(math.sqrt(size_z)))
+    nrows = size_z // ncols
+    if (nrows * ncols) < size_z:
       nrows += 1
 
-    fig, axes = pyplot.subplots(nrows=nrows, ncols=ncols,
-                                sharex=True, sharey=True)
+    fig, axes = pyplot.subplots(nrows=nrows, ncols=ncols, sharex=True, sharey=True)
 
     profile = flex.sqrt(as_integer).as_numpy_array()
     max_value = profile.max()
     for k in range(size_z):
       ax = axes.flat[k]
-      slice_z = profile[k,:,:]
-      im = ax.imshow(slice_z, interpolation='nearest',
-                     vmin=0.0, vmax=max_value,
-                     cmap='gray_r')
+      slice_z = profile[k, :, :]
+      im = ax.imshow(slice_z, interpolation='nearest', vmin=0.0, vmax=max_value, cmap='gray_r')
       ax.set_aspect('equal')
 
     # hide the unused positions in the subplot grid
@@ -77,7 +73,6 @@ def display_reference_profiles(reference_pickle_file, profile_number,
     fig.colorbar(im, cax=cax, **kw)
     #pyplot.show()
     pyplot.savefig(plot_name, dpi=300)
-
 
   # now calculate some properties of this profile e.g. the central position and
   # the deviation about this central position
@@ -106,9 +101,9 @@ def display_reference_profiles(reference_pickle_file, profile_number,
   for k in range(size_z):
     for j in range(size_y):
       for i in range(size_x):
-        sum_xxi += (i - xi) ** 2 * central_profile[k, j, i]
-        sum_yyi += (j - yi) ** 2 * central_profile[k, j, i]
-        sum_zzi += (k - zi) ** 2 * central_profile[k, j, i]
+        sum_xxi += (i - xi)**2 * central_profile[k, j, i]
+        sum_yyi += (j - yi)**2 * central_profile[k, j, i]
+        sum_zzi += (k - zi)**2 * central_profile[k, j, i]
 
   _xxi = sum_xxi / sum(central_profile)
   _yyi = sum_yyi / sum(central_profile)
@@ -139,5 +134,4 @@ if __name__ == '__main__':
   else:
     profile_number = 5
 
-  display_reference_profiles(sys.argv[1], profile_number,
-                             plot_name="profile.png")
+  display_reference_profiles(sys.argv[1], profile_number, plot_name="profile.png")

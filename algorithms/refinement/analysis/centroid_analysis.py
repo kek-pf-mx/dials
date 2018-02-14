@@ -15,10 +15,9 @@ from math import pi
 from dials.array_family import flex
 from scitbx.math.periodogram import Periodogram
 
-RAD2DEG = 180./pi
+RAD2DEG = 180. / pi
 
 class CentroidAnalyser(object):
-
   def __init__(self, reflections, av_callback=flex.mean, debug=False):
 
     # flags to indicate at what level the analysis has been performed
@@ -28,7 +27,7 @@ class CentroidAnalyser(object):
     self._av_callback = av_callback
 
     # Remove invalid reflections
-    reflections = reflections.select(~(reflections['miller_index'] == (0,0,0)))
+    reflections = reflections.select(~(reflections['miller_index'] == (0, 0, 0)))
 
     # FIXME - better way to recognise non-predictions. Can't rely on flags
     # in e.g. indexed.pickle I think.
@@ -100,10 +99,7 @@ class CentroidAnalyser(object):
         old_nblocks = nblocks
 
       # collect the basic data for this experiment
-      self._results.append({'block_size':block_size,
-                            'nref_per_block':nr,
-                            'nblocks':nblocks,
-                            'phi_range':phi_range})
+      self._results.append({'block_size': block_size, 'nref_per_block': nr, 'nblocks': nblocks, 'phi_range': phi_range})
 
     # keep reflections for analysis
     self._reflections = reflections
@@ -112,8 +108,7 @@ class CentroidAnalyser(object):
     if debug:
       self._reflections.as_pickle('centroid_analysis_reflections.pickle')
 
-  def __call__(self, calc_average_residuals=True,
-                     calc_periodograms=True, spans=(4,4)):
+  def __call__(self, calc_average_residuals=True, calc_periodograms=True, spans=(4, 4)):
     """Perform analysis and return the results as a list of dictionaries (one
     for each experiment)"""
 
@@ -180,9 +175,8 @@ class CentroidAnalyser(object):
         if exp_data['nblocks'] < 5: continue
 
         for pname, data in zip(
-          ['x_periodogram', 'y_periodogram', 'phi_periodogram'],
-          [exp_data['av_x_resid_per_block'], exp_data['av_y_resid_per_block'],
-           exp_data['av_phi_resid_per_block']]):
+            ['x_periodogram', 'y_periodogram', 'phi_periodogram'],
+            [exp_data['av_x_resid_per_block'], exp_data['av_y_resid_per_block'], exp_data['av_phi_resid_per_block']]):
           if (flex.max(data) - flex.min(data)) > 1.e-8:
             exp_data[pname] = Periodogram(1000. * data, spans=spans)
       self._spectral_analysis = True
@@ -227,8 +221,7 @@ class CentroidAnalyser(object):
         freq = f1 + df
       except IndexError:
         freq = f1
-      period = 2.0 * 1./freq
+      period = 2.0 * 1. / freq
     else:
       period = None
     return period
-

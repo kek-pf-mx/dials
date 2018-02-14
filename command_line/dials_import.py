@@ -59,10 +59,10 @@ Examples::
 
 '''
 
-
 # Create the phil parameters
 from libtbx.phil import parse
-phil_scope = parse('''
+phil_scope = parse(
+    '''
 
   output {
 
@@ -152,8 +152,8 @@ phil_scope = parse('''
               "If both dx and dy are set then"
               "OffsetParallaxCorrectedPxMmStrategy will be used"
   }
-''', process_includes=True)
-
+''',
+    process_includes=True)
 
 class DataBlockImporter(object):
   '''
@@ -188,8 +188,8 @@ class DataBlockImporter(object):
       # and in dials.import phil scope
       try:
         format_kwargs = {
-          'dynamic_shadowing' : self.params.format.dynamic_shadowing,
-          'multi_panel' : self.params.format.multi_panel,
+            'dynamic_shadowing': self.params.format.dynamic_shadowing,
+            'multi_panel': self.params.format.multi_panel,
         }
       except Exception:
         format_kwargs = None
@@ -198,17 +198,13 @@ class DataBlockImporter(object):
       # import the images based on the template input
       if len(self.params.input.template) > 0:
         importer = DataBlockTemplateImporter(
-          self.params.input.template,
-          max(self.params.verbosity-1, 0),
-          format_kwargs=format_kwargs)
+            self.params.input.template, max(self.params.verbosity - 1, 0), format_kwargs=format_kwargs)
         datablocks = importer.datablocks
         if len(datablocks) == 0:
           raise Sorry('No datablocks found matching template %s' % self.params.input.template)
       elif len(self.params.input.directory) > 0:
         datablocks = DataBlockFactory.from_filenames(
-          self.params.input.directory,
-          max(self.params.verbosity-1, 0),
-          format_kwargs=format_kwargs)
+            self.params.input.directory, max(self.params.verbosity - 1, 0), format_kwargs=format_kwargs)
         if len(datablocks) == 0:
           raise Sorry('No datablocks found in directories %s' % self.params.input.directory)
       else:
@@ -218,7 +214,6 @@ class DataBlockImporter(object):
 
     # Return the datablocks
     return datablocks
-
 
 class ReferenceGeometryUpdater(object):
   '''
@@ -240,8 +235,7 @@ class ReferenceGeometryUpdater(object):
     '''
     # Check static detector items are the same
     assert self.reference.detector.is_similar_to(
-      imageset.get_detector(),
-      static_only=True), "Reference detector model does not match input detector model"
+        imageset.get_detector(), static_only=True), "Reference detector model does not match input detector model"
 
     # Set beam and detector
     imageset.set_beam(self.reference.beam)
@@ -262,8 +256,7 @@ class ReferenceGeometryUpdater(object):
       from dxtbx.serialize import load
       experiments, datablock = None, None
       try:
-        experiments = load.experiment_list(
-          params.input.reference_geometry, check_format=False)
+        experiments = load.experiment_list(params.input.reference_geometry, check_format=False)
       except Exception:
         datablock = load.datablock(params.input.reference_geometry)
       assert experiments or datablock, 'Could not import reference geometry'
@@ -271,9 +264,13 @@ class ReferenceGeometryUpdater(object):
         assert len(experiments.detectors()) >= 1
         assert len(experiments.beams()) >= 1
         if len(experiments.detectors()) > 1:
-          raise Sorry('The reference geometry file contains %d detector definitions, but only a single definition is allowed.' % len(experiments.detectors()))
+          raise Sorry(
+              'The reference geometry file contains %d detector definitions, but only a single definition is allowed.' %
+              len(experiments.detectors()))
         if len(experiments.beams()) > 1:
-          raise Sorry('The reference geometry file contains %d beam definitions, but only a single definition is allowed.' % len(experiments.beams()))
+          raise Sorry(
+              'The reference geometry file contains %d beam definitions, but only a single definition is allowed.' %
+              len(experiments.beams()))
         reference_detector = experiments.detectors()[0]
         reference_beam = experiments.beams()[0]
         reference_goniometer = experiments.goniometers()[0]
@@ -284,17 +281,14 @@ class ReferenceGeometryUpdater(object):
         reference_beam = imageset.get_beam()
         reference_goniometer = imageset.get_goniometer()
     Reference = namedtuple("Reference", ["detector", "beam", "goniometer"])
-    return Reference(
-      detector=reference_detector,
-      beam=reference_beam,
-      goniometer=reference_goniometer)
-
+    return Reference(detector=reference_detector, beam=reference_beam, goniometer=reference_goniometer)
 
 class ManualGeometryUpdater(object):
   '''
   A class to update the geometry manually
 
   '''
+
   def __init__(self, params):
     '''
     Save the params
@@ -320,28 +314,15 @@ class ManualGeometryUpdater(object):
       if self.params.geometry.convert_stills_to_sweeps:
         imageset = self.convert_stills_to_sweep(imageset)
     if isinstance(imageset, ImageSweep):
-      beam = BeamFactory.from_phil(
-        self.params.geometry,
-        imageset.get_beam())
-      detector = DetectorFactory.from_phil(
-        self.params.geometry,
-        imageset.get_detector(),
-        beam)
-      goniometer = GoniometerFactory.from_phil(
-        self.params.geometry,
-        imageset.get_goniometer())
-      scan = ScanFactory.from_phil(
-        self.params.geometry,
-        deepcopy(imageset.get_scan()))
+      beam = BeamFactory.from_phil(self.params.geometry, imageset.get_beam())
+      detector = DetectorFactory.from_phil(self.params.geometry, imageset.get_detector(), beam)
+      goniometer = GoniometerFactory.from_phil(self.params.geometry, imageset.get_goniometer())
+      scan = ScanFactory.from_phil(self.params.geometry, deepcopy(imageset.get_scan()))
       i0, i1 = scan.get_array_range()
       j0, j1 = imageset.get_scan().get_array_range()
       if i0 < j0 or i1 > j1:
         imageset = self.extrapolate_imageset(
-          imageset   = imageset,
-          beam       = beam,
-          detector   = detector,
-          goniometer = goniometer,
-          scan       = scan)
+            imageset=imageset, beam=beam, detector=detector, goniometer=goniometer, scan=scan)
       else:
         imageset.set_beam(beam)
         imageset.set_detector(detector)
@@ -349,42 +330,28 @@ class ManualGeometryUpdater(object):
         imageset.set_scan(scan)
     else:
       for i in range(len(imageset)):
-        beam = BeamFactory.from_phil(
-          self.params.geometry,
-          imageset.get_beam(i))
-        detector = DetectorFactory.from_phil(
-          self.params.geometry,
-          imageset.get_detector(i),
-          beam)
-        goniometer = GoniometerFactory.from_phil(
-          self.params.geometry,
-          imageset.get_goniometer(i))
-        scan = ScanFactory.from_phil(
-          self.params.geometry,
-          imageset.get_scan(i))
+        beam = BeamFactory.from_phil(self.params.geometry, imageset.get_beam(i))
+        detector = DetectorFactory.from_phil(self.params.geometry, imageset.get_detector(i), beam)
+        goniometer = GoniometerFactory.from_phil(self.params.geometry, imageset.get_goniometer(i))
+        scan = ScanFactory.from_phil(self.params.geometry, imageset.get_scan(i))
         imageset.set_beam(beam, i)
         imageset.set_detector(detector, i)
         imageset.set_goniometer(goniometer, i)
         imageset.set_scan(scan, i)
     return imageset
 
-  def extrapolate_imageset(self,
-                           imageset=None,
-                           beam = None,
-                           detector = None,
-                           goniometer = None,
-                           scan = None):
+  def extrapolate_imageset(self, imageset=None, beam=None, detector=None, goniometer=None, scan=None):
     from dxtbx.imageset import ImageSetFactory
     first, last = scan.get_image_range()
     sweep = ImageSetFactory.make_sweep(
-      template      = imageset.get_template(),
-      indices       = range(first, last+1),
-      format_class  = imageset.get_format_class(),
-      beam          = beam,
-      detector      = detector,
-      goniometer    = goniometer,
-      scan          = scan,
-      format_kwargs = imageset.params())
+        template=imageset.get_template(),
+        indices=range(first, last + 1),
+        format_class=imageset.get_format_class(),
+        beam=beam,
+        detector=detector,
+        goniometer=goniometer,
+        scan=scan,
+        format_kwargs=imageset.params())
     return sweep
 
   def convert_stills_to_sweep(self, imageset):
@@ -398,48 +365,48 @@ class ManualGeometryUpdater(object):
       d_i = imageset.get_detector(i)
       g_i = imageset.get_goniometer(i)
       assert (beam is None and b_i is None) or beam.is_similar_to(
-        imageset.get_beam(index=i),
-        wavelength_tolerance            = self.params.input.tolerance.beam.wavelength,
-        direction_tolerance             = self.params.input.tolerance.beam.direction,
-        polarization_normal_tolerance   = self.params.input.tolerance.beam.polarization_normal,
-        polarization_fraction_tolerance = self.params.input.tolerance.beam.polarization_fraction)
+          imageset.get_beam(index=i),
+          wavelength_tolerance=self.params.input.tolerance.beam.wavelength,
+          direction_tolerance=self.params.input.tolerance.beam.direction,
+          polarization_normal_tolerance=self.params.input.tolerance.beam.polarization_normal,
+          polarization_fraction_tolerance=self.params.input.tolerance.beam.polarization_fraction)
       assert (detector is None and d_i is None) or detector.is_similar_to(
-        imageset.get_detector(index=i),
-        fast_axis_tolerance = self.params.input.tolerance.detector.fast_axis,
-        slow_axis_tolerance = self.params.input.tolerance.detector.slow_axis,
-        origin_tolerance    = self.params.input.tolerance.detector.origin)
+          imageset.get_detector(index=i),
+          fast_axis_tolerance=self.params.input.tolerance.detector.fast_axis,
+          slow_axis_tolerance=self.params.input.tolerance.detector.slow_axis,
+          origin_tolerance=self.params.input.tolerance.detector.origin)
       assert (goniometer is None and g_i is None) or goniometer.is_similar_to(
-        imageset.get_goniometer(index=i),
-        rotation_axis_tolerance    = self.params.input.tolerance.goniometer.rotation_axis,
-        fixed_rotation_tolerance   = self.params.input.tolerance.goniometer.fixed_rotation,
-        setting_rotation_tolerance = self.params.input.tolerance.goniometer.setting_rotation)
+          imageset.get_goniometer(index=i),
+          rotation_axis_tolerance=self.params.input.tolerance.goniometer.rotation_axis,
+          fixed_rotation_tolerance=self.params.input.tolerance.goniometer.fixed_rotation,
+          setting_rotation_tolerance=self.params.input.tolerance.goniometer.setting_rotation)
     oscillation = self.params.geometry.scan.oscillation
     from dxtbx.sweep_filenames import template_regex_from_list
     from dxtbx.imageset import ImageSetFactory
     template, indices = template_regex_from_list(imageset.paths())
     image_range = (min(indices), max(indices))
-    assert (image_range[1]+1 - image_range[0]) == len(indices)
+    assert (image_range[1] + 1 - image_range[0]) == len(indices)
     scan = Scan(image_range=image_range, oscillation=oscillation)
     if template is None:
       paths = [imageset.get_path(i) for i in range(len(imageset))]
       assert len(set(paths)) == 1
       template = paths[0]
     new_sweep = ImageSetFactory.make_sweep(
-      template     = template,
-      indices      = indices,
-      format_class = imageset.reader().get_format_class(),
-      beam         = beam,
-      detector     = detector,
-      goniometer   = goniometer,
-      scan         = scan)
+        template=template,
+        indices=indices,
+        format_class=imageset.reader().get_format_class(),
+        beam=beam,
+        detector=detector,
+        goniometer=goniometer,
+        scan=scan)
     return new_sweep
-
 
 class MetaDataUpdater(object):
   '''
   A class to manage updating the datablock metadata
 
   '''
+
   def __init__(self, params):
     '''
     Init the class
@@ -513,11 +480,9 @@ class MetaDataUpdater(object):
         ''')
 
       # Check if dx and dy are set
-      if [imageset.external_lookup.dx.filename,
-          imageset.external_lookup.dy.filename].count(None) == 0:
+      if [imageset.external_lookup.dx.filename, imageset.external_lookup.dy.filename].count(None) == 0:
         imageset.update_detector_px_mm_data()
-      elif [imageset.external_lookup.dx.filename,
-            imageset.external_lookup.dy.filename].count(None) == 1:
+      elif [imageset.external_lookup.dx.filename, imageset.external_lookup.dy.filename].count(None) == 1:
         raise Sorry('''
           Only 1 offset map is set. Need to set both dx and d
         ''')
@@ -575,13 +540,13 @@ class MetaDataUpdater(object):
       mask_filename = params.lookup.mask
       mask = pickle.load(open(mask_filename))
       if not isinstance(mask, tuple):
-        mask = (mask,)
+        mask = (mask, )
       lookup_size = [m.all() for m in mask]
     if params.lookup.gain is not None:
       gain_filename = params.lookup.gain
       gain = pickle.load(open(gain_filename))
       if not isinstance(gain, tuple):
-        gain = (gain,)
+        gain = (gain, )
       if lookup_size is None:
         lookup_size = [g.all() for g in gain]
       else:
@@ -592,7 +557,7 @@ class MetaDataUpdater(object):
       dark_filename = params.lookup.pedestal
       dark = pickle.load(open(dark_filename))
       if not isinstance(dark, tuple):
-        dark = (dark,)
+        dark = (dark, )
       if lookup_size is None:
         lookup_size = [d.all() for d in dark]
       else:
@@ -603,7 +568,7 @@ class MetaDataUpdater(object):
       dx_filename = params.lookup.dx
       dx = pickle.load(open(dx_filename))
       if not isinstance(dx, tuple):
-        dx = (dx,)
+        dx = (dx, )
       if lookup_size is None:
         lookup_size = [d.all() for d in dx]
       else:
@@ -614,7 +579,7 @@ class MetaDataUpdater(object):
       dy_filename = params.lookup.dy
       dy = pickle.load(open(dy_filename))
       if not isinstance(dy, tuple):
-        dy = (dy,)
+        dy = (dy, )
       if lookup_size is None:
         lookup_size = [d.all() for d in dy]
       else:
@@ -624,12 +589,12 @@ class MetaDataUpdater(object):
     Lookup = namedtuple("Lookup", ['size', 'mask', 'gain', 'dark', 'dx', 'dy'])
     Item = namedtuple("Item", ["data", "filename"])
     return Lookup(
-      size=lookup_size,
-      mask=Item(data=mask, filename=mask_filename),
-      gain=Item(data=gain, filename=gain_filename),
-      dark=Item(data=dark, filename=dark_filename),
-      dx=Item(data=dx, filename=dx_filename),
-      dy=Item(data=dy, filename=dy_filename))
+        size=lookup_size,
+        mask=Item(data=mask, filename=mask_filename),
+        gain=Item(data=gain, filename=gain_filename),
+        dark=Item(data=dark, filename=dark_filename),
+        dx=Item(data=dx, filename=dx_filename),
+        dy=Item(data=dy, filename=dy_filename))
 
   def convert_to_grid_scan(self, datablock, params):
     '''
@@ -647,7 +612,6 @@ class MetaDataUpdater(object):
       imagesets.append(ImageGrid.from_imageset(iset, params.input.grid_size))
     return DataBlock(imagesets)
 
-
 class Script(object):
   ''' Class to parse the command line options. '''
 
@@ -659,11 +623,7 @@ class Script(object):
     # Create the option parser
     usage = "usage: %s [options] /path/to/image/files" % libtbx.env.dispatcher_name
     self.parser = OptionParser(
-      usage=usage,
-      sort_options=True,
-      phil=phil_scope,
-      read_datablocks_from_images=True,
-      epilog=help_message)
+        usage=usage, sort_options=True, phil=phil_scope, read_datablocks_from_images=True, epilog=help_message)
 
   def run(self):
     ''' Parse the options. '''
@@ -673,18 +633,13 @@ class Script(object):
     params, options = self.parser.parse_args(show_diff_phil=False, quick_parse=True)
 
     # Configure logging
-    log.config(
-      params.verbosity,
-      info=params.output.log,
-      debug=params.output.debug_log)
+    log.config(params.verbosity, info=params.output.log, debug=params.output.debug_log)
     from dials.util.version import dials_version
     logger.info(dials_version())
 
     # Parse the command line arguments completely
     if params.input.ignore_unhandled:
-      params, options, unhandled = self.parser.parse_args(
-        show_diff_phil=False,
-        return_unhandled=True)
+      params, options, unhandled = self.parser.parse_args(show_diff_phil=False, return_unhandled=True)
     else:
       params, options = self.parser.parse_args(show_diff_phil=False)
       unhandled = None
@@ -703,8 +658,7 @@ class Script(object):
       logger.warn(msg)
 
     # Print help if no input
-    if (len(params.input.datablock) == 0 and not
-        (params.input.template or params.input.directory)):
+    if (len(params.input.datablock) == 0 and not (params.input.template or params.input.directory)):
       self.parser.print_help()
       return
 
@@ -801,9 +755,9 @@ class Script(object):
     logger.info("")
     for i in range(1, len(sweeps)):
       logger.info("=" * 80)
-      logger.info("Diff between sweep %d and %d" % (i-1, i))
+      logger.info("Diff between sweep %d and %d" % (i - 1, i))
       logger.info("")
-      self.print_sweep_diff(sweeps[i-1], sweeps[i], params)
+      self.print_sweep_diff(sweeps[i - 1], sweeps[i], params)
     logger.info("=" * 80)
     logger.info("")
 
@@ -816,8 +770,6 @@ class Script(object):
     diff = SweepDiff(params.input.tolerance)
     text = diff(sweep1, sweep2)
     logger.info("\n".join(text))
-
-
 
 if __name__ == '__main__':
   from dials.util import halraiser

@@ -1,8 +1,6 @@
 from __future__ import absolute_import, division
 
-
 class Test(object):
-
   def __init__(self):
     from os.path import join
     import libtbx.load_env
@@ -20,13 +18,12 @@ class Test(object):
 
     # Call dials.compare_mosflm_dials
     easy_run.fully_buffered([
-      'dials.compare_mosflm_dials',
-      join(self.path, 'integrate.mtz'),
-      join(self.path, 'integrated.pickle'),
-      join(self.path, 'crystal.json'),
-      join(self.path, 'sweep.json'),
+        'dials.compare_mosflm_dials',
+        join(self.path, 'integrate.mtz'),
+        join(self.path, 'integrated.pickle'),
+        join(self.path, 'crystal.json'),
+        join(self.path, 'sweep.json'),
     ]).raise_if_errors()
-
 
     # remember to uncomment the next line
     #assert(len(table) == 361)

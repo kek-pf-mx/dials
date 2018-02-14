@@ -44,7 +44,8 @@ Examples::
 
 '''
 
-phil_scope = iotbx.phil.parse("""
+phil_scope = iotbx.phil.parse(
+    """
 change_of_basis_op = a,b,c
   .type = str
 hkl_offset = None
@@ -65,13 +66,13 @@ output {
     .type = str
     .help = "The filename for reindexed reflections"
 }
-""", process_includes=True)
-
+""",
+    process_includes=True)
 
 def derive_change_of_basis_op(from_hkl, to_hkl):
 
   # exclude those reflections that we couldn't index
-  sel = (to_hkl != (0,0,0)) & (from_hkl != (0,0,0))
+  sel = (to_hkl != (0, 0, 0)) & (from_hkl != (0, 0, 0))
   assert sel.count(True) >= 3 # need minimum of 3 equations ?
   to_hkl = to_hkl.select(sel)
   from_hkl = from_hkl.select(sel)
@@ -84,44 +85,39 @@ def derive_change_of_basis_op(from_hkl, to_hkl):
   from scitbx.lstbx import normal_eqns
   for i in range(3):
     eqns = normal_eqns.linear_ls(3)
-    for index, hkl in zip((h,k,l)[i], from_hkl):
-      eqns.add_equation(right_hand_side=index,
-                        design_matrix_row=flex.double(hkl),
-                        weight=1)
+    for index, hkl in zip((h, k, l)[i], from_hkl):
+      eqns.add_equation(right_hand_side=index, design_matrix_row=flex.double(hkl), weight=1)
     eqns.solve()
     r.extend(eqns.solution())
 
   from scitbx.math import continued_fraction
   from scitbx import matrix
   denom = 12
-  r = [int(denom * continued_fraction.from_real(r_, eps=1e-2).as_rational())
-       for r_ in r]
+  r = [int(denom * continued_fraction.from_real(r_, eps=1e-2).as_rational()) for r_ in r]
   r = matrix.sqr(r).transpose()
   #print (1/denom)*r
 
   # now convert into a cctbx change_of_basis_op object
-  change_of_basis_op = sgtbx.change_of_basis_op(
-    sgtbx.rt_mx(sgtbx.rot_mx(r, denominator=denom))).inverse()
-  print "discovered change_of_basis_op=%s" %(str(change_of_basis_op))
+  change_of_basis_op = sgtbx.change_of_basis_op(sgtbx.rt_mx(sgtbx.rot_mx(r, denominator=denom))).inverse()
+  print "discovered change_of_basis_op=%s" % (str(change_of_basis_op))
 
   # sanity check that this is the right cb_op
   assert (change_of_basis_op.apply(from_hkl) == to_hkl).count(False) == 0
 
   return change_of_basis_op
 
-
 def run(args):
   import libtbx.load_env
   from libtbx.utils import Sorry
-  usage = "%s [options] experiments.json indexed.pickle" %libtbx.env.dispatcher_name
+  usage = "%s [options] experiments.json indexed.pickle" % libtbx.env.dispatcher_name
 
   parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_reflections=True,
-    read_experiments=True,
-    check_format=False,
-    epilog=help_message)
+      usage=usage,
+      phil=phil_scope,
+      read_reflections=True,
+      read_experiments=True,
+      check_format=False,
+      epilog=help_message)
 
   params, options = parser.parse_args(show_diff_phil=True)
 
@@ -138,8 +134,7 @@ def run(args):
   reference_crystal = None
   if params.reference is not None:
     from dxtbx.serialize import load
-    reference_experiments = load.experiment_list(
-      params.reference, check_format=False)
+    reference_experiments = load.experiment_list(params.reference, check_format=False)
     assert len(reference_experiments.crystals()) == 1
     reference_crystal = reference_experiments.crystals()[0]
 
@@ -149,12 +144,11 @@ def run(args):
            import difference_rotation_matrix_axis_angle
 
       cryst = experiments.crystals()[0]
-      R, axis, angle, change_of_basis_op = difference_rotation_matrix_axis_angle(
-        cryst, reference_crystal)
-      print "Change of basis op: %s" %change_of_basis_op
+      R, axis, angle, change_of_basis_op = difference_rotation_matrix_axis_angle(cryst, reference_crystal)
+      print "Change of basis op: %s" % change_of_basis_op
       print "Rotation matrix to transform input crystal to reference::"
       print R.mathematica_form(format="%.3f", one_row_per_line=True)
-      print "Rotation of %.3f degrees" %angle, "about axis (%.3f, %.3f, %.3f)" %axis
+      print "Rotation of %.3f degrees" % angle, "about axis (%.3f, %.3f, %.3f)" % axis
 
     elif len(reflections):
       assert len(reflections) == 1
@@ -167,13 +161,11 @@ def run(args):
           sel = (reflections[0]['imageset_id'] == i)
         else:
           sel = (reflections[0]['id'] == i)
-        refl = indexer.indexer_base.map_spots_pixel_to_mm_rad(
-          reflections[0].select(sel),
-          imageset.get_detector(), imageset.get_scan())
+        refl = indexer.indexer_base.map_spots_pixel_to_mm_rad(reflections[0].select(sel), imageset.get_detector(),
+                                                              imageset.get_scan())
 
-        indexer.indexer_base.map_centroids_to_reciprocal_space(
-          refl, imageset.get_detector(), imageset.get_beam(),
-          imageset.get_goniometer())
+        indexer.indexer_base.map_centroids_to_reciprocal_space(refl, imageset.get_detector(), imageset.get_beam(),
+                                                               imageset.get_goniometer())
         refl_copy.extend(refl)
 
       # index the reflection list using the input experiments list
@@ -197,8 +189,7 @@ def run(args):
     cryst_reindexed = cryst_orig.change_basis(change_of_basis_op)
     if params.space_group is not None:
       a, b, c = cryst_reindexed.get_real_space_vectors()
-      cryst_reindexed = Crystal(
-        a, b, c, space_group=params.space_group.group())
+      cryst_reindexed = Crystal(a, b, c, space_group=params.space_group.group())
     experiment.crystal.update(cryst_reindexed)
 
     print "Old crystal:"
@@ -208,35 +199,33 @@ def run(args):
     print cryst_reindexed
     print
 
-    print "Saving reindexed experimental models to %s" %params.output.experiments
+    print "Saving reindexed experimental models to %s" % params.output.experiments
     dump.experiment_list(experiments, params.output.experiments)
 
   if len(reflections):
-    assert(len(reflections) == 1)
+    assert (len(reflections) == 1)
     reflections = reflections[0]
 
     miller_indices = reflections['miller_index']
 
     if params.hkl_offset is not None:
-      h,k,l = miller_indices.as_vec3_double().parts()
+      h, k, l = miller_indices.as_vec3_double().parts()
       h += params.hkl_offset[0]
       k += params.hkl_offset[1]
       l += params.hkl_offset[2]
       miller_indices = flex.miller_index(h.iround(), k.iround(), l.iround())
     non_integral_indices = change_of_basis_op.apply_results_in_non_integral_indices(miller_indices)
     if non_integral_indices.size() > 0:
-      print "Removing %i/%i reflections (change of basis results in non-integral indices)" %(
-      non_integral_indices.size(), miller_indices.size())
+      print "Removing %i/%i reflections (change of basis results in non-integral indices)" % (
+          non_integral_indices.size(), miller_indices.size())
     sel = flex.bool(miller_indices.size(), True)
     sel.set_selected(non_integral_indices, False)
-    miller_indices_reindexed = change_of_basis_op.apply(
-      miller_indices.select(sel))
+    miller_indices_reindexed = change_of_basis_op.apply(miller_indices.select(sel))
     reflections['miller_index'].set_selected(sel, miller_indices_reindexed)
-    reflections['miller_index'].set_selected(~sel, (0,0,0))
+    reflections['miller_index'].set_selected(~sel, (0, 0, 0))
 
-    print "Saving reindexed reflections to %s" %params.output.reflections
+    print "Saving reindexed reflections to %s" % params.output.reflections
     easy_pickle.dump(params.output.reflections, reflections)
-
 
 if __name__ == '__main__':
   import sys

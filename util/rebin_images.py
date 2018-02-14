@@ -19,7 +19,7 @@ def split_counts(image, split):
   for p in positive.iselection():
     counts = image[p]
     for j in range(counts):
-      new_images[random.randint(0, split-1)][p] += 1
+      new_images[random.randint(0, split - 1)][p] += 1
 
   return new_images
 
@@ -38,7 +38,7 @@ def read_image(in_image):
   import os
   from dxtbx import load
 
-  assert(os.path.exists(in_image))
+  assert (os.path.exists(in_image))
 
   start_tag = binascii.unhexlify('0c1a04d5')
 
@@ -54,7 +54,7 @@ def write_image(out_image, pixel_values, header):
   import binascii
   import os
 
-  assert(not os.path.exists(out_image))
+  assert (not os.path.exists(out_image))
   start_tag = binascii.unhexlify('0c1a04d5')
 
   compressed = compress(pixel_values)
@@ -74,13 +74,13 @@ def write_image(out_image, pixel_values, header):
   gz_open(out_image, 'wb').write(fixed_header + start_tag + compressed + tailer)
 
 def main(in_images, out_images):
-  assert(len(in_images) == len(out_images))
+  assert (len(in_images) == len(out_images))
   n = len(in_images)
   import os
   for i in in_images:
-    assert(os.path.exists(i))
+    assert (os.path.exists(i))
   for o in out_images:
-    assert(not os.path.exists(o))
+    assert (not os.path.exists(o))
 
   in_image_data = []
   in_image_headers = []
@@ -102,8 +102,8 @@ def main_sum(in_images, out_image):
   n = len(in_images)
   import os
   for i in in_images:
-    assert(os.path.exists(i))
-  assert(not os.path.exists(out_image))
+    assert (os.path.exists(i))
+  assert (not os.path.exists(out_image))
 
   in_image_data = []
   in_image_headers = []

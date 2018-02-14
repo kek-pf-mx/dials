@@ -4,11 +4,9 @@ from os.path import join, isdir
 
 have_dials_regression = libtbx.env.has_module("dials_regression")
 if have_dials_regression:
-  dials_regression = libtbx.env.find_in_repositories(
-    relative_path="dials_regression", test=isdir)
+  dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=isdir)
 
 class TestRayPredictor:
-
   def __init__(self):
     from dials.algorithms.spot_prediction import IndexGenerator
     from dials.algorithms.spot_prediction import ScanStaticRayPredictor
@@ -38,8 +36,7 @@ class TestRayPredictor:
     self.scan = models.get_scan()
 
     # Get crystal parameters
-    self.space_group_type = ioutil.get_space_group_type_from_xparm(
-        self.gxparm_handle)
+    self.space_group_type = ioutil.get_space_group_type_from_xparm(self.gxparm_handle)
     cfc = coordinate_frame_converter(gxparm_filename)
     a_vec = cfc.get('real_space_a')
     b_vec = cfc.get('real_space_b')
@@ -56,19 +53,16 @@ class TestRayPredictor:
 
     # Get the number of frames from the max z value
     xcal, ycal, zcal = zip(*self.integrate_handle.xyzcal)
-    self.scan.set_image_range((self.scan.get_image_range()[0],
-                             self.scan.get_image_range()[0] +
-                                int(ceil(max(zcal)))))
+    self.scan.set_image_range((self.scan.get_image_range()[0], self.scan.get_image_range()[0] + int(ceil(max(zcal)))))
 
     # Print stuff
-#        print self.beam
-#        print self.gonio
-#        print self.detector
-#        print self.scan
+    #        print self.beam
+    #        print self.gonio
+    #        print self.detector
+    #        print self.scan
 
     # Create the index generator
-    self.generate_indices = IndexGenerator(self.unit_cell,
-        self.space_group_type, self.d_min)
+    self.generate_indices = IndexGenerator(self.unit_cell, self.space_group_type, self.d_min)
 
     s0 = self.beam.get_s0()
     m2 = self.gonio.get_rotation_axis()
@@ -78,21 +72,21 @@ class TestRayPredictor:
     dphi = self.scan.get_oscillation_range(deg=False)
 
     # Create the ray predictor
-    self.predict_rays = ScanStaticRayPredictor(s0, m2, fixed_rotation,
-                                               setting_rotation, dphi)
+    self.predict_rays = ScanStaticRayPredictor(s0, m2, fixed_rotation, setting_rotation, dphi)
 
     # Predict the spot locations
-    self.reflections = self.predict_rays(
-                            self.generate_indices.to_array(), UB)
+    self.reflections = self.predict_rays(self.generate_indices.to_array(), UB)
 
   def test_miller_index_set(self):
     """Ensure we have the whole set of miller indices"""
-    gen_hkl = { r['miller_index'] for r in self.reflections }
+    gen_hkl = {r['miller_index'] for r in self.reflections}
     missing = []
     for hkl in self.integrate_handle.hkl:
       if hkl not in gen_hkl:
         missing.append(hkl)
-    assert len(missing) == 0, "%d out of %d reflections not in set, including %s" % (len(missing), len(self.integrate_handle.hkl), str(missing[0]))
+    assert len(missing) == 0, "%d out of %d reflections not in set, including %s" % (len(missing),
+                                                                                     len(self.integrate_handle.hkl),
+                                                                                     str(missing[0]))
 
   def test_rotation_angles(self):
     """Ensure the rotation angles agree with XDS"""
@@ -110,8 +104,7 @@ class TestRayPredictor:
         gen_phi[hkl] = [phi]
 
     # For each hkl in the xds file
-    for hkl, xyz in zip(self.integrate_handle.hkl,
-                        self.integrate_handle.xyzcal):
+    for hkl, xyz in zip(self.integrate_handle.hkl, self.integrate_handle.xyzcal):
 
       # Calculate the XDS phi value
       xds_phi = self.scan.get_oscillation(deg=False)[0] + \
@@ -132,7 +125,7 @@ class TestRayPredictor:
         my_phi = my_phi[0]
 
       # Check the Phi values are the same
-      assert(abs(xds_phi - my_phi) < 0.1)
+      assert (abs(xds_phi - my_phi) < 0.1)
 
     print "OK"
 
@@ -143,7 +136,7 @@ class TestRayPredictor:
     for r in self.reflections:
       s1 = r['s1']
       s1_length = matrix.col(s1).length()
-      assert(abs(s0_length - s1_length) < 1e-7)
+      assert (abs(s0_length - s1_length) < 1e-7)
 
     print "OK"
 
@@ -152,8 +145,7 @@ class TestRayPredictor:
     from dials.algorithms.spot_prediction import ScanStaticRayPredictor
     from dials.algorithms.spot_prediction import IndexGenerator
     # Create the index generator
-    self.generate_indices = IndexGenerator(self.unit_cell,
-        self.space_group_type, self.d_min)
+    self.generate_indices = IndexGenerator(self.unit_cell, self.space_group_type, self.d_min)
 
     s0 = self.beam.get_s0()
     m2 = self.gonio.get_rotation_axis()
@@ -163,8 +155,7 @@ class TestRayPredictor:
     dphi = self.scan.get_oscillation_range(deg=False)
 
     # Create the ray predictor
-    self.predict_rays = ScanStaticRayPredictor(s0, m2, fixed_rotation,
-                                               setting_rotation, dphi)
+    self.predict_rays = ScanStaticRayPredictor(s0, m2, fixed_rotation, setting_rotation, dphi)
 
     # Predict the spot locations
     self.reflections2 = []
@@ -175,19 +166,18 @@ class TestRayPredictor:
           self.reflections2.append(ray)
 
     eps = 1e-7
-    assert(len(self.reflections) == len(self.reflections2))
+    assert (len(self.reflections) == len(self.reflections2))
     for r1, r2 in zip(self.reflections, self.reflections2):
-      assert(all(abs(a - b) < eps for a, b in zip(r1['s1'], r2.s1)))
-      assert(abs(r1['phi'] - r2.angle) < eps)
-      assert(r1['entering'] == r2.entering)
+      assert (all(abs(a - b) < eps for a, b in zip(r1['s1'], r2.s1)))
+      assert (abs(r1['phi'] - r2.angle) < eps)
+      assert (r1['entering'] == r2.entering)
     print 'OK'
 
   def test_new_from_array(self):
     from dials.algorithms.spot_prediction import ScanStaticRayPredictor
     from dials.algorithms.spot_prediction import IndexGenerator
     # Create the index generator
-    self.generate_indices = IndexGenerator(self.unit_cell,
-        self.space_group_type, self.d_min)
+    self.generate_indices = IndexGenerator(self.unit_cell, self.space_group_type, self.d_min)
 
     s0 = self.beam.get_s0()
     m2 = self.gonio.get_rotation_axis()
@@ -197,8 +187,7 @@ class TestRayPredictor:
     dphi = self.scan.get_oscillation_range(deg=False)
 
     # Create the ray predictor
-    self.predict_rays = ScanStaticRayPredictor(s0, m2, fixed_rotation,
-                                               setting_rotation, dphi)
+    self.predict_rays = ScanStaticRayPredictor(s0, m2, fixed_rotation, setting_rotation, dphi)
 
     # Predict the spot locations
     h = self.generate_indices.to_array()
@@ -209,11 +198,11 @@ class TestRayPredictor:
         self.reflections3.append(r)
 
     eps = 1e-7
-    assert(len(self.reflections) == len(self.reflections3))
+    assert (len(self.reflections) == len(self.reflections3))
     for r1, r2 in zip(self.reflections, self.reflections3):
-      assert(all(abs(a - b) < eps for a, b in zip(r1['s1'], r2['s1'])))
-      assert(abs(r1['phi'] - r2['phi']) < eps)
-      assert(r1['entering'] == r2['entering'])
+      assert (all(abs(a - b) < eps for a, b in zip(r1['s1'], r2['s1'])))
+      assert (abs(r1['phi'] - r2['phi']) < eps)
+      assert (r1['entering'] == r2['entering'])
     print 'OK'
 
   def test_scan_varying(self):
@@ -232,35 +221,30 @@ class TestRayPredictor:
     # For quick comparison look at reflections on one frame only
     frame = 0
     angle_beg = self.scan.get_angle_from_array_index(frame, deg=False)
-    angle_end = self.scan.get_angle_from_array_index(frame+1, deg=False)
-    frame0_refs = self.reflections.select(
-        (self.reflections['phi'] >= angle_beg) & (self.reflections['phi'] <= angle_end))
+    angle_end = self.scan.get_angle_from_array_index(frame + 1, deg=False)
+    frame0_refs = self.reflections.select((self.reflections['phi'] >= angle_beg) &
+                                          (self.reflections['phi'] <= angle_end))
 
     # Get UB matrices at beginning and end of frame
-    r_osc_beg = matrix.sqr(
-      scitbx.math.r3_rotation_axis_and_angle_as_matrix(
-      axis = m2, angle = angle_beg, deg=False))
+    r_osc_beg = matrix.sqr(scitbx.math.r3_rotation_axis_and_angle_as_matrix(axis=m2, angle=angle_beg, deg=False))
     UB_beg = r_osc_beg * self.ub_matrix
-    r_osc_end = matrix.sqr(
-      scitbx.math.r3_rotation_axis_and_angle_as_matrix(
-      axis = m2, angle = angle_end, deg=False))
+    r_osc_end = matrix.sqr(scitbx.math.r3_rotation_axis_and_angle_as_matrix(axis=m2, angle=angle_end, deg=False))
     UB_end = r_osc_end * self.ub_matrix
 
     # Get indices
-    r = ReekeIndexGenerator(UB_beg, UB_end, self.space_group_type, m2,
-      s0, self.d_min, margin=1)
+    r = ReekeIndexGenerator(UB_beg, UB_end, self.space_group_type, m2, s0, self.d_min, margin=1)
     h = r.to_array()
 
     # Fn to loop through hkl applying a prediction function to each and testing
     # the results are the same as those from the ScanStaticRayPredictor
     def test_each_hkl(hkl_list, predict_fn):
-      DEG2RAD = pi/180.
+      DEG2RAD = pi / 180.
       count = 0
       for hkl in hkl_list:
         ray = predict_fn(hkl)
         if ray is not None:
           count += 1
-          ref = frame0_refs.select(frame0_refs['miller_index']==hkl)[0]
+          ref = frame0_refs.select(frame0_refs['miller_index'] == hkl)[0]
           assert ref['entering'] == ray.entering
           assert approx_equal(ref['phi'], ray.angle * DEG2RAD) # ray angle is in degrees (!)
           assert approx_equal(ref['s1'], ray.s1)
@@ -269,7 +253,7 @@ class TestRayPredictor:
 
     # Create the ray predictor
     sv_predict_rays = ScanVaryingRayPredictor(s0, m2,
-        self.scan.get_array_range()[0], self.scan.get_oscillation(), self.d_min)
+                                              self.scan.get_array_range()[0], self.scan.get_oscillation(), self.d_min)
 
     # Test with the method that allows only differing UB matrices
     test_each_hkl(h, lambda x: sv_predict_rays(x, UB_beg, UB_end, frame))

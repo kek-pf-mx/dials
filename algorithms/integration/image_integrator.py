@@ -8,18 +8,17 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 
-
 from __future__ import absolute_import, division
 
 import logging
 logger = logging.getLogger(__name__)
-
 
 class TimingInfo(object):
   '''
   A class to contain timing info.
 
   '''
+
   def __init__(self):
     self.read = 0
     self.initialize = 0
@@ -32,15 +31,14 @@ class TimingInfo(object):
     ''' Convert to string. '''
     from libtbx.table_utils import format as table
     rows = [
-      ["Read time"        , "%.2f seconds" % (self.read)       ],
-      ["Pre-process time" , "%.2f seconds" % (self.initialize) ],
-      ["Process time"     , "%.2f seconds" % (self.process)    ],
-      ["Post-process time", "%.2f seconds" % (self.finalize)   ],
-      ["Total time"       , "%.2f seconds" % (self.total)      ],
-      ["User time"        , "%.2f seconds" % (self.user)       ],
+        ["Read time", "%.2f seconds" % (self.read)],
+        ["Pre-process time", "%.2f seconds" % (self.initialize)],
+        ["Process time", "%.2f seconds" % (self.process)],
+        ["Post-process time", "%.2f seconds" % (self.finalize)],
+        ["Total time", "%.2f seconds" % (self.total)],
+        ["User time", "%.2f seconds" % (self.user)],
     ]
     return table(rows, justify='right', prefix=' ')
-
 
 class ProcessorImageBase(object):
   ''' Processor interface class. '''
@@ -93,7 +91,8 @@ class ProcessorImageBase(object):
     self.manager.initialize()
     mp_method = self.manager.params.integration.mp.method
     mp_nproc = min(len(self.manager), self.manager.params.integration.mp.nproc)
-    if mp_nproc > 1 and platform.system() == "Windows": # platform.system() forks which is bad for MPI, so don't use it unless nproc > 1
+    if mp_nproc > 1 and platform.system(
+    ) == "Windows": # platform.system() forks which is bad for MPI, so don't use it unless nproc > 1
       logger.warn("")
       logger.warn("*" * 80)
       logger.warn("Multiprocessing is not available on windows. Setting nproc = 1")
@@ -102,15 +101,16 @@ class ProcessorImageBase(object):
       mp_nproc = 1
     assert mp_nproc > 0, "Invalid number of processors"
     logger.info(self.manager.summary())
-    logger.info(' Using %s with %d parallel job(s)\n' % (
-      mp_method, mp_nproc))
+    logger.info(' Using %s with %d parallel job(s)\n' % (mp_method, mp_nproc))
     if mp_nproc > 1:
+
       def process_output(result):
         for message in result[1]:
           logger.log(message.levelno, message.msg)
         self.manager.accumulate(result[0])
         result[0].reflections = None
         result[0].data = None
+
       def execute_task(task):
         from dials.util import log
         import logging
@@ -119,15 +119,16 @@ class ProcessorImageBase(object):
         handlers = logging.getLogger('dials').handlers
         assert len(handlers) == 1, "Invalid number of logging handlers"
         return result, handlers[0].messages()
+
       multi_node_parallel_map(
-        func                       = execute_task,
-        iterable                   = list(self.manager.tasks()),
-        njobs                      = mp_njobs,
-        nproc                      = mp_nproc,
-        callback                   = process_output,
-        method                     = mp_method,
-        preserve_order             = True,
-        preserve_exception_message = True)
+          func=execute_task,
+          iterable=list(self.manager.tasks()),
+          njobs=mp_njobs,
+          nproc=mp_nproc,
+          callback=process_output,
+          method=mp_method,
+          preserve_order=True,
+          preserve_exception_message=True)
     else:
       for task in self.manager.tasks():
         self.manager.accumulate(task())
@@ -136,7 +137,6 @@ class ProcessorImageBase(object):
     self.manager.time.user_time = end_time - start_time
     result = self.manager.result()
     return result, self.manager.time
-
 
 class Result(object):
   '''
@@ -156,9 +156,7 @@ class Result(object):
     self.index = index
     self.reflections = reflections
 
-
 class Dataset(object):
-
   def __init__(self, frames, size):
     from dials.array_family import flex
     self.frames = frames
@@ -172,26 +170,21 @@ class Dataset(object):
   def set_image(self, index, data, mask):
     from dials.array_family import flex
     for d1, d2 in zip(self.data, data):
-      h,w = d2.all()
-      d2.reshape(flex.grid(1,h,w))
-      d1[index:index+1,:,:] = d2.as_double()
+      h, w = d2.all()
+      d2.reshape(flex.grid(1, h, w))
+      d1[index:index + 1, :, :] = d2.as_double()
     for m1, m2 in zip(self.mask, mask):
-      h,w = m2.all()
-      m2.reshape(flex.grid(1,h,w))
-      m1[index:index+1,:,:] = m2
+      h, w = m2.all()
+      m2.reshape(flex.grid(1, h, w))
+      m1[index:index + 1, :, :] = m2
 
 class Task(object):
   '''
   A class to perform a null task.
 
   '''
-  def __init__(self,
-               index,
-               frames,
-               reflections,
-               experiments,
-               params,
-               executor):
+
+  def __init__(self, index, frames, reflections, experiments, params, executor):
     '''
     Initialise the task
 
@@ -262,18 +255,14 @@ class Task(object):
     # Initialise the dataset
     image_volume = MultiPanelImageVolume()
     for panel in self.experiments[0].detector:
-      image_volume.add(ImageVolume(
-        frame0,
-        frame1,
-        panel.get_image_size()[1],
-        panel.get_image_size()[0]))
+      image_volume.add(ImageVolume(frame0, frame1, panel.get_image_size()[1], panel.get_image_size()[0]))
 
     # Read all the images into a block of data
     read_time = 0.0
     for i in range(len(imageset)):
       st = time()
       image = imageset.get_corrected_data(i)
-      mask  = imageset.get_mask(i)
+      mask = imageset.get_mask(i)
       if self.params.integration.lookup.mask is not None:
         assert len(mask) == len(self.params.lookup.mask), \
           "Mask/Image are incorrect size %d %d" % (
@@ -287,10 +276,7 @@ class Task(object):
 
     # Process the data
     st = time()
-    data = self.executor.process(
-      image_volume,
-      self.experiments,
-      self.reflections)
+    data = self.executor.process(image_volume, self.experiments, self.reflections)
     process_time = time() - st
 
     # Set the result values
@@ -300,7 +286,6 @@ class Task(object):
     result.total_time = time() - start_time
     result.data = data
     return result
-
 
 class ManagerImage(object):
   '''
@@ -370,12 +355,12 @@ class ManagerImage(object):
 
     '''
     return Task(
-        index       = index,
-        frames      = self.manager.frames(index),
-        reflections = self.manager.split(index),
-        experiments = self.experiments,
-        params      = self.params,
-        executor    = self.executor)
+        index=index,
+        frames=self.manager.frames(index),
+        reflections=self.manager.split(index),
+        experiments=self.experiments,
+        params=self.params,
+        executor=self.executor)
 
   def tasks(self):
     '''
@@ -458,10 +443,7 @@ class ManagerImage(object):
     num_partial = len(self.reflections)
     assert num_partial >= num_full, "Invalid number of partials"
     if num_partial > num_full:
-      logger.info(' Split %d reflections into %d partial reflections\n' % (
-        num_full,
-        num_partial))
-
+      logger.info(' Split %d reflections into %d partial reflections\n' % (num_full, num_partial))
 
 class ProcessorImage(ProcessorImageBase):
   ''' Top level processor for per image processing. '''
@@ -475,16 +457,13 @@ class ProcessorImage(ProcessorImageBase):
     # Initialise the processor
     super(ProcessorImage, self).__init__(manager)
 
-
 class InitializerRot(object):
   '''
   A pre-processing class for oscillation data.
 
   '''
 
-  def __init__(self,
-               experiments,
-               params):
+  def __init__(self, experiments, params):
     '''
     Initialise the pre-processor.
 
@@ -514,7 +493,6 @@ class InitializerRot(object):
       mask = self.params.filter.powder_filter(reflections['d'])
       reflections.set_flags(mask, reflections.flags.in_powder_ring)
 
-
 class FinalizerRot(object):
   '''
   A post-processing class for oscillation data.
@@ -538,9 +516,7 @@ class FinalizerRot(object):
     # Compute the corrections
     reflections.compute_corrections(self.experiments)
 
-
 class ImageIntegratorExecutor(object):
-
   def __init__(self):
     pass
 
@@ -582,23 +558,16 @@ class ImageIntegratorExecutor(object):
       logger.info('')
 
     # Compute the shoebox mask
-    reflections.compute_mask(
-      experiments  = experiments,
-      image_volume = image_volume)
+    reflections.compute_mask(experiments=experiments, image_volume=image_volume)
 
     # Compute the background
-    reflections.compute_background(
-      experiments  = experiments,
-      image_volume = image_volume)
+    reflections.compute_background(experiments=experiments, image_volume=image_volume)
 
     # Compute the summed intensity
-    reflections.compute_summed_intensity(
-      image_volume = image_volume)
+    reflections.compute_summed_intensity(image_volume=image_volume)
 
     # Compute the centroid
-    reflections.compute_centroid(
-      experiments  = experiments,
-      image_volume = image_volume)
+    reflections.compute_centroid(experiments=experiments, image_volume=image_volume)
 
     # Get some reflection info
     image_volume.update_reflection_info(reflections)
@@ -610,7 +579,6 @@ class ImageIntegratorExecutor(object):
     ntot = len(reflections)
     logger.info(fmt % (nsum, nprf, ntot))
 
-
 class ImageIntegrator(object):
   '''
   A class that does integration directly on the image skipping the shoebox
@@ -618,10 +586,7 @@ class ImageIntegrator(object):
 
   '''
 
-  def __init__(self,
-               experiments,
-               reflections,
-               params):
+  def __init__(self, experiments, reflections, params):
     '''
     Initialize the integrator
 
@@ -661,27 +626,20 @@ class ImageIntegrator(object):
     logger.info("")
 
     # Create summary format
-    fmt = (
-      ' Processing the following experiments:\n'
-      '\n'
-      ' Experiments: %d\n'
-      ' Beams:       %d\n'
-      ' Detectors:   %d\n'
-      ' Goniometers: %d\n'
-      ' Scans:       %d\n'
-      ' Crystals:    %d\n'
-      ' Imagesets:   %d\n'
-    )
+    fmt = (' Processing the following experiments:\n'
+           '\n'
+           ' Experiments: %d\n'
+           ' Beams:       %d\n'
+           ' Detectors:   %d\n'
+           ' Goniometers: %d\n'
+           ' Scans:       %d\n'
+           ' Crystals:    %d\n'
+           ' Imagesets:   %d\n')
 
     # Print the summary
-    logger.info(fmt % (
-      len(self.experiments),
-      len(self.experiments.beams()),
-      len(self.experiments.detectors()),
-      len(self.experiments.goniometers()),
-      len(self.experiments.scans()),
-      len(self.experiments.crystals()),
-      len(self.experiments.imagesets())))
+    logger.info(fmt % (len(self.experiments), len(self.experiments.beams()), len(self.experiments.detectors()),
+                       len(self.experiments.goniometers()), len(self.experiments.scans()),
+                       len(self.experiments.crystals()), len(self.experiments.imagesets())))
 
     # Print a heading
     logger.info("=" * 80)
@@ -690,31 +648,22 @@ class ImageIntegrator(object):
     logger.info("")
 
     # Initialise the processing
-    initialize = InitializerRot(
-      self.experiments,
-      self.params)
+    initialize = InitializerRot(self.experiments, self.params)
     initialize(self.reflections)
 
     # Construvt the image integrator processor
-    processor = ProcessorImage(
-      self.experiments,
-      self.reflections,
-      self.params)
+    processor = ProcessorImage(self.experiments, self.reflections, self.params)
     processor.executor = ImageIntegratorExecutor()
 
     # Do the processing
     self.reflections, time_info = processor.process()
 
     # Finalise the processing
-    finalize = FinalizerRot(
-      self.experiments,
-      self.params)
+    finalize = FinalizerRot(self.experiments, self.params)
     finalize(self.reflections)
 
     # Create the integration report
-    self.integration_report = IntegrationReport(
-      self.experiments,
-      self.reflections)
+    self.integration_report = IntegrationReport(self.experiments, self.reflections)
     logger.info("")
     logger.info(self.integration_report.as_str(prefix=' '))
 

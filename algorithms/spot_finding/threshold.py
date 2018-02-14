@@ -10,7 +10,6 @@
 
 from __future__ import absolute_import, division
 
-
 class ThresholdStrategy(object):
   '''
   Base class for spot finder threshold strategies.
@@ -30,7 +29,6 @@ class ThresholdStrategy(object):
 
     '''
     raise RuntimeError('Overload Me!')
-
 
 class UnimodalThresholdStrategy(ThresholdStrategy):
   '''
@@ -73,7 +71,6 @@ class UnimodalThresholdStrategy(ThresholdStrategy):
     # Return a threshold mask
     return image >= threshold
 
-
 class DispersionThresholdStrategy(ThresholdStrategy):
   '''
   A class implementing a 'gain' threshold.
@@ -91,11 +88,11 @@ class DispersionThresholdStrategy(ThresholdStrategy):
 
     # Get the parameters
     self._kernel_size = kwargs.get('kernel_size', (3, 3))
-    self._gain        = kwargs.get('gain')
-    self._n_sigma_b   = kwargs.get('n_sigma_b', 6)
-    self._n_sigma_s   = kwargs.get('n_sigma_s', 3)
-    self._min_count   = kwargs.get('min_count', 2)
-    self._threshold   = kwargs.get('global_threshold', 0)
+    self._gain = kwargs.get('gain')
+    self._n_sigma_b = kwargs.get('n_sigma_b', 6)
+    self._n_sigma_s = kwargs.get('n_sigma_s', 3)
+    self._min_count = kwargs.get('min_count', 2)
+    self._threshold = kwargs.get('global_threshold', 0)
 
     # Save the constant gain
     self._gain_map = None
@@ -119,18 +116,13 @@ class DispersionThresholdStrategy(ThresholdStrategy):
     try:
       algorithm = self.algorithm[image.all()]
     except Exception:
-      algorithm = threshold.DispersionThreshold(
-        image.all(),
-        self._kernel_size,
-        self._n_sigma_b,
-        self._n_sigma_s,
-        self._threshold,
-        self._min_count)
+      algorithm = threshold.DispersionThreshold(image.all(), self._kernel_size, self._n_sigma_b, self._n_sigma_s,
+                                                self._threshold, self._min_count)
       self.algorithm[image.all()] = algorithm
 
     # Set the gain
     if self._gain is not None:
-      assert(self._gain > 0)
+      assert (self._gain > 0)
       self._gain_map = flex.double(image.accessor(), self._gain)
       self._gain = None
 

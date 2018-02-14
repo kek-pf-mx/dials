@@ -19,14 +19,12 @@ class H5PYEncoder(object):
     '''Encode the object in the HDF5 file.'''
     raise RuntimeError("Overload!")
 
-
 class H5PYDecoder(object):
   '''Decoder base class.'''
 
   def decode(self, handle):
     '''Decode the object from the HDF5 file.'''
     raise RuntimeError("Overload!")
-
 
 class ReflectionListEncoder(H5PYEncoder):
   '''Encoder for the reflection data.'''
@@ -62,7 +60,6 @@ class ReflectionListEncoder(H5PYEncoder):
       data['%d' % i] = sb.data.as_numpy_array()
       mask['%d' % i] = sb.mask.as_numpy_array()
       background['%d' % i] = sb.background.as_numpy_array()
-
 
 class ReflectionListDecoder(H5PYDecoder):
   '''Decoder for the reflection data.'''
@@ -134,7 +131,7 @@ class NexusFile(object):
   def close(self):
     '''Close the file.'''
     self._handle.close()
-    del(self._handle)
+    del (self._handle)
 
   def set_data(self, data, encoder):
     '''Set the model data using the supplied encoder.'''
@@ -152,21 +149,16 @@ class NexusFile(object):
     '''Get the reflection data.'''
     return self.get_data(ReflectionListDecoder())
 
-
 if __name__ == '__main__':
   from dials.array_family import flex
-  reflections = flex.reflection_table([
-    ('hkl', flex.miller_index(10)),
-    ('s1', flex.vec3_double(10)),
-    ('bbox', flex.int6(10)),
-    ('id', flex.int(10)),
-    ('shoebox', flex.shoebox(10))
-  ])
+  reflections = flex.reflection_table([('hkl', flex.miller_index(10)), ('s1', flex.vec3_double(10)), ('bbox',
+                                                                                                      flex.int6(10)),
+                                       ('id', flex.int(10)), ('shoebox', flex.shoebox(10))])
 
   for i in range(10):
-    reflections['shoebox'][i].data = flex.double(flex.grid(10,10,10))
-    reflections['shoebox'][i].mask = flex.int(flex.grid(10,10,10))
-    reflections['shoebox'][i].background = flex.double(flex.grid(10,10,10))
+    reflections['shoebox'][i].data = flex.double(flex.grid(10, 10, 10))
+    reflections['shoebox'][i].mask = flex.int(flex.grid(10, 10, 10))
+    reflections['shoebox'][i].background = flex.double(flex.grid(10, 10, 10))
 
   for i in range(10):
     print reflections['shoebox'][i].data.all()

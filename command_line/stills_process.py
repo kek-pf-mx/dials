@@ -164,18 +164,18 @@ profile.gaussian_rs.min_spots.overall = 0
 phil_scope = parse(control_phil_str + dials_phil_str, process_includes=True).fetch(parse(program_defaults_phil_str))
 
 def do_import(filename):
-  logger.info("Loading %s"%os.path.basename(filename))
+  logger.info("Loading %s" % os.path.basename(filename))
   datablocks = DataBlockFactory.from_filenames([filename])
   if len(datablocks) == 0:
     try:
       datablocks = DataBlockFactory.from_json_file(filename)
     except ValueError:
-      raise Abort("Could not load %s"%filename)
+      raise Abort("Could not load %s" % filename)
 
   if len(datablocks) == 0:
-    raise Abort("Could not load %s"%filename)
+    raise Abort("Could not load %s" % filename)
   if len(datablocks) > 1:
-    raise Abort("Got multiple datablocks from file %s"%filename)
+    raise Abort("Got multiple datablocks from file %s" % filename)
 
   # Ensure the indexer and downstream applications treat this as set of stills
   from dxtbx.imageset import ImageSet
@@ -204,11 +204,7 @@ class Script(object):
     self.reference_detector = None
 
     # Create the parser
-    self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      epilog=help_message
-      )
+    self.parser = OptionParser(usage=usage, phil=phil_scope, epilog=help_message)
 
   def load_reference_geometry(self):
     if self.params.input.reference_geometry is None: return
@@ -226,7 +222,7 @@ class Script(object):
           import dxtbx
           img = dxtbx.load(self.params.input.reference_geometry)
         except Exception:
-          raise Sorry("Couldn't load geometry file %s"%self.params.input.reference_geometry)
+          raise Sorry("Couldn't load geometry file %s" % self.params.input.reference_geometry)
         else:
           self.reference_detector = img.get_detector()
       else:
@@ -254,7 +250,7 @@ class Script(object):
     # Mask validation
     for mask_path in params.spotfinder.lookup.mask, params.integration.lookup.mask:
       if mask_path is not None and not os.path.isfile(mask_path):
-        raise Sorry("Mask %s not found"%mask_path)
+        raise Sorry("Mask %s not found" % mask_path)
 
     # Save the options
     self.options = options
@@ -263,10 +259,7 @@ class Script(object):
     st = time()
 
     # Configure logging
-    log.config(
-      params.verbosity,
-      info='dials.process.log',
-      debug='dials.process.debug.log')
+    log.config(params.verbosity, info='dials.process.log', debug='dials.process.debug.log')
 
     # Log the diff phil
     diff_phil = self.parser.diff_phil.as_str()
@@ -299,9 +292,7 @@ class Script(object):
         for datablock in datablocks:
           for imageset in datablock.extract_imagesets():
             for i in range(len(imageset)):
-              imageset.set_detector(
-                Detector.from_dict(self.reference_detector.to_dict()),
-                index=i)
+              imageset.set_detector(Detector.from_dict(self.reference_detector.to_dict()), index=i)
 
       for datablock in datablocks:
         for imageset in datablock.extract_imagesets():
@@ -314,20 +305,20 @@ class Script(object):
         for imageset in datablock.extract_imagesets():
           paths = imageset.paths()
           for i in xrange(len(imageset)):
-            subset = imageset[i:i+1]
+            subset = imageset[i:i + 1]
             split_datablocks.append(DataBlockFactory.from_imageset(subset)[0])
             indices.append(i)
             basenames.append(os.path.splitext(os.path.basename(paths[i]))[0])
       tags = []
       for i, basename in zip(indices, basenames):
         if basenames.count(basename) > 1:
-          tags.append("%s_%05d"%(basename, i))
+          tags.append("%s_%05d" % (basename, i))
         else:
           tags.append(basename)
 
       # Wrapper function
       def do_work(i, item_list):
-        processor = Processor(copy.deepcopy(params), composite_tag = "%04d"%i)
+        processor = Processor(copy.deepcopy(params), composite_tag="%04d" % i)
         for item in item_list:
           processor.process_datablock(item[0], item[1])
         processor.finalize()
@@ -339,23 +330,23 @@ class Script(object):
       tags = []
       for i, basename in enumerate(basenames):
         if basenames.count(basename) > 1:
-          tags.append("%s_%05d"%(basename, i))
+          tags.append("%s_%05d" % (basename, i))
         else:
           tags.append(basename)
 
       # Wrapper function
       def do_work(i, item_list):
-        processor = Processor(copy.deepcopy(params), composite_tag = "%04d"%i)
+        processor = Processor(copy.deepcopy(params), composite_tag="%04d" % i)
         for item in item_list:
           tag, filename = item
 
           datablock = do_import(filename)
           imagesets = datablock.extract_imagesets()
           if len(imagesets) == 0 or len(imagesets[0]) == 0:
-            logger.info("Zero length imageset in file: %s"%filename)
+            logger.info("Zero length imageset in file: %s" % filename)
             return
           if len(imagesets) > 1:
-            raise Abort("Found more than one imageset in file: %s"%filename)
+            raise Abort("Found more than one imageset in file: %s" % filename)
           if len(imagesets[0]) > 1:
             raise Abort("Found a multi-image file. Run again with pre_import=True")
 
@@ -377,17 +368,18 @@ class Script(object):
       rank = comm.Get_rank() # each process in MPI has a unique id, 0-indexed
       size = comm.Get_size() # size: number of processes running in this job
 
-      subset = [item for i, item in enumerate(iterable) if (i+rank)%size == 0]
+      subset = [item for i, item in enumerate(iterable) if (i + rank) % size == 0]
       do_work(rank, subset)
     else:
       from dxtbx.command_line.image_average import splitit
       if params.mp.nproc == 1:
         do_work(0, iterable)
       else:
-        result = list(easy_mp.multi_core_run(
-          myfunction=do_work,
-          argstuples=list(enumerate(splitit(iterable, params.mp.nproc))),
-          nproc=params.mp.nproc))
+        result = list(
+            easy_mp.multi_core_run(
+                myfunction=do_work,
+                argstuples=list(enumerate(splitit(iterable, params.mp.nproc))),
+                nproc=params.mp.nproc))
         error_list = [r[2] for r in result]
         if error_list.count(None) != len(error_list):
           print "Some processes failed excecution. Not all images may have processed. Error messages:"
@@ -400,17 +392,17 @@ class Script(object):
     logger.info("Total Time Taken = %f seconds" % (time() - st))
 
 class Processor(object):
-  def __init__(self, params, composite_tag = None):
+  def __init__(self, params, composite_tag=None):
     self.params = params
     self.composite_tag = composite_tag
 
     # The convention is to put %s in the phil parameter to add a tag to
     # each output datafile. Save the initial templates here.
-    self.datablock_filename_template              = params.output.datablock_filename
-    self.strong_filename_template                 = params.output.strong_filename
-    self.indexed_filename_template                = params.output.indexed_filename
-    self.refined_experiments_filename_template    = params.output.refined_experiments_filename
-    self.integrated_filename_template             = params.output.integrated_filename
+    self.datablock_filename_template = params.output.datablock_filename
+    self.strong_filename_template = params.output.strong_filename
+    self.indexed_filename_template = params.output.indexed_filename
+    self.refined_experiments_filename_template = params.output.refined_experiments_filename
+    self.integrated_filename_template = params.output.integrated_filename
     self.integrated_experiments_filename_template = params.output.integrated_experiments_filename
 
     if params.output.composite_output:
@@ -430,17 +422,23 @@ class Processor(object):
   def setup_filenames(self, tag):
     # before processing, set output paths according to the templates
     if self.datablock_filename_template is not None and "%s" in self.datablock_filename_template:
-      self.params.output.datablock_filename = os.path.join(self.params.output.output_dir, self.datablock_filename_template%("idx-" + tag))
+      self.params.output.datablock_filename = os.path.join(self.params.output.output_dir,
+                                                           self.datablock_filename_template % ("idx-" + tag))
     if self.strong_filename_template is not None and "%s" in self.strong_filename_template:
-      self.params.output.strong_filename = os.path.join(self.params.output.output_dir, self.strong_filename_template%("idx-" + tag))
+      self.params.output.strong_filename = os.path.join(self.params.output.output_dir,
+                                                        self.strong_filename_template % ("idx-" + tag))
     if self.indexed_filename_template is not None and "%s" in self.indexed_filename_template:
-      self.params.output.indexed_filename = os.path.join(self.params.output.output_dir, self.indexed_filename_template%("idx-" + tag))
+      self.params.output.indexed_filename = os.path.join(self.params.output.output_dir,
+                                                         self.indexed_filename_template % ("idx-" + tag))
     if self.refined_experiments_filename_template is not None and "%s" in self.refined_experiments_filename_template:
-      self.params.output.refined_experiments_filename = os.path.join(self.params.output.output_dir, self.refined_experiments_filename_template%("idx-" + tag))
+      self.params.output.refined_experiments_filename = os.path.join(
+          self.params.output.output_dir, self.refined_experiments_filename_template % ("idx-" + tag))
     if self.integrated_filename_template is not None and "%s" in self.integrated_filename_template:
-      self.params.output.integrated_filename = os.path.join(self.params.output.output_dir, self.integrated_filename_template%("idx-" + tag))
+      self.params.output.integrated_filename = os.path.join(self.params.output.output_dir,
+                                                            self.integrated_filename_template % ("idx-" + tag))
     if self.integrated_experiments_filename_template is not None and "%s" in self.integrated_experiments_filename_template:
-      self.params.output.integrated_experiments_filename = os.path.join(self.params.output.output_dir, self.integrated_experiments_filename_template%("idx-" + tag))
+      self.params.output.integrated_experiments_filename = os.path.join(
+          self.params.output.output_dir, self.integrated_experiments_filename_template % ("idx-" + tag))
 
   def process_datablock(self, tag, datablock):
     import os
@@ -535,23 +533,20 @@ class Processor(object):
 
     if params.indexing.stills.method_list is None:
       idxr = indexer_base.from_parameters(
-        reflections, imagesets, known_crystal_models=known_crystal_models,
-        params=params)
+          reflections, imagesets, known_crystal_models=known_crystal_models, params=params)
       idxr.index()
     else:
       indexing_error = None
       for method in params.indexing.stills.method_list:
         params.indexing.method = method
         try:
-          idxr = indexer_base.from_parameters(
-            reflections, imagesets,
-            params=params)
+          idxr = indexer_base.from_parameters(reflections, imagesets, params=params)
           idxr.index()
         except Exception as e:
-          logger.info("Couldn't index using method %s"%method)
+          logger.info("Couldn't index using method %s" % method)
           if indexing_error is None:
             if e is None:
-              e = Exception("Couldn't index using method %s"%method)
+              e = Exception("Couldn't index using method %s" % method)
             indexing_error = e
         else:
           indexing_error = None
@@ -569,8 +564,8 @@ class Processor(object):
         sel = indexed['miller_index'] == idx
         if sel.count(True) == 1:
           filtered.extend(indexed.select(sel))
-      logger.info("Filtered duplicate reflections, %d out of %d remaining"%(len(filtered),len(indexed)))
-      print "Filtered duplicate reflections, %d out of %d remaining"%(len(filtered),len(indexed))
+      logger.info("Filtered duplicate reflections, %d out of %d remaining" % (len(filtered), len(indexed)))
+      print "Filtered duplicate reflections, %d out of %d remaining" % (len(filtered), len(indexed))
       indexed = filtered
 
     logger.info('')
@@ -587,8 +582,7 @@ class Processor(object):
       logger.info('Refining Model')
       logger.info('*' * 80)
 
-      refiner = RefinerFactory.from_parameters_data_experiments(
-        self.params, centroids, experiments)
+      refiner = RefinerFactory.from_parameters_data_experiments(self.params, centroids, experiments)
 
       refiner.run()
       experiments = refiner.get_experiments()
@@ -599,7 +593,8 @@ class Processor(object):
 
       # Re-estimate mosaic estimates
       from dials.algorithms.indexing.nave_parameters import nave_parameters
-      nv = nave_parameters(params = self.params, experiments=experiments, reflections=centroids, refinery=refiner, graph_verbose=False)
+      nv = nave_parameters(
+          params=self.params, experiments=experiments, reflections=centroids, refinery=refiner, graph_verbose=False)
       nv()
       acceptance_flags_nv = nv.nv_acceptance_flags
       centroids = centroids.select(acceptance_flags_nv)
@@ -640,8 +635,7 @@ class Processor(object):
     logger.info('Integrating Reflections')
     logger.info('*' * 80)
 
-
-    indexed,_ = self.process_reference(indexed)
+    indexed, _ = self.process_reference(indexed)
 
     # Get the integrator from the input parameters
     logger.info('Configuring integrator from input parameters')
@@ -660,11 +654,11 @@ class Processor(object):
     logger.info("Predicting reflections")
     logger.info("")
     predicted = flex.reflection_table.from_predictions_multi(
-      experiments,
-      dmin=self.params.prediction.d_min,
-      dmax=self.params.prediction.d_max,
-      margin=self.params.prediction.margin,
-      force_static=self.params.prediction.force_static)
+        experiments,
+        dmin=self.params.prediction.d_min,
+        dmax=self.params.prediction.d_max,
+        margin=self.params.prediction.margin,
+        force_static=self.params.prediction.force_static)
     predicted.match_with_reference(indexed)
     logger.info("")
     integrator = IntegratorFactory.create(self.params, experiments, predicted)
@@ -676,14 +670,15 @@ class Processor(object):
     for abs_params in self.params.integration.absorption_correction:
       if abs_params.apply and abs_params.algorithm == "fuller_kapton":
         from dials.algorithms.integration.kapton_correction import multi_kapton_correction
-        experiments, integrated = multi_kapton_correction(experiments, integrated,
-          abs_params.fuller_kapton, logger=logger)()
+        experiments, integrated = multi_kapton_correction(
+            experiments, integrated, abs_params.fuller_kapton, logger=logger)()
 
     if self.params.significance_filter.enable:
       from dials.algorithms.integration.stills_significance_filter import SignificanceFilter
       sig_filter = SignificanceFilter(self.params)
       refls = sig_filter(experiments, integrated)
-      logger.info("Removed %d reflections out of %d when applying significance filter"%(len(integrated)-len(refls), len(integrated)))
+      logger.info("Removed %d reflections out of %d when applying significance filter" % (len(integrated) - len(refls),
+                                                                                          len(integrated)))
       if len(refls) == 0:
         raise Sorry("No reflections left after applying significance filter")
       integrated = refls
@@ -718,18 +713,21 @@ class Processor(object):
     from dials.algorithms.indexing.stills_indexer import calc_2D_rmsd_and_displacements
 
     rmsd_indexed, _ = calc_2D_rmsd_and_displacements(indexed)
-    log_str = "RMSD indexed (px): %f\n"%(rmsd_indexed)
+    log_str = "RMSD indexed (px): %f\n" % (rmsd_indexed)
     for i in xrange(6):
-      bright_integrated = integrated.select((integrated['intensity.sum.value']/flex.sqrt(integrated['intensity.sum.variance']))>=i)
+      bright_integrated = integrated.select(
+          (integrated['intensity.sum.value'] / flex.sqrt(integrated['intensity.sum.variance'])) >= i)
       if len(bright_integrated) > 0:
         rmsd_integrated, _ = calc_2D_rmsd_and_displacements(bright_integrated)
       else:
         rmsd_integrated = 0
-      log_str += "N reflections integrated at I/sigI >= %d: % 4d, RMSD (px): %f\n"%(i, len(bright_integrated), rmsd_integrated)
+      log_str += "N reflections integrated at I/sigI >= %d: % 4d, RMSD (px): %f\n" % (i, len(bright_integrated),
+                                                                                      rmsd_integrated)
 
     for crystal_model in experiments.crystals():
       if hasattr(crystal_model, 'get_domain_size_ang'):
-        log_str += ". Final ML model: domain size angstroms: %f, half mosaicity degrees: %f"%(crystal_model.get_domain_size_ang(), crystal_model.get_half_mosaicity_deg())
+        log_str += ". Final ML model: domain size angstroms: %f, half mosaicity degrees: %f" % (
+            crystal_model.get_domain_size_ang(), crystal_model.get_half_mosaicity_deg())
 
     logger.info(log_str)
 
@@ -737,7 +735,7 @@ class Processor(object):
     logger.info('Time Taken = %f seconds' % (time() - st))
     return integrated
 
-  def write_integration_pickles(self, integrated, experiments, callback = None):
+  def write_integration_pickles(self, integrated, experiments, callback=None):
     """
     Write a serialized python dictionary with integrated intensities and other information
     suitible for use by cxi.merge or prime.postrefine.
@@ -777,14 +775,17 @@ class Processor(object):
             # if the data is in memory only, check if the reader set a timestamp on the format object
             event_timestamp = experiment.imageset.reader().get_format(0).timestamp
           event_timestamp = os.path.basename(event_timestamp)
-          if event_timestamp.find("shot-")==0:
-             event_timestamp = os.path.splitext(event_timestamp)[0] # micromanage the file name
+          if event_timestamp.find("shot-") == 0:
+            event_timestamp = os.path.splitext(event_timestamp)[0] # micromanage the file name
         else:
           event_timestamp = self.tag
         if hasattr(self.params.output, "output_dir"):
-          outfile = os.path.join(self.params.output.output_dir, self.params.output.integration_pickle%(e_number,event_timestamp))
+          outfile = os.path.join(self.params.output.output_dir,
+                                 self.params.output.integration_pickle % (e_number, event_timestamp))
         else:
-          outfile = os.path.join(os.path.dirname(self.params.output.integration_pickle), self.params.output.integration_pickle%(e_number,event_timestamp))
+          outfile = os.path.join(
+              os.path.dirname(self.params.output.integration_pickle),
+              self.params.output.integration_pickle % (e_number, event_timestamp))
 
         if callback is not None:
           callback(self.params, outfile, frame)
@@ -802,15 +803,15 @@ class Processor(object):
     if reference is None:
       return None, None
     st = time()
-    assert("miller_index" in reference)
-    assert("id" in reference)
+    assert ("miller_index" in reference)
+    assert ("id" in reference)
     logger.info('Processing reference reflections')
     logger.info(' read %d strong spots' % len(reference))
     mask = reference.get_flags(reference.flags.indexed)
     rubbish = reference.select(mask == False)
     if mask.count(False) > 0:
       reference.del_selected(mask == False)
-      logger.info(' removing %d unindexed reflections' %  mask.count(True))
+      logger.info(' removing %d unindexed reflections' % mask.count(True))
     if len(reference) == 0:
       raise Sorry('''
         Invalid input for reference reflections.
@@ -820,7 +821,7 @@ class Processor(object):
     if mask.count(True) > 0:
       rubbish.extend(reference.select(mask))
       reference.del_selected(mask)
-      logger.info(' removing %d reflections with hkl (0,0,0)' %  mask.count(True))
+      logger.info(' removing %d reflections with hkl (0,0,0)' % mask.count(True))
     mask = reference['id'] < 0
     if mask.count(True) > 0:
       raise Sorry('''
@@ -864,12 +865,13 @@ class Processor(object):
       if len(self.all_int_pickles) > 0 and self.params.output.integration_pickle:
         import tarfile, StringIO, time, cPickle as pickle
         tar_template_integration_pickle = self.params.output.integration_pickle.replace('%d', '%s')
-        outfile = os.path.join(self.params.output.output_dir, tar_template_integration_pickle%('x',self.composite_tag)) + ".tar"
-        tar = tarfile.TarFile(outfile,"w")
+        outfile = os.path.join(self.params.output.output_dir, tar_template_integration_pickle %
+                               ('x', self.composite_tag)) + ".tar"
+        tar = tarfile.TarFile(outfile, "w")
         for i, (fname, d) in enumerate(zip(self.all_int_pickle_filenames, self.all_int_pickles)):
           string = StringIO.StringIO(pickle.dumps(d, protocol=2))
           info = tarfile.TarInfo(name=fname)
-          info.size=len(string.buf)
+          info.size = len(string.buf)
           info.mtime = time.time()
           tar.addfile(tarinfo=info, fileobj=string)
         tar.close()

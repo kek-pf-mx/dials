@@ -14,7 +14,7 @@ def run():
   path = os.path.join(dials_regression, "centroid_test_data")
 
   # import the data
-  cmd = "dials.import %s output.datablock=datablock.json" % ' '.join(glob(os.path.join(path,"*.cbf")))
+  cmd = "dials.import %s output.datablock=datablock.json" % ' '.join(glob(os.path.join(path, "*.cbf")))
   easy_run.fully_buffered(cmd).raise_if_errors()
   assert os.path.exists("datablock.json")
 
@@ -32,7 +32,6 @@ def run():
     "| image | #spots | #spots_no_ice | total_intensity |" + \
     " d_min | d_min (distl method 1) | d_min (distl method 2) |"
     in result.stdout_lines), result.stdout_lines
-
 
 if __name__ == '__main__':
   from dials.test import cd_auto

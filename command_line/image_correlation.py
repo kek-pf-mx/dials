@@ -13,7 +13,8 @@ Examples::
 
 '''
 
-phil_scope = iotbx.phil.parse("""\
+phil_scope = iotbx.phil.parse(
+    """\
   image=None
     .type = ints
     .help = "image numbers to analyse"
@@ -31,10 +32,8 @@ def extract_signal_mask(data):
 
   from dxtbx import datablock
 
-  spot_params = phil_scope.fetch(source=iotbx.phil.parse(
-    "spotfinder.threshold.dispersion.gain=1")).extract()
-  threshold_function = SpotFinderFactory.configure_threshold(
-    spot_params, None)
+  spot_params = phil_scope.fetch(source=iotbx.phil.parse("spotfinder.threshold.dispersion.gain=1")).extract()
+  threshold_function = SpotFinderFactory.configure_threshold(spot_params, None)
   negative = (data < 0)
   signal = threshold_function.compute_threshold(data, ~negative)
 
@@ -58,15 +57,10 @@ def run(args):
   from dials.util.options import flatten_datablocks
   import libtbx.load_env
 
-  usage = "%s [options] datablock.json" % (
-    libtbx.env.dispatcher_name)
+  usage = "%s [options] datablock.json" % (libtbx.env.dispatcher_name)
 
   parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_datablocks=True,
-    read_datablocks_from_images=True,
-    epilog=help_message)
+      usage=usage, phil=phil_scope, read_datablocks=True, read_datablocks_from_images=True, epilog=help_message)
 
   params, options = parser.parse_args(show_diff_phil=True)
 
@@ -76,19 +70,19 @@ def run(args):
     parser.print_help()
     exit()
 
-  assert(len(datablocks) == 1)
+  assert (len(datablocks) == 1)
 
   datablock = datablocks[0]
   imagesets = datablock.extract_imagesets()
 
-  assert(len(imagesets) == 1)
+  assert (len(imagesets) == 1)
 
   imageset = imagesets[0]
 
   images = params.image
 
   for j, img_a in enumerate(images[:-1]):
-    for img_b in images[j+1:]:
+    for img_b in images[j + 1:]:
       a = imageset.get_raw_data(img_a)[0]
       b = imageset.get_raw_data(img_b)[0]
       n, cc = image_correlation(a, b)

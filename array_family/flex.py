@@ -34,11 +34,14 @@ def strategy(cls, params=None):
   :return: A function to instantiate the strategy
 
   '''
+
   class Strategy(cls):
     algorithm = cls
     name = ''
+
     def __init__(self, *args):
       super(Strategy, self).__init__(params, *args)
+
   return Strategy
 
 def default_background_algorithm():
@@ -76,12 +79,7 @@ class reflection_table_aux(boost.python.injector, reflection_table):
   _centroid_algorithm = default_centroid_algorithm()
 
   @staticmethod
-  def from_predictions(experiment,
-                       dmin=None,
-                       dmax=None,
-                       margin=1,
-                       force_static=False,
-                       padding=0):
+  def from_predictions(experiment, dmin=None, dmax=None, margin=1, force_static=False, padding=0):
     '''
     Construct a reflection table from predictions.
 
@@ -96,35 +94,25 @@ class reflection_table_aux(boost.python.injector, reflection_table):
     '''
     if experiment.profile is not None:
       return experiment.profile.predict_reflections(
-        experiment.imageset,
-        experiment.crystal,
-        experiment.beam,
-        experiment.detector,
-        experiment.goniometer,
-        experiment.scan,
-        dmin=dmin,
-        dmax=dmax,
-        margin=margin,
-        force_static=force_static,
-        padding=padding)
+          experiment.imageset,
+          experiment.crystal,
+          experiment.beam,
+          experiment.detector,
+          experiment.goniometer,
+          experiment.scan,
+          dmin=dmin,
+          dmax=dmax,
+          margin=margin,
+          force_static=force_static,
+          padding=padding)
     from dials.algorithms.spot_prediction.reflection_predictor \
       import ReflectionPredictor
     predict = ReflectionPredictor(
-      experiment,
-      dmin=dmin,
-      dmax=dmax,
-      margin=margin,
-      force_static=force_static,
-      padding=padding)
+        experiment, dmin=dmin, dmax=dmax, margin=margin, force_static=force_static, padding=padding)
     return predict()
 
   @staticmethod
-  def from_predictions_multi(experiments,
-                             dmin=None,
-                             dmax=None,
-                             margin=1,
-                             force_static=False,
-                             padding=0):
+  def from_predictions_multi(experiments, dmin=None, dmax=None, margin=1, force_static=False, padding=0):
     '''
     Construct a reflection table from predictions.
 
@@ -141,12 +129,7 @@ class reflection_table_aux(boost.python.injector, reflection_table):
     result = reflection_table()
     for i, e in enumerate(experiments):
       rlist = reflection_table.from_predictions(
-        e,
-        dmin=dmin,
-        dmax=dmax,
-        margin=margin,
-        force_static=force_static,
-        padding=padding)
+          e, dmin=dmin, dmax=dmax, margin=margin, force_static=force_static, padding=padding)
       rlist['id'] = flex.int(len(rlist), i)
       result.extend(rlist)
     return result
@@ -172,14 +155,11 @@ class reflection_table_aux(boost.python.injector, reflection_table):
         params.spotfinder.filter.min_spot_size = 3
       else:
         params.spotfinder.filter.min_spot_size = 6
-      logger.info('Setting spotfinder.filter.min_spot_size=%i' %(
-        params.spotfinder.filter.min_spot_size))
+      logger.info('Setting spotfinder.filter.min_spot_size=%i' % (params.spotfinder.filter.min_spot_size))
 
     # Get the integrator from the input parameters
     logger.info('Configuring spot finder from input parameters')
-    find_spots = SpotFinderFactory.from_parameters(
-      datablock=datablock,
-      params=params)
+    find_spots = SpotFinderFactory.from_parameters(datablock=datablock, params=params)
 
     # Find the spots
     return find_spots(datablock)
@@ -198,7 +178,7 @@ class reflection_table_aux(boost.python.injector, reflection_table):
 
     with smart_open.for_reading(filename, 'rb') as infile:
       result = pickle.load(infile)
-      assert(isinstance(result, reflection_table))
+      assert (isinstance(result, reflection_table))
       return result
 
   @staticmethod
@@ -270,8 +250,8 @@ class reflection_table_aux(boost.python.injector, reflection_table):
     '''
     from matplotlib import pyplot as plt
     from matplotlib.patches import Polygon
-    fig=plt.figure()
-    ax=fig.add_subplot(111,aspect='equal')
+    fig = plt.figure()
+    ax = fig.add_subplot(111, aspect='equal')
     spots = table[key]
     if 'px' in key:
       spots = [detector[table['panel'][i]].get_pixel_lab_coord(spots[i][0:2]) for i in xrange(len(spots))]
@@ -283,25 +263,23 @@ class reflection_table_aux(boost.python.injector, reflection_table):
 
     for i, panel in enumerate(detector):
       fs, ss = panel.get_image_size()
-      p0 = panel.get_pixel_lab_coord((0,0))
-      p1 = panel.get_pixel_lab_coord((fs-1,0))
-      p2 = panel.get_pixel_lab_coord((fs-1,ss-1))
-      p3 = panel.get_pixel_lab_coord((0,ss-1))
-      p = Polygon((p0[0:2],p1[0:2],p2[0:2],p3[0:2]), closed=True, color='green', fill=False, hatch='/')
+      p0 = panel.get_pixel_lab_coord((0, 0))
+      p1 = panel.get_pixel_lab_coord((fs - 1, 0))
+      p2 = panel.get_pixel_lab_coord((fs - 1, ss - 1))
+      p3 = panel.get_pixel_lab_coord((0, ss - 1))
+      p = Polygon((p0[0:2], p1[0:2], p2[0:2], p3[0:2]), closed=True, color='green', fill=False, hatch='/')
 
-      if p.xy[:,0].min() < min_f: min_f = p.xy[:,0].min()
-      if p.xy[:,0].max() > max_f: max_f = p.xy[:,0].max()
-      if p.xy[:,1].min() < min_s: min_s = p.xy[:,1].min()
-      if p.xy[:,1].max() > max_s: max_s = p.xy[:,1].max()
+      if p.xy[:, 0].min() < min_f: min_f = p.xy[:, 0].min()
+      if p.xy[:, 0].max() > max_f: max_f = p.xy[:, 0].max()
+      if p.xy[:, 1].min() < min_s: min_s = p.xy[:, 1].min()
+      if p.xy[:, 1].max() > max_s: max_s = p.xy[:, 1].max()
 
       ax.add_patch(p)
 
-    ax.set_xlim((min_f-10,max_f+10))
-    ax.set_ylim((min_s-10,max_s+10))
-    plt.scatter([s[0] for s in spots],
-                [s[1] for s in spots],c='blue',linewidth=0)
+    ax.set_xlim((min_f - 10, max_f + 10))
+    ax.set_ylim((min_s - 10, max_s + 10))
+    plt.scatter([s[0] for s in spots], [s[1] for s in spots], c='blue', linewidth=0)
     plt.show()
-
 
   def as_pickle(self, filename):
     '''
@@ -348,31 +326,19 @@ class reflection_table_aux(boost.python.injector, reflection_table):
 
     '''
     import __builtin__
-    if type(self[name]) in [
-        vec2_double,
-        vec3_double,
-        mat3_double,
-        int6,
-        miller_index ]:
+    if type(self[name]) in [vec2_double, vec3_double, mat3_double, int6, miller_index]:
       data = self[name]
       if order is None:
-        perm = flex.size_t(
-          __builtin__.sorted(
-            range(len(self)),
-            key=lambda x: data[x],
-            reverse=reverse))
+        perm = flex.size_t(__builtin__.sorted(range(len(self)), key=lambda x: data[x], reverse=reverse))
       else:
         assert len(order) == len(data[0])
+
         def compare(x, y):
           a = tuple(x[i] for i in order)
           b = tuple(y[i] for i in order)
           return cmp(a, b)
-        perm = flex.size_t(
-          __builtin__.sorted(
-            range(len(self)),
-            key=lambda x: data[x],
-            cmp=compare,
-            reverse=reverse))
+
+        perm = flex.size_t(__builtin__.sorted(range(len(self)), key=lambda x: data[x], cmp=compare, reverse=reverse))
     else:
       perm = flex.sort_permutation(self[name], reverse=reverse)
     self.reorder(perm)
@@ -380,6 +346,7 @@ class reflection_table_aux(boost.python.injector, reflection_table):
   """
   Sorting the reflection table within an already sorted column
   """
+
   def subsort(self, key0, key1, reverse=False):
     '''
     Sort the reflection based on key1 within a constant key0.
@@ -392,9 +359,9 @@ class reflection_table_aux(boost.python.injector, reflection_table):
     uniq_values = self[key0]
     for ii in set(uniq_values):
       val = (uniq_values == ii).iselection()
-      ref_tmp = copy.deepcopy(self[min(val):(max(val)+1)])
-      ref_tmp.sort(key1,reverse)
-      self[min(val):(max(val)+1)] = ref_tmp
+      ref_tmp = copy.deepcopy(self[min(val):(max(val) + 1)])
+      ref_tmp.sort(key1, reverse)
+      self[min(val):(max(val) + 1)] = ref_tmp
 
   def match(self, other):
     '''
@@ -469,10 +436,10 @@ class reflection_table_aux(boost.python.injector, reflection_table):
         for i in value.a:
           d = []
           for j in value.b:
-            dx = x1[i]-x2[j]
-            dy = y1[i]-y2[j]
-            dz = z1[i]-z2[j]
-            d.append((i,j,dx**2 + dy**2 + dz**2))
+            dx = x1[i] - x2[j]
+            dy = y1[i] - y2[j]
+            dz = z1[i] - z2[j]
+            d.append((i, j, dx**2 + dy**2 + dz**2))
           i, j, d = __builtin__.min(d, key=lambda x: x[2])
           if j not in matched:
             matched[j] = (i, d)
@@ -497,34 +464,24 @@ class reflection_table_aux(boost.python.injector, reflection_table):
     h2 = o2['miller_index']
     e1 = s2['entering']
     e2 = o2['entering']
-    assert(h1 == h2).all_eq(True)
-    assert(e1 == e2).all_eq(True)
+    assert (h1 == h2).all_eq(True)
+    assert (e1 == e2).all_eq(True)
     x1, y1, z1 = s2['xyzcal.px'].parts()
     x2, y2, z2 = o2['xyzcal.px'].parts()
-    distance = flex.sqrt((x1-x2)**2+(y1-y2)**2+(z1-z2)**2)
+    distance = flex.sqrt((x1 - x2)**2 + (y1 - y2)**2 + (z1 - z2)**2)
     mask = distance < 2
     logger.info(' %d reflections matched' % len(o2))
     logger.info(' %d reflections accepted' % mask.count(True))
-    self.set_flags(
-      sind.select(mask),
-      self.flags.reference_spot)
-    self.set_flags(
-      sind.select(o2.get_flags(self.flags.strong)),
-      self.flags.strong)
-    self.set_flags(
-      sind.select(o2.get_flags(self.flags.indexed)),
-      self.flags.indexed)
-    self.set_flags(
-      sind.select(o2.get_flags(self.flags.used_in_refinement)),
-      self.flags.used_in_refinement)
+    self.set_flags(sind.select(mask), self.flags.reference_spot)
+    self.set_flags(sind.select(o2.get_flags(self.flags.strong)), self.flags.strong)
+    self.set_flags(sind.select(o2.get_flags(self.flags.indexed)), self.flags.indexed)
+    self.set_flags(sind.select(o2.get_flags(self.flags.used_in_refinement)), self.flags.used_in_refinement)
     other_matched_indices = oind.select(mask)
     other_unmatched_mask = flex.bool(len(other), True)
-    other_unmatched_mask.set_selected(
-      other_matched_indices,
-      flex.bool(len(other_matched_indices), False))
+    other_unmatched_mask.set_selected(other_matched_indices, flex.bool(len(other_matched_indices), False))
     other_matched = other.select(other_matched_indices)
     other_unmatched = other.select(other_unmatched_mask)
-    mask2 = flex.bool(len(self),False)
+    mask2 = flex.bool(len(self), False)
     mask2.set_selected(sind.select(mask), True)
     return mask2, other_matched, other_unmatched
 
@@ -587,10 +544,10 @@ class reflection_table_aux(boost.python.injector, reflection_table):
         for i in value.a:
           d = []
           for j in value.b:
-            dx = x1[i]-x2[j]
-            dy = y1[i]-y2[j]
-            dz = z1[i]-z2[j]
-            d.append((i,j,dx**2 + dy**2 + dz**2))
+            dx = x1[i] - x2[j]
+            dy = y1[i] - y2[j]
+            dz = z1[i] - z2[j]
+            d.append((i, j, dx**2 + dy**2 + dz**2))
           i, j, d = __builtin__.min(d, key=lambda x: x[2])
           if j not in matched:
             matched[j] = (i, d)
@@ -615,47 +572,37 @@ class reflection_table_aux(boost.python.injector, reflection_table):
     h2 = o2['miller_index']
     e1 = s2['entering']
     e2 = o2['entering']
-    assert(h1 == h2).all_eq(True)
-    assert(e1 == e2).all_eq(True)
+    assert (h1 == h2).all_eq(True)
+    assert (e1 == e2).all_eq(True)
     x1, y1, z1 = s2['xyzcal.px'].parts()
     x2, y2, z2 = o2['xyzcal.px'].parts()
-    distance = flex.sqrt((x1-x2)**2+(y1-y2)**2+(z1-z2)**2)
+    distance = flex.sqrt((x1 - x2)**2 + (y1 - y2)**2 + (z1 - z2)**2)
     mask = distance < 2
     logger.info(' %d reflections matched' % len(o2))
     logger.info(' %d reflections accepted' % mask.count(True))
-    self.set_flags(
-      sind.select(mask),
-      self.flags.reference_spot)
-    self.set_flags(
-      sind.select(o2.get_flags(self.flags.strong)),
-      self.flags.strong)
-    self.set_flags(
-      sind.select(o2.get_flags(self.flags.indexed)),
-      self.flags.indexed)
-    self.set_flags(
-      sind.select(o2.get_flags(self.flags.used_in_refinement)),
-      self.flags.used_in_refinement)
+    self.set_flags(sind.select(mask), self.flags.reference_spot)
+    self.set_flags(sind.select(o2.get_flags(self.flags.strong)), self.flags.strong)
+    self.set_flags(sind.select(o2.get_flags(self.flags.indexed)), self.flags.indexed)
+    self.set_flags(sind.select(o2.get_flags(self.flags.used_in_refinement)), self.flags.used_in_refinement)
     other_matched_indices = oind.select(mask)
     other_unmatched_mask = flex.bool(len(other), True)
-    other_unmatched_mask.set_selected(
-      other_matched_indices,
-      flex.bool(len(other_matched_indices), False))
+    other_unmatched_mask.set_selected(other_matched_indices, flex.bool(len(other_matched_indices), False))
     other_matched = other.select(other_matched_indices)
     other_unmatched = other.select(other_unmatched_mask)
     for key, column in self.select(sind.select(mask)).cols():
       other_matched[key] = column
-    mask2 = flex.bool(len(self),False)
+    mask2 = flex.bool(len(self), False)
     mask2.set_selected(sind.select(mask), True)
     return mask2, other_matched, other_unmatched
 
   #def is_bbox_inside_image_range(self, experiment):
-    #''' Check if bbox is within image range. '''
-    #from dials.algorithms import filtering
-    #assert(len(experiment.detector) == 1)
-    #return filtering.is_bbox_outside_image_range(
-      #self['bbox'],
-      #experiment.detector[0].get_image_size()[::-1],
-      #experiment.scan.get_array_range()) != True
+  #''' Check if bbox is within image range. '''
+  #from dials.algorithms import filtering
+  #assert(len(experiment.detector) == 1)
+  #return filtering.is_bbox_outside_image_range(
+  #self['bbox'],
+  #experiment.detector[0].get_image_size()[::-1],
+  #experiment.scan.get_array_range()) != True
 
   def compute_zeta(self, experiment):
     '''
@@ -730,16 +677,15 @@ class reflection_table_aux(boost.python.injector, reflection_table):
     '''
     self['bbox'] = int6(len(self))
     for expr, indices in self.iterate_experiments_and_indices(experiments):
-      self['bbox'].set_selected(
-        indices,
-        expr.profile.compute_bbox(
-          self.select(indices),
-          expr.crystal,
-          expr.beam,
-          expr.detector,
-          expr.goniometer,
-          expr.scan,
-          sigma_b_multiplier=sigma_b_multiplier))
+      self['bbox'].set_selected(indices,
+                                expr.profile.compute_bbox(
+                                    self.select(indices),
+                                    expr.crystal,
+                                    expr.beam,
+                                    expr.detector,
+                                    expr.goniometer,
+                                    expr.scan,
+                                    sigma_b_multiplier=sigma_b_multiplier))
     return self['bbox']
 
   def compute_partiality(self, experiments):
@@ -753,15 +699,10 @@ class reflection_table_aux(boost.python.injector, reflection_table):
     '''
     self['partiality'] = flex.double(len(self))
     for expr, indices in self.iterate_experiments_and_indices(experiments):
-      self['partiality'].set_selected(
-        indices,
-        expr.profile.compute_partiality(
-          self.select(indices),
-          expr.crystal,
-          expr.beam,
-          expr.detector,
-          expr.goniometer,
-          expr.scan))
+      self['partiality'].set_selected(indices,
+                                      expr.profile.compute_partiality(
+                                          self.select(indices), expr.crystal, expr.beam, expr.detector, expr.goniometer,
+                                          expr.scan))
     return self['partiality']
 
   def compute_mask(self, experiments, image_volume=None, overlaps=None):
@@ -774,13 +715,13 @@ class reflection_table_aux(boost.python.injector, reflection_table):
     '''
     for expr, indices in self.iterate_experiments_and_indices(experiments):
       result = expr.profile.compute_mask(
-        self.select(indices),
-        expr.crystal,
-        expr.beam,
-        expr.detector,
-        expr.goniometer,
-        expr.scan,
-        image_volume=image_volume)
+          self.select(indices),
+          expr.crystal,
+          expr.beam,
+          expr.detector,
+          expr.goniometer,
+          expr.scan,
+          image_volume=image_volume)
       if result is not None:
         if 'fraction' not in self:
           self['fraction'] = flex.double(len(self))
@@ -792,13 +733,13 @@ class reflection_table_aux(boost.python.injector, reflection_table):
     for each experiment
 
     '''
-    assert(len(experiments) > 0)
+    assert (len(experiments) > 0)
     index_list = self.split_indices_by_experiment_id(len(experiments))
-    assert(len(experiments) == len(index_list))
+    assert (len(experiments) == len(index_list))
     tot = 0
     for l in index_list:
       tot += len(l)
-    assert(tot == len(self))
+    assert (tot == len(self))
     for experiment, indices in zip(experiments, index_list):
       yield experiment, indices
 
@@ -809,8 +750,7 @@ class reflection_table_aux(boost.python.injector, reflection_table):
     :param experiments: The list of experiments
 
     '''
-    success = self._background_algorithm(experiments).compute_background(
-      self, image_volume)
+    success = self._background_algorithm(experiments).compute_background(self, image_volume)
     self.set_flags(~success, self.flags.failed_during_background_modelling)
 
   def compute_centroid(self, experiments, image_volume=None):
@@ -820,8 +760,7 @@ class reflection_table_aux(boost.python.injector, reflection_table):
     :param experiments: The list of experiments
 
     '''
-    self._centroid_algorithm(experiments).compute_centroid(
-      self, image_volume=image_volume)
+    self._centroid_algorithm(experiments).compute_centroid(self, image_volume=image_volume)
 
   def compute_summed_intensity(self, image_volume=None):
     '''
@@ -855,10 +794,7 @@ class reflection_table_aux(boost.python.injector, reflection_table):
     from dials.algorithms.integration import Corrections, CorrectionsMulti
     compute = CorrectionsMulti()
     for experiment in experiments:
-      compute.append(Corrections(
-        experiment.beam,
-        experiment.goniometer,
-        experiment.detector))
+      compute.append(Corrections(experiment.beam, experiment.goniometer, experiment.detector))
     lp = compute.lp(self['id'], self['s1'])
     self['lp'] = lp
     if experiment.detector[0].get_mu() > 0:
@@ -895,7 +831,7 @@ class reflection_table_aux(boost.python.injector, reflection_table):
     '''
     from dials.model.data import make_image
     from time import time
-    assert("shoebox" in self)
+    assert ("shoebox" in self)
     detector = imageset.get_detector()
     try:
       frame0, frame1 = imageset.get_array_range()
@@ -912,14 +848,14 @@ class reflection_table_aux(boost.python.injector, reflection_table):
       image = imageset.get_corrected_data(i)
       mask2 = imageset.get_mask(i)
       if mask is not None:
-        assert(len(mask) == len(mask2))
+        assert (len(mask) == len(mask2))
         mask2 = tuple(m1 & m2 for m1, m2 in zip(mask, mask2))
       read_time += time() - st
       st = time()
       extractor.next(make_image(image, mask2))
       extract_time += time() - st
       del image
-    assert(extractor.finished())
+    assert (extractor.finished())
     logger.info('  successfully read %d images' % (frame1 - frame0))
     logger.info('  read time: %g seconds' % read_time)
     logger.info('  extract time: %g seconds' % extract_time)
@@ -935,8 +871,8 @@ class reflection_table_aux(boost.python.injector, reflection_table):
     '''
     from dxtbx.model.experiment_list import ExperimentList
     from dials.algorithms.shoebox import OverloadChecker
-    assert('shoebox' in self)
-    assert('id' in self)
+    assert ('shoebox' in self)
+    assert ('id' in self)
     if isinstance(experiments_or_datablock, ExperimentList):
       detectors = [expr.detector for expr in experiments_or_datablock]
     else:
@@ -996,7 +932,7 @@ class reflection_table_aux(boost.python.injector, reflection_table):
       y1 += border
       z0 -= border
       z1 += border
-      bbox = int6(x0,x1,y0,y1,z0,z1)
+      bbox = int6(x0, x1, y0, y1, z0, z1)
     else:
       bbox = self['bbox']
 
@@ -1006,9 +942,7 @@ class reflection_table_aux(boost.python.injector, reflection_table):
 
     # Group according to imageset
     if experiments is not None:
-      groups = groupby(
-        range(len(experiments)),
-        lambda x: experiments[x].imageset)
+      groups = groupby(range(len(experiments)), lambda x: experiments[x].imageset)
 
       # Get the experiment ids we're to treat together
       lookup = {}
@@ -1028,7 +962,7 @@ class reflection_table_aux(boost.python.injector, reflection_table):
 
     # Find the overlaps
     overlaps = find_overlapping(group_id, panel, bbox)
-    assert(overlaps.num_vertices() == len(self))
+    assert (overlaps.num_vertices() == len(self))
 
     # Return the overlaps
     return overlaps
@@ -1049,32 +983,31 @@ class reflection_table_aux(boost.python.injector, reflection_table):
       xs = b1[1] - b1[0]
       ys = b1[3] - b1[2]
       zs = b1[5] - b1[4]
-      assert(xs > 0)
-      assert(ys > 0)
-      assert(zs > 0)
-      mask = flex.bool(flex.grid(zs,ys,xs),False)
+      assert (xs > 0)
+      assert (ys > 0)
+      assert (zs > 0)
+      mask = flex.bool(flex.grid(zs, ys, xs), False)
       for edge in overlaps.adjacent_vertices(i):
         b2 = bbox[edge]
-        x0 = b2[0]-b1[0]
-        x1 = b2[1]-b1[0]
-        y0 = b2[2]-b1[2]
-        y1 = b2[3]-b1[2]
-        z0 = b2[4]-b1[4]
-        z1 = b2[5]-b1[4]
+        x0 = b2[0] - b1[0]
+        x1 = b2[1] - b1[0]
+        y0 = b2[2] - b1[2]
+        y1 = b2[3] - b1[2]
+        z0 = b2[4] - b1[4]
+        z1 = b2[5] - b1[4]
         if x0 < 0: x0 = 0
         if y0 < 0: y0 = 0
         if z0 < 0: z0 = 0
         if x1 > xs: x1 = xs
         if y1 > ys: y1 = ys
         if z1 > zs: z1 = zs
-        assert(x1 > x0)
-        assert(y1 > y0)
-        assert(z1 > z0)
-        m2 = flex.bool(flex.grid(z1-z0,y1-y0,x1-x0),True)
-        mask[z0:z1,y0:y1,x0:x1] = m2
-      result[i] = (1.0*mask.count(True)) / mask.size()
+        assert (x1 > x0)
+        assert (y1 > y0)
+        assert (z1 > z0)
+        m2 = flex.bool(flex.grid(z1 - z0, y1 - y0, x1 - x0), True)
+        mask[z0:z1, y0:y1, x0:x1] = m2
+      result[i] = (1.0 * mask.count(True)) / mask.size()
     return result
-
 
 class reflection_table_selector(object):
   '''
@@ -1083,6 +1016,7 @@ class reflection_table_selector(object):
   This is mainly useful for specifying selections from phil parameters
 
   '''
+
   def __init__(self, column, op, value):
     '''
     Initialise the selector

@@ -38,7 +38,8 @@ Examples::
 
 '''
 
-phil_scope = iotbx.phil.parse("""
+phil_scope = iotbx.phil.parse(
+    """
 d_min = 0
   .type = float
   .help = "High resolution limit to use for analysis"
@@ -78,14 +79,15 @@ output {
   debug_log = dials.check_indexing_symmetry.debug.log
     .type = str
 }
-""", process_includes=True)
+""",
+    process_includes=True)
 
 def dump_text(filename, set0, set1):
   i0 = set0.as_double()
   i1 = set1.as_double()
   with open(filename, 'w') as fout:
     for _0, _1 in zip(i0, i1):
-      assert(_0[0] == _1[0])
+      assert (_0[0] == _1[0])
       fout.write('%f %f\n' % (_0[1], _1[1]))
 
 def get_symop_correlation_coefficients(miller_array, use_binning=False):
@@ -99,24 +101,20 @@ def get_symop_correlation_coefficients(miller_array, use_binning=False):
     if use_binning:
       intensity.use_binning_of(miller_array)
       intensity_rdx.use_binning_of(miller_array)
-      cc = intensity.correlation(
-        intensity_rdx, use_binning=use_binning)
+      cc = intensity.correlation(intensity_rdx, use_binning=use_binning)
       corr_coeffs.append(
-        flex.mean_weighted(
-          flex.double(i for i in cc.data if i is not None),
-          flex.double(
-            j for i, j in zip(cc.data, cc.binner.counts()) if i is not None)))
+          flex.mean_weighted(
+              flex.double(i for i in cc.data if i is not None),
+              flex.double(j for i, j in zip(cc.data, cc.binner.counts()) if i is not None)))
     else:
-      corr_coeffs.append(intensity.correlation(
-        intensity_rdx, use_binning=use_binning).coefficient())
+      corr_coeffs.append(intensity.correlation(intensity_rdx, use_binning=use_binning).coefficient())
     n_refs.append(intensity.size())
   return corr_coeffs, n_refs
 
 def normalise_intensities(miller_array, n_bins=10):
   miller_array.setup_binner(n_bins=n_bins)
   nomalisations = miller_array.amplitude_quasi_normalisations()
-  miller_array = miller_array.customized_copy(
-    data=miller_array.data()/nomalisations.data())
+  miller_array = miller_array.customized_copy(data=miller_array.data() / nomalisations.data())
   return miller_array
 
 def test_crystal_pointgroup_symmetry(reflections, experiment, params):
@@ -136,8 +134,7 @@ def test_crystal_pointgroup_symmetry(reflections, experiment, params):
 
   from cctbx.miller import set as miller_set
   ms = miller_set(cs, original_miller_indices)
-  ms = ms.array(reflections['intensity.sum.value'] /
-                flex.sqrt(reflections['intensity.sum.variance']))
+  ms = ms.array(reflections['intensity.sum.value'] / flex.sqrt(reflections['intensity.sum.variance']))
 
   if params.d_min or params.d_max:
     d_spacings = ms.d_spacings().data()
@@ -184,12 +181,18 @@ def test_crystal_pointgroup_symmetry(reflections, experiment, params):
 
 def offset_miller_indices(miller_indices, offset):
   from dials.array_family import flex
-  return flex.miller_index(
-    *[mi.iround() for mi in (miller_indices.as_vec3_double() + offset).parts()])
+  return flex.miller_index(*[mi.iround() for mi in (miller_indices.as_vec3_double() + offset).parts()])
 
-def get_indexing_offset_correlation_coefficients(
-    reflections, crystal, grid, d_min=None, d_max=None,
-    map_to_asu=False, grid_h=0, grid_k=0, grid_l=0, reference=None):
+def get_indexing_offset_correlation_coefficients(reflections,
+                                                 crystal,
+                                                 grid,
+                                                 d_min=None,
+                                                 d_max=None,
+                                                 map_to_asu=False,
+                                                 grid_h=0,
+                                                 grid_k=0,
+                                                 grid_l=0,
+                                                 reference=None):
 
   from dials.algorithms.symmetry import origin
 
@@ -200,8 +203,7 @@ def get_indexing_offset_correlation_coefficients(
 
   if True:
     return origin.get_hkl_offset_correlation_coefficients(
-      reflections, crystal, map_to_asu=map_to_asu,
-      grid_h=grid_h, grid_k=grid_k, grid_l=grid_l, reference=reference)
+        reflections, crystal, map_to_asu=map_to_asu, grid_h=grid_h, grid_k=grid_k, grid_l=grid_l, reference=reference)
 
   from dials.array_family import flex
 
@@ -219,8 +221,7 @@ def get_indexing_offset_correlation_coefficients(
     reference = reference.select(reference['intensity.sum.variance'] > 0)
     reference_data = reference['intensity.sum.value'] / \
          flex.sqrt(reference['intensity.sum.variance'])
-    reference_ms = miller_set(cs, reference['miller_index']).array(
-      reference_data)
+    reference_ms = miller_set(cs, reference['miller_index']).array(reference_data)
   else:
     reference_ms = None
 
@@ -283,11 +284,16 @@ def test_P1_crystal_indexing(reflections, experiment, params):
     reference = None
 
   offsets, ccs, nref = get_indexing_offset_correlation_coefficients(
-    reflections, experiment.crystal,
-    grid=params.grid,
-    d_min=params.d_min, d_max=params.d_max, map_to_asu=params.asu,
-    grid_h=params.grid_h, grid_k=params.grid_k, grid_l=params.grid_l,
-    reference=reference)
+      reflections,
+      experiment.crystal,
+      grid=params.grid,
+      d_min=params.d_min,
+      d_max=params.d_max,
+      map_to_asu=params.asu,
+      grid_h=params.grid_h,
+      grid_k=params.grid_k,
+      grid_l=params.grid_l,
+      reference=reference)
 
   for (h, k, l), cc, n in zip(offsets, ccs, nref):
     if cc > params.symop_threshold or (h == k == l == 0):
@@ -307,12 +313,12 @@ def run(args):
     libtbx.env.dispatcher_name
 
   parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_reflections=True,
-    read_experiments=True,
-    check_format=False,
-    epilog=help_message)
+      usage=usage,
+      phil=phil_scope,
+      read_reflections=True,
+      read_experiments=True,
+      check_format=False,
+      epilog=help_message)
 
   params, options = parser.parse_args(show_diff_phil=True)
 
@@ -325,8 +331,8 @@ def run(args):
   if len(reflections) == 0 or len(experiments) == 0:
     parser.print_help()
     return
-  assert(len(reflections) == 1)
-  assert(len(experiments) == 1)
+  assert (len(reflections) == 1)
+  assert (len(experiments) == 1)
   experiment = experiments[0]
   reflections = reflections[0]
 

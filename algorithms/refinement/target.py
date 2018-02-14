@@ -6,7 +6,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """Contains classes used to construct a target function for refinement,
 principally Target and ReflectionManager."""
 
@@ -41,13 +40,17 @@ class Target(object):
   This should all be set by a derived class.
   """
 
-  __metaclass__  = abc.ABCMeta
+  __metaclass__ = abc.ABCMeta
   _grad_names = ['dX_dp', 'dY_dp', 'dphi_dp']
   rmsd_names = ["RMSD_X", "RMSD_Y", "RMSD_Phi"]
   rmsd_units = ["mm", "mm", "rad"]
 
-  def __init__(self, experiments, reflection_predictor, ref_manager,
-               prediction_parameterisation, restraints_parameterisation=None,
+  def __init__(self,
+               experiments,
+               reflection_predictor,
+               ref_manager,
+               prediction_parameterisation,
+               restraints_parameterisation=None,
                gradient_calculation_blocksize=None):
 
     self._reflection_predictor = reflection_predictor
@@ -87,8 +90,7 @@ class Target(object):
     # varying case) then call it. Prefer hasattr to try-except duck typing to
     # avoid masking AttributeErrors that could be raised within the method.
     if hasattr(self._prediction_parameterisation, 'compose'):
-      self._prediction_parameterisation.compose(
-          reflections, skip_derivatives)
+      self._prediction_parameterisation.compose(reflections, skip_derivatives)
 
     # do prediction (updates reflection table in situ). Scan-varying prediction
     # is done automatically if the crystal has scan-points (assuming reflections
@@ -204,11 +206,9 @@ class Target(object):
     self.update_matches()
 
     if reflections:
-      gradients = self._prediction_parameterisation.get_gradients(
-        reflections, callback)
+      gradients = self._prediction_parameterisation.get_gradients(reflections, callback)
     else:
-      gradients = self._prediction_parameterisation.get_gradients(
-        self._matches, callback)
+      gradients = self._prediction_parameterisation.get_gradients(self._matches, callback)
 
     return gradients
 
@@ -280,8 +280,7 @@ class Target(object):
       result['curvature'] = flex.sum(weights * grads * grads)
       return result
 
-    results = self.calculate_gradients(matches,
-        callback=process_one_gradient)
+    results = self.calculate_gradients(matches, callback=process_one_gradient)
 
     dL_dp = [result['dL_dp'] for result in results]
     curvs = [result['curvature'] for result in results]
@@ -348,7 +347,7 @@ class Target(object):
     else:
       nblocks = nproc
     # ensure at least 100 reflections per block
-    nblocks = min(nblocks, int(len(self._matches)/100))
+    nblocks = min(nblocks, int(len(self._matches) / 100))
     nblocks = max(nblocks, 1)
     blocksize = int(floor(len(self._matches) / nblocks))
     blocks = []
@@ -387,7 +386,7 @@ class Target(object):
     nparam = len(self._prediction_parameterisation)
     jacobian = self._build_jacobian(*reshaped, nelem=nelem, nparam=nparam)
 
-    return(residuals, jacobian, weights)
+    return (residuals, jacobian, weights)
 
   def compute_restraints_residuals_and_gradients(self):
     '''delegate to the restraints_parameterisation object, if present, to
@@ -397,7 +396,7 @@ class Target(object):
     if self._restraints_parameterisation:
       residuals, jacobian, weights = \
         self._restraints_parameterisation.get_residuals_gradients_and_weights()
-      return(residuals, jacobian, weights)
+      return (residuals, jacobian, weights)
 
     else:
       return None
@@ -493,19 +492,24 @@ class LeastSquaresPositionalResidualWithRmsdCutoff(Target):
   in terms of detector impact position X, Y and phi, terminating on achieved
   rmsd (or on intrisic convergence of the chosen minimiser)"""
 
-  def __init__(self, experiments, reflection_predictor, ref_man,
-               prediction_parameterisation, restraints_parameterisation,
+  def __init__(self,
+               experiments,
+               reflection_predictor,
+               ref_man,
+               prediction_parameterisation,
+               restraints_parameterisation,
                frac_binsize_cutoff=0.33333,
                absolute_cutoffs=None,
                gradient_calculation_blocksize=None):
 
-    Target.__init__(self,
-                    experiments=experiments,
-                    reflection_predictor=reflection_predictor,
-                    ref_manager=ref_man,
-                    prediction_parameterisation=prediction_parameterisation,
-                    restraints_parameterisation=restraints_parameterisation,
-                    gradient_calculation_blocksize=gradient_calculation_blocksize)
+    Target.__init__(
+        self,
+        experiments=experiments,
+        reflection_predictor=reflection_predictor,
+        ref_manager=ref_man,
+        prediction_parameterisation=prediction_parameterisation,
+        restraints_parameterisation=restraints_parameterisation,
+        gradient_calculation_blocksize=gradient_calculation_blocksize)
 
     # Set up the RMSD achieved criterion. For simplicity, we take models from
     # the first Experiment only. If this is not appropriate for refinement over
@@ -520,9 +524,10 @@ class LeastSquaresPositionalResidualWithRmsdCutoff(Target):
       pixel_sizes = [p.get_pixel_size() for p in detector]
       min_px_size_x = min(e[0] for e in pixel_sizes)
       min_px_size_y = min(e[1] for e in pixel_sizes)
-      self._binsize_cutoffs = [min_px_size_x * frac_binsize_cutoff,
-                               min_px_size_y * frac_binsize_cutoff,
-                               image_width_rad * frac_binsize_cutoff]
+      self._binsize_cutoffs = [
+          min_px_size_x * frac_binsize_cutoff, min_px_size_y * frac_binsize_cutoff,
+          image_width_rad * frac_binsize_cutoff
+      ]
     else:
       assert len(absolute_cutoffs) == 3
       self._binsize_cutoffs = absolute_cutoffs
@@ -536,8 +541,7 @@ class LeastSquaresPositionalResidualWithRmsdCutoff(Target):
   def _extract_residuals_and_weights(matches):
 
     # return residuals and weights as 1d flex.double vectors
-    residuals = flex.double.concatenate(matches['x_resid'],
-                                        matches['y_resid'])
+    residuals = flex.double.concatenate(matches['x_resid'], matches['y_resid'])
     residuals.extend(matches['phi_resid'])
 
     weights, w_y, w_z = matches['xyzobs.mm.weights'].parts()
@@ -549,8 +553,7 @@ class LeastSquaresPositionalResidualWithRmsdCutoff(Target):
   @staticmethod
   def _extract_squared_residuals(matches):
 
-    residuals2 = flex.double.concatenate(matches['x_resid2'],
-                                         matches['y_resid2'])
+    residuals2 = flex.double.concatenate(matches['x_resid2'], matches['y_resid2'])
     residuals2.extend(matches['phi_resid2'])
 
     return residuals2
@@ -563,9 +566,7 @@ class LeastSquaresPositionalResidualWithRmsdCutoff(Target):
     resid_phi = flex.sum(reflections['phi_resid2'])
     n = len(reflections)
 
-    rmsds = (sqrt(resid_x / n),
-             sqrt(resid_y / n),
-             sqrt(resid_phi / n))
+    rmsds = (sqrt(resid_x / n), sqrt(resid_y / n), sqrt(resid_phi / n))
     return rmsds
 
   def achieved(self):
@@ -575,9 +576,7 @@ class LeastSquaresPositionalResidualWithRmsdCutoff(Target):
     # reset cached rmsds to avoid getting out of step
     self._rmsds = None
 
-    if (r[0] < self._binsize_cutoffs[0] and
-        r[1] < self._binsize_cutoffs[1] and
-        r[2] < self._binsize_cutoffs[2]):
+    if (r[0] < self._binsize_cutoffs[0] and r[1] < self._binsize_cutoffs[1] and r[2] < self._binsize_cutoffs[2]):
       return True
     return False
 
@@ -598,14 +597,14 @@ class SparseGradientsMixin:
 
     # loop over parameters, building full width blocks of the full Jacobian
     for i in range(nparam):
-      X_mat[:,i] = dX_dp[i]
-      Y_mat[:,i] = dY_dp[i]
-      Z_mat[:,i] = dZ_dp[i]
+      X_mat[:, i] = dX_dp[i]
+      Y_mat[:, i] = dY_dp[i]
+      Z_mat[:, i] = dZ_dp[i]
 
     # set the blocks in the Jacobian
     jacobian.assign_block(X_mat, 0, 0)
     jacobian.assign_block(Y_mat, nref, 0)
-    jacobian.assign_block(Z_mat, 2*nref, 0)
+    jacobian.assign_block(Z_mat, 2 * nref, 0)
 
     return jacobian
 
@@ -620,8 +619,8 @@ class SparseGradientsMixin:
     grads.extend(dZ)
     return grads
 
-class LeastSquaresPositionalResidualWithRmsdCutoffSparse(
-  SparseGradientsMixin, LeastSquaresPositionalResidualWithRmsdCutoff):
+class LeastSquaresPositionalResidualWithRmsdCutoffSparse(SparseGradientsMixin,
+                                                         LeastSquaresPositionalResidualWithRmsdCutoff):
   """A version of the LeastSquaresPositionalResidualWithRmsdCutoff Target that
   uses a sparse matrix data structure for memory efficiency when there are a
   large number of Experiments"""

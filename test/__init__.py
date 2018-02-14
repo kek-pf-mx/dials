@@ -14,7 +14,6 @@ class cd(object):
     import os
     os.chdir(self._oldpath)
 
-
 class cd_auto(cd):
   def __init__(self, filename):
     from os.path import splitext, basename
@@ -22,4 +21,3 @@ class cd_auto(cd):
     path = splitext(basename(filename))[0]
     path = "%s_%s" % (path, uuid4().hex)
     super(cd_auto, self).__init__(path)
-

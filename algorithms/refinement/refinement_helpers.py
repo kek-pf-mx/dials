@@ -6,7 +6,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """Auxiliary functions for the refinement package"""
 
 from __future__ import absolute_import, division
@@ -73,20 +72,15 @@ def dR_from_axis_and_angle_py(axis, angle, deg=False):
   # See also axis_and_angle_as_r3_derivative_wrt_angle, which does the same
   # as this function, but this function is faster.
 
-  assert axis.n in ((3,1), (1,3))
-  if deg: angle *= pi/180
+  assert axis.n in ((3, 1), (1, 3))
+  if deg: angle *= pi / 180
   axis = -1. * axis.normalize()
-  ca, sa  = cos(angle), sin(angle)
+  ca, sa = cos(angle), sin(angle)
 
-  return(matrix.sqr((sa * axis[0] * axis[0] - sa ,
-                  sa * axis[0] * axis[1] + ca * axis[2],
-                  sa * axis[0] * axis[2] - ca * axis[1],
-                  sa * axis[1] * axis[0] - ca * axis[2],
-                  sa * axis[1] * axis[1] - sa,
-                  sa * axis[1] * axis[2] + ca * axis[0],
-                  sa * axis[2] * axis[0] + ca * axis[1],
-                  sa * axis[2] * axis[1] - ca * axis[0],
-                  sa * axis[2] * axis[2] - sa)))
+  return (matrix.sqr(
+      (sa * axis[0] * axis[0] - sa, sa * axis[0] * axis[1] + ca * axis[2], sa * axis[0] * axis[2] - ca * axis[1],
+       sa * axis[1] * axis[0] - ca * axis[2], sa * axis[1] * axis[1] - sa, sa * axis[1] * axis[2] + ca * axis[0],
+       sa * axis[2] * axis[0] + ca * axis[1], sa * axis[2] * axis[1] - ca * axis[0], sa * axis[2] * axis[2] - sa)))
 
 def skew_symm(v):
   '''Make matrix [v]_x from v. Essentially multiply vector by SO(3) basis
@@ -124,11 +118,11 @@ def dRq_de(theta, e, q):
 
   qx = skew_symm(q)
   vx = skew_symm(v)
-  vvt = v*v.transpose()
+  vvt = v * v.transpose()
   Rt = R.transpose()
   I3 = matrix.identity(3)
 
-  return (-1./theta) * R * qx * (vvt + (Rt - I3) * vx)
+  return (-1. / theta) * R * qx * (vvt + (Rt - I3) * vx)
 
 def random_param_shift(vals, sigmas):
   """Add a random (normal) shift to a parameter set, for testing"""
@@ -188,7 +182,7 @@ def get_panel_groups_at_depth(group, depth=0):
     return [group]
   else:
     assert group.is_group()
-    return [p for gp in group.children() for p in get_panel_groups_at_depth(gp, depth-1)]
+    return [p for gp in group.children() for p in get_panel_groups_at_depth(gp, depth - 1)]
 
 def get_panel_ids_at_root(panel_list, group):
   """Get the sequential panel IDs for a set of panels belonging to a group"""
@@ -230,14 +224,14 @@ def corrgram(corrmat, labels):
     for y in xrange(nr):
       d = corrmat[x, y]
       d_abs = abs(d)
-      circ = plt.Circle((x, y),radius=0.9*sqrt(d_abs)/2)
+      circ = plt.Circle((x, y), radius=0.9 * sqrt(d_abs) / 2)
       circ.set_edgecolor('white')
       # put data into range [0,1] and invert so that 1 == blue and 0 == red
-      facecolor = 1 - (0.5*d + 0.5)
+      facecolor = 1 - (0.5 * d + 0.5)
       circ.set_facecolor(clrmap(facecolor))
       ax.add_artist(circ)
-  ax.set_xlim(-0.5, nr-0.5)
-  ax.set_ylim(-0.5, nr-0.5)
+  ax.set_xlim(-0.5, nr - 0.5)
+  ax.set_ylim(-0.5, nr - 0.5)
 
   ax.xaxis.tick_top()
   xtickslocs = range(len(labels))
@@ -314,9 +308,7 @@ def calculate_frame_numbers(reflections, experiments):
     to_update = scan.get_array_index_from_angle(angles, deg=False)
     frames.set_selected(sel, to_update)
   reflections['xyzobs.px.value'] = flex.vec3_double(
-          flex.double(len(reflections), 0.),
-          flex.double(len(reflections), 0.),
-          frames)
+      flex.double(len(reflections), 0.), flex.double(len(reflections), 0.), frames)
 
   return reflections
 
@@ -337,7 +329,7 @@ def set_obs_s1(reflections, experiments):
       isel = (expt_sel & panel_sel & refs_wo_s1_sel).iselection()
       spots = reflections.select(isel)
       x, y, rot_angle = spots['xyzobs.mm.value'].parts()
-      s1 = panel.get_lab_coord(flex.vec2_double(x,y))
-      s1 = s1/s1.norms() * (1/beam.get_wavelength())
+      s1 = panel.get_lab_coord(flex.vec2_double(x, y))
+      s1 = s1 / s1.norms() * (1 / beam.get_wavelength())
       reflections['s1'].set_selected(isel, s1)
   return nrefs_wo_s1

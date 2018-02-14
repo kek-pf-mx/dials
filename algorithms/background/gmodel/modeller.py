@@ -36,10 +36,7 @@ phil_scope = parse('''
 ''')
 
 class Modeller(object):
-
-  def __init__(self, beam, detector,
-               min_count=5, nsigma=6, sigma=0.5,
-               kernel_size=9, niter=10):
+  def __init__(self, beam, detector, min_count=5, nsigma=6, sigma=0.5, kernel_size=9, niter=10):
     from dials.algorithms.background.gmodel import PixelFilter
 
     self.beam = beam
@@ -61,7 +58,7 @@ class Modeller(object):
 
     height, width = image.all()
 
-    _,_,_,_,z0,z1 = reflections['bbox'].parts()
+    _, _, _, _, z0, z1 = reflections['bbox'].parts()
     selection = (z0 <= frame) & (z1 > frame)
     subset = reflections.select(selection)
     sbox_mask = subset['shoebox'].apply_background_mask(frame, 1, (height, width))
@@ -93,9 +90,7 @@ class Modeller(object):
 
     return data
 
-
 class Creator(object):
-
   def __init__(self, experiment, params):
 
     self.modeller = None
@@ -111,11 +106,7 @@ class Creator(object):
 
   def initialize(self):
     assert not self.initialized()
-    self.modeller = Modeller(
-      self.experiment.beam,
-      self.experiment.detector,
-      self.params.min_count,
-      self.params.nsigma)
+    self.modeller = Modeller(self.experiment.beam, self.experiment.detector, self.params.min_count, self.params.nsigma)
 
   def next_image(self, frame, image, mask, reflections):
     assert self.initialized()
@@ -139,12 +130,8 @@ class Creator(object):
     fitter = Fitter(self.background)
     scale = fitter(reflections['shoebox'])
     success = scale >= 0
-    mean = flex.double([
-      flex.mean(sbox.background)
-      for sbox in reflections['shoebox']
-    ])
+    mean = flex.double([flex.mean(sbox.background) for sbox in reflections['shoebox']])
     reflections['background.mean'] = mean
     reflections['background.scale'] = scale
     reflections.set_flags(success != True, reflections.flags.dont_integrate)
     return success
-

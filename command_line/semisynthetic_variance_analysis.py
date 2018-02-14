@@ -22,26 +22,23 @@ def npp(values, input_mean_variance):
 
   return expected, scaled
 
-def semisynthetic_variance_analysis(semisynthetic_integrated_data_files,
-                                    value_column):
+def semisynthetic_variance_analysis(semisynthetic_integrated_data_files, value_column):
   import cPickle as pickle
   import math
   from dials.array_family import flex
   from dials.util.add_hash import add_hash
 
-  integrated_data_sets = [pickle.load(open(data_file, 'rb')) for
-                          data_file in semisynthetic_integrated_data_files]
+  integrated_data_sets = [pickle.load(open(data_file, 'rb')) for data_file in semisynthetic_integrated_data_files]
 
   # check column, find variance
   integrated_data = integrated_data_sets[0]
   assert value_column in integrated_data
   variance_column = None
-  for column in ['%s.variance' % value_column,
-                 value_column.replace('value', 'variance')]:
+  for column in ['%s.variance' % value_column, value_column.replace('value', 'variance')]:
     if column in integrated_data:
       variance_column = column
       break
-  assert(variance_column)
+  assert (variance_column)
   data = integrated_data[value_column]
   if hasattr(data, 'parts'):
     multicolumn = len(data.parts())
@@ -95,27 +92,26 @@ def semisynthetic_variance_analysis(semisynthetic_integrated_data_files,
       for i in hashed_data_sets:
         sel = i['hash'] == h
         isel = sel.iselection()
-        assert(len(isel) == 1)
+        assert (len(isel) == 1)
         values.append(i[isel[0]][value_column])
         variances.append(i[isel[0]][variance_column])
-      weighted_mean, weighted_variance = weighted_mean_variance(values,
-                                                                variances)
+      weighted_mean, weighted_variance = weighted_mean_variance(values, variances)
       expected, scaled = npp(values, (weighted_mean, weighted_variance))
       fit = flex.linear_regression(expected, scaled)
       # since I have everything needed to compute chi-square here...
       n = len(values)
-      chi2 = sum([((v - weighted_mean) ** 2) / weighted_variance for v in values]) / n
+      chi2 = sum([((v - weighted_mean)**2) / weighted_variance for v in values]) / n
       print '%.3f %.3f %.3f' % (weighted_mean / math.sqrt(weighted_variance), fit.slope(), chi2)
     else:
-      values = { }
-      variances = { }
+      values = {}
+      variances = {}
       for m in range(multicolumn):
         values[m] = flex.double()
         variances[m] = flex.double()
       for i in hashed_data_sets:
         sel = i['hash'] == h
         isel = sel.iselection()
-        assert(len(isel) == 1)
+        assert (len(isel) == 1)
         data = i[isel[0]][value_column]
         variance = i[isel[0]][variance_column]
         for m in range(multicolumn):
@@ -123,13 +119,12 @@ def semisynthetic_variance_analysis(semisynthetic_integrated_data_files,
           variances[m].append(variance[m])
       result = ''
       for m in range(multicolumn):
-        weighted_mean, weighted_variance = weighted_mean_variance(values[m],
-                                                                  variances[m])
+        weighted_mean, weighted_variance = weighted_mean_variance(values[m], variances[m])
         expected, scaled = npp(values[m], (weighted_mean, weighted_variance))
         fit = flex.linear_regression(expected, scaled)
         # since I have everything needed to compute chi-square here...
         n = len(values[m])
-        chi2 = sum([((v - weighted_mean) ** 2) / weighted_variance for v in values[m]]) / n
+        chi2 = sum([((v - weighted_mean)**2) / weighted_variance for v in values[m]]) / n
         result += '%f %.3f %.3f ' % (math.sqrt(weighted_variance), fit.slope(), chi2)
       print result
 

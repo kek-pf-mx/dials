@@ -25,7 +25,7 @@ class Parameter(object):
   parameter value is set, the esd is reset to None. So this must be
   set separately, and after the parameter value if it is required"""
 
-  def __init__(self, value, axis = None, ptype = None, name = "Parameter"):
+  def __init__(self, value, axis=None, ptype=None, name="Parameter"):
     self._value = value
     self._esd = None
     self._axis = axis
@@ -105,11 +105,10 @@ class ModelParameterisation(object):
   parameters is used to compose all states and calculate all
   derivatives of these states."""
 
-  __metaclass__  = abc.ABCMeta
+  __metaclass__ = abc.ABCMeta
 
-  def __init__(self, model, initial_state, param_list, experiment_ids,
-               is_multi_state=False):
-    assert(isinstance(param_list, list))
+  def __init__(self, model, initial_state, param_list, experiment_ids, is_multi_state=False):
+    assert (isinstance(param_list, list))
     self._initial_state = initial_state
     self._model = model
     self._param = list(param_list)
@@ -157,7 +156,7 @@ class ModelParameterisation(object):
 
     pass
 
-  def get_params(self, only_free = True):
+  def get_params(self, only_free=True):
     """Return the internal list of parameters. It is intended that this
     function be used for reporting parameter attributes, not for modifying
     them.
@@ -172,7 +171,7 @@ class ModelParameterisation(object):
     else:
       return [x for x in self._param]
 
-  def get_param_vals(self, only_free = True):
+  def get_param_vals(self, only_free=True):
     """export the values of the internal list of parameters as a
     sequence of floats.
 
@@ -186,7 +185,7 @@ class ModelParameterisation(object):
     else:
       return [x.value for x in self._param]
 
-  def get_param_names(self, only_free = True):
+  def get_param_names(self, only_free=True):
     """export the names of the internal list of parameters
 
     If only_free, the names of fixed parameters are filtered from the
@@ -205,7 +204,7 @@ class ModelParameterisation(object):
     Only free parameters can be set, therefore the length of vals must equal
     the value of num_free"""
 
-    assert(len(vals) == self.num_free())
+    assert (len(vals) == self.num_free())
 
     v = iter(vals)
     for p in self._param:
@@ -225,7 +224,7 @@ class ModelParameterisation(object):
     Only free parameters can be set, therefore the length of esds must equal
     the value of num_free"""
 
-    assert(len(esds) == self.num_free())
+    assert (len(esds) == self.num_free())
 
     v = iter(esds)
     for p in self._param:
@@ -239,11 +238,10 @@ class ModelParameterisation(object):
 
     return [p.get_fixed() for p in self._param]
 
-
   def set_fixed(self, fix):
     """set parameters to be fixed or free"""
 
-    assert(len(fix) == len(self._param))
+    assert (len(fix) == len(self._param))
 
     for f, p in zip(fix, self._param):
       if f: p.fix()
@@ -269,7 +267,7 @@ class ModelParameterisation(object):
     # value of get_ds_dp.
     pass
 
-  def get_ds_dp(self, only_free = True, multi_state_elt=None, use_none_as_null=False):
+  def get_ds_dp(self, only_free=True, multi_state_elt=None, use_none_as_null=False):
     """get a list of derivatives of the state wrt each parameter, as
     a list in the same order as the internal list of parameters.
 
@@ -304,7 +302,6 @@ class ModelParameterisation(object):
 
     return [null if e is None else e for e in grads]
 
-
   def calculate_state_uncertainties(self, var_cov):
     """Given a variance-covariance array for the parameters of this model,
     propagate those estimated errors into the uncertainties of the model state"""
@@ -331,8 +328,7 @@ class ModelParameterisation(object):
     state_covs = []
     for grads_one_state in grads:
       jacobian_t = flex.double(flat_list(grads_one_state))
-      jacobian_t.reshape(flex.grid(len(grads_one_state),
-                                   len(grads_one_state[0].elems)))
+      jacobian_t.reshape(flex.grid(len(grads_one_state), len(grads_one_state[0].elems)))
 
       # propagation of errors takes the variance-covariance matrix of parameters,
       # along with the jacobian mapping changes in parameter values to changes

@@ -55,16 +55,16 @@ class Script(object):
     import libtbx.load_env
 
     # The script usage
-    usage  = "usage: %s [options] experiment.json reflections.pickle" % libtbx.env.dispatcher_name
+    usage = "usage: %s [options] experiment.json reflections.pickle" % libtbx.env.dispatcher_name
 
     # Create the parser
     self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      epilog=help_message,
-      read_experiments=True,
-      read_reflections=True,
-      read_datablocks=True)
+        usage=usage,
+        phil=phil_scope,
+        epilog=help_message,
+        read_experiments=True,
+        read_reflections=True,
+        read_datablocks=True)
 
   def run(self):
     ''' Extract the shoeboxes. '''
@@ -113,8 +113,8 @@ class Script(object):
       reflections = reflections[0]
 
     # Check the reflections contain the necessary stuff
-    assert("bbox" in reflections)
-    assert("panel" in reflections)
+    assert ("bbox" in reflections)
+    assert ("panel" in reflections)
 
     # Get some models
     detector = imageset.get_detector()
@@ -149,10 +149,7 @@ class Script(object):
       old_shoebox = None
 
     # Allocate the shoeboxes
-    reflections["shoebox"] = flex.shoebox(
-      reflections["panel"],
-      reflections["bbox"],
-      allocate=True)
+    reflections["shoebox"] = flex.shoebox(reflections["panel"], reflections["bbox"], allocate=True)
 
     # Extract the shoeboxes
     reflections.extract_shoeboxes(imageset, verbose=True)
@@ -174,7 +171,7 @@ class Script(object):
         y1 = bbox0[3] - bbox0[2] + y0
         z0 = bbox0[4] - bbox1[4]
         z1 = bbox0[5] - bbox0[4] + z0
-        mask2[z0:z1,y0:y1,x0:x1] = mask0
+        mask2[z0:z1, y0:y1, x0:x1] = mask0
         mask1 = mask1.as_1d() | mask2.as_1d()
         if params.padding_is_background:
           selection = flex.size_t(range(len(mask1))).select(mask1 == MaskCode.Valid)

@@ -11,12 +11,8 @@ class TestCoordinateSystem(object):
 
     # Coordinate sensitive to length of vectors, so need to ensure that
     # lengths of both s0 and s1 are equal
-    self.s0 = (0.013141995425357206,
-                0.002199999234194632,
-                1.4504754950989514)
-    self.s1 = (-0.01752795848400313,
-               -0.24786554213968193,
-                1.4290948735525306)
+    self.s0 = (0.013141995425357206, 0.002199999234194632, 1.4504754950989514)
+    self.s1 = (-0.01752795848400313, -0.24786554213968193, 1.4290948735525306)
     self.m2 = (0.999975, -0.001289, -0.006968)
     self.phi = 5.83575672475 * pi / 180
     self.cs = CoordinateSystem(self.m2, self.s0, self.s1, self.phi)
@@ -30,10 +26,10 @@ class TestCoordinateSystem(object):
     s0 = matrix.col(self.s0)
     s1 = matrix.col(self.s1)
     m2 = matrix.col(self.m2)
-    assert(abs(matrix.col(self.cs.s0()) - s0) <= eps)
-    assert(abs(matrix.col(self.cs.s1()) - s1) <= eps)
-    assert(abs(matrix.col(self.cs.m2()) - m2.normalize()) <= eps)
-    assert(abs(self.cs.phi() - self.phi) <= eps)
+    assert (abs(matrix.col(self.cs.s0()) - s0) <= eps)
+    assert (abs(matrix.col(self.cs.s1()) - s1) <= eps)
+    assert (abs(matrix.col(self.cs.m2()) - m2.normalize()) <= eps)
+    assert (abs(self.cs.phi() - self.phi) <= eps)
     print 'OK'
 
   def test_axis_length(self):
@@ -42,9 +38,9 @@ class TestCoordinateSystem(object):
 
     # Check all axes are of length 1
     eps = 1e-7
-    assert(abs(matrix.col(self.cs.e1_axis()).length() - 1.0) <= eps)
-    assert(abs(matrix.col(self.cs.e2_axis()).length() - 1.0) <= eps)
-    assert(abs(matrix.col(self.cs.e3_axis()).length() - 1.0) <= eps)
+    assert (abs(matrix.col(self.cs.e1_axis()).length() - 1.0) <= eps)
+    assert (abs(matrix.col(self.cs.e2_axis()).length() - 1.0) <= eps)
+    assert (abs(matrix.col(self.cs.e3_axis()).length() - 1.0) <= eps)
 
     # Test passed
     print "OK"
@@ -69,16 +65,16 @@ class TestCoordinateSystem(object):
     eps = 1e-7
 
     # Check that e1 is orthogonal to s0 and s1
-    assert(abs(e1.dot(s0) - 0.0) <= eps)
-    assert(abs(e1.dot(s1) - 0.0) <= eps)
+    assert (abs(e1.dot(s0) - 0.0) <= eps)
+    assert (abs(e1.dot(s1) - 0.0) <= eps)
 
     # Check that e2 is orthogonal to s1 and e1
-    assert(abs(e2.dot(s1) - 0.0) <= eps)
-    assert(abs(e2.dot(e1) - 0.0) <= eps)
+    assert (abs(e2.dot(s1) - 0.0) <= eps)
+    assert (abs(e2.dot(e1) - 0.0) <= eps)
 
     # Check that e3 is orthogonal to e1 and p* = s1 - s0
-    assert(abs(e3.dot(e1) - 0.0) <= eps)
-    assert(abs(e3.dot(s1 - s0) - 0.0) <= eps)
+    assert (abs(e3.dot(e1) - 0.0) <= eps)
+    assert (abs(e3.dot(s1 - s0) - 0.0) <= eps)
 
     # Test passed
     print "OK"
@@ -101,8 +97,8 @@ class TestCoordinateSystem(object):
     lim = self.cs.limits()
 
     # Check the limits
-    assert(abs(-1.0 - lim[0]) <= eps)
-    assert(abs(1.0 - lim[1]) <= eps)
+    assert (abs(-1.0 - lim[0]) <= eps)
+    assert (abs(1.0 - lim[1]) <= eps)
 
     # Test passed
     print 'OK'
@@ -114,7 +110,6 @@ class TestCoordinateSystem(object):
     self.test_axis_orthogonal()
     self.test_limits()
 
-
 class TestFromBeamVector(object):
   """Test the FromBeamVectorToXds class"""
 
@@ -123,12 +118,8 @@ class TestFromBeamVector(object):
 
     from math import pi
 
-    self.s0 = (0.013141995425357206,
-                0.002199999234194632,
-                1.4504754950989514)
-    self.s1 = (-0.01752795848400313,
-               -0.24786554213968193,
-                1.4290948735525306)
+    self.s0 = (0.013141995425357206, 0.002199999234194632, 1.4504754950989514)
+    self.s1 = (-0.01752795848400313, -0.24786554213968193, 1.4290948735525306)
     self.m2 = (0.999975, -0.001289, -0.006968)
     self.phi = 5.83575672475 * pi / 180
 
@@ -144,8 +135,8 @@ class TestFromBeamVector(object):
     c1, c2 = self.cs.from_beam_vector(s_dash)
 
     # Ensure that it is at the origin
-    assert(abs(c1 - 0.0) <= eps)
-    assert(abs(c2 - 0.0) <= eps)
+    assert (abs(c1 - 0.0) <= eps)
+    assert (abs(c2 - 0.0) <= eps)
 
     # Test passed
     print "OK"
@@ -172,7 +163,7 @@ class TestFromBeamVector(object):
     c1, c2 = self.cs.from_beam_vector(s_dash)
 
     # Check the point is equal to the limit in rs
-    assert(abs(sqrt(c1**2 + c2**2) - abs(self.cs.limits()[0])) <= eps)
+    assert (abs(sqrt(c1**2 + c2**2) - abs(self.cs.limits()[0])) <= eps)
 
     # Test passed
     print 'OK'
@@ -182,7 +173,6 @@ class TestFromBeamVector(object):
     self.test_coordinate_of_s1()
     self.test_limit()
 
-
 class TestFromRotationAngle(object):
   """Test the TestFromRotationAngle class"""
 
@@ -191,15 +181,10 @@ class TestFromRotationAngle(object):
 
     from math import pi
 
-    self.s0 = (0.013141995425357206,
-                0.002199999234194632,
-                1.4504754950989514)
-    self.s1 = (-0.01752795848400313,
-               -0.24786554213968193,
-                1.4290948735525306)
+    self.s0 = (0.013141995425357206, 0.002199999234194632, 1.4504754950989514)
+    self.s1 = (-0.01752795848400313, -0.24786554213968193, 1.4290948735525306)
     self.m2 = (0.999975, -0.001289, -0.006968)
     self.phi = 5.83575672475 * pi / 180
-
 
     self.cs = CoordinateSystem(self.m2, self.s0, self.s1, self.phi)
 
@@ -215,7 +200,7 @@ class TestFromRotationAngle(object):
     c3 = self.cs.from_rotation_angle(phi_dash)
 
     # Ensure that it is at the origin
-    assert(abs(c3 - 0.0) <= eps)
+    assert (abs(c3 - 0.0) <= eps)
 
     # Test passed
     print "OK"
@@ -229,7 +214,7 @@ class TestFromRotationAngle(object):
 
     # Select a random rotation from phi
     s_dash = self.s1
-    phi_dash = self.phi + (2.0*random.random() - 1.0) * pi / 180
+    phi_dash = self.phi + (2.0 * random.random() - 1.0) * pi / 180
 
     # Calculate the XDS coordinate, this class uses an approximation
     # for c3 = zeta * (phi' - phi)
@@ -237,7 +222,7 @@ class TestFromRotationAngle(object):
     c3_2 = self.cs.from_rotation_angle_fast(phi_dash)
 
     # Check the true and approximate value are almost equal to 4dp
-    assert(abs(c3 - c3_2) < eps)
+    assert (abs(c3 - c3_2) < eps)
 
     # Test passed
     print "OK"
@@ -247,7 +232,6 @@ class TestFromRotationAngle(object):
     self.test_coordinate_of_phi()
     self.test_e3_coordinate_approximation()
 
-
 class TestToBeamVector(object):
   """Test the ToBeamVector class"""
 
@@ -256,12 +240,8 @@ class TestToBeamVector(object):
 
     from math import pi
 
-    self.s0 = (0.013141995425357206,
-                0.002199999234194632,
-                1.4504754950989514)
-    self.s1 = (-0.01752795848400313,
-               -0.24786554213968193,
-                1.4290948735525306)
+    self.s0 = (0.013141995425357206, 0.002199999234194632, 1.4504754950989514)
+    self.s1 = (-0.01752795848400313, -0.24786554213968193, 1.4290948735525306)
     self.m2 = (0.999975, -0.001289, -0.006968)
     self.phi = 5.83575672475 * pi / 180
 
@@ -272,14 +252,13 @@ class TestToBeamVector(object):
     from scitbx import matrix
     eps = 1e-7
     s_dash = self.cs.to_beam_vector((0, 0))
-    assert(abs(matrix.col(s_dash) - matrix.col(self.s1)) <= eps)
+    assert (abs(matrix.col(s_dash) - matrix.col(self.s1)) <= eps)
 
     print "OK"
 
   def test_far_out_coordinates(self):
     """Test some large coordinates, 1 valid and the other invalid. (i.e.
     a coordinate that cannot be mapped onto the ewald sphere)."""
-
 
     eps = 1e-7
 
@@ -294,7 +273,7 @@ class TestToBeamVector(object):
     try:
       c1 = 1.0 + eps
       s_dash = self.cs.to_beam_vector((c1, c2))
-      assert(False)
+      assert (False)
     except RuntimeError:
 
       #Test passed
@@ -312,7 +291,7 @@ class TestToBeamVector(object):
     try:
       c2 = 1.0 + eps
       s_dash = self.cs.to_beam_vector((c1, c2))
-      assert(False)
+      assert (False)
     except RuntimeError:
 
       #Test passed
@@ -332,6 +311,7 @@ class TestToBeamVector(object):
     min_shift = -0.5
     max_shift = +0.5
     range_shift = max_shift - min_shift
+
     def random_shift():
       return min_shift + random.random() * range_shift
 
@@ -340,9 +320,7 @@ class TestToBeamVector(object):
     for i in range(num):
 
       # Create a beam vector
-      s_dash = matrix.col(self.s1) + matrix.col((random_shift(),
-                                                 random_shift(),
-                                                 random_shift()))
+      s_dash = matrix.col(self.s1) + matrix.col((random_shift(), random_shift(), random_shift()))
       s_dash = s_dash.normalize() * matrix.col(self.s1).length()
 
       # Calculate the XDS coordinate of the vector
@@ -352,7 +330,7 @@ class TestToBeamVector(object):
       s_dash_2 = self.cs.to_beam_vector((c1, c2))
 
       # Check the vectors are almost equal
-      assert(abs(matrix.col(s_dash) - matrix.col(s_dash_2)) <= eps)
+      assert (abs(matrix.col(s_dash) - matrix.col(s_dash_2)) <= eps)
 
     # Test passed
     print "OK"
@@ -363,7 +341,6 @@ class TestToBeamVector(object):
     self.test_far_out_coordinates()
     self.test_forward_and_reverse_transform()
 
-
 class TestToRotationAngle(object):
   """Test the TestToRotationAngle class"""
 
@@ -372,12 +349,8 @@ class TestToRotationAngle(object):
 
     from math import pi
 
-    self.s0 = (0.013141995425357206,
-                0.002199999234194632,
-                1.4504754950989514)
-    self.s1 = (-0.01752795848400313,
-               -0.24786554213968193,
-                1.4290948735525306)
+    self.s0 = (0.013141995425357206, 0.002199999234194632, 1.4504754950989514)
+    self.s1 = (-0.01752795848400313, -0.24786554213968193, 1.4290948735525306)
     self.m2 = (0.999975, -0.001289, -0.006968)
     self.phi = 5.83575672475 * pi / 180
 
@@ -393,6 +366,7 @@ class TestToRotationAngle(object):
     min_shift = -20.0 * pi / 180.0
     max_shift = +20.0 * pi / 180.0
     range_shift = max_shift - min_shift
+
     def random_shift():
       return min_shift + random.random() * range_shift
 
@@ -410,7 +384,7 @@ class TestToRotationAngle(object):
       phi_dash_2 = self.cs.to_rotation_angle(c3)
 
       # Check the vectors are almost equal
-      assert(abs(phi_dash_2 - phi_dash) <= eps)
+      assert (abs(phi_dash_2 - phi_dash) <= eps)
 
     # Test passed
     print "OK"
@@ -418,7 +392,7 @@ class TestToRotationAngle(object):
   def test_origin(self):
     eps = 1e-7
     phi_dash = self.cs.to_rotation_angle(0.0)
-    assert(abs(phi_dash - self.phi) <= eps)
+    assert (abs(phi_dash - self.phi) <= eps)
     print 'OK'
 
   def test_far_out_coordinates(self):
@@ -449,14 +423,14 @@ class TestToRotationAngle(object):
       c3 = lim0 + eps
       phi_dash = self.cs.to_rotation_angle(c3)
       print phi_dash
-      assert(False)
+      assert (False)
     except RuntimeError:
       pass
 
     try:
       c3 = lim1 - eps
       phi_dash = self.cs.to_rotation_angle(c3)
-      assert(False)
+      assert (False)
     except RuntimeError:
       pass
 
@@ -471,7 +445,7 @@ class TestToRotationAngle(object):
     eps = 1e-4
 
     # Select a random rotation from phi
-    phi_dash = self.phi + (2.0*random.random() - 1.0) * pi / 180
+    phi_dash = self.phi + (2.0 * random.random() - 1.0) * pi / 180
 
     # Calculate the XDS coordinate, this class uses an approximation
     # for c3 = zeta * (phi' - phi)
@@ -479,7 +453,7 @@ class TestToRotationAngle(object):
     phi_dash_2 = self.cs.to_rotation_angle_fast(c3)
 
     # Check the true and approximate value are almost equal to 4dp
-    assert(abs(phi_dash - phi_dash_2) < eps)
+    assert (abs(phi_dash - phi_dash_2) < eps)
 
     # Test passed
     print "OK"
@@ -490,7 +464,6 @@ class TestToRotationAngle(object):
     self.test_origin()
     self.test_far_out_coordinates()
     self.test_e3_coordinate_approximation()
-
 
 class Test(object):
   def __init__(self):
@@ -506,7 +479,6 @@ class Test(object):
     self.tst_from_rotation_angle()
     self.tst_to_beam_vector()
     self.tst_to_rotation_angle()
-
 
 if __name__ == '__main__':
   from dials.test import cd_auto

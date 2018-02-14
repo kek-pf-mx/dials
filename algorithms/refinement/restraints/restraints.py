@@ -18,8 +18,8 @@ from dials_refinement_helpers_ext import CalculateCellGradients
 import logging
 logger = logging.getLogger(__name__)
 
-DEG2RAD = pi/180.0
-RAD2DEG = 180.0/pi
+DEG2RAD = pi / 180.0
+RAD2DEG = 180.0 / pi
 
 class DerivedParameterTie(object):
   """Calculate the restraint and gradients for a single derived parameter
@@ -116,9 +116,9 @@ class SingleUnitCellTie(object):
     # For each non-zero sigma create a restraint between the relevant cell
     # parameter and its target value
     self._ties = []
-    for t, s  in zip(self._target, _sigma):
+    for t, s in zip(self._target, _sigma):
       if s is not None:
-        self._ties.append(DerivedParameterTie(t, 1./s**2))
+        self._ties.append(DerivedParameterTie(t, 1. / s**2))
       else:
         self._ties.append(None)
 
@@ -127,7 +127,7 @@ class SingleUnitCellTie(object):
 
     return
 
-  def _calculate_uc_gradients(self, sel=[True]*6):
+  def _calculate_uc_gradients(self, sel=[True] * 6):
     '''Calculate gradients of the unit cell parameters with respect to
     each of the parameters of the crystal unit cell model parameterisation'''
 
@@ -203,7 +203,7 @@ class MeanUnitCellTie(object):
     self._nxls = len(model_parameterisations)
 
     # common factors used in gradient calculations
-    self._meangradfac = 1./self._nxls
+    self._meangradfac = 1. / self._nxls
     self._gradfac = (1. - self._meangradfac)
 
     self._weights = []
@@ -277,7 +277,7 @@ class MeanUnitCellTie(object):
     self.nrestraints_per_cell = self._sel.count(True)
 
     # repeat the weights for each unit cell being restrained
-    weights = [1./s**2 for s in sigma if s > 0.0]
+    weights = [1. / s**2 for s in sigma if s > 0.0]
     weights = [flex.double(self._nxls, w) for w in weights]
     self._weights = weights[0]
     for w in weights[1:]:
@@ -298,8 +298,7 @@ class MeanUnitCellTie(object):
     resid_cc = cc - flex.mean(cc) if self._sel[5] else None
 
     # collect the residuals for restrained parameters only
-    resid = [e for e in [resid_a, resid_b, resid_c,
-                         resid_aa, resid_bb, resid_cc] if e is not None]
+    resid = [e for e in [resid_a, resid_b, resid_c, resid_aa, resid_bb, resid_cc] if e is not None]
 
     # stack the columns
     R = resid[0]
@@ -359,9 +358,7 @@ class MeanUnitCellTie(object):
 
     return self._weights
 
-
 class LowMemoryMeanUnitCellTie(MeanUnitCellTie):
-
   def _construct_grad_block(self, param_grads, i):
     '''helper function to construct a block of gradients. The length of
     param_grads is the number of columns of the block. i selects a row of
@@ -374,9 +371,7 @@ class LowMemoryMeanUnitCellTie(MeanUnitCellTie):
         block[i, j] = g
     return block
 
-
 class MedianUnitCellTie(MeanUnitCellTie):
-
   def residuals(self):
     """Calculate and return the residuals"""
 
@@ -390,8 +385,7 @@ class MedianUnitCellTie(MeanUnitCellTie):
     resid_cc = cc - flex.median(cc) if self._sel[5] else None
 
     # collect the residuals for restrained parameters only
-    resid = [e for e in [resid_a, resid_b, resid_c,
-                         resid_aa, resid_bb, resid_cc] if e is not None]
+    resid = [e for e in [resid_a, resid_b, resid_c, resid_aa, resid_bb, resid_cc] if e is not None]
 
     # stack the columns
     R = resid[0]

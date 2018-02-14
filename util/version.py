@@ -5,6 +5,7 @@ from __future__ import absolute_import, division
 __dials_version_format = "DIALS %s"
 #  2. the most recent annotated git tag (or failing that: a default string)
 __dials_version_default = "1.dev"
+
 #  3. a dash followed by the number of commits since that tag
 #  4. a dash followed by a lowercase 'g' and the current commit id
 
@@ -14,8 +15,8 @@ def get_git_version(dials_path, treat_merges_as_single_commit=False):
   version = None
   with open(os.devnull, 'w') as devnull:
     # Obtain name of the current branch. If this fails then the other commands will probably also fail
-    branch = subprocess.check_output(["git", "describe", "--contains", "--all", "HEAD"],
-      cwd=dials_path, stderr=devnull).rstrip()
+    branch = subprocess.check_output(
+        ["git", "describe", "--contains", "--all", "HEAD"], cwd=dials_path, stderr=devnull).rstrip()
     releasebranch = 'dials-1' in branch
 
     # Always treat merges as single commit on release branches
@@ -26,20 +27,19 @@ def get_git_version(dials_path, treat_merges_as_single_commit=False):
     if treat_merges_as_single_commit:
       try:
         # Get a 'correct' depth, which should be the shortest path to the most recent tag
-        version = subprocess.check_output(["git", "describe", "--long", "--first-parent"],
-          cwd=dials_path, stderr=devnull).rstrip()
+        version = subprocess.check_output(
+            ["git", "describe", "--long", "--first-parent"], cwd=dials_path, stderr=devnull).rstrip()
       except Exception:
         pass # This is not supported on older git versions < 1.8.4.
     if version is None:
       # Find the most recent tag
-      version = subprocess.check_output(["git", "describe", "--long"],
-        cwd=dials_path, stderr=devnull).rstrip()
+      version = subprocess.check_output(["git", "describe", "--long"], cwd=dials_path, stderr=devnull).rstrip()
       if treat_merges_as_single_commit:
         tag = version[:version.rindex('-', 0, version.rindex('-'))]
         commit = version[version.rindex('-') + 1:] # 'gxxxxxxx'
         # Now find the first-parent-path
-        depth = subprocess.check_output(["git", "rev-list", "%s..HEAD" % tag, "--first-parent"],
-          cwd=dials_path, stderr=devnull).rstrip()
+        depth = subprocess.check_output(
+            ["git", "rev-list", "%s..HEAD" % tag, "--first-parent"], cwd=dials_path, stderr=devnull).rstrip()
         if depth:
           depth = depth.strip().count("\n") + 1
         else:
@@ -48,7 +48,7 @@ def get_git_version(dials_path, treat_merges_as_single_commit=False):
 
     # Turn descriptive version string into proper version number
     if version[0] == 'v':
-      version = version[1:].replace('.0-','-')
+      version = version[1:].replace('.0-', '-')
     version = version.replace('-', '.', 1)
     # If we are on a release branch, then append a '-release'-tag
     if releasebranch:

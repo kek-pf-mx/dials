@@ -13,7 +13,6 @@ from __future__ import absolute_import, division
 # LIBTBX_PRE_DISPATCHER_INCLUDE_SH export PHENIX_GUI_ENVIRONMENT=1
 # LIBTBX_PRE_DISPATCHER_INCLUDE_SH export BOOST_ADAPTBX_FPE_DEFAULT=1
 
-
 help_message = '''
 
 This program is used to view the reflections with debugging purposes.
@@ -38,13 +37,9 @@ class Script(object):
               % libtbx.env.dispatcher_name
 
     # Create the parser
-    self.parser = OptionParser(
-      usage=usage,
-      epilog=help_message,
-      read_reflections=True)
+    self.parser = OptionParser(usage=usage, epilog=help_message, read_reflections=True)
 
   def run(self):
-
 
     from dials.util.options import flatten_reflections
     from dials.viewer.viewer_interface import extract_n_show
@@ -57,8 +52,6 @@ class Script(object):
       return
 
     extract_n_show(table[0])
-
-
 
 if __name__ == '__main__':
   script = Script()

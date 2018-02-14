@@ -18,7 +18,7 @@ Examples::
 
 '''
 
-phil_scope= libtbx.phil.parse('''
+phil_scope = libtbx.phil.parse('''
 oscillation_range = None
   .type = floats(size=2)
 step_size = auto
@@ -37,22 +37,15 @@ output {
 }
 ''')
 
-
 def run(args):
 
   from dials.util.options import OptionParser
   from dials.util.options import flatten_datablocks
   import libtbx.load_env
 
-  usage = "%s [options] datablock.json" %(
-    libtbx.env.dispatcher_name)
+  usage = "%s [options] datablock.json" % (libtbx.env.dispatcher_name)
 
-  parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_datablocks=True,
-    check_format=True,
-    epilog=help_message)
+  parser = OptionParser(usage=usage, phil=phil_scope, read_datablocks=True, check_format=True, epilog=help_message)
 
   params, options = parser.parse_args(show_diff_phil=True)
   datablocks = flatten_datablocks(params.input.datablock)
@@ -123,16 +116,16 @@ def run(args):
             continue
           n_px_shadowed[i, j] += polygon_area(shadow[p_id])
 
-  fraction_shadowed = n_px_shadowed/n_px_tot
+  fraction_shadowed = n_px_shadowed / n_px_tot
 
   if params.output.json is not None:
     if params.mode == '2d':
       raise Sorry('json output not supported for mode=2d')
 
-    print 'Writing json output to %s' %params.output.json
+    print 'Writing json output to %s' % params.output.json
     d = {
-      'scan_points': list(scan_points),
-      'fraction_shadowed': list(fraction_shadowed),
+        'scan_points': list(scan_points),
+        'fraction_shadowed': list(fraction_shadowed),
     }
     import json
     with open(params.output.json, 'wb') as f:
@@ -146,7 +139,7 @@ def run(args):
 
     if params.mode == '1d':
       plt.plot(scan_points.as_numpy_array(), fraction_shadowed.as_numpy_array() * 100)
-      plt.xlabel('%s angle (degrees)' %names[scan_axis])
+      plt.xlabel('%s angle (degrees)' % names[scan_axis])
       plt.ylabel('Shadowed area (%)')
       if params.y_max is not None:
         plt.ylim(0, params.y_max)
@@ -154,12 +147,12 @@ def run(args):
         plt.ylim(0, plt.ylim()[1])
     else:
       plt.imshow(fraction_shadowed.as_numpy_array() * 100, interpolation='bicubic')
-      plt.xlabel('%s angle (degrees)' %names[2])
-      plt.ylabel('%s angle (degrees)' %names[1])
-      plt.xlim(0, 360/step)
-      plt.ylim(0, 360/step)
-      plt.axes().set_xticklabels(["%.0f" %(step * t) for t in plt.xticks()[0]])
-      plt.axes().set_yticklabels(["%.0f" %(step * t) for t in plt.yticks()[0]])
+      plt.xlabel('%s angle (degrees)' % names[2])
+      plt.ylabel('%s angle (degrees)' % names[1])
+      plt.xlim(0, 360 / step)
+      plt.ylim(0, 360 / step)
+      plt.axes().set_xticklabels(["%.0f" % (step * t) for t in plt.xticks()[0]])
+      plt.axes().set_yticklabels(["%.0f" % (step * t) for t in plt.yticks()[0]])
       cbar = plt.colorbar()
       cbar.set_label('Shadowed area (%)')
 
@@ -167,9 +160,8 @@ def run(args):
       fig = plt.gcf()
       fig.set_size_inches(params.output.size_inches)
     plt.tight_layout()
-    print 'Saving plot to %s' %params.output.plot
+    print 'Saving plot to %s' % params.output.plot
     plt.savefig(params.output.plot)
-
 
 def polygon_area(points):
   #http://mathworld.wolfram.com/PolygonArea.html
@@ -180,7 +172,6 @@ def polygon_area(points):
   y1.append(y0[0])
 
   return 0.5 * abs(flex.sum(x0 * y1 - x1 * y0))
-
 
 if __name__ == '__main__':
   import sys

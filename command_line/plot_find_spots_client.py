@@ -7,7 +7,8 @@ import iotbx.phil
 help_message = '''
 '''
 
-phil_scope = iotbx.phil.parse("""\
+phil_scope = iotbx.phil.parse(
+    """\
 grid = None
   .type = ints(size=2, value_min=1)
 stereographic_projections = False
@@ -18,23 +19,18 @@ cmap = YlOrRd
   .type = str
 invalid = white
   .type = str
-""", process_includes=True)
-
+""",
+    process_includes=True)
 
 def run(args):
   from dials.util.options import OptionParser
   import libtbx.load_env
 
-  usage = "%s [options] find_spots.json" %(
-    libtbx.env.dispatcher_name)
+  usage = "%s [options] find_spots.json" % (libtbx.env.dispatcher_name)
 
-  parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    epilog=help_message)
+  parser = OptionParser(usage=usage, phil=phil_scope, epilog=help_message)
 
-  params, options, args = parser.parse_args(
-    show_diff_phil=True, return_unhandled=True)
+  params, options, args = parser.parse_args(show_diff_phil=True, return_unhandled=True)
 
   positions = None
   if params.positions is not None:
@@ -76,8 +72,7 @@ def run(args):
   if n_indexed.size():
     sel = n_spots > 0
     fraction_indexed = flex.double(n_indexed.size(), 0)
-    fraction_indexed.set_selected(
-      sel, n_indexed.select(sel)/n_spots.select(sel))
+    fraction_indexed.set_selected(sel, n_indexed.select(sel) / n_spots.select(sel))
 
   import matplotlib
   matplotlib.use('Agg')
@@ -113,18 +108,19 @@ def run(args):
     n_spots_no_ice.append(d['n_spots_no_ice'])
     total_intensity.append(d['total_intensity'])
 
-  stats = group_args(image=image_names,
-                     n_spots_total=n_spots_total,
-                     n_spots_no_ice=n_spots_no_ice,
-                     n_spots_4A=None,
-                     n_indexed=n_indexed,
-                     fraction_indexed=fraction_indexed,
-                     total_intensity=total_intensity,
-                     estimated_d_min=estimated_d_min,
-                     d_min_distl_method_1=d_min_distl_method_1,
-                     d_min_distl_method_2=d_min_distl_method_2,
-                     noisiness_method_1=None,
-                     noisiness_method_2=None)
+  stats = group_args(
+      image=image_names,
+      n_spots_total=n_spots_total,
+      n_spots_no_ice=n_spots_no_ice,
+      n_spots_4A=None,
+      n_indexed=n_indexed,
+      fraction_indexed=fraction_indexed,
+      total_intensity=total_intensity,
+      estimated_d_min=estimated_d_min,
+      d_min_distl_method_1=d_min_distl_method_1,
+      d_min_distl_method_2=d_min_distl_method_2,
+      noisiness_method_1=None,
+      noisiness_method_2=None)
 
   if plot:
     plot_stats(stats)
@@ -135,51 +131,42 @@ def run(args):
   n_rows = 10
   n_rows = min(n_rows, len(n_spots_total))
   perm_n_spots_total = flex.sort_permutation(n_spots_total, reverse=True)
-  print 'Top %i images sorted by number of spots:' %n_rows
+  print 'Top %i images sorted by number of spots:' % n_rows
   print_table(stats, perm=perm_n_spots_total, n_rows=n_rows)
   if flex.max(n_indexed) > 0:
     perm_n_indexed = flex.sort_permutation(n_indexed, reverse=True)
-    print 'Top %i images sorted by number of indexed reflections:' %n_rows
+    print 'Top %i images sorted by number of indexed reflections:' % n_rows
     print_table(stats, perm=perm_n_indexed, n_rows=n_rows)
 
   print "Number of indexed lattices: ", (n_indexed > 0).count(True)
 
-  print "Number with valid d_min but failed indexing: ", (
-    (d_min_distl_method_1 > 0) &
-    (d_min_distl_method_2 > 0) &
-    (estimated_d_min > 0) &
-    (n_indexed == 0)).count(True)
+  print "Number with valid d_min but failed indexing: ", ((d_min_distl_method_1 > 0) & (d_min_distl_method_2 > 0) &
+                                                          (estimated_d_min > 0) & (n_indexed == 0)).count(True)
 
   n_bins = 20
-  spot_count_histogram(
-    n_spots_total, n_bins=n_bins, filename='hist_n_spots_total.png', log=True)
-  spot_count_histogram(
-    n_spots_no_ice, n_bins=n_bins, filename='hist_n_spots_no_ice.png', log=True)
-  spot_count_histogram(
-    n_indexed.select(n_indexed > 0), n_bins=n_bins, filename='hist_n_indexed.png', log=False)
+  spot_count_histogram(n_spots_total, n_bins=n_bins, filename='hist_n_spots_total.png', log=True)
+  spot_count_histogram(n_spots_no_ice, n_bins=n_bins, filename='hist_n_spots_no_ice.png', log=True)
+  spot_count_histogram(n_indexed.select(n_indexed > 0), n_bins=n_bins, filename='hist_n_indexed.png', log=False)
 
   if len(crystals):
     plot_unit_cell_histograms(crystals)
 
   if params.stereographic_projections and len(crystals):
     from dxtbx.datablock import DataBlockFactory
-    datablocks = DataBlockFactory.from_filenames(
-      [image_names[0]], verbose=False)
+    datablocks = DataBlockFactory.from_filenames([image_names[0]], verbose=False)
     assert len(datablocks) == 1
     imageset = datablocks[0].extract_imagesets()[0]
     s0 = imageset.get_beam().get_s0()
     # XXX what if no goniometer?
     rotation_axis = imageset.get_goniometer().get_rotation_axis()
 
-    indices = ((1,0,0), (0,1,0), (0,0,1))
+    indices = ((1, 0, 0), (0, 1, 0), (0, 0, 1))
     for i, index in enumerate(indices):
 
       from cctbx import crystal, miller
       from scitbx import matrix
       miller_indices = flex.miller_index([index])
-      symmetry = crystal.symmetry(
-        unit_cell=crystals[0].get_unit_cell(),
-        space_group=crystals[0].get_space_group())
+      symmetry = crystal.symmetry(unit_cell=crystals[0].get_unit_cell(), space_group=crystals[0].get_space_group())
       miller_set = miller.set(symmetry, miller_indices)
       d_spacings = miller_set.d_spacings()
       d_spacings = d_spacings.as_non_anomalous_array().expand_to_p1()
@@ -197,8 +184,7 @@ def run(args):
 
       for cryst in crystals:
         reciprocal_space_points = list(cryst.get_U() * cryst.get_B()) * miller_indices.as_vec3_double()
-        projections.append(stereographic_projection(
-          reciprocal_space_points, reference_poles))
+        projections.append(stereographic_projection(reciprocal_space_points, reference_poles))
 
         #from dials.algorithms.indexing.compare_orientation_matrices import \
         #  difference_rotation_matrix_and_euler_angles
@@ -207,11 +193,10 @@ def run(args):
         #print max(euler_angles)
 
       from dials.command_line.stereographic_projection import plot_projections
-      plot_projections(projections, filename='projections_%s.png' %('hkl'[i]))
+      plot_projections(projections, filename='projections_%s.png' % ('hkl' [i]))
       pyplot.clf()
 
-  def plot_grid(values, grid, file_name, cmap=pyplot.cm.Reds,
-                vmin=None, vmax=None, invalid='white'):
+  def plot_grid(values, grid, file_name, cmap=pyplot.cm.Reds, vmin=None, vmax=None, invalid='white'):
     values = values.as_double()
     # At DLS, fast direction appears to be largest direction
     if grid[0] > grid[1]:
@@ -225,8 +210,7 @@ def run(args):
     #f, (ax1, ax2) = pyplot.subplots(2)
     f, ax1 = pyplot.subplots(1)
 
-    mesh1 = ax1.pcolormesh(
-      values.as_numpy_array(), cmap=cmap, vmin=vmin, vmax=vmax)
+    mesh1 = ax1.pcolormesh(values.as_numpy_array(), cmap=cmap, vmin=vmin, vmax=vmax)
     mesh1.cmap.set_under(color=invalid, alpha=None)
     mesh1.cmap.set_over(color=invalid, alpha=None)
     #mesh2 = ax2.contour(Z, cmap=cmap, vmin=vmin, vmax=vmax)
@@ -240,8 +224,7 @@ def run(args):
     pyplot.savefig(file_name, dpi=600)
     pyplot.clf()
 
-  def plot_positions(values, positions, file_name, cmap=pyplot.cm.Reds,
-                     vmin=None, vmax=None, invalid='white'):
+  def plot_positions(values, positions, file_name, cmap=pyplot.cm.Reds, vmin=None, vmax=None, invalid='white'):
     values = values.as_double()
     assert positions.size() >= values.size()
     positions = positions[:values.size()]
@@ -257,19 +240,18 @@ def run(args):
     dx = dx.select(dx > 0)
     dy = dy.select(dy > 0)
 
-    scale = 1/flex.min(dx)
+    scale = 1 / flex.min(dx)
     #print scale
     x = (x * scale).iround()
     y = (y * scale).iround()
 
     from libtbx.math_utils import iceil
-    z = flex.double(flex.grid(iceil(flex.max(y))+1, iceil(flex.max(x))+1), -2)
+    z = flex.double(flex.grid(iceil(flex.max(y)) + 1, iceil(flex.max(x)) + 1), -2)
     #print z.all()
     for x_, y_, z_ in zip(x, y, values):
       z[y_, x_] = z_
 
-    plot_grid(z.as_1d(), z.all(), file_name, cmap=cmap, vmin=vmin, vmax=vmax,
-              invalid=invalid)
+    plot_grid(z.as_1d(), z.all(), file_name, cmap=cmap, vmin=vmin, vmax=vmax, invalid=invalid)
     return
 
   if grid is not None or positions is not None:
@@ -280,17 +262,13 @@ def run(args):
       plotter = plot_positions
 
     cmap = pyplot.get_cmap(params.cmap)
-    plotter(n_spots_total, positions, 'grid_spot_count_total.png', cmap=cmap,
-            invalid=params.invalid)
-    plotter(n_spots_no_ice, positions, 'grid_spot_count_no_ice.png', cmap=cmap,
-            invalid=params.invalid)
-    plotter(total_intensity, positions, 'grid_total_intensity.png', cmap=cmap,
-            invalid=params.invalid)
+    plotter(n_spots_total, positions, 'grid_spot_count_total.png', cmap=cmap, invalid=params.invalid)
+    plotter(n_spots_no_ice, positions, 'grid_spot_count_no_ice.png', cmap=cmap, invalid=params.invalid)
+    plotter(total_intensity, positions, 'grid_total_intensity.png', cmap=cmap, invalid=params.invalid)
     if flex.max(n_indexed) > 0:
-      plotter(n_indexed, positions, 'grid_n_indexed.png', cmap=cmap,
-              invalid=params.invalid)
-      plotter(fraction_indexed, positions, 'grid_fraction_indexed.png',
-              cmap=cmap, vmin=0, vmax=1, invalid=params.invalid)
+      plotter(n_indexed, positions, 'grid_n_indexed.png', cmap=cmap, invalid=params.invalid)
+      plotter(
+          fraction_indexed, positions, 'grid_fraction_indexed.png', cmap=cmap, vmin=0, vmax=1, invalid=params.invalid)
 
     for i, d_min in enumerate((estimated_d_min, d_min_distl_method_1, d_min_distl_method_2)):
       from cctbx import uctbx
@@ -301,20 +279,17 @@ def run(args):
 
       vmin = flex.min(d_min.select(d_min > 0))
       vmax = flex.max(d_min)
-      cmap = pyplot.get_cmap('%s_r' %params.cmap)
+      cmap = pyplot.get_cmap('%s_r' % params.cmap)
       d_min.set_selected(d_min <= 0, vmax)
 
       if i == 0:
-        plotter(d_min, positions, 'grid_d_min.png', cmap=cmap, vmin=vmin,
-                vmax=vmax, invalid=params.invalid)
+        plotter(d_min, positions, 'grid_d_min.png', cmap=cmap, vmin=vmin, vmax=vmax, invalid=params.invalid)
       else:
         plotter(
-          d_min, positions, 'grid_d_min_method_%i.png' %i, cmap=cmap,
-          vmin=vmin, vmax=vmax, invalid=params.invalid)
+            d_min, positions, 'grid_d_min_method_%i.png' % i, cmap=cmap, vmin=vmin, vmax=vmax, invalid=params.invalid)
 
   if flex.max(n_indexed) > 0:
-    pyplot.hexbin(
-      n_spots, n_indexed, bins='log', cmap=pyplot.cm.jet, gridsize=50)
+    pyplot.hexbin(n_spots, n_indexed, bins='log', cmap=pyplot.cm.jet, gridsize=50)
     pyplot.colorbar()
     #pyplot.scatter(n_spots, n_indexed, marker=marker, alpha=alpha, c=blue, lw=lw)
     xlim = pyplot.xlim()
@@ -327,11 +302,10 @@ def run(args):
     pyplot.savefig('n_spots_vs_n_indexed.png')
     pyplot.clf()
 
-    pyplot.hexbin(
-      n_spots, fraction_indexed, bins='log', cmap=pyplot.cm.jet, gridsize=50)
+    pyplot.hexbin(n_spots, fraction_indexed, bins='log', cmap=pyplot.cm.jet, gridsize=50)
     pyplot.colorbar()
     #pyplot.scatter(
-      #n_spots, fraction_indexed, marker=marker, alpha=alpha, c=blue, lw=lw)
+    #n_spots, fraction_indexed, marker=marker, alpha=alpha, c=blue, lw=lw)
     pyplot.xlim(0, pyplot.xlim()[1])
     pyplot.ylim(0, pyplot.ylim()[1])
     pyplot.xlabel('# spots')
@@ -339,11 +313,10 @@ def run(args):
     pyplot.savefig('n_spots_vs_fraction_indexed.png')
     pyplot.clf()
 
-    pyplot.hexbin(
-      n_indexed, fraction_indexed, bins='log', cmap=pyplot.cm.jet, gridsize=50)
+    pyplot.hexbin(n_indexed, fraction_indexed, bins='log', cmap=pyplot.cm.jet, gridsize=50)
     pyplot.colorbar()
     #pyplot.scatter(
-      #n_indexed, fraction_indexed, marker=marker, alpha=alpha, c=blue, lw=lw)
+    #n_indexed, fraction_indexed, marker=marker, alpha=alpha, c=blue, lw=lw)
     pyplot.xlim(0, pyplot.xlim()[1])
     pyplot.ylim(0, pyplot.ylim()[1])
     pyplot.xlabel('# indexed')
@@ -351,11 +324,10 @@ def run(args):
     pyplot.savefig('n_indexed_vs_fraction_indexed.png')
     pyplot.clf()
 
-    pyplot.hexbin(
-      n_spots, n_lattices, bins='log', cmap=pyplot.cm.jet, gridsize=50)
+    pyplot.hexbin(n_spots, n_lattices, bins='log', cmap=pyplot.cm.jet, gridsize=50)
     pyplot.colorbar()
     #pyplot.scatter(
-      #n_spots, n_lattices, marker=marker, alpha=alpha, c=blue, lw=lw)
+    #n_spots, n_lattices, marker=marker, alpha=alpha, c=blue, lw=lw)
     pyplot.xlim(0, pyplot.xlim()[1])
     pyplot.ylim(0, pyplot.ylim()[1])
     pyplot.xlabel('# spots')
@@ -365,8 +337,7 @@ def run(args):
 
   #pyplot.scatter(
   #  estimated_d_min, d_min_distl_method_1, marker=marker, alpha=alpha, c=blue, lw=lw)
-  pyplot.hexbin(estimated_d_min, d_min_distl_method_1, bins='log',
-                cmap=pyplot.cm.jet, gridsize=50)
+  pyplot.hexbin(estimated_d_min, d_min_distl_method_1, bins='log', cmap=pyplot.cm.jet, gridsize=50)
   pyplot.colorbar()
   #pyplot.gca().set_aspect('equal')
   xlim = pyplot.xlim()
@@ -382,8 +353,7 @@ def run(args):
 
   #pyplot.scatter(
   #  estimated_d_min, d_min_distl_method_2, marker=marker, alpha=alpha, c=blue, lw=lw)
-  pyplot.hexbin(estimated_d_min, d_min_distl_method_2, bins='log',
-                cmap=pyplot.cm.jet, gridsize=50)
+  pyplot.hexbin(estimated_d_min, d_min_distl_method_2, bins='log', cmap=pyplot.cm.jet, gridsize=50)
   pyplot.colorbar()
   #pyplot.gca().set_aspect('equal')
   xlim = pyplot.xlim()
@@ -399,8 +369,7 @@ def run(args):
 
   #pyplot.scatter(
   #  d_min_distl_method_1, d_min_distl_method_2, marker=marker, alpha=alpha, c=blue, lw=lw)
-  pyplot.hexbin(d_min_distl_method_1, d_min_distl_method_2, bins='log',
-                cmap=pyplot.cm.jet, gridsize=50)
+  pyplot.hexbin(d_min_distl_method_1, d_min_distl_method_2, bins='log', cmap=pyplot.cm.jet, gridsize=50)
   pyplot.colorbar()
   #pyplot.gca().set_aspect('equal')
   xlim = pyplot.xlim()
@@ -414,11 +383,10 @@ def run(args):
   pyplot.savefig('distl_method_1_vs_distl_method_2.png')
   pyplot.clf()
 
-  pyplot.hexbin(
-    n_spots, estimated_d_min, bins='log', cmap=pyplot.cm.jet, gridsize=50)
+  pyplot.hexbin(n_spots, estimated_d_min, bins='log', cmap=pyplot.cm.jet, gridsize=50)
   pyplot.colorbar()
   #pyplot.scatter(
-    #n_spots, estimated_d_min, marker=marker, alpha=alpha, c=blue, lw=lw)
+  #n_spots, estimated_d_min, marker=marker, alpha=alpha, c=blue, lw=lw)
   pyplot.xlim(0, pyplot.xlim()[1])
   pyplot.ylim(0, pyplot.ylim()[1])
   pyplot.xlabel('# spots')
@@ -426,11 +394,10 @@ def run(args):
   pyplot.savefig('n_spots_vs_d_min.png')
   pyplot.clf()
 
-  pyplot.hexbin(
-    n_spots, d_min_distl_method_1, bins='log', cmap=pyplot.cm.jet, gridsize=50)
+  pyplot.hexbin(n_spots, d_min_distl_method_1, bins='log', cmap=pyplot.cm.jet, gridsize=50)
   pyplot.colorbar()
   #pyplot.scatter(
-    #n_spots, d_min_distl_method_1, marker=marker, alpha=alpha, c=blue, lw=lw)
+  #n_spots, d_min_distl_method_1, marker=marker, alpha=alpha, c=blue, lw=lw)
   pyplot.xlim(0, pyplot.xlim()[1])
   pyplot.ylim(0, pyplot.ylim()[1])
   pyplot.xlabel('# spots')
@@ -438,11 +405,10 @@ def run(args):
   pyplot.savefig('n_spots_vs_distl_method_1.png')
   pyplot.clf()
 
-  pyplot.hexbin(
-    n_spots, d_min_distl_method_2, bins='log', cmap=pyplot.cm.jet, gridsize=50)
+  pyplot.hexbin(n_spots, d_min_distl_method_2, bins='log', cmap=pyplot.cm.jet, gridsize=50)
   pyplot.colorbar()
   #pyplot.scatter(
-    #n_spots, d_min_distl_method_2, marker=marker, alpha=alpha, c=blue, lw=lw)
+  #n_spots, d_min_distl_method_2, marker=marker, alpha=alpha, c=blue, lw=lw)
   pyplot.xlim(0, pyplot.xlim()[1])
   pyplot.ylim(0, pyplot.ylim()[1])
   pyplot.xlabel('# spots')
@@ -457,10 +423,13 @@ def spot_count_histogram(n_spots, n_bins=20, filename='n_spots_hist.png', log=Fa
 
   from matplotlib import pyplot
   pyplot.bar(
-    hist.slot_centers().as_numpy_array(),
-    hist.slots().as_numpy_array(),
-    width=0.75*hist.slot_width(), align='center',
-    color=blue, edgecolor=blue, log=log)
+      hist.slot_centers().as_numpy_array(),
+      hist.slots().as_numpy_array(),
+      width=0.75 * hist.slot_width(),
+      align='center',
+      color=blue,
+      edgecolor=blue,
+      log=log)
   pyplot.savefig(filename)
   pyplot.clf()
 
@@ -477,10 +446,9 @@ def unit_cell_histograms(crystals):
 
   from cctbx import uctbx
   median_unit_cell = uctbx.unit_cell([flex.median(p) for p in params])
-  modal_unit_cell = uctbx.unit_cell([
-    h.slot_centers()[flex.max_index(h.slots())] for h in histograms])
-  print 'Modal unit cell: %s' %str(modal_unit_cell)
-  print 'Median unit cell: %s' %str(median_unit_cell)
+  modal_unit_cell = uctbx.unit_cell([h.slot_centers()[flex.max_index(h.slots())] for h in histograms])
+  print 'Modal unit cell: %s' % str(modal_unit_cell)
+  print 'Median unit cell: %s' % str(median_unit_cell)
 
   return histograms
 
@@ -500,10 +468,12 @@ def plot_unit_cell_histograms(crystals):
     col, row = divmod(i, 3)
     ax = axes[row][col]
     ax.bar(
-      hist.slot_centers().as_numpy_array(),
-      hist.slots().as_numpy_array(),
-      width=0.75*hist.slot_width(), align='center',
-      color=blue, edgecolor=blue)
+        hist.slot_centers().as_numpy_array(),
+        hist.slots().as_numpy_array(),
+        width=0.75 * hist.slot_width(),
+        align='center',
+        color=blue,
+        edgecolor=blue)
     if col == 0:
       ax.set_ylabel('Frequency')
       if row == 2:
@@ -513,8 +483,6 @@ def plot_unit_cell_histograms(crystals):
   pyplot.savefig('unit_cell_histograms.png')
   pyplot.clf()
 
-
 if __name__ == '__main__':
   import sys
   run(sys.argv[1:])
-

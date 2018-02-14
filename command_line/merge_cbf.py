@@ -27,7 +27,8 @@ Examples::
 
 '''
 
-phil_scope = iotbx.phil.parse("""\
+phil_scope = iotbx.phil.parse(
+    """\
 merge_n_images = 2
   .type = int(value_min=1)
   .help = "Number of input images to average into a single output image"
@@ -35,13 +36,13 @@ output {
   image_prefix = sum_
     .type = path
 }
-""", process_includes=True)
+""",
+    process_includes=True)
 
 def merge_cbf(imageset, n_images, out_prefix="sum_"):
 
   from dxtbx.format.FormatCBF import FormatCBF
-  assert issubclass(imageset.get_format_class(), FormatCBF), (
-    "Only CBF format images supported")
+  assert issubclass(imageset.get_format_class(), FormatCBF), ("Only CBF format images supported")
 
   from cbflib_adaptbx import compress
   import binascii
@@ -58,7 +59,7 @@ def merge_cbf(imageset, n_images, out_prefix="sum_"):
 
     for j in range(n_images):
 
-      i_in = (i_out*n_images) + j
+      i_in = (i_out * n_images) + j
 
       data_in = imageset.get_raw_data(i_in)
       assert len(data_in) == 1
@@ -74,11 +75,11 @@ def merge_cbf(imageset, n_images, out_prefix="sum_"):
         data_in.set_selected(data_special, 0)
         data_out += data_in
 
-    out_image = "%s%04i.cbf" %(out_prefix, i_out+1)
+    out_image = "%s%04i.cbf" % (out_prefix, i_out + 1)
 
     start_tag = binascii.unhexlify('0c1a04d5')
 
-    data = open(imageset.get_path(i_out*n_images), 'rb').read()
+    data = open(imageset.get_path(i_out * n_images), 'rb').read()
     data_offset = data.find(start_tag)
     cbf_header = data[:data_offset]
 
@@ -117,7 +118,7 @@ def merge_cbf(imageset, n_images, out_prefix="sum_"):
       while True:
         n = n + 1
         line = new_header[n].strip()
-        if line in { '', ';' }: # end of loop
+        if line in {'', ';'}: # end of loop
           break
         elif line.startswith('_'): # loop header
           if line in multiply_fields:
@@ -146,18 +147,12 @@ def run():
   from dials.util.options import OptionParser
   from dials.util.options import flatten_datablocks
 
-  usage = "%s [options] image_*.cbf" %libtbx.env.dispatcher_name
+  usage = "%s [options] image_*.cbf" % libtbx.env.dispatcher_name
 
   parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_datablocks=True,
-    read_datablocks_from_images=True,
-    epilog=help_message
-  )
+      usage=usage, phil=phil_scope, read_datablocks=True, read_datablocks_from_images=True, epilog=help_message)
 
-  params, options, args = parser.parse_args(
-    show_diff_phil=True, return_unhandled=True)
+  params, options, args = parser.parse_args(show_diff_phil=True, return_unhandled=True)
 
   n_images = params.merge_n_images
   out_prefix = params.output.image_prefix

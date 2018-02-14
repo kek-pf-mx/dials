@@ -6,7 +6,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """Managed reflection prediction for refinement.
 
 * ScansRayPredictor adapts DIALS prediction for use in refinement, by keeping
@@ -34,7 +33,7 @@ class ScansRayPredictor(object):
   required.
   """
 
-  def __init__(self, experiments, sweep_range=(0, 2.*pi)):
+  def __init__(self, experiments, sweep_range=(0, 2. * pi)):
     """Construct by linking to instances of experimental model classes"""
 
     self._experiments = experiments
@@ -49,12 +48,9 @@ class ScansRayPredictor(object):
     """
 
     e = self._experiments[experiment_id]
-    ray_predictor = ScanStaticRayPredictor(
-      e.beam.get_s0(),
-      e.goniometer.get_rotation_axis_datum(),
-      e.goniometer.get_fixed_rotation(),
-      e.goniometer.get_setting_rotation(),
-      self._sweep_range)
+    ray_predictor = ScanStaticRayPredictor(e.beam.get_s0(), e.goniometer.get_rotation_axis_datum(),
+                                           e.goniometer.get_fixed_rotation(), e.goniometer.get_setting_rotation(),
+                                           self._sweep_range)
 
     UB_ = UB if UB else e.crystal.get_A()
 
@@ -83,8 +79,7 @@ class ExperimentsPredictor(object):
       predictors = [st(e, spherical_relp=self._spherical_relp) \
                           for e in self._experiments]
     else:
-      predictors = [sc(e) if e.goniometer else st(e,
-        spherical_relp=self._spherical_relp) for e in self._experiments]
+      predictors = [sc(e) if e.goniometer else st(e, spherical_relp=self._spherical_relp) for e in self._experiments]
     self._UBs = [e.crystal.get_A() for e in self._experiments]
 
     for iexp, e in enumerate(self._experiments):
@@ -116,4 +111,3 @@ class ExperimentsPredictor(object):
       reflections.set_selected(sel, refs)
 
     return reflections
-

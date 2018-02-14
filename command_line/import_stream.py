@@ -71,9 +71,6 @@ phil_scope = parse('''
 
 ''')
 
-
-
-
 class Script(object):
   ''' Class to parse the command line options. '''
 
@@ -84,11 +81,7 @@ class Script(object):
 
     # Create the option parser
     usage = "usage: %s [options]" % libtbx.env.dispatcher_name
-    self.parser = OptionParser(
-      usage=usage,
-      sort_options=True,
-      phil=phil_scope,
-      epilog=help_message)
+    self.parser = OptionParser(usage=usage, sort_options=True, phil=phil_scope, epilog=help_message)
 
   def run(self):
     ''' Parse the options. '''
@@ -105,10 +98,7 @@ class Script(object):
     params, options = self.parser.parse_args(show_diff_phil=False, quick_parse=True)
 
     # Configure logging
-    log.config(
-      params.verbosity,
-      info=params.output.log,
-      debug=params.output.debug_log)
+    log.config(params.verbosity, info=params.output.log, debug=params.output.debug_log)
     from dials.util.version import dials_version
     logger.info(dials_version())
 
@@ -140,9 +130,7 @@ class Script(object):
 
     # Initialise the stream
     stream = ZMQStream(params.input.host, params.input.port)
-    decoder = Decoder(
-      params.output.directory,
-      params.output.image_template)
+    decoder = Decoder(params.output.directory, params.output.image_template)
     imageset = None
     while True:
 
@@ -162,14 +150,10 @@ class Script(object):
         self.write_datablocks(datablocks, params)
       elif obj.is_image():
         assert imageset is not None
-        filename = join(
-          params.output.directory,
-          params.output.image_template % obj.count)
+        filename = join(params.output.directory, params.output.image_template % obj.count)
         with open(filename, "wb") as outfile:
           outfile.write(obj.data)
-        filename = join(
-          params.output.directory,
-          "%s.info" % (params.output.image_template % obj.count))
+        filename = join(params.output.directory, "%s.info" % (params.output.image_template % obj.count))
         with open(filename, "w") as outfile:
           json.dump(obj.info, outfile)
       elif obj.is_endofseries():
@@ -191,9 +175,6 @@ class Script(object):
       logger.info('Writing datablocks to %s' % params.output.datablock)
       dump = DataBlockDumper(datablocks)
       dump.as_file(params.output.datablock, compact=params.output.compact)
-
-
-
 
 if __name__ == '__main__':
   from dials.util import halraiser

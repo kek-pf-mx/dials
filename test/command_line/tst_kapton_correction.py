@@ -1,9 +1,7 @@
 from __future__ import absolute_import, division
 from dials.array_family import flex # import dependency
 
-
 class Test(object):
-
   def __init__(self):
     from os.path import join
     import libtbx.load_env
@@ -24,7 +22,7 @@ class Test(object):
     import os
     from uuid import uuid4
 
-    dirname ='tmp_%s' % uuid4().hex
+    dirname = 'tmp_%s' % uuid4().hex
     os.mkdir(dirname)
     os.chdir(dirname)
     loc = os.getcwd()
@@ -75,10 +73,8 @@ class Test(object):
         }
       }
 """
-    without_kapton_phil = templ_phil % ("nokapton", "nokapton",
-      os.path.join(self.path, "mask.pickle"), "False")
-    with_kapton_phil = templ_phil % ("kapton", "kapton",
-      os.path.join(self.path, "mask.pickle"), "True")
+    without_kapton_phil = templ_phil % ("nokapton", "nokapton", os.path.join(self.path, "mask.pickle"), "False")
+    with_kapton_phil = templ_phil % ("kapton", "kapton", os.path.join(self.path, "mask.pickle"), "True")
 
     f = open("integrate_without_kapton.phil", 'wb')
     f.write(without_kapton_phil)
@@ -88,13 +84,9 @@ class Test(object):
     f.write(with_kapton_phil)
     f.close()
 
-
-
     # Call dials.integrate with and without kapton correction
     for phil in "integrate_without_kapton.phil", "integrate_with_kapton.phil":
-      result = easy_run.fully_buffered([
-        'dials.integrate', pickle_name, json_name, phil
-      ]).raise_if_errors()
+      result = easy_run.fully_buffered(['dials.integrate', pickle_name, json_name, phil]).raise_if_errors()
 
     import cPickle as pickle
     results = []
@@ -102,10 +94,12 @@ class Test(object):
       result = os.path.join(loc, "idx-20161021225550223_integrated_%s.pickle" % mode)
       table = pickle.load(open(result, 'rb'))
       millers = table['miller_index']
-      test_indices = {'zero':(-5, 2, -6), 'low':(-2, -20, 7), 'high':(-1, -10, 4)}
-      test_rows = {k:millers.first_index(v) for k,v in test_indices.iteritems()}
-      test_I_sigsqI = {k:(table[v]['intensity.sum.value'], table[v]['intensity.sum.variance'])
-                       for k,v in test_rows.iteritems()}
+      test_indices = {'zero': (-5, 2, -6), 'low': (-2, -20, 7), 'high': (-1, -10, 4)}
+      test_rows = {k: millers.first_index(v) for k, v in test_indices.iteritems()}
+      test_I_sigsqI = {
+          k: (table[v]['intensity.sum.value'], table[v]['intensity.sum.variance'])
+          for k, v in test_rows.iteritems()
+      }
       results.append(test_I_sigsqI)
     assert results[0]['zero'][0] == results[1]['zero'][0]
     assert results[0]['zero'][1] - results[1]['zero'][1] < 0.0001

@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division
 
 class Test(object):
-
   def __init__(self):
     pass
 
@@ -12,12 +11,12 @@ class Test(object):
     from scitbx.array_family import flex
     flags = [m & (1 << 0) for m in mask]
     pixels = flex.select(shoebox, flags=flags)
-    assert(len(pixels) >= min_pixels)
+    assert (len(pixels) >= min_pixels)
     meanp = flex.mean_and_variance(flex.double(pixels))
     maxp = flex.max(flex.double(pixels))
     m = meanp.mean()
     s = meanp.unweighted_sample_standard_deviation()
-    assert(maxp <= m + n_sigma * s)
+    assert (maxp <= m + n_sigma * s)
 
   def tst_no_mask(self):
     from scitbx.array_family import flex

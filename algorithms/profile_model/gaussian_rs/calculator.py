@@ -83,7 +83,6 @@ class ComputeEsdBeamDivergence(object):
     # Return a list of variances
     return flex.double(variance)
 
-
 class FractionOfObservedIntensity(object):
   '''Calculate the fraction of observed intensity for different sigma_m.'''
 
@@ -102,8 +101,7 @@ class FractionOfObservedIntensity(object):
     dphi2 = scan.get_oscillation(deg=False)[1] / 2.0
 
     # Calculate a list of angles and zeta's
-    tau, zeta = self._calculate_tau_and_zeta(crystal, beam, detector,
-                                             goniometer, scan, reflections)
+    tau, zeta = self._calculate_tau_and_zeta(crystal, beam, detector, goniometer, scan, reflections)
 
     # Calculate zeta * (tau +- dphi / 2) / sqrt(2)
     self.e1 = (tau + dphi2) * flex.abs(zeta) / sqrt(2.0)
@@ -140,8 +138,8 @@ class FractionOfObservedIntensity(object):
     for s, b, p, z in zip(sbox, bbox, phi, zeta):
       for z0, f in enumerate(range(b[4], b[5])):
         phi0 = scan.get_angle_from_array_index(int(f), deg=False)
-        phi1 = scan.get_angle_from_array_index(int(f)+1, deg=False)
-        m = s.mask[z0:z0+1,:,:]
+        phi1 = scan.get_angle_from_array_index(int(f) + 1, deg=False)
+        m = s.mask[z0:z0 + 1, :, :]
         if m.count(mask_code) > 0:
           tau.append((phi1 + phi0) / 2.0 - p)
           zeta2.append(z)
@@ -165,7 +163,7 @@ class FractionOfObservedIntensity(object):
 
     # Tiny value
     TINY = 1e-10
-    assert(sigma_m > TINY)
+    assert (sigma_m > TINY)
 
     # Calculate the two components to the fraction
     a = scitbx.math.erf(self.e1 / sigma_m)
@@ -176,18 +174,16 @@ class FractionOfObservedIntensity(object):
 
     # Set any points <= 0 to 1e-10 (otherwise will get a floating
     # point error in log calculation below).
-    assert(R.all_ge(0))
+    assert (R.all_ge(0))
     mask = R < TINY
-    assert(mask.count(True) < len(mask))
+    assert (mask.count(True) < len(mask))
     R.set_selected(mask, TINY)
 
     # Return the logarithm of r
     return flex.log(R)
 
-
 class ComputeEsdReflectingRange(object):
   '''calculate the e.s.d of the reflecting range (mosaicity).'''
-
 
   class Estimator(object):
     '''Estimate E.s.d reflecting range by maximum likelihood estimation.'''
@@ -212,8 +208,7 @@ class ComputeEsdReflectingRange(object):
       # reflections as per how Mosflm does it...
 
       # Initialise the function used in likelihood estimation.
-      self._R = FractionOfObservedIntensity(crystal, beam, detector, goniometer,
-                                            scan, reflections)
+      self._R = FractionOfObservedIntensity(crystal, beam, detector, goniometer, scan, reflections)
 
       # Set the starting values to try 1, 3 degrees seems sensible for
       # crystal mosaic spread
@@ -222,11 +217,7 @@ class ComputeEsdReflectingRange(object):
       starting_simplex = [flex.double([start]), flex.double([stop])]
 
       # Initialise the optimizer
-      optimizer = simplex.simplex_opt(
-        1,
-        matrix=starting_simplex,
-        evaluator=self,
-        tolerance=1e-7)
+      optimizer = simplex.simplex_opt(1, matrix=starting_simplex, evaluator=self, tolerance=1e-7)
 
       # Get the solution
       self.sigma = exp(optimizer.get_solution()[0])
@@ -239,6 +230,7 @@ class ComputeEsdReflectingRange(object):
 
   class CrudeEstimator(object):
     ''' If the main estimator failed make a crude estimate '''
+
     def __init__(self, crystal, beam, detector, goniometer, scan, reflections):
 
       from dials.array_family import flex
@@ -248,8 +240,7 @@ class ComputeEsdReflectingRange(object):
       dphi2 = scan.get_oscillation(deg=False)[1] / 2.0
 
       # Calculate a list of angles and zeta's
-      tau, zeta = self._calculate_tau_and_zeta(crystal, beam, detector,
-                                               goniometer, scan, reflections)
+      tau, zeta = self._calculate_tau_and_zeta(crystal, beam, detector, goniometer, scan, reflections)
 
       # Calculate zeta * (tau +- dphi / 2) / sqrt(2)
       X = tau * zeta
@@ -287,8 +278,8 @@ class ComputeEsdReflectingRange(object):
       for s, b, p, z in zip(sbox, bbox, phi, zeta):
         for z0, f in enumerate(range(b[4], b[5])):
           phi0 = scan.get_angle_from_array_index(int(f), deg=False)
-          phi1 = scan.get_angle_from_array_index(int(f)+1, deg=False)
-          m = s.mask[z0:z0+1,:,:]
+          phi1 = scan.get_angle_from_array_index(int(f) + 1, deg=False)
+          m = s.mask[z0:z0 + 1, :, :]
           if m.count(mask_code) > 0:
             tau.append((phi1 + phi0) / 2.0 - p)
             zeta2.append(z)
@@ -298,8 +289,8 @@ class ComputeEsdReflectingRange(object):
 
   class ExtendedEstimator(object):
     ''' Try to estimate using knowledge of intensities '''
-    def __init__(self, crystal, beam, detector, goniometer, scan, reflections,
-                 n_macro_cycles=10):
+
+    def __init__(self, crystal, beam, detector, goniometer, scan, reflections, n_macro_cycles=10):
 
       from dials.array_family import flex
       from math import sqrt, pi, exp, log
@@ -309,8 +300,7 @@ class ComputeEsdReflectingRange(object):
       dphi2 = scan.get_oscillation(deg=False)[1] / 2.0
 
       # Calculate a list of angles and zeta's
-      tau, zeta, n, indices = self._calculate_tau_and_zeta(
-        crystal, beam, detector,  goniometer, scan, reflections)
+      tau, zeta, n, indices = self._calculate_tau_and_zeta(crystal, beam, detector, goniometer, scan, reflections)
 
       # Calculate zeta * (tau +- dphi / 2) / sqrt(2)
       self.e1 = (tau + dphi2) * flex.abs(zeta) / sqrt(2.0)
@@ -333,11 +323,7 @@ class ComputeEsdReflectingRange(object):
       starting_simplex = [flex.double([start]), flex.double([stop])]
 
       # Initialise the optimizer
-      optimizer = simplex.simplex_opt(
-        1,
-        matrix=starting_simplex,
-        evaluator=self,
-        tolerance=1e-3)
+      optimizer = simplex.simplex_opt(1, matrix=starting_simplex, evaluator=self, tolerance=1e-3)
 
       # Get the solution
       sigma = exp(optimizer.get_solution()[0])
@@ -355,7 +341,7 @@ class ComputeEsdReflectingRange(object):
 
       # Tiny value
       TINY = 1e-10
-      assert(sigma_m > TINY)
+      assert (sigma_m > TINY)
 
       # Calculate the two components to the fraction
       a = scitbx.math.erf(self.e1 / sigma_m)
@@ -368,9 +354,9 @@ class ComputeEsdReflectingRange(object):
 
       # Set any points <= 0 to 1e-10 (otherwise will get a floating
       # point error in log calculation below).
-      assert(zi.all_ge(0))
+      assert (zi.all_ge(0))
       mask = zi < TINY
-      assert(mask.count(True) < len(mask))
+      assert (mask.count(True) < len(mask))
       zi.set_selected(mask, TINY)
 
       # Compute the likelihood
@@ -400,11 +386,10 @@ class ComputeEsdReflectingRange(object):
         #L += flex.sum(nj * flex.log(zj)) - kj * Z
         #L += flex.sum(nj * flex.log(zj)) - kj * log(Z)
         L += flex.sum(nj * flex.log(zj)) - kj * log(Z) + log(Z)
-      logger.debug("Sigma M: %f, log(L): %f" % (sigma_m * 180/pi, L))
+      logger.debug("Sigma M: %f, log(L): %f" % (sigma_m * 180 / pi, L))
 
       # Return the logarithm of r
       return -L
-
 
     def _calculate_tau_and_zeta(self, crystal, beam, detector, goniometer, scan, reflections):
       '''Calculate the list of tau and zeta needed for the calculation.
@@ -439,9 +424,9 @@ class ComputeEsdReflectingRange(object):
         b = s.bbox
         for z0, f in enumerate(range(b[4], b[5])):
           phi0 = scan.get_angle_from_array_index(int(f), deg=False)
-          phi1 = scan.get_angle_from_array_index(int(f)+1, deg=False)
-          d = s.data[z0:z0+1,:,:]
-          m = s.mask[z0:z0+1,:,:]
+          phi1 = scan.get_angle_from_array_index(int(f) + 1, deg=False)
+          d = s.data[z0:z0 + 1, :, :]
+          m = s.mask[z0:z0 + 1, :, :]
           d = flex.sum(d.as_1d().select(m.as_1d() == mask_code))
           if d > 0:
             tau.append((phi1 + phi0) / 2.0 - p)
@@ -453,8 +438,7 @@ class ComputeEsdReflectingRange(object):
       # Return the list of tau and zeta
       return flex.double(tau), flex.double(zeta2), flex.double(num), flex.size_t(indices)
 
-  def __init__(self, crystal, beam, detector, goniometer, scan, reflections,
-               algorithm="basic"):
+  def __init__(self, crystal, beam, detector, goniometer, scan, reflections, algorithm="basic"):
     '''initialise the algorithm with the scan.
 
     params:
@@ -466,16 +450,13 @@ class ComputeEsdReflectingRange(object):
 
       # Calculate sigma_m
       try:
-        estimator = ComputeEsdReflectingRange.Estimator(
-          crystal, beam, detector, goniometer, scan, reflections)
+        estimator = ComputeEsdReflectingRange.Estimator(crystal, beam, detector, goniometer, scan, reflections)
       except Exception:
         logger.info("Using Crude Mosaicity estimator")
-        estimator = ComputeEsdReflectingRange.CrudeEstimator(
-          crystal, beam, detector, goniometer, scan, reflections)
+        estimator = ComputeEsdReflectingRange.CrudeEstimator(crystal, beam, detector, goniometer, scan, reflections)
 
     elif algorithm == "extended":
-      estimator = ComputeEsdReflectingRange.ExtendedEstimator(
-          crystal, beam, detector, goniometer, scan, reflections)
+      estimator = ComputeEsdReflectingRange.ExtendedEstimator(crystal, beam, detector, goniometer, scan, reflections)
 
     # Save the solution
     self._sigma = estimator.sigma
@@ -484,24 +465,22 @@ class ComputeEsdReflectingRange(object):
     ''' Return the E.S.D reflecting rang. '''
     return self._sigma
 
-
 class ProfileModelCalculator(object):
   ''' Class to help calculate the profile model. '''
 
-  def __init__(self, reflections, crystal, beam, detector, goniometer, scan,
-               min_zeta=0.05, algorithm="basic"):
+  def __init__(self, reflections, crystal, beam, detector, goniometer, scan, min_zeta=0.05, algorithm="basic"):
     ''' Calculate the profile model. '''
     from dxtbx.model.experiment_list import Experiment
     from dials.array_family import flex
     from math import pi
 
     # Check input has what we want
-    assert(reflections is not None)
-    assert("miller_index" in reflections)
-    assert("s1" in reflections)
-    assert("shoebox" in reflections)
-    assert("xyzobs.px.value" in reflections)
-    assert("xyzcal.mm" in reflections)
+    assert (reflections is not None)
+    assert ("miller_index" in reflections)
+    assert ("s1" in reflections)
+    assert ("shoebox" in reflections)
+    assert ("xyzobs.px.value" in reflections)
+    assert ("xyzcal.mm" in reflections)
 
     # Calculate the E.S.D of the beam divergence
     logger.info('Calculating E.S.D Beam Divergence.')
@@ -517,25 +496,14 @@ class ProfileModelCalculator(object):
 
       # Select by zeta
       zeta = reflections.compute_zeta(
-        Experiment(
-          crystal=crystal,
-          beam=beam,
-          detector=detector,
-          goniometer=goniometer,
-          scan=scan))
+          Experiment(crystal=crystal, beam=beam, detector=detector, goniometer=goniometer, scan=scan))
       mask = flex.abs(zeta) >= min_zeta
       reflections = reflections.select(mask)
 
       # Calculate the E.S.D of the reflecting range
       logger.info('Calculating E.S.D Reflecting Range.')
       reflecting_range = ComputeEsdReflectingRange(
-        crystal,
-        beam,
-        detector,
-        goniometer,
-        scan,
-        reflections,
-        algorithm=algorithm)
+          crystal, beam, detector, goniometer, scan, reflections, algorithm=algorithm)
 
       # Set the sigmas
       self._sigma_m = reflecting_range.sigma()
@@ -555,8 +523,7 @@ class ProfileModelCalculator(object):
 class ScanVaryingProfileModelCalculator(object):
   ''' Class to help calculate the profile model. '''
 
-  def __init__(self, reflections, crystal, beam, detector, goniometer, scan,
-               min_zeta=0.05, algorithm="basic"):
+  def __init__(self, reflections, crystal, beam, detector, goniometer, scan, min_zeta=0.05, algorithm="basic"):
     ''' Calculate the profile model. '''
     from copy import deepcopy
     from collections import defaultdict
@@ -565,21 +532,16 @@ class ScanVaryingProfileModelCalculator(object):
     from dxtbx.model.experiment_list import Experiment
 
     # Check input has what we want
-    assert(reflections is not None)
-    assert("miller_index" in reflections)
-    assert("s1" in reflections)
-    assert("shoebox" in reflections)
-    assert("xyzobs.px.value" in reflections)
-    assert("xyzcal.mm" in reflections)
+    assert (reflections is not None)
+    assert ("miller_index" in reflections)
+    assert ("s1" in reflections)
+    assert ("shoebox" in reflections)
+    assert ("xyzobs.px.value" in reflections)
+    assert ("xyzcal.mm" in reflections)
 
     # Select by zeta
     zeta = reflections.compute_zeta(
-      Experiment(
-        crystal=crystal,
-        beam=beam,
-        detector=detector,
-        goniometer=goniometer,
-        scan=scan))
+        Experiment(crystal=crystal, beam=beam, detector=detector, goniometer=goniometer, scan=scan))
     mask = flex.abs(zeta) >= min_zeta
     reflections = reflections.select(mask)
 
@@ -591,17 +553,16 @@ class ScanVaryingProfileModelCalculator(object):
     bbox = reflections['bbox']
     index_list = defaultdict(list)
     for i, (x0, x1, y0, y1, z0, z1) in enumerate(bbox):
-      assert(z1 == z0 + 1)
+      assert (z1 == z0 + 1)
       index_list[z0].append(i)
-    reflection_list = dict((key, reflections.select(flex.size_t(value)))
-                           for key, value in index_list.iteritems())
+    reflection_list = dict((key, reflections.select(flex.size_t(value))) for key, value in index_list.iteritems())
 
     # The range of frames
     z0, z1 = scan.get_array_range()
     min_z = min(index_list.iterkeys())
     max_z = max(index_list.iterkeys())
-    assert(z0 == min_z)
-    assert(z1 == max_z+1)
+    assert (z0 == min_z)
+    assert (z1 == max_z + 1)
 
     # Compute for all frames
     self._num = []
@@ -623,14 +584,13 @@ class ScanVaryingProfileModelCalculator(object):
       sigma_b.append(beam_divergence.sigma())
 
       # Calculate the E.S.D of the reflecting range
-      reflecting_range = ComputeEsdReflectingRange(crystal, beam, detector,
-                                                   goniometer, scan, reflections)
+      reflecting_range = ComputeEsdReflectingRange(crystal, beam, detector, goniometer, scan, reflections)
 
       # Set the sigmas
       sigma_m.append(reflecting_range.sigma())
 
     def convolve(data, kernel):
-      assert(len(kernel) & 1)
+      assert (len(kernel) & 1)
       result = []
       mid = len(kernel) // 2
       for i in range(len(data)):
@@ -648,12 +608,12 @@ class ScanVaryingProfileModelCalculator(object):
 
     def gaussian_kernel(n):
       from math import exp
-      assert(n & 1)
+      assert (n & 1)
       mid = n // 2
       sigma = mid / 3.0
       kernel = []
       for i in range(n):
-        kernel.append(exp(-(i-mid)**2 / (2*sigma**2)))
+        kernel.append(exp(-(i - mid)**2 / (2 * sigma**2)))
       kernel = [k / sum(kernel) for k in kernel]
       return kernel
 
@@ -663,7 +623,7 @@ class ScanVaryingProfileModelCalculator(object):
     sigma_m_new = convolve(sigma_m, kernel)
     self._sigma_b = flex.double(sigma_b_new)
     self._sigma_m = flex.double(sigma_m_new)
-    assert(len(self._sigma_b) == len(self._sigma_m))
+    assert (len(self._sigma_b) == len(self._sigma_m))
 
     # Print the output - mean as is scan varying
     mean_sigma_b = sum(self._sigma_b) / len(self._sigma_b)

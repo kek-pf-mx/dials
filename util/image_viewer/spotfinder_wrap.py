@@ -4,9 +4,11 @@ from rstbx.slip_viewer.frame import chooser_wrapper as _chooser_wrapper
 
 try:
   import resource
+
   def debug_memory_usage():
     print('Memory usage: %.1f MB' % (int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss) / 1024))
 except ImportError:
+
   def debug_memory_usage():
     pass
 
@@ -26,13 +28,17 @@ class spot_wrapper(object):
 
     app = wx.App()
 
-    self.frame = SpotFrame(None, -1, "X-ray image display", size=(800,720),
-      pos=(100,100),
-      params=self.params,
-      datablock=datablock,
-      experiments=experiments,
-      reflections=reflections)
-    self.frame.SetSize((1024,780))
+    self.frame = SpotFrame(
+        None,
+        -1,
+        "X-ray image display",
+        size=(800, 720),
+        pos=(100, 100),
+        params=self.params,
+        datablock=datablock,
+        experiments=experiments,
+        reflections=reflections)
+    self.frame.SetSize((1024, 780))
     self.frame.Show()
 
     imagesets = self.frame.imagesets

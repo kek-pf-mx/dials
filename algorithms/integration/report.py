@@ -12,21 +12,19 @@ from dials.array_family import flex
 from dials.array_family.flex import Binner
 from dials.util.report import Report, Table, Array
 
-
 def flex_ios(val, var):
   '''
   Compute I/sigma or return zero for each element.
 
   '''
-  assert(len(val) == len(var))
-  result = flex.double(len(val),0)
+  assert (len(val) == len(var))
+  result = flex.double(len(val), 0)
   indices = flex.size_t(range(len(val))).select(var > 0)
   val = val.select(indices)
   var = var.select(indices)
-  assert(var.all_gt(0))
+  assert (var.all_gt(0))
   result.set_selected(indices, val / flex.sqrt(var))
   return result
-
 
 def generate_integration_report(experiment, reflections, n_resolution_bins=20):
   '''
@@ -42,45 +40,41 @@ def generate_integration_report(experiment, reflections, n_resolution_bins=20):
 
     # Start by adding some overall numbers
     report = OrderedDict()
-    report['n']                   = len(reflections)
-    report['n_full']              = data['full'].count(True)
-    report['n_partial']           = data['full'].count(False)
-    report['n_overload']          = data['over'].count(True)
-    report['n_ice']               = data['ice'].count(True)
-    report['n_summed']            = data['sum'].count(True)
-    report['n_fitted']            = data['prf'].count(True)
-    report['n_integated']         = data['int'].count(True)
-    report['n_invalid_bg']        = data['ninvbg'].count(True)
-    report['n_invalid_fg']        = data['ninvfg'].count(True)
+    report['n'] = len(reflections)
+    report['n_full'] = data['full'].count(True)
+    report['n_partial'] = data['full'].count(False)
+    report['n_overload'] = data['over'].count(True)
+    report['n_ice'] = data['ice'].count(True)
+    report['n_summed'] = data['sum'].count(True)
+    report['n_fitted'] = data['prf'].count(True)
+    report['n_integated'] = data['int'].count(True)
+    report['n_invalid_bg'] = data['ninvbg'].count(True)
+    report['n_invalid_fg'] = data['ninvfg'].count(True)
     report['n_failed_background'] = data['fbgd'].count(True)
-    report['n_failed_summation']  = data['fsum'].count(True)
-    report['n_failed_fitting']    = data['fprf'].count(True)
+    report['n_failed_summation'] = data['fsum'].count(True)
+    report['n_failed_fitting'] = data['fprf'].count(True)
 
     # Compute mean background
     try:
-      report['mean_background'] = flex.mean(
-        data['background.mean'].select(data['int']))
+      report['mean_background'] = flex.mean(data['background.mean'].select(data['int']))
     except Exception:
       report['mean_background'] = 0.0
 
     # Compute mean I/Sigma summation
     try:
-      report['ios_sum'] = flex.mean(
-        data['intensity.sum.ios'].select(data['sum']))
+      report['ios_sum'] = flex.mean(data['intensity.sum.ios'].select(data['sum']))
     except Exception:
       report['ios_sum'] = 0.0
 
     # Compute mean I/Sigma profile fitting
     try:
-      report['ios_prf'] = flex.mean(
-        data['intensity.prf.ios'].select(data['prf']))
+      report['ios_prf'] = flex.mean(data['intensity.prf.ios'].select(data['prf']))
     except Exception:
       report['ios_prf'] = 0.0
 
     # Compute the mean profile correlation
     try:
-      report['cc_prf'] = flex.mean(
-        data['profile.correlation'].select(data['prf']))
+      report['cc_prf'] = flex.mean(data['profile.correlation'].select(data['prf']))
     except Exception:
       report['cc_prf'] = 0.0
 
@@ -108,51 +102,46 @@ def generate_integration_report(experiment, reflections, n_resolution_bins=20):
 
     # Add some stats by resolution
     report = OrderedDict()
-    report['bins']                = list(binner.bins())
-    report['n_full']              = list(indexer_all.sum(data['full']))
-    report['n_partial']           = list(indexer_all.sum(~data['full']))
-    report['n_overload']          = list(indexer_all.sum(data['over']))
-    report['n_ice']               = list(indexer_all.sum(data['ice']))
-    report['n_summed']            = list(indexer_all.sum(data['sum']))
-    report['n_fitted']            = list(indexer_all.sum(data['prf']))
-    report['n_integrated']        = list(indexer_all.sum(data['int']))
-    report['n_invalid_bg']        = list(indexer_all.sum(data['ninvbg']))
-    report['n_invalid_fg']        = list(indexer_all.sum(data['ninvfg']))
+    report['bins'] = list(binner.bins())
+    report['n_full'] = list(indexer_all.sum(data['full']))
+    report['n_partial'] = list(indexer_all.sum(~data['full']))
+    report['n_overload'] = list(indexer_all.sum(data['over']))
+    report['n_ice'] = list(indexer_all.sum(data['ice']))
+    report['n_summed'] = list(indexer_all.sum(data['sum']))
+    report['n_fitted'] = list(indexer_all.sum(data['prf']))
+    report['n_integrated'] = list(indexer_all.sum(data['int']))
+    report['n_invalid_bg'] = list(indexer_all.sum(data['ninvbg']))
+    report['n_invalid_fg'] = list(indexer_all.sum(data['ninvfg']))
     report['n_failed_background'] = list(indexer_all.sum(data['fbgd']))
-    report['n_failed_summation']  = list(indexer_all.sum(data['fsum']))
-    report['n_failed_fitting']    = list(indexer_all.sum(data['fprf']))
+    report['n_failed_summation'] = list(indexer_all.sum(data['fsum']))
+    report['n_failed_fitting'] = list(indexer_all.sum(data['fprf']))
 
     # Compute mean background
     try:
-      report['mean_background'] = list(indexer_int.mean(
-        data['background.mean'].select(data['int'])))
+      report['mean_background'] = list(indexer_int.mean(data['background.mean'].select(data['int'])))
     except Exception:
       report['mean_background'] = [0.0] * len(binner)
 
     # Compute mean I/Sigma summation
     try:
-      report['ios_sum'] = list(indexer_sum.mean(
-        data['intensity.sum.ios'].select(data['sum'])))
+      report['ios_sum'] = list(indexer_sum.mean(data['intensity.sum.ios'].select(data['sum'])))
     except Exception:
       report['ios_sum'] = [0.0] * len(binner)
 
     # Compute mean I/Sigma profile fitting
     try:
-      report['ios_prf'] = list(indexer_prf.mean(
-        data['intensity.prf.ios'].select(data['prf'])))
+      report['ios_prf'] = list(indexer_prf.mean(data['intensity.prf.ios'].select(data['prf'])))
     except Exception:
       report['ios_prf'] = [0.0] * len(binner)
 
     # Compute the mean profile correlation
     try:
-      report['cc_prf'] = list(indexer_prf.mean(
-        data['profile.correlation'].select(data['prf'])))
+      report['cc_prf'] = list(indexer_prf.mean(data['profile.correlation'].select(data['prf'])))
     except Exception:
       report['cc_prf'] = [0.0] * len(binner)
 
     try:
-      report['rmsd_xy'] = list(indexer_sum.mean(
-        data['xyz.rmsd'].select(data['int'])))
+      report['rmsd_xy'] = list(indexer_sum.mean(data['xyz.rmsd'].select(data['int'])))
     except Exception:
       report['rmsd_xy'] = [0.0] * len(binner)
 
@@ -163,8 +152,7 @@ def generate_integration_report(experiment, reflections, n_resolution_bins=20):
 
     # Create the crystal symmetry object
     cs = crystal.symmetry(
-      space_group=experiment.crystal.get_space_group(),
-      unit_cell=experiment.crystal.get_unit_cell())
+        space_group=experiment.crystal.get_space_group(), unit_cell=experiment.crystal.get_unit_cell())
 
     # Create the resolution binner object
     ms = miller.set(cs, hkl)
@@ -185,32 +173,25 @@ def generate_integration_report(experiment, reflections, n_resolution_bins=20):
     return result
 
   # Check the required columns are there
-  assert("miller_index" in reflections)
-  assert("d" in reflections)
-  assert("flags" in reflections)
-  assert("bbox" in reflections)
-  assert("xyzcal.px" in reflections)
-  assert("partiality" in reflections)
-  assert("intensity.sum.value" in reflections)
-  assert("intensity.sum.variance" in reflections)
+  assert ("miller_index" in reflections)
+  assert ("d" in reflections)
+  assert ("flags" in reflections)
+  assert ("bbox" in reflections)
+  assert ("xyzcal.px" in reflections)
+  assert ("partiality" in reflections)
+  assert ("intensity.sum.value" in reflections)
+  assert ("intensity.sum.variance" in reflections)
 
   # Get the flag enumeration
   flags = flex.reflection_table.flags
 
   # Get some keys from the data
   data = {}
-  for key in ['miller_index',
-              'xyzcal.px',
-              'xyzobs.px.value',
-              'd',
-              'bbox',
-              'background.mean',
-              'partiality',
-              'intensity.sum.value',
-              'intensity.sum.variance',
-              'intensity.prf.value',
-              'intensity.prf.variance',
-              'profile.correlation']:
+  for key in [
+      'miller_index', 'xyzcal.px', 'xyzobs.px.value', 'd', 'bbox', 'background.mean', 'partiality',
+      'intensity.sum.value', 'intensity.sum.variance', 'intensity.prf.value', 'intensity.prf.variance',
+      'profile.correlation'
+  ]:
     if key in reflections:
       data[key] = reflections[key]
 
@@ -228,15 +209,11 @@ def generate_integration_report(experiment, reflections, n_resolution_bins=20):
   data["fprf"] = reflections.get_flags(flags.failed_during_profile_fitting)
 
   # Try to calculate the i over sigma for summation
-  data['intensity.sum.ios'] = flex_ios(
-    data['intensity.sum.value'],
-    data['intensity.sum.variance'])
+  data['intensity.sum.ios'] = flex_ios(data['intensity.sum.value'], data['intensity.sum.variance'])
 
   # Try to calculate the i over sigma for profile fitting
   try:
-    data['intensity.prf.ios'] = flex_ios(
-      data['intensity.prf.value'],
-      data['intensity.prf.variance'])
+    data['intensity.prf.ios'] = flex_ios(data['intensity.prf.value'], data['intensity.prf.variance'])
   except Exception:
     pass
 
@@ -244,27 +221,19 @@ def generate_integration_report(experiment, reflections, n_resolution_bins=20):
   try:
     xcal, ycal, zcal = data['xyzcal.px'].parts()
     xobs, yobs, zobs = data['xyzobs.px.value'].parts()
-    data['xyz.rmsd'] = flex.sqrt(
-      flex.pow2(xcal - xobs) +
-      flex.pow2(ycal - yobs))
+    data['xyz.rmsd'] = flex.sqrt(flex.pow2(xcal - xobs) + flex.pow2(ycal - yobs))
   except Exception:
     pass
 
   # Create the resolution binner
-  resolution_binner = Binner(
-    resolution_bins(
-      experiment,
-      data['miller_index'],
-      n_resolution_bins))
+  resolution_binner = Binner(resolution_bins(experiment, data['miller_index'], n_resolution_bins))
 
   # Create the frame binner object
   try:
     array_range = experiment.imageset.get_array_range()
   except Exception:
     array_range = (0, len(experiment.imageset))
-  frame_binner = Binner(flex.int(range(
-    array_range[0],
-    array_range[1]+1)).as_double())
+  frame_binner = Binner(flex.int(range(array_range[0], array_range[1] + 1)).as_double())
 
   # Create the overall report
   overall = overall_report(data)
@@ -272,20 +241,16 @@ def generate_integration_report(experiment, reflections, n_resolution_bins=20):
   # Create high/low resolution reports
   hl_binner = resolution_binner.indexer(data['d'])
   high_summary = overall_report(select(data, hl_binner.indices(0)))
-  low_summary = overall_report(select(data, hl_binner.indices(n_resolution_bins-1)))
+  low_summary = overall_report(select(data, hl_binner.indices(n_resolution_bins - 1)))
   high_summary['dmin'] = resolution_binner.bins()[0]
   high_summary['dmax'] = resolution_binner.bins()[1]
-  low_summary['dmin'] = resolution_binner.bins()[n_resolution_bins-1]
+  low_summary['dmin'] = resolution_binner.bins()[n_resolution_bins - 1]
   low_summary['dmax'] = resolution_binner.bins()[n_resolution_bins]
   overall['dmin'] = high_summary['dmin']
   overall['dmax'] = low_summary['dmax']
 
   # Create the overall report
-  summary = OrderedDict([
-    ('overall', overall),
-    ('low', low_summary),
-    ('high', high_summary)
-  ])
+  summary = OrderedDict([('overall', overall), ('low', low_summary), ('high', high_summary)])
 
   # Create a report binned by resolution
   resolution = binned_report(resolution_binner, data['d'], data)
@@ -294,11 +259,7 @@ def generate_integration_report(experiment, reflections, n_resolution_bins=20):
   image = binned_report(frame_binner, data['xyzcal.px'].parts()[2], data)
 
   # Return the report
-  return OrderedDict([
-    ("summary", summary),
-    ("resolution", resolution),
-    ("image", image)])
-
+  return OrderedDict([("summary", summary), ("resolution", resolution), ("image", image)])
 
 class IntegrationReport(Report):
   '''
@@ -321,7 +282,7 @@ class IntegrationReport(Report):
 
     # Split the tables by experiment id
     tables = reflections.split_by_experiment_id()
-    assert(len(tables) == len(experiments))
+    assert (len(tables) == len(experiments))
 
     # Initialise the dictionary
     report_list = []
@@ -349,21 +310,22 @@ class IntegrationReport(Report):
     table.cols.append(('rmsd_xy', 'RMSD XY'))
     for j, report in enumerate(report_list):
       report = report['image']
-      for i in range(len(report['bins'])-1):
+      for i in range(len(report['bins']) - 1):
         table.rows.append([
-          '%d'   % j,
-          '%d'   % report['bins'][i],
-          '%d'   % report['n_full'][i],
-          '%d'   % report['n_partial'][i],
-          '%d'   % report['n_overload'][i],
-          '%d'   % report['n_ice'][i],
-          '%d'   % report['n_summed'][i],
-          '%d'   % report['n_fitted'][i],
-          '%.2f' % report['mean_background'][i],
-          '%.2f' % report['ios_sum'][i],
-          '%.2f' % report['ios_prf'][i],
-          '%.2f' % report['cc_prf'][i],
-          '%.2f' % report['rmsd_xy'][i]])
+            '%d' % j,
+            '%d' % report['bins'][i],
+            '%d' % report['n_full'][i],
+            '%d' % report['n_partial'][i],
+            '%d' % report['n_overload'][i],
+            '%d' % report['n_ice'][i],
+            '%d' % report['n_summed'][i],
+            '%d' % report['n_fitted'][i],
+            '%.2f' % report['mean_background'][i],
+            '%.2f' % report['ios_sum'][i],
+            '%.2f' % report['ios_prf'][i],
+            '%.2f' % report['cc_prf'][i],
+            '%.2f' % report['rmsd_xy'][i]
+        ])
     self.add_table(table)
 
     # Construct the per resolution table
@@ -385,21 +347,22 @@ class IntegrationReport(Report):
     table.cols.append(('rmsd_xy', 'RMSD XY'))
     for j, report in enumerate(report_list):
       report = report['resolution']
-      for i in range(len(report['bins'])-1):
+      for i in range(len(report['bins']) - 1):
         table.rows.append([
-          '%d'   % j,
-          '%.2f' % report['bins'][i],
-          '%d'   % report['n_full'][i],
-          '%d'   % report['n_partial'][i],
-          '%d'   % report['n_overload'][i],
-          '%d'   % report['n_ice'][i],
-          '%d'   % report['n_summed'][i],
-          '%d'   % report['n_fitted'][i],
-          '%.2f' % report['mean_background'][i],
-          '%.2f' % report['ios_sum'][i],
-          '%.2f' % report['ios_prf'][i],
-          '%.2f' % report['cc_prf'][i],
-          '%.2f' % report['rmsd_xy'][i]])
+            '%d' % j,
+            '%.2f' % report['bins'][i],
+            '%d' % report['n_full'][i],
+            '%d' % report['n_partial'][i],
+            '%d' % report['n_overload'][i],
+            '%d' % report['n_ice'][i],
+            '%d' % report['n_summed'][i],
+            '%d' % report['n_fitted'][i],
+            '%.2f' % report['mean_background'][i],
+            '%.2f' % report['ios_sum'][i],
+            '%.2f' % report['ios_prf'][i],
+            '%.2f' % report['cc_prf'][i],
+            '%.2f' % report['rmsd_xy'][i]
+        ])
     self.add_table(table)
 
     # Create the overall table
@@ -416,31 +379,28 @@ class IntegrationReport(Report):
       table.cols.append(('overall', 'Overall'))
       table.cols.append(('low', 'Low'))
       table.cols.append(('high', 'High'))
-      desc_fmt_key = [
-        ("dmin",                                  '%.2f', 'dmin'),
-        ('dmax',                                  '%.2f', 'dmax'),
-        ("number fully recorded",                 '%d'  , "n_full"),
-        ("number partially recorded",             '%d'  , "n_partial"),
-        ("number with invalid background pixels", '%d'  , "n_invalid_bg"),
-        ("number with invalid foreground pixels", '%d'  , "n_invalid_fg"),
-        ("number with overloaded pixels",         '%d'  , "n_overload"),
-        ("number in powder rings",                '%d'  , "n_ice"),
-        ("number processed with summation",       '%d'  , "n_summed"),
-        ("number processed with profile fitting", '%d'  , "n_fitted"),
-        ("number failed in background modelling", '%d'  , "n_failed_background"),
-        ("number failed in summation",            '%d'  , "n_failed_summation"),
-        ("number failed in profile fitting",      '%d'  , "n_failed_fitting"),
-        ("ibg",                                   '%.2f', "mean_background"),
-        ("i/sigi (summation)",                    '%.2f', "ios_sum"),
-        ("i/sigi (profile fitting)",              '%.2f', "ios_prf"),
-        ("cc prf",                                '%.2f', "cc_prf"),
-        ("cc_pearson sum/prf",                    '%.2f', "cc_pearson_sum_prf"),
-        ("cc_spearman sum/prf",                   '%.2f', "cc_spearman_sum_prf")
-      ]
+      desc_fmt_key = [("dmin", '%.2f', 'dmin'), ('dmax', '%.2f', 'dmax'), ("number fully recorded", '%d', "n_full"),
+                      ("number partially recorded", '%d',
+                       "n_partial"), ("number with invalid background pixels", '%d',
+                                      "n_invalid_bg"), ("number with invalid foreground pixels", '%d', "n_invalid_fg"),
+                      ("number with overloaded pixels", '%d',
+                       "n_overload"), ("number in powder rings", '%d',
+                                       "n_ice"), ("number processed with summation", '%d',
+                                                  "n_summed"), ("number processed with profile fitting", '%d',
+                                                                "n_fitted"), ("number failed in background modelling",
+                                                                              '%d', "n_failed_background"),
+                      ("number failed in summation", '%d',
+                       "n_failed_summation"), ("number failed in profile fitting", '%d',
+                                               "n_failed_fitting"), ("ibg", '%.2f', "mean_background"),
+                      ("i/sigi (summation)", '%.2f',
+                       "ios_sum"), ("i/sigi (profile fitting)", '%.2f',
+                                    "ios_prf"), ("cc prf", '%.2f',
+                                                 "cc_prf"), ("cc_pearson sum/prf", '%.2f',
+                                                             "cc_pearson_sum_prf"), ("cc_spearman sum/prf", '%.2f',
+                                                                                     "cc_spearman_sum_prf")]
       for desc, fmt, key in desc_fmt_key:
         table.rows.append([desc, fmt % summary[key], fmt % low[key], fmt % high[key]])
       self.add_table(table)
-
 
 class ProfileModelReport(Report):
   '''
@@ -483,13 +443,14 @@ class ProfileModelReport(Report):
       model = fitter[i]
       for j in range(len(model)):
         table.rows.append([
-          '%d'   % i,
-          '%d'   % j,
-          '%s'   % model.valid(j),
-          '%.2f' % model.coord(j)[0],
-          '%.2f' % model.coord(j)[1],
-          '%.2f' % model.coord(j)[2],
-          '%d'   % model.n_reflections(j)])
+            '%d' % i,
+            '%d' % j,
+            '%s' % model.valid(j),
+            '%.2f' % model.coord(j)[0],
+            '%.2f' % model.coord(j)[1],
+            '%.2f' % model.coord(j)[2],
+            '%d' % model.n_reflections(j)
+        ])
 
     # Add the table
     self.add_table(table)
@@ -504,7 +465,6 @@ class ProfileModelReport(Report):
           array.title = 'Profile model (id: %d, profile: %d)' % (i, j)
           array.data = model.data(j)
           self.add_array(array)
-
 
 class ProfileModelReport2(Report):
   '''
@@ -547,13 +507,14 @@ class ProfileModelReport2(Report):
       model = reference[i]
       for j in range(len(model)):
         table.rows.append([
-          '%d'   % i,
-          '%d'   % j,
-          '%s'   % True,
-          '%.2f' % model.sampler().coord(j)[0],
-          '%.2f' % model.sampler().coord(j)[1],
-          '%.2f' % model.sampler().coord(j)[2],
-          '%d'   % model.n_reflections(j)])
+            '%d' % i,
+            '%d' % j,
+            '%s' % True,
+            '%.2f' % model.sampler().coord(j)[0],
+            '%.2f' % model.sampler().coord(j)[1],
+            '%.2f' % model.sampler().coord(j)[2],
+            '%d' % model.n_reflections(j)
+        ])
 
     # Add the table
     self.add_table(table)
@@ -568,7 +529,6 @@ class ProfileModelReport2(Report):
           array.title = 'Profile model (id: %d, profile: %d)' % (i, j)
           array.data = model.data(j)
           self.add_array(array)
-
 
 class ProfileValidationReport(Report):
   '''
@@ -612,9 +572,7 @@ class ProfileValidationReport(Report):
     # Create the summary for each profile model
     for i in range(len(reflection_tables)):
       reflection_table = reflection_tables[i]
-      reflection_table = reflection_table.select(
-        reflection_table.get_flags(
-          reflection_table.flags.integrated_prf))
+      reflection_table = reflection_table.select(reflection_table.get_flags(reflection_table.flags.integrated_prf))
       index = reflection_table['profile.index']
       cc = reflection_table['profile.correlation']
       nrmsd = reflection_table['profile.rmsd']
@@ -627,12 +585,7 @@ class ProfileValidationReport(Report):
         else:
           mean_cc = flex.mean(cc.select(mask))
           mean_nrmsd = flex.mean(nrmsd.select(mask))
-        table.rows.append([
-          '%d'   % i,
-          '%d'   % j,
-          '%d'   % num_validated,
-          '%.2f' % mean_cc,
-          '%.2f' % mean_nrmsd])
+        table.rows.append(['%d' % i, '%d' % j, '%d' % num_validated, '%.2f' % mean_cc, '%.2f' % mean_nrmsd])
 
     # Add the table
     self.add_table(table)

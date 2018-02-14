@@ -8,7 +8,6 @@
 #
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
-
 """Special versions of classes optimised to do detector refinement from multiple
 stills in the case where the crystals and beam are fixed."""
 from __future__ import absolute_import, division
@@ -26,7 +25,6 @@ from dials.array_family import flex
 from dials.algorithms.spot_prediction import ray_intersection
 
 class StillsDetectorRefinerFactory(RefinerFactory):
-
   @staticmethod
   def config_parameterisation(params, experiments, refman, do_stills):
     """Given a set of parameters, create a parameterisation from a set of
@@ -67,23 +65,19 @@ class StillsDetectorRefinerFactory(RefinerFactory):
         if len(detector) > 1:
           try:
             h = detector.hierarchy()
-            det_param = par.DetectorParameterisationHierarchical(detector,
-                experiment_ids=exp_ids, level=detector_options.hierarchy_level)
+            det_param = par.DetectorParameterisationHierarchical(
+                detector, experiment_ids=exp_ids, level=detector_options.hierarchy_level)
           except AttributeError:
-            det_param = par.DetectorParameterisationMultiPanel(detector, beam,
-                                                        experiment_ids=exp_ids)
+            det_param = par.DetectorParameterisationMultiPanel(detector, beam, experiment_ids=exp_ids)
         else:
-          det_param = par.DetectorParameterisationSinglePanel(detector,
-                                                        experiment_ids=exp_ids)
+          det_param = par.DetectorParameterisationSinglePanel(detector, experiment_ids=exp_ids)
       elif detector_options.panels == "single":
-        det_param = par.DetectorParameterisationSinglePanel(detector,
-                                                        experiment_ids=exp_ids)
+        det_param = par.DetectorParameterisationSinglePanel(detector, experiment_ids=exp_ids)
       elif detector_options.panels == "multiple":
-        det_param = par.DetectorParameterisationMultiPanel(detector, beam,
-                                                        experiment_ids=exp_ids)
+        det_param = par.DetectorParameterisationMultiPanel(detector, beam, experiment_ids=exp_ids)
       elif detector_options.panels == "hierarchical":
-        det_param = par.DetectorParameterisationHierarchical(detector, beam,
-                experiment_ids=exp_ids, level=detector_options.hierarchy_level)
+        det_param = par.DetectorParameterisationHierarchical(
+            detector, beam, experiment_ids=exp_ids, level=detector_options.hierarchy_level)
       else: # can only get here if refinement.phil is broken
         raise RuntimeError("detector_options.panels value not recognised")
 
@@ -111,10 +105,8 @@ class StillsDetectorRefinerFactory(RefinerFactory):
     # Now we have the final list of model parameterisations, build a restraints
     # parameterisation (if requested). Only unit cell restraints are supported
     # at the moment.
-    if any([crystal_options.unit_cell.restraints.tie_to_target,
-            crystal_options.unit_cell.restraints.tie_to_group]):
-      restraints_param = cls.config_restraints(params, det_params, beam_params,
-        xl_ori_params, xl_uc_params)
+    if any([crystal_options.unit_cell.restraints.tie_to_target, crystal_options.unit_cell.restraints.tie_to_group]):
+      restraints_param = cls.config_restraints(params, det_params, beam_params, xl_ori_params, xl_uc_params)
     else:
       restraints_param = None
 
@@ -124,8 +116,7 @@ class StillsDetectorRefinerFactory(RefinerFactory):
         spp = StillsDetectorPredictionParameterisationSparse
       else:
         spp = StillsDetectorPredictionParameterisation
-      pred_param = spp(experiments, det_params, beam_params,
-                       xl_ori_params, xl_uc_params)
+      pred_param = spp(experiments, det_params, beam_params, xl_ori_params, xl_uc_params)
 
     else: # doing scans
       raise NotImplementedError("currently only for stills")
@@ -158,8 +149,7 @@ class StillsDetectorRefinerFactory(RefinerFactory):
       #      det_params, beam_params, xl_ori_params, xl_uc_params)
 
     # Parameter reporting
-    param_reporter = par.ParameterReporter(det_params, beam_params,
-                                           xl_ori_params, xl_uc_params)
+    param_reporter = par.ParameterReporter(det_params, beam_params, xl_ori_params, xl_uc_params)
 
     return pred_param, param_reporter, restraints_param
 
@@ -184,12 +174,12 @@ class StillsDetectorRefinerFactory(RefinerFactory):
     elif options.rmsd_cutoff == "absolute":
       absolute_cutoffs = options.absolute_cutoffs
     else:
-      raise RuntimeError("Target function rmsd_cutoff option" +
-          options.rmsd_cutoff + " not recognised")
+      raise RuntimeError("Target function rmsd_cutoff option" + options.rmsd_cutoff + " not recognised")
 
     # all experiments have the same (or no) goniometer
     goniometer = experiments[0].goniometer
-    for e in experiments: assert e.goniometer is goniometer
+    for e in experiments:
+      assert e.goniometer is goniometer
 
     # build managed reflection predictors
     from dials.algorithms.refinement.prediction import ExperimentsPredictor
@@ -214,20 +204,19 @@ class StillsDetectorRefinerFactory(RefinerFactory):
 
     # Here we pass in None for prediction_parameterisation and
     # restraints_parameterisation, as these will be linked to the object later
-    target = targ(experiments=experiments,
-                  reflection_predictor=ref_predictor,
-                  ref_man=refman,
-                  prediction_parameterisation=None,
-                  restraints_parameterisation=None,
-                  frac_binsize_cutoff=options.bin_size_fraction,
-                  absolute_cutoffs=absolute_cutoffs,
-                  gradient_calculation_blocksize=options.gradient_calculation_blocksize)
+    target = targ(
+        experiments=experiments,
+        reflection_predictor=ref_predictor,
+        ref_man=refman,
+        prediction_parameterisation=None,
+        restraints_parameterisation=None,
+        frac_binsize_cutoff=options.bin_size_fraction,
+        absolute_cutoffs=absolute_cutoffs,
+        gradient_calculation_blocksize=options.gradient_calculation_blocksize)
 
     return target
 
-
 class StillsDetectorPredictionParameterisation(StillsPredictionParameterisation):
-
   def get_gradients(self, reflections, callback=None):
     """
     Calculate gradients of the prediction formula with respect to each
@@ -283,7 +272,7 @@ class StillsDetectorPredictionParameterisation(StillsPredictionParameterisation)
 
     # also need quantities derived from pv, precalculated for efficiency
     u, v, w = self._pv.parts()
-    self._w_inv = 1/w
+    self._w_inv = 1 / w
     self._u_w_inv = u * self._w_inv
     self._v_w_inv = v * self._w_inv
 
@@ -348,8 +337,7 @@ class StillsDetectorPredictionParameterisation(StillsPredictionParameterisation)
       panel = reflections['panel'].select(isel)
 
       # Extend derivative vectors for this detector parameterisation
-      results = self._extend_gradient_vectors(results, m, dp.num_free(),
-        keys=self._grad_names)
+      results = self._extend_gradient_vectors(results, m, dp.num_free(), keys=self._grad_names)
 
       # loop through the panels in this detector
       for panel_id, _ in enumerate(detector):
@@ -359,16 +347,14 @@ class StillsDetectorPredictionParameterisation(StillsPredictionParameterisation)
         if len(sub_isel) == 0:
           # if no reflections intersect this panel, skip calculation
           continue
-        dpv_ddet_p = self._detector_derivatives(sub_isel, panel_id,
-          parameterisation=dp, reflections=reflections)
+        dpv_ddet_p = self._detector_derivatives(sub_isel, panel_id, parameterisation=dp, reflections=reflections)
 
         # convert to dX/dp, dY/dp and assign the elements of the vectors
         # corresponding to this experiment and panel
         sub_w_inv = self._w_inv.select(sub_isel)
         sub_u_w_inv = self._u_w_inv.select(sub_isel)
         sub_v_w_inv = self._v_w_inv.select(sub_isel)
-        dX_ddet_p, dY_ddet_p = self._calc_dX_dp_and_dY_dp_from_dpv_dp(
-          sub_w_inv, sub_u_w_inv, sub_v_w_inv, dpv_ddet_p)
+        dX_ddet_p, dY_ddet_p = self._calc_dX_dp_and_dY_dp_from_dpv_dp(sub_w_inv, sub_u_w_inv, sub_v_w_inv, dpv_ddet_p)
 
         # use a local parameter index pointer because we set all derivatives
         # for this panel before moving on to the next
@@ -391,13 +377,13 @@ class StillsDetectorPredictionParameterisation(StillsPredictionParameterisation)
     return results
 
 class StillsDetectorPredictionParameterisationSparse(SparseGradientVectorMixin,
-  StillsDetectorPredictionParameterisation):
+                                                     StillsDetectorPredictionParameterisation):
   pass
-
 
 class LeastSquaresStillsDetector(LeastSquaresStillsResidualWithRmsdCutoff):
 
   _first_predict = True
+
   def predict(self):
     """perform reflection prediction and update the reflection manager"""
 
@@ -446,6 +432,5 @@ class LeastSquaresStillsDetector(LeastSquaresStillsResidualWithRmsdCutoff):
 
     return
 
-class LeastSquaresStillsDetectorSparse(SparseGradientsMixin,
-  LeastSquaresStillsDetector):
+class LeastSquaresStillsDetectorSparse(SparseGradientsMixin, LeastSquaresStillsDetector):
   pass

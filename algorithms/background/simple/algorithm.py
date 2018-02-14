@@ -14,10 +14,7 @@ from __future__ import absolute_import, division
 class BackgroundAlgorithm(object):
   ''' Class to do background subtraction. '''
 
-  def __init__(self, experiments,
-               outlier='nsigma',
-               model='constant3d',
-               **kwargs):
+  def __init__(self, experiments, outlier='nsigma', model='constant3d', **kwargs):
     '''
     Initialise the algorithm.
 
@@ -52,24 +49,15 @@ class BackgroundAlgorithm(object):
       if outlier == 'null':
         return None
       elif outlier == 'truncated':
-        return TruncatedOutlierRejector(
-          kwargs.get("lower", 0.01),
-          kwargs.get("upper", 0.01))
+        return TruncatedOutlierRejector(kwargs.get("lower", 0.01), kwargs.get("upper", 0.01))
       elif outlier == 'nsigma':
-        return NSigmaOutlierRejector(
-          kwargs.get("lower", 3),
-          kwargs.get("upper", 3))
+        return NSigmaOutlierRejector(kwargs.get("lower", 3), kwargs.get("upper", 3))
       elif outlier == 'normal':
-        return NormalOutlierRejector(
-          kwargs.get("min_pixels", 10))
+        return NormalOutlierRejector(kwargs.get("min_pixels", 10))
       elif outlier == 'plane':
-        return MosflmOutlierRejector(
-          kwargs.get("fraction", 1.0),
-          kwargs.get("n_sigma", 4.0))
+        return MosflmOutlierRejector(kwargs.get("fraction", 1.0), kwargs.get("n_sigma", 4.0))
       elif outlier == 'tukey':
-        return TukeyOutlierRejector(
-          kwargs.get("lower", 1.5),
-          kwargs.get("upper", 1.5))
+        return TukeyOutlierRejector(kwargs.get("lower", 1.5), kwargs.get("upper", 1.5))
       raise RuntimeError("Unexpected outlier rejector: %s" % outlier)
 
     # Get the minimum number of pixels
@@ -92,25 +80,19 @@ class BackgroundAlgorithm(object):
     if image_volume is None:
       reflections['background.mse'] = flex.double(len(reflections))
       reflections['background.dispersion'] = flex.double(len(reflections))
-      success = self._creator(
-        reflections['shoebox'],
-        reflections['background.mse'],
-        reflections['background.dispersion'])
+      success = self._creator(reflections['shoebox'], reflections['background.mse'],
+                              reflections['background.dispersion'])
       reflections['background.mean'] = reflections['shoebox'].mean_background()
     else:
       success = self._creator(reflections, image_volume)
     reflections.set_flags(success != True, reflections.flags.dont_integrate)
     return success
 
-
 class SimpleBackgroundCalculatorFactory(object):
   ''' Class to do background subtraction. '''
 
   @classmethod
-  def create(Class, experiments,
-             outlier='nsigma',
-             model='constant3d',
-             **kwargs):
+  def create(Class, experiments, outlier='nsigma', model='constant3d', **kwargs):
     '''
     Initialise the algorithm.
 
@@ -145,24 +127,15 @@ class SimpleBackgroundCalculatorFactory(object):
       if outlier == 'null':
         return None
       elif outlier == 'truncated':
-        return TruncatedOutlierRejector(
-          kwargs.get("lower", 0.01),
-          kwargs.get("upper", 0.01))
+        return TruncatedOutlierRejector(kwargs.get("lower", 0.01), kwargs.get("upper", 0.01))
       elif outlier == 'nsigma':
-        return NSigmaOutlierRejector(
-          kwargs.get("lower", 3),
-          kwargs.get("upper", 3))
+        return NSigmaOutlierRejector(kwargs.get("lower", 3), kwargs.get("upper", 3))
       elif outlier == 'normal':
-        return NormalOutlierRejector(
-          kwargs.get("min_pixels", 10))
+        return NormalOutlierRejector(kwargs.get("min_pixels", 10))
       elif outlier == 'plane':
-        return MosflmOutlierRejector(
-          kwargs.get("fraction", 1.0),
-          kwargs.get("n_sigma", 4.0))
+        return MosflmOutlierRejector(kwargs.get("fraction", 1.0), kwargs.get("n_sigma", 4.0))
       elif outlier == 'tukey':
-        return TukeyOutlierRejector(
-          kwargs.get("lower", 1.5),
-          kwargs.get("upper", 1.5))
+        return TukeyOutlierRejector(kwargs.get("lower", 1.5), kwargs.get("upper", 1.5))
       raise RuntimeError("Unexpected outlier rejector: %s" % outlier)
 
     # Get the minimum number of pixels

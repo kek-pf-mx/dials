@@ -16,12 +16,13 @@ MPI derivative of dials.stills_process.  Only handle individual images, not HDF5
 '''
 
 from dials.command_line.stills_process import Script as base_script
-from dials.command_line.stills_process import do_import,phil_scope
+from dials.command_line.stills_process import do_import, phil_scope
 from dials.command_line.stills_process import Processor
 
 class Script(base_script):
   '''A class for running the script.'''
-  def __init__(self,comm):
+
+  def __init__(self, comm):
     '''MPI-aware constructor.'''
     self.comm = comm
     self.rank = comm.Get_rank() # each process in MPI has a unique id, 0-indexed
@@ -38,21 +39,15 @@ class Script(base_script):
       self.reference_detector = None
 
       # Create the parser
-      self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      epilog=help_message
-      )
+      self.parser = OptionParser(usage=usage, phil=phil_scope, epilog=help_message)
 
   def assign_work(self):
-
     '''Execute the script.'''
     from dials.util import log
 
-    if self.rank==0:
+    if self.rank == 0:
       # Parse the command line
-      params, options, all_paths = self.parser.parse_args(
-        show_diff_phil=False, return_unhandled=True,quick_parse=True)
+      params, options, all_paths = self.parser.parse_args(show_diff_phil=False, return_unhandled=True, quick_parse=True)
 
       # Check that all filenames have been entered as mp.blob
       assert all_paths == []
@@ -67,13 +62,11 @@ class Script(base_script):
       for item in params.mp.glob:
         all_paths += glob.glob(item)
 
-      transmitted_info = dict(p=params,
-                              o=options,
-                              a=all_paths )
+      transmitted_info = dict(p=params, o=options, a=all_paths)
     else:
       transmitted_info = None
 
-    transmitted_info = self.comm.bcast(transmitted_info, root = 0)
+    transmitted_info = self.comm.bcast(transmitted_info, root=0)
 
     # Save the options
     self.options = transmitted_info["o"]
@@ -81,10 +74,7 @@ class Script(base_script):
     all_paths = transmitted_info["a"]
 
     # Configure logging
-    log.config(
-      self.params.verbosity,
-      info=None,
-      debug=None)
+    log.config(self.params.verbosity, info=None, debug=None)
 
     for abs_params in self.params.integration.absorption_correction:
       if abs_params.apply:
@@ -98,14 +88,14 @@ class Script(base_script):
     basenames = [os.path.splitext(os.path.basename(filename))[0] for filename in all_paths]
     tags = []
     for i, basename in enumerate(basenames):
-        if basenames.count(basename) > 1:
-          tags.append("%s_%05d"%(basename, i))
-        else:
-          tags.append(basename)
+      if basenames.count(basename) > 1:
+        tags.append("%s_%05d" % (basename, i))
+      else:
+        tags.append(basename)
     iterable = zip(tags, all_paths)
 
-    self.subset = [item for i, item in enumerate(iterable) if (i+self.rank)%self.size == 0]
-    print("DELEGATE %d of %d: %s"%( self.rank, self.size, self.subset[0:10]))
+    self.subset = [item for i, item in enumerate(iterable) if (i + self.rank) % self.size == 0]
+    print("DELEGATE %d of %d: %s" % (self.rank, self.size, self.subset[0:10]))
 
   def run(self):
     import copy
@@ -120,17 +110,17 @@ class Script(base_script):
 
       # Wrapper function
       def do_work(i, item_list):
-        processor = Processor(copy.deepcopy(self.params), composite_tag = "%04d"%i)
+        processor = Processor(copy.deepcopy(self.params), composite_tag="%04d" % i)
         for item in item_list:
           tag, filename = item
 
           datablock = do_import(filename)
           imagesets = datablock.extract_imagesets()
           if len(imagesets) == 0 or len(imagesets[0]) == 0:
-            logger.info("Zero length imageset in file: %s"%filename)
+            logger.info("Zero length imageset in file: %s" % filename)
             return
           if len(imagesets) > 1:
-            raise Abort("Found more than one imageset in file: %s"%filename)
+            raise Abort("Found more than one imageset in file: %s" % filename)
           if len(imagesets[0]) > 1:
             raise Abort("Found a multi-image file. Run again with pre_import=True")
 
@@ -153,9 +143,9 @@ class Script(base_script):
     logger.info("Total Time Taken = %f seconds" % (time() - st))
 
 if __name__ == '__main__':
-    from mpi4py import MPI
-    comm = MPI.COMM_WORLD
-    script = Script(comm)
-    script.assign_work()
-    comm.barrier()
-    script.run()
+  from mpi4py import MPI
+  comm = MPI.COMM_WORLD
+  script = Script(comm)
+  script.assign_work()
+  comm.barrier()
+  script.run()

@@ -21,9 +21,7 @@ Examples::
 
 '''
 
-
-phil_scope = iotbx.phil.parse(
-'''
+phil_scope = iotbx.phil.parse('''
 hkl = None
   .type = ints(size=3)
   .multiple=True
@@ -33,21 +31,15 @@ space_group = None
   .type = space_group
 ''')
 
-
 def run(args):
 
   from dials.util.options import OptionParser
   from dials.util.options import flatten_experiments
   import libtbx.load_env
 
-  usage = "%s [options] experiments.json" %libtbx.env.dispatcher_name
+  usage = "%s [options] experiments.json" % libtbx.env.dispatcher_name
 
-  parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_experiments=True,
-    check_format=False,
-    epilog=help_message)
+  parser = OptionParser(usage=usage, phil=phil_scope, read_experiments=True, check_format=False, epilog=help_message)
 
   params, options = parser.parse_args(show_diff_phil=True)
   experiments = flatten_experiments(params.input.experiments)
@@ -67,7 +59,6 @@ def run(args):
     crystals.append(crystal)
 
   show_rotation_matrix_differences(crystals, miller_indices=hkl, comparison=params.comparison)
-
 
 if __name__ == '__main__':
   import sys

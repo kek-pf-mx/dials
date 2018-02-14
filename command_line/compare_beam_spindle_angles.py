@@ -21,32 +21,28 @@ Example::
 """
 
 class Script(object):
-
   def __init__(self):
     '''Initialise the script.'''
     from dials.util.options import OptionParser
     import libtbx.load_env
 
     # The phil scope
-    phil_scope = parse('''
+    phil_scope = parse(
+        '''
 
     print_precision = 4
       .type=int(value_min=0)
       .help="Number of decimal places to print values with"
 
-    ''', process_includes=True)
+    ''',
+        process_includes=True)
 
     # The script usage
-    usage  = ("usage: %s [options] [param.phil] experiments1.json "
-              "experiments2.json..." % libtbx.env.dispatcher_name)
+    usage = ("usage: %s [options] [param.phil] experiments1.json " "experiments2.json..." % libtbx.env.dispatcher_name)
 
     # Create the parser
     self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      read_experiments=True,
-      check_format=False,
-      epilog=help_message)
+        usage=usage, phil=phil_scope, read_experiments=True, check_format=False, epilog=help_message)
 
   def run(self):
     '''Execute the script.'''
@@ -73,7 +69,7 @@ class Script(object):
     angles = [us0.angle(e, deg=True) for us0, e in zip(us0_vecs, e_vecs)]
 
     fmt = "{:." + str(params.print_precision) + "f}"
-    header = ['Exp\nid','Beam direction', 'Rotation axis', 'Angle (deg)']
+    header = ['Exp\nid', 'Beam direction', 'Rotation axis', 'Angle (deg)']
     rows = []
     for iexp, (us0, e, ang) in enumerate(zip(us0_vecs, e_vecs, angles)):
       beam_str = " ".join([fmt] * 3).format(*us0.elems)
@@ -89,8 +85,7 @@ class Script(object):
       mv = flex.mean_and_variance(angles)
 
       print "Mean and standard deviation of the angle"
-      print (fmt.format(mv.mean()) + " +/- " + fmt.format(
-        mv.unweighted_sample_standard_deviation()))
+      print(fmt.format(mv.mean()) + " +/- " + fmt.format(mv.unweighted_sample_standard_deviation()))
       print
 
     return
@@ -114,4 +109,3 @@ if __name__ == "__main__":
     script.run()
   except Exception as e:
     halraiser(e)
-

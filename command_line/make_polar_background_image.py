@@ -32,8 +32,7 @@ matplotlib.use("Agg")
 
 # Create the phil scope
 from libtbx.phil import parse
-phil_scope = parse(
-'''
+phil_scope = parse('''
 
   model = None
     .type = str
@@ -50,7 +49,6 @@ phil_scope = parse(
 
 ''')
 
-
 class Script(object):
   ''' The integration program. '''
 
@@ -60,14 +58,10 @@ class Script(object):
     import libtbx.load_env
 
     # The script usage
-    usage  = "usage: %s [options] experiment.json" % libtbx.env.dispatcher_name
+    usage = "usage: %s [options] experiment.json" % libtbx.env.dispatcher_name
 
     # Create the parser
-    self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      epilog=help_message,
-      read_experiments=True)
+    self.parser = OptionParser(usage=usage, phil=phil_scope, epilog=help_message, read_experiments=True)
 
   def run(self):
     ''' Perform the integration. '''
@@ -108,12 +102,8 @@ class Script(object):
 
     from matplotlib import pylab
     vmax = sorted(list(data))[int(0.99 * len(data))]
-    figure = pylab.figure(figsize=(6,4))
-    pylab.imshow(
-      data.as_numpy_array(),
-      interpolation = 'none',
-      vmin          = 0,
-      vmax          = vmax)
+    figure = pylab.figure(figsize=(6, 4))
+    pylab.imshow(data.as_numpy_array(), interpolation='none', vmin=0, vmax=vmax)
     ax1 = pylab.gca()
     ax1.get_xaxis().set_visible(False)
     ax1.get_yaxis().set_visible(False)
@@ -121,8 +111,6 @@ class Script(object):
     cb.ax.tick_params(labelsize=8)
     logger.info("Saving polar model %s" % (params.output.image))
     pylab.savefig("%s" % (params.output.image), dpi=600, bbox_inches='tight')
-
-
 
 if __name__ == '__main__':
   from dials.util import halraiser

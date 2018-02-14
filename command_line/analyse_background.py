@@ -19,10 +19,8 @@ help_message = '''
 
 # Create the phil scope
 from libtbx.phil import parse
-phil_scope = parse(
-'''
+phil_scope = parse('''
 ''', process_includes=True)
-
 
 class Script(object):
   ''' The integration program. '''
@@ -33,14 +31,10 @@ class Script(object):
     import libtbx.load_env
 
     # The script usage
-    usage  = "usage: %s [options] experiment.json" % libtbx.env.dispatcher_name
+    usage = "usage: %s [options] experiment.json" % libtbx.env.dispatcher_name
 
     # Create the parser
-    self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      epilog=help_message,
-      read_experiments=True)
+    self.parser = OptionParser(usage=usage, phil=phil_scope, epilog=help_message, read_experiments=True)
 
   def run(self):
     ''' Analyse the background '''
@@ -75,7 +69,7 @@ class Script(object):
     print sum(total_image) / len(total_image)
 
     from matplotlib import pylab
-    pylab.imshow(total_image.as_numpy_array(), vmin=0,vmax=2)
+    pylab.imshow(total_image.as_numpy_array(), vmin=0, vmax=2)
     pylab.show()
 
 if __name__ == '__main__':

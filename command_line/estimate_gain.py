@@ -21,7 +21,8 @@ Examples::
 
 '''
 
-phil_scope = iotbx.phil.parse("""\
+phil_scope = iotbx.phil.parse(
+    """\
   kernel_size = 10,10
     .type = ints(size=2, value_min=1)
   max_images = 1
@@ -33,9 +34,10 @@ phil_scope = iotbx.phil.parse("""\
       .type = str
       .help = "Name of output gain map file"
   }
-""", process_includes=True)
+""",
+    process_includes=True)
 
-def estimate_gain(imageset, kernel_size=(10,10), output_gain_map=None, max_images = 1):
+def estimate_gain(imageset, kernel_size=(10, 10), output_gain_map=None, max_images=1):
   detector = imageset.get_detector()
 
   from dials.algorithms.image.threshold import DispersionThresholdDebug
@@ -45,8 +47,7 @@ def estimate_gain(imageset, kernel_size=(10,10), output_gain_map=None, max_image
     raw_data = imageset.get_raw_data(image_no)
 
     gain_value = 1
-    gain_map = [flex.double(raw_data[i].accessor(), gain_value)
-                for i in range(len(detector))]
+    gain_map = [flex.double(raw_data[i].accessor(), gain_value) for i in range(len(detector))]
 
     mask = imageset.get_mask(image_no)
 
@@ -60,9 +61,8 @@ def estimate_gain(imageset, kernel_size=(10,10), output_gain_map=None, max_image
     kabsch_debug_list = []
     for i_panel in range(len(detector)):
       kabsch_debug_list.append(
-        DispersionThresholdDebug(
-          raw_data[i_panel].as_double(), mask[i_panel], gain_map[i_panel],
-          kernel_size, nsigma_b, nsigma_s, global_threshold, min_local))
+          DispersionThresholdDebug(raw_data[i_panel].as_double(), mask[i_panel], gain_map[i_panel], kernel_size,
+                                   nsigma_b, nsigma_s, global_threshold, min_local))
 
     dispersion = flex.double()
     for kabsch in kabsch_debug_list:
@@ -71,30 +71,29 @@ def estimate_gain(imageset, kernel_size=(10,10), output_gain_map=None, max_image
     sorted_dispersion = flex.sorted(dispersion)
     from libtbx.math_utils import nearest_integer as nint
 
-    q1 = sorted_dispersion[nint(len(sorted_dispersion)/4)]
-    q2 = sorted_dispersion[nint(len(sorted_dispersion)/2)]
-    q3 = sorted_dispersion[nint(len(sorted_dispersion)*3/4)]
-    iqr = q3-q1
+    q1 = sorted_dispersion[nint(len(sorted_dispersion) / 4)]
+    q2 = sorted_dispersion[nint(len(sorted_dispersion) / 2)]
+    q3 = sorted_dispersion[nint(len(sorted_dispersion) * 3 / 4)]
+    iqr = q3 - q1
 
-    print "q1, q2, q3: %.2f, %.2f, %.2f" %(q1, q2, q3)
+    print "q1, q2, q3: %.2f, %.2f, %.2f" % (q1, q2, q3)
     if iqr == 0.0:
       raise Sorry('Unable to robustly estimate the variation of pixel values.')
 
-    inlier_sel = (sorted_dispersion > (q1 - 1.5*iqr)) & (sorted_dispersion < (q3 + 1.5*iqr))
+    inlier_sel = (sorted_dispersion > (q1 - 1.5 * iqr)) & (sorted_dispersion < (q3 + 1.5 * iqr))
     sorted_dispersion = sorted_dispersion.select(inlier_sel)
-    gain = sorted_dispersion[nint(len(sorted_dispersion)/2)]
+    gain = sorted_dispersion[nint(len(sorted_dispersion) / 2)]
     print "Estimated gain: %.2f" % gain
     gains.append(gain)
 
     if image_no == 0:
       gain0 = gain
-    if image_no+1 >= max_images:
+    if image_no + 1 >= max_images:
       break
 
   if len(gains) > 1:
     stats = flex.mean_and_variance(gains)
-    print "Average gain: %.2f +/- %.2f"%(stats.mean(),
-      stats.unweighted_sample_standard_deviation())
+    print "Average gain: %.2f +/- %.2f" % (stats.mean(), stats.unweighted_sample_standard_deviation())
 
   if output_gain_map:
     if len(gains) > 1:
@@ -102,8 +101,7 @@ def estimate_gain(imageset, kernel_size=(10,10), output_gain_map=None, max_image
     # write the gain map
     import cPickle as pickle
     gain_map = flex.double(flex.grid(raw_data[0].all()), gain0)
-    pickle.dump(gain_map, open(output_gain_map, "w"),
-                protocol=pickle.HIGHEST_PROTOCOL)
+    pickle.dump(gain_map, open(output_gain_map, "w"), protocol=pickle.HIGHEST_PROTOCOL)
 
   if 0:
     sel = flex.random_selection(population_size=len(sorted_dispersion), sample_size=10000)
@@ -116,25 +114,24 @@ def estimate_gain(imageset, kernel_size=(10,10), output_gain_map=None, max_image
 
   return gain0
 
-
 def run(args):
   import libtbx.load_env
   from libtbx.utils import Sorry
-  usage = "%s [options] datablock.json" %libtbx.env.dispatcher_name
+  usage = "%s [options] datablock.json" % libtbx.env.dispatcher_name
 
   parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_datablocks=True,
-    check_format=True,
-    read_datablocks_from_images=True,
-    epilog=help_message)
+      usage=usage,
+      phil=phil_scope,
+      read_datablocks=True,
+      check_format=True,
+      read_datablocks_from_images=True,
+      epilog=help_message)
 
   params, options = parser.parse_args(show_diff_phil=False)
 
   ## Configure the logging
   #log.config(
-    #params.verbosity, info='dials.estimate_gain.log', debug='dials.estimate_gain.debug.log')
+  #params.verbosity, info='dials.estimate_gain.log', debug='dials.estimate_gain.debug.log')
 
   # Log the diff phil
   diff_phil = parser.diff_phil.as_str()
@@ -159,7 +156,6 @@ def run(args):
   estimate_gain(imageset, params.kernel_size, params.output.gain_map, params.max_images)
 
   return
-
 
 if __name__ == '__main__':
   import sys

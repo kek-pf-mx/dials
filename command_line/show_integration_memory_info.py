@@ -30,7 +30,6 @@ phil_scope = parse('''
 
 ''')
 
-
 class Script(object):
   ''' A class to encapsulate the script. '''
 
@@ -41,11 +40,7 @@ class Script(object):
 
     # The script usage
     usage = "usage: %s [options] /path/to/experiments.json" % libtbx.env.dispatcher_name
-    self.parser = OptionParser(
-      epilog=help_message,
-      usage=usage,
-      phil=phil_scope,
-      read_experiments=True)
+    self.parser = OptionParser(epilog=help_message, usage=usage, phil=phil_scope, read_experiments=True)
 
   def run(self):
     ''' Run the script. '''
@@ -70,21 +65,16 @@ class Script(object):
 
     from dials.algorithms.integration.parallel_integrator import MultiThreadedIntegrator
 
-    max_block_size = MultiThreadedIntegrator.compute_max_block_size(
-      imageset,
-      params.use_dynamic_mask,
-      total_memory)
+    max_block_size = MultiThreadedIntegrator.compute_max_block_size(imageset, params.use_dynamic_mask, total_memory)
 
     print("Total memory:   %.2f GB" % (total_memory / 1e9))
     print("Max Block Size: %d" % max_block_size)
 
-    for i in range(1, min(max_block_size, len(imageset)+1)):
-      memory = MultiThreadedIntegrator.compute_required_memory(
-        imageset[0:i],
-        params.use_dynamic_mask)
+    for i in range(1, min(max_block_size, len(imageset) + 1)):
+      memory = MultiThreadedIntegrator.compute_required_memory(imageset[0:i], params.use_dynamic_mask)
       print("Block Size = %d, Memory = %.2f GB" % (i, memory / 1e9))
 
-if __name__  == '__main__':
+if __name__ == '__main__':
   from dials.util import halraiser
   try:
     script = Script()

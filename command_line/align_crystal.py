@@ -33,7 +33,7 @@ dials.align_crystal experiments.json frame=direct
 
 '''
 
-phil_scope= iotbx.phil.parse("""
+phil_scope = iotbx.phil.parse("""
 space_group = None
   .type = space_group
 align {
@@ -53,24 +53,23 @@ output {
 }
 """)
 
+a_star = matrix.col((1., 0., 0.))
+b_star = matrix.col((0., 1., 0.))
+c_star = matrix.col((0., 0., 1.))
 
-a_star = matrix.col((1.,0.,0.))
-b_star = matrix.col((0.,1.,0.))
-c_star = matrix.col((0.,0.,1.))
-
-a = matrix.col((1.,0.,0.))
-b = matrix.col((0.,1.,0.))
-c = matrix.col((0.,0.,1.))
+a = matrix.col((1., 0., 0.))
+b = matrix.col((0., 1., 0.))
+c = matrix.col((0., 0., 1.))
 
 def smallest_angle(angle):
-  return min(abs(angle), abs(180-angle))
+  return min(abs(angle), abs(180 - angle))
 
 def describe(vector, space_group, reciprocal=True):
 
   vector_names = {
-    a.elems: 'a',
-    b.elems: 'b',
-    c.elems: 'c',
+      a.elems: 'a',
+      b.elems: 'b',
+      c.elems: 'c',
   }
 
   v = vector.elems
@@ -80,7 +79,7 @@ def describe(vector, space_group, reciprocal=True):
       vstr += '*'
       t = axis_type(vector, space_group)
       if t is not None:
-        vstr = '%s (%i-fold)' %(vstr, t)
+        vstr = '%s (%i-fold)' % (vstr, t)
   else:
     vstr = str(v)
   return vstr
@@ -98,13 +97,12 @@ def axis_type(vector, space_group):
 
   return axis_t
 
-
 class align_crystal(object):
 
   vector_names = {
-    a.elems: 'a',
-    b.elems: 'b',
-    c.elems: 'c',
+      a.elems: 'a',
+      b.elems: 'b',
+      c.elems: 'c',
   }
 
   def __init__(self, experiment, vectors, frame='reciprocal', mode='main'):
@@ -131,8 +129,7 @@ class align_crystal(object):
     fixed_rotation = matrix.sqr(gonio.get_fixed_rotation())
     setting_rotation = matrix.sqr(gonio.get_setting_rotation())
     rotation_axis = matrix.col(gonio.get_rotation_axis_datum())
-    rotation_matrix = rotation_axis.axis_and_angle_as_r3_rotation_matrix(
-      experiment.scan.get_oscillation()[0], deg=True)
+    rotation_matrix = rotation_axis.axis_and_angle_as_r3_rotation_matrix(experiment.scan.get_oscillation()[0], deg=True)
 
     from dials.algorithms.refinement import rotation_decomposition
 
@@ -148,10 +145,7 @@ class align_crystal(object):
     ey = matrix.col((0, 1, 0))
     ez = matrix.col((0, 0, 1))
 
-    referential_permutations = ([ ex,  ey,  ez],
-                                [-ex, -ey,  ez],
-                                [ ex, -ey, -ez],
-                                [-ex,  ey, -ez])
+    referential_permutations = ([ex, ey, ez], [-ex, -ey, ez], [ex, -ey, -ez], [-ex, ey, -ez])
 
     for (v1_, v2_) in self.vectors:
       results[(v1_, v2_)] = collections.OrderedDict()
@@ -203,7 +197,7 @@ class align_crystal(object):
           R = align_reference_frame(v1_0, S * l1, v2_0, S * l2)
 
           solutions = rotation_decomposition.solve_r3_rotation_for_angles_given_axes(
-            R, e1, e2, e3, return_both_solutions=True, deg=True)
+              R, e1, e2, e3, return_both_solutions=True, deg=True)
 
           if solutions is None:
             continue
@@ -242,9 +236,10 @@ class align_crystal(object):
     for angles, vector_pairs in self.unique_solutions.iteritems():
       v1, v2 = list(vector_pairs)[0]
       rows.append((
-        describe(v1, space_group, reciprocal=reciprocal),
-        describe(v2, space_group, reciprocal=reciprocal),
-        '% 7.3f' %angles[0], '% 7.3f' %angles[1],
+          describe(v1, space_group, reciprocal=reciprocal),
+          describe(v2, space_group, reciprocal=reciprocal),
+          '% 7.3f' % angles[0],
+          '% 7.3f' % angles[1],
       ))
     rows = [('Primary axis', 'Secondary axis', names[1], names[0])] + \
            sorted(rows)
@@ -258,15 +253,12 @@ class align_crystal(object):
     reciprocal = self.frame == 'reciprocal'
     for angles, solns in self.unique_solutions.iteritems():
       solutions.append({
-        'primary_axis': [self._vector_as_str(v1) for v1, v2 in solns],
-        'secondary_axis': [self._vector_as_str(v2) for v1, v2 in solns],
-        'primary_axis_type': [axis_type(v1, space_group) for v1, v2 in solns],
-        'secondary_axis_type': [axis_type(v2, space_group) for v1, v2 in solns],
-        names[1]: angles[0],
-        names[0]: angles[1]
+          'primary_axis': [self._vector_as_str(v1) for v1, v2 in solns], 'secondary_axis': [
+              self._vector_as_str(v2) for v1, v2 in solns
+          ], 'primary_axis_type': [axis_type(v1, space_group) for v1, v2 in solns], 'secondary_axis_type':
+          [axis_type(v2, space_group) for v1, v2 in solns], names[1]: angles[0], names[0]: angles[1]
       })
-    d = {'solutions': solutions,
-         'goniometer': self.experiment.goniometer.to_dict()}
+    d = {'solutions': solutions, 'goniometer': self.experiment.goniometer.to_dict()}
     import json
     if filename is not None:
       return json.dump(d, open(filename, 'wb'), indent=2)
@@ -292,33 +284,27 @@ class align_crystal(object):
     names = self.experiment.goniometer.get_names()
     axes = self.experiment.goniometer.get_axes()
     rows = [['Experimental axis', 'a*', 'b*', 'c*']]
-    rows.append([names[0]] + [
-      '%.3f' %smallest_angle(axis.angle(matrix.col(axes[0]), deg=True))
-      for axis in (a_star_, b_star_, c_star_)])
-    rows.append(['Beam'] + [
-      '%.3f' %smallest_angle(axis.angle(self.s0, deg=True))
-      for axis in (a_star_, b_star_, c_star_)])
-    rows.append([names[2]] + [
-      '%.3f' %smallest_angle(axis.angle(matrix.col(axes[2]), deg=True))
-      for axis in (a_star_, b_star_, c_star_)])
+    rows.append(
+        [names[0]] +
+        ['%.3f' % smallest_angle(axis.angle(matrix.col(axes[0]), deg=True)) for axis in (a_star_, b_star_, c_star_)])
+    rows.append(
+        ['Beam'] + ['%.3f' % smallest_angle(axis.angle(self.s0, deg=True)) for axis in (a_star_, b_star_, c_star_)])
+    rows.append(
+        [names[2]] +
+        ['%.3f' % smallest_angle(axis.angle(matrix.col(axes[2]), deg=True)) for axis in (a_star_, b_star_, c_star_)])
     print 'Angles between reciprocal cell axes and principal experimental axes:'
     print table_utils.format(rows=rows, has_header=True)
     print
 
     rows = [['Experimental axis', 'a', 'b', 'c']]
-    rows.append([names[0]] + [
-      '%.3f' %smallest_angle(axis.angle(matrix.col(axes[0]), deg=True))
-      for axis in (a_, b_, c_)])
-    rows.append(['Beam'] + [
-      '%.3f' %smallest_angle(axis.angle(self.s0, deg=True))
-      for axis in (a_, b_, c_)])
-    rows.append([names[2]] + [
-      '%.3f' %smallest_angle(axis.angle(matrix.col(axes[2]), deg=True))
-      for axis in (a_, b_, c_)])
+    rows.append(
+        [names[0]] + ['%.3f' % smallest_angle(axis.angle(matrix.col(axes[0]), deg=True)) for axis in (a_, b_, c_)])
+    rows.append(['Beam'] + ['%.3f' % smallest_angle(axis.angle(self.s0, deg=True)) for axis in (a_, b_, c_)])
+    rows.append(
+        [names[2]] + ['%.3f' % smallest_angle(axis.angle(matrix.col(axes[2]), deg=True)) for axis in (a_, b_, c_)])
     print 'Angles between unit cell axes and principal experimental axes:'
     print table_utils.format(rows=rows, has_header=True)
     print
-
 
 def run(args):
 
@@ -326,15 +312,9 @@ def run(args):
   from dials.util.options import flatten_experiments
   import libtbx.load_env
 
-  usage = "%s [options] datablock.json" %(
-    libtbx.env.dispatcher_name)
+  usage = "%s [options] datablock.json" % (libtbx.env.dispatcher_name)
 
-  parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_experiments=True,
-    check_format=False,
-    epilog=help_message)
+  parser = OptionParser(usage=usage, phil=phil_scope, read_experiments=True, check_format=False, epilog=help_message)
 
   params, options = parser.parse_args(show_diff_phil=True)
   experiments = flatten_experiments(params.input.experiments)
@@ -352,16 +332,16 @@ def run(args):
 
   if len(params.align.crystal.vector):
     frame = None
-    assert len(params.align.crystal.vector) %2 == 0
+    assert len(params.align.crystal.vector) % 2 == 0
     vectors = []
 
     name_to_vectors = {
-      'a': (a, 'direct'),
-      'b': (b, 'direct'),
-      'c': (c, 'direct'),
-      'a*': (a_star, 'reciprocal'),
-      'b*': (b_star, 'reciprocal'),
-      'c*': (c_star, 'reciprocal'),
+        'a': (a, 'direct'),
+        'b': (b, 'direct'),
+        'c': (c, 'direct'),
+        'a*': (a_star, 'reciprocal'),
+        'b*': (b_star, 'reciprocal'),
+        'c*': (c_star, 'reciprocal'),
     }
 
     for v in params.align.crystal.vector:
@@ -378,33 +358,33 @@ def run(args):
           frame = params.align.crystal.frame
 
       vectors.append(v)
-    vectors = [(vectors[2*i], vectors[2*i+1])
-               for i in range(len(vectors)//2)]
+    vectors = [(vectors[2 * i], vectors[2 * i + 1]) for i in range(len(vectors) // 2)]
   elif params.align.crystal.frame == 'direct':
     frame = params.align.crystal.frame
-    vectors = ((a, b),
-               (a, c),
-               (b, a),
-               (b, c),
-               (c, a),
-               (c, b),
-              )
+    vectors = (
+        (a, b),
+        (a, c),
+        (b, a),
+        (b, c),
+        (c, a),
+        (c, b),
+    )
 
   else:
     frame = 'reciprocal'
-    vectors = ((a_star, b_star), # a*, b*
-               (a_star, c_star), # a*, c*
-               (b_star, a_star), # b*, a*
-               (b_star, c_star), # b*, c*
-               (c_star, a_star), # c*, a*
-               (c_star, b_star), # c*, b*
-              )
+    vectors = (
+        (a_star, b_star), # a*, b*
+        (a_star, c_star), # a*, c*
+        (b_star, a_star), # b*, a*
+        (b_star, c_star), # b*, c*
+        (c_star, a_star), # c*, a*
+        (c_star, b_star), # c*, b*
+    )
 
   result = align_crystal(expt, vectors, frame=frame, mode=params.align.mode)
   result.show()
   if params.output.json is not None:
     result.as_json(filename=params.output.json)
-
 
 if __name__ == '__main__':
   import sys

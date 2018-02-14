@@ -7,9 +7,7 @@ from libtbx.test_utils import open_tmp_directory
 import libtbx.load_env
 have_dials_regression = libtbx.env.has_module("dials_regression")
 if have_dials_regression:
-  dials_regression = libtbx.env.find_in_repositories(
-    relative_path="dials_regression",
-    test=os.path.isdir)
+  dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=os.path.isdir)
 
 def exercise():
   data_dir = os.path.join(dials_regression, "centroid_test_data")
@@ -21,12 +19,11 @@ def exercise():
   g = glob.glob(os.path.join(data_dir, "*.cbf"))
   assert len(g) == 9
 
-  cmd = "dials.merge_cbf %s merge_n_images=3" %(" ".join(g))
+  cmd = "dials.merge_cbf %s merge_n_images=3" % (" ".join(g))
   print cmd
   result = easy_run.fully_buffered(cmd).raise_if_errors()
   g = glob.glob(os.path.join(tmp_dir, "sum_*.cbf"))
   assert len(g) == 3
-
 
 def run(args):
   if not have_dials_regression:

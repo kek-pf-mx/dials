@@ -17,11 +17,9 @@ def test_combination_of_multiple_datablocks_and_strong_spots_files(dials_regress
   result = easy_run.fully_buffered(cmd).raise_if_errors()
   cmd = "dials.find_spots datablock.json output.reflections=strong1.pickle"
   result = easy_run.fully_buffered(cmd).raise_if_errors()
-  cmd = ("dials.find_spots datablock.json sigma_strong=5 "
-         "output.reflections=strong2.pickle")
+  cmd = ("dials.find_spots datablock.json sigma_strong=5 " "output.reflections=strong2.pickle")
   result = easy_run.fully_buffered(cmd).raise_if_errors()
-  cmd = ("dev.dials.combine_datablocks datablock.json datablock.json "
-         "strong1.pickle strong2.pickle")
+  cmd = ("dev.dials.combine_datablocks datablock.json datablock.json " "strong1.pickle strong2.pickle")
   result = easy_run.fully_buffered(cmd).raise_if_errors()
 
   # load results

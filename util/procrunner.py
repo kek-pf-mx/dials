@@ -6,7 +6,6 @@ import subprocess
 import time
 import timeit
 from threading import Thread
-
 '''Function to run an external process, print and retain stdout and stderr,
    enforce a timeout, keep the exit code, etc.'''
 
@@ -17,11 +16,13 @@ class _LineAggregator:
      lines. Lines can be printed or passed to an arbitrary callback function.
      The lines passed to the callback function do not contain a trailing
      newline character.'''
+
   def __init__(self, print_line=False, callback=None):
     '''Create aggregator object.'''
     self._buffer = ''
     self._print = print_line
     self._callback = callback
+
   def add(self, data):
     '''Add a single character to buffer. If one or more full lines are found,
        print them (if desired) and pass to callback function.'''
@@ -33,6 +34,7 @@ class _LineAggregator:
       if self._callback:
         self._callback(to_print)
       self._buffer = remainder
+
   def flush(self):
     '''Print/send any remaining data to callback function.'''
     if self._buffer:
@@ -44,6 +46,7 @@ class _LineAggregator:
 
 class _NonBlockingStreamReader:
   '''Reads a stream in a thread to avoid blocking/deadlocks'''
+
   def __init__(self, stream, output=True, debug=False, notify=None, callback=None):
     '''Creates and starts a thread which reads from a stream.'''
     self._buffer = StringIO()
@@ -71,7 +74,7 @@ class _NonBlockingStreamReader:
       if notify:
         notify()
 
-    self._thread = Thread(target = _thread_write_stream_to_buffer)
+    self._thread = Thread(target=_thread_write_stream_to_buffer)
     self._thread.daemon = True
     self._thread.start()
 
@@ -103,6 +106,7 @@ class _NonBlockingStreamReader:
 
 class _NonBlockingStreamWriter:
   '''Writes to a stream in a thread to avoid blocking/deadlocks'''
+
   def __init__(self, stream, data, debug=False, notify=None):
     '''Creates and starts a thread which writes data to stream.'''
     self._buffer = data
@@ -137,7 +141,7 @@ class _NonBlockingStreamWriter:
       if notify:
         notify()
 
-    self._thread = Thread(target = _thread_write_buffer_to_stream)
+    self._thread = Thread(target=_thread_write_buffer_to_stream)
     self._thread.daemon = True
     self._thread.start()
 
@@ -153,7 +157,15 @@ class _NonBlockingStreamWriter:
     '''Return the number of bytes still to be written.'''
     return self._buffer_len - self._buffer_pos
 
-def run_process(command, timeout=None, debug=False, stdin=None, print_stdout=True, print_stderr=True, callback_stdout=None, callback_stderr=None, environ=None):
+def run_process(command,
+                timeout=None,
+                debug=False,
+                stdin=None,
+                print_stdout=True,
+                print_stderr=True,
+                callback_stdout=None,
+                callback_stderr=None,
+                environ=None):
   '''run an external process, command line specified as array,
      optionally enforces a timeout specified in seconds, obtains STDOUT,
      STDERR and exit code and returns summary dictionary. Optionally can
@@ -170,10 +182,10 @@ def run_process(command, timeout=None, debug=False, stdin=None, print_stdout=Tru
     stdin_pipe = subprocess.PIPE
 
   if dummy:
-    return { 'exitcode': 0, 'command': command,
-             'stdout': '', 'stderr': '',
-             'timeout': False, 'runtime': 0,
-             'time_start': time_start, 'time_end': time_start }
+    return {
+        'exitcode': 0, 'command': command, 'stdout': '', 'stderr': '', 'timeout': False, 'runtime': 0, 'time_start':
+        time_start, 'time_end': time_start
+    }
 
   start_time = timeit.default_timer()
   if timeout is not None:
@@ -191,10 +203,12 @@ def run_process(command, timeout=None, debug=False, stdin=None, print_stdout=Tru
   thread_pipe_pool = []
   notifyee, notifier = Pipe(False)
   thread_pipe_pool.append(notifyee)
-  stdout = _NonBlockingStreamReader(p.stdout, output=print_stdout, debug=debug, notify=notifier.close, callback=callback_stdout)
+  stdout = _NonBlockingStreamReader(
+      p.stdout, output=print_stdout, debug=debug, notify=notifier.close, callback=callback_stdout)
   notifyee, notifier = Pipe(False)
   thread_pipe_pool.append(notifyee)
-  stderr = _NonBlockingStreamReader(p.stderr, output=print_stderr, debug=debug, notify=notifier.close, callback=callback_stderr)
+  stderr = _NonBlockingStreamReader(
+      p.stderr, output=print_stderr, debug=debug, notify=notifier.close, callback=callback_stderr)
   if stdin is not None:
     notifyee, notifier = Pipe(False)
     thread_pipe_pool.append(notifyee)
@@ -222,7 +236,7 @@ def run_process(command, timeout=None, debug=False, stdin=None, print_stdout=Tru
         time.sleep(0.5)
     except KeyboardInterrupt:
       p.kill() # if user pressed Ctrl+C we won't be able to produce a proper report anyway
-               # but at least make sure the child process dies with us
+      # but at least make sure the child process dies with us
       raise
 
     # check if process is still running
@@ -268,12 +282,11 @@ def run_process(command, timeout=None, debug=False, stdin=None, print_stdout=Tru
   stderr = stderr.get_output()
   time_end = time.strftime("%Y-%m-%d %H:%M:%S GMT", time.gmtime())
 
-  result = { 'exitcode': p.returncode, 'command': command,
-             'stdout': stdout, 'stderr': stderr,
-             'timeout': timeout_encountered, 'runtime': runtime,
-             'time_start': time_start, 'time_end': time_end }
+  result = {
+      'exitcode': p.returncode, 'command': command, 'stdout': stdout, 'stderr': stderr, 'timeout': timeout_encountered,
+      'runtime': runtime, 'time_start': time_start, 'time_end': time_end
+  }
   if stdin is not None:
-    result.update({ 'stdin_bytes_sent': stdin.bytes_sent(),
-                    'stdin_bytes_remain': stdin.bytes_remaining() })
+    result.update({'stdin_bytes_sent': stdin.bytes_sent(), 'stdin_bytes_remain': stdin.bytes_remaining()})
 
   return result

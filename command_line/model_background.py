@@ -23,7 +23,8 @@ help_message = '''
 
 # Set the phil scope
 from libtbx.phil import parse
-phil_scope = parse('''
+phil_scope = parse(
+    '''
 
   output {
     model = 'background.pickle'
@@ -102,8 +103,8 @@ phil_scope = parse('''
   include scope dials.algorithms.integration.integrator.phil_scope
   include scope dials.algorithms.spot_prediction.reflection_predictor.phil_scope
 
-''', process_includes=True)
-
+''',
+    process_includes=True)
 
 class ImageGenerator(object):
   '''
@@ -129,12 +130,8 @@ class ImageGenerator(object):
     for i in range(len(self.model)):
       min_image = self.model[i].min_image
       vmax = sorted(list(min_image))[int(0.99 * len(min_image))]
-      figure = pylab.figure(figsize=(6,4))
-      pylab.imshow(
-        min_image.as_numpy_array(),
-        interpolation = 'none',
-        vmin          = 0,
-        vmax          = vmax)
+      figure = pylab.figure(figsize=(6, 4))
+      pylab.imshow(min_image.as_numpy_array(), interpolation='none', vmin=0, vmax=vmax)
       ax1 = pylab.gca()
       ax1.get_xaxis().set_visible(False)
       ax1.get_yaxis().set_visible(False)
@@ -152,12 +149,8 @@ class ImageGenerator(object):
     for i in range(len(self.model)):
       max_image = self.model[i].max_image
       vmax = sorted(list(max_image))[int(0.99 * len(max_image))]
-      figure = pylab.figure(figsize=(6,4))
-      pylab.imshow(
-        max_image.as_numpy_array(),
-        interpolation = 'none',
-        vmin          = 0,
-        vmax          = vmax)
+      figure = pylab.figure(figsize=(6, 4))
+      pylab.imshow(max_image.as_numpy_array(), interpolation='none', vmin=0, vmax=vmax)
       ax1 = pylab.gca()
       ax1.get_xaxis().set_visible(False)
       ax1.get_yaxis().set_visible(False)
@@ -175,12 +168,8 @@ class ImageGenerator(object):
     for i in range(len(self.model)):
       mean = self.model[i].mean
       vmax = sorted(list(mean))[int(0.99 * len(mean))]
-      figure = pylab.figure(figsize=(6,4))
-      pylab.imshow(
-        mean.as_numpy_array(),
-        interpolation = 'none',
-        vmin          = 0,
-        vmax          = vmax)
+      figure = pylab.figure(figsize=(6, 4))
+      pylab.imshow(mean.as_numpy_array(), interpolation='none', vmin=0, vmax=vmax)
       ax1 = pylab.gca()
       ax1.get_xaxis().set_visible(False)
       ax1.get_yaxis().set_visible(False)
@@ -198,13 +187,8 @@ class ImageGenerator(object):
     for i in range(len(self.model)):
       variance = self.model[i].variance
       vmax = sorted(list(variance))[int(0.99 * len(variance))]
-      figure = pylab.figure(figsize=(6,4))
-      pylab.imshow(
-        variance.as_numpy_array(),
-        interpolation = 'none',
-        vmin          = 0,
-        vmax          = vmax
-      )
+      figure = pylab.figure(figsize=(6, 4))
+      pylab.imshow(variance.as_numpy_array(), interpolation='none', vmin=0, vmax=vmax)
       ax1 = pylab.gca()
       ax1.get_xaxis().set_visible(False)
       ax1.get_yaxis().set_visible(False)
@@ -221,12 +205,8 @@ class ImageGenerator(object):
     from matplotlib import pylab
     for i in range(len(self.model)):
       dispersion = self.model[i].dispersion
-      figure = pylab.figure(figsize=(6,4))
-      pylab.imshow(
-        dispersion.as_numpy_array(),
-        interpolation = 'none',
-        vmin          = 0,
-        vmax          = 2)
+      figure = pylab.figure(figsize=(6, 4))
+      pylab.imshow(dispersion.as_numpy_array(), interpolation='none', vmin=0, vmax=2)
       ax1 = pylab.gca()
       ax1.get_xaxis().set_visible(False)
       ax1.get_yaxis().set_visible(False)
@@ -243,10 +223,8 @@ class ImageGenerator(object):
     from matplotlib import pylab
     for i in range(len(self.model)):
       mask = self.model[i].mask
-      figure = pylab.figure(figsize=(6,4))
-      pylab.imshow(
-        mask.as_numpy_array(),
-        interpolation = 'none')
+      figure = pylab.figure(figsize=(6, 4))
+      pylab.imshow(mask.as_numpy_array(), interpolation='none')
       ax1 = pylab.gca()
       ax1.get_xaxis().set_visible(False)
       ax1.get_yaxis().set_visible(False)
@@ -262,12 +240,8 @@ class ImageGenerator(object):
     for i in range(len(self.model)):
       model = self.model[i].model
       vmax = sorted(list(model))[int(0.99 * len(model))]
-      figure = pylab.figure(figsize=(6,4))
-      pylab.imshow(
-        model.as_numpy_array(),
-        interpolation = 'none',
-        vmin = 0,
-        vmax = vmax)
+      figure = pylab.figure(figsize=(6, 4))
+      pylab.imshow(model.as_numpy_array(), interpolation='none', vmin=0, vmax=vmax)
       ax1 = pylab.gca()
       ax1.get_xaxis().set_visible(False)
       ax1.get_yaxis().set_visible(False)
@@ -284,10 +258,8 @@ class ImageGenerator(object):
     from matplotlib import pylab
     for i in range(len(self.model)):
       polar_model = self.model[i].polar_model
-      figure = pylab.figure(figsize=(6,4))
-      pylab.imshow(
-        polar_model.as_numpy_array(),
-        interpolation = 'none')
+      figure = pylab.figure(figsize=(6, 4))
+      pylab.imshow(polar_model.as_numpy_array(), interpolation='none')
       ax1 = pylab.gca()
       ax1.get_xaxis().set_visible(False)
       ax1.get_yaxis().set_visible(False)
@@ -295,7 +267,6 @@ class ImageGenerator(object):
       cb.ax.tick_params(labelsize=8)
       logger.info("Saving polar model image for panel %d to %s_%d.png" % (i, filename, i))
       pylab.savefig("%s_%d.png" % (filename, i), dpi=600, bbox_inches='tight')
-
 
 class Script(object):
   '''A class for running the script.'''
@@ -311,11 +282,7 @@ class Script(object):
             % libtbx.env.dispatcher_name
 
     # Initialise the base class
-    self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      epilog=help_message,
-      read_experiments=True)
+    self.parser = OptionParser(usage=usage, phil=phil_scope, epilog=help_message, read_experiments=True)
 
   def run(self):
     '''Execute the script.'''
@@ -332,10 +299,7 @@ class Script(object):
     params, options = self.parser.parse_args(show_diff_phil=False)
 
     # Configure the logging
-    log.config(
-      params.verbosity,
-      info=params.output.log,
-      debug=params.output.debug_log)
+    log.config(params.verbosity, info=params.output.log, debug=params.output.debug_log)
 
     from dials.util.version import dials_version
     logger.info(dials_version())
@@ -364,11 +328,11 @@ class Script(object):
     logger.info(heading("Predicting reflections"))
     logger.info("")
     predicted = flex.reflection_table.from_predictions_multi(
-      experiments,
-      dmin=params.prediction.d_min,
-      dmax=params.prediction.d_max,
-      margin=params.prediction.margin,
-      force_static=params.prediction.force_static)
+        experiments,
+        dmin=params.prediction.d_min,
+        dmax=params.prediction.d_max,
+        margin=params.prediction.margin,
+        force_static=params.prediction.force_static)
 
     # Create the modeller
     modeller = BackgroundModeller(experiments, predicted, params)
@@ -397,7 +361,6 @@ class Script(object):
 
     # Print the time
     logger.info("Time Taken: %f" % (time() - start_time))
-
 
 if __name__ == '__main__':
   from dials.util import halraiser

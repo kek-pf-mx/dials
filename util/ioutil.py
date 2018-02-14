@@ -1,4 +1,5 @@
 from __future__ import absolute_import, division
+
 def get_inverse_ub_matrix_from_xparm(handle):
   """Get the inverse_ub_matrix from an xparm file handle
 
@@ -10,9 +11,7 @@ def get_inverse_ub_matrix_from_xparm(handle):
 
   """
   from scitbx import matrix
-  return matrix.sqr(handle.unit_cell_a_axis +
-                    handle.unit_cell_b_axis +
-                    handle.unit_cell_c_axis)
+  return matrix.sqr(handle.unit_cell_a_axis + handle.unit_cell_b_axis + handle.unit_cell_c_axis)
 
 def get_ub_matrix_from_xparm(handle):
   """Get the ub_matrix from an xparm file handle
@@ -50,5 +49,4 @@ def get_space_group_type_from_xparm(handle):
 
   """
   from cctbx import sgtbx
-  return sgtbx.space_group_type(sgtbx.space_group(
-      sgtbx.space_group_symbols(handle.space_group).hall()))
+  return sgtbx.space_group_type(sgtbx.space_group(sgtbx.space_group_symbols(handle.space_group).hall()))

@@ -35,7 +35,8 @@ def generate_phil_scope():
   from dials.interfaces import BackgroundIface
   from dials.interfaces import CentroidIface
 
-  phil_scope = phil.parse('''
+  phil_scope = phil.parse(
+      '''
 
     integration {
 
@@ -201,7 +202,8 @@ def generate_phil_scope():
                   "See Leslie 1999."
       }
     }
-  ''', process_includes=True)
+  ''',
+      process_includes=True)
   main_scope = phil_scope.get_without_substitution("integration")
   assert len(main_scope) == 1
   main_scope = main_scope[0]
@@ -247,9 +249,7 @@ def hist(data, width=80, symbol='#', prefix=''):
   assert num_hist > 0, "num_hist should be > 0"
   fmt = '%s%%-%dd [%%-%dd]: %%s' % (prefix, num_frame_zeros, num_count_zeros)
   scale = float(num_hist) / max_count
-  return '\n'.join((
-    fmt % (key, value, int(value * scale) * symbol)
-      for key, value in zip(frame, count)))
+  return '\n'.join((fmt % (key, value, int(value * scale) * symbol) for key, value in zip(frame, count)))
 
 def frame_hist(bbox, width=80, symbol='#', prefix=''):
   '''
@@ -262,11 +262,7 @@ def frame_hist(bbox, width=80, symbol='#', prefix=''):
   :return: The histogram string
 
   '''
-  return hist(
-    [z for b in bbox for z in range(b[4], b[5])],
-    width=width,
-    symbol=symbol,
-    prefix=prefix)
+  return hist([z for b in bbox for z in range(b[4], b[5])], width=width, symbol=symbol, prefix=prefix)
 
 def nframes_hist(bbox, width=80, symbol='#', prefix=''):
   '''
@@ -279,12 +275,7 @@ def nframes_hist(bbox, width=80, symbol='#', prefix=''):
   :return: The histogram string
 
   '''
-  return hist(
-    [b[5] - b[4] for b in bbox],
-    width=width,
-    symbol=symbol,
-    prefix=prefix)
-
+  return hist([b[5] - b[4] for b in bbox], width=width, symbol=symbol, prefix=prefix)
 
 class Parameters(object):
   '''
@@ -297,6 +288,7 @@ class Parameters(object):
     Filter parameters
 
     '''
+
     def __init__(self):
       self.min_zeta = 0.05
       self.powder_filter = None
@@ -308,7 +300,6 @@ class Parameters(object):
     '''
 
     class Validation(object):
-
       def __init__(self):
         self.number_of_partitions = 2
         self.min_partition_size = 100
@@ -400,16 +391,13 @@ class Parameters(object):
     # Return the result
     return result
 
-
 class InitializerRot(object):
   '''
   A pre-processing class for oscillation data.
 
   '''
 
-  def __init__(self,
-               experiments,
-               params):
+  def __init__(self, experiments, params):
     '''
     Initialise the pre-processor.
 
@@ -439,16 +427,13 @@ class InitializerRot(object):
       mask = self.params.filter.powder_filter(reflections['d'])
       reflections.set_flags(mask, reflections.flags.in_powder_ring)
 
-
 class InitializerStills(object):
   '''
   A pre-processing class for stills data.
 
   '''
 
-  def __init__(self,
-               experiments,
-               params):
+  def __init__(self, experiments, params):
     '''
     Initialise the pre-processor.
 
@@ -476,9 +461,7 @@ class InitializerStills(object):
       mask = self.params.filter.powder_filter(reflections['d'])
       reflections.set_flags(mask, reflections.flags.in_powder_ring)
 
-
 class FinalizerBase(object):
-
   def __init__(self, reflections, experiments, params):
     '''
     Initialise the post processor.
@@ -491,9 +474,9 @@ class FinalizerBase(object):
   def __call__(self):
     overlaps_scope = self.params.integration.overlaps_filter
     if True in [
-      overlaps_scope.foreground_foreground.enable,
-      overlaps_scope.foreground_background.enable,
-      ]:
+        overlaps_scope.foreground_foreground.enable,
+        overlaps_scope.foreground_background.enable,
+    ]:
       from dials.algorithms.integration.overlaps_filter import OverlapsFilterMultiExpt
       overlaps_filter = OverlapsFilterMultiExpt(self.reflections, self.experiments)
       if overlaps_scope.foreground_foreground.enable:
@@ -518,7 +501,6 @@ class FinalizerRot(FinalizerBase):
     # Compute the corrections
     self.reflections.compute_corrections(self.experiments)
 
-
 class FinalizerStills(FinalizerBase):
   '''
   A post-processing class for stills data.
@@ -536,17 +518,15 @@ class FinalizerStills(FinalizerBase):
 
     # Select only those reflections which were integrated
     if 'intensity.prf.variance' in integrated:
-      selection = integrated.get_flags(
-        integrated.flags.integrated,
-        all=True)
+      selection = integrated.get_flags(integrated.flags.integrated, all=True)
     else:
-      selection = integrated.get_flags(
-        integrated.flags.integrated_sum)
+      selection = integrated.get_flags(integrated.flags.integrated_sum)
     integrated = integrated.select(selection)
 
     len_all = len(integrated)
     integrated = integrated.select(~integrated.get_flags(integrated.flags.foreground_includes_bad_pixels))
-    logger.info("Filtering %d reflections with at least one bad foreground pixel out of %d"%(len_all-len(integrated), len_all))
+    logger.info("Filtering %d reflections with at least one bad foreground pixel out of %d" %
+                (len_all - len(integrated), len_all))
 
     # verify sigmas are sensible
     if 'intensity.prf.value' in integrated:
@@ -559,7 +539,8 @@ class FinalizerStills(FinalizerBase):
         n = (integrated['intensity.sum.variance'] == 0).count(True)
         sel = (integrated['intensity.sum.variance'] == 0) & (integrated['intensity.sum.value'] == 0)
         if n == sel.count(True):
-          logger.info("Filtering %d reflections with no integrated signal (sum and variance = 0) out of %d"%(n, len(integrated)))
+          logger.info("Filtering %d reflections with no integrated signal (sum and variance = 0) out of %d" %
+                      (n, len(integrated)))
           integrated = integrated.select(integrated['intensity.sum.variance'] > 0)
         else:
           raise Sorry("Found reflections with variances == 0 but summed signal != 0")
@@ -570,7 +551,8 @@ class FinalizerStills(FinalizerBase):
       if (integrated['background.sum.variance'] < 0).count(True) > 0:
         raise Sorry("Found negative variances (background sum). Are bad pixels properly masked out?")
       if (integrated['background.sum.variance'] == 0).count(True) > 0:
-        logger.info("Filtering %d reflections with zero background variance" % ((integrated['background.sum.variance'] == 0).count(True)))
+        logger.info("Filtering %d reflections with zero background variance" %
+                    ((integrated['background.sum.variance'] == 0).count(True)))
         integrated = integrated.select(integrated['background.sum.variance'] > 0)
       # apply detector gain to background summation variances
       integrated['background.sum.variance'] *= self.params.integration.summation.detector_gain
@@ -684,8 +666,6 @@ class ProfileModellerExecutor(Executor):
     '''
     return (self.experiments, self.profile_fitter)
 
-
-
 class ProfileValidatorExecutor(Executor):
   '''
   The class to do profile validation calculations
@@ -794,7 +774,6 @@ class ProfileValidatorExecutor(Executor):
 
     '''
     return (self.experiments, self.profile_fitter)
-
 
 class IntegratorExecutor(Executor):
   '''
@@ -946,17 +925,13 @@ class IntegratorExecutor(Executor):
     '''
     return (self.experiments, self.profile_fitter)
 
-
 class Integrator(object):
   '''
   The integrator class
 
   '''
 
-  def __init__(self,
-               experiments,
-               reflections,
-               params):
+  def __init__(self, experiments, reflections, params):
     '''
     Initialize the integrator
 
@@ -1003,32 +978,23 @@ class Integrator(object):
     logger.info("")
 
     # Create summary format
-    fmt = (
-      ' Processing the following experiments:\n'
-      '\n'
-      ' Experiments: %d\n'
-      ' Beams:       %d\n'
-      ' Detectors:   %d\n'
-      ' Goniometers: %d\n'
-      ' Scans:       %d\n'
-      ' Crystals:    %d\n'
-      ' Imagesets:   %d\n'
-    )
+    fmt = (' Processing the following experiments:\n'
+           '\n'
+           ' Experiments: %d\n'
+           ' Beams:       %d\n'
+           ' Detectors:   %d\n'
+           ' Goniometers: %d\n'
+           ' Scans:       %d\n'
+           ' Crystals:    %d\n'
+           ' Imagesets:   %d\n')
 
     # Print the summary
-    logger.info(fmt % (
-      len(self.experiments),
-      len(self.experiments.beams()),
-      len(self.experiments.detectors()),
-      len(self.experiments.goniometers()),
-      len(self.experiments.scans()),
-      len(self.experiments.crystals()),
-      len(self.experiments.imagesets())))
+    logger.info(fmt % (len(self.experiments), len(self.experiments.beams()), len(self.experiments.detectors()),
+                       len(self.experiments.goniometers()), len(self.experiments.scans()),
+                       len(self.experiments.crystals()), len(self.experiments.imagesets())))
 
     # Initialize the reflections
-    initialize = self.InitializerClass(
-      self.experiments,
-      self.params)
+    initialize = self.InitializerClass(self.experiments, self.params)
     initialize(self.reflections)
 
     # Check if we want to do some profile fitting
@@ -1050,8 +1016,7 @@ class Integrator(object):
       logger.info("")
 
       # Get the selection
-      selection = self.reflections.get_flags(
-        self.reflections.flags.reference_spot)
+      selection = self.reflections.get_flags(self.reflections.flags.reference_spot)
 
       # Get the reference spots
       reference = self.reflections.select(selection)
@@ -1070,7 +1035,7 @@ class Integrator(object):
           else:
             num_folds = self.params.profile.validation.number_of_partitions
           if num_folds > 1:
-            indices = (list(range(num_folds)) * int(ceil(n/num_folds)))[0:n]
+            indices = (list(range(num_folds)) * int(ceil(n / num_folds)))[0:n]
             shuffle(indices)
             reference['profile.index'] = flex.size_t(indices)
           if num_folds < 1:
@@ -1081,20 +1046,14 @@ class Integrator(object):
         # Create the profile fitter
         profile_fitter = ValidatedMultiExpProfileModeller()
         for i in range(num_folds):
-          profile_fitter_single = MultiExpProfileModeller()#(num_folds)
+          profile_fitter_single = MultiExpProfileModeller() #(num_folds)
           for expr in self.experiments:
             profile_fitter_single.add(expr.profile.fitting_class()(expr))
           profile_fitter.add(profile_fitter_single)
 
         # Create the data processor
-        executor = ProfileModellerExecutor(
-          self.experiments,
-          profile_fitter)
-        processor = ProcessorBuilder(
-          self.ProcessorClass,
-          self.experiments,
-          reference,
-          self.params.modelling).build()
+        executor = ProfileModellerExecutor(self.experiments, profile_fitter)
+        processor = ProcessorBuilder(self.ProcessorClass, self.experiments, reference, self.params.modelling).build()
         processor.executor = executor
 
         # Process the reference profiles
@@ -1146,10 +1105,7 @@ class Integrator(object):
               logger.debug("** NO PROFILE **")
 
         # Print the modeller report
-        self.profile_model_report = ProfileModelReport(
-          self.experiments,
-          finalized_profile_fitter,
-          reference)
+        self.profile_model_report = ProfileModelReport(self.experiments, finalized_profile_fitter, reference)
         logger.info("")
         logger.info(self.profile_model_report.as_str(prefix=' '))
 
@@ -1163,25 +1119,16 @@ class Integrator(object):
         if num_folds > 1:
 
           # Create the data processor
-          executor = ProfileValidatorExecutor(
-            self.experiments,
-            profile_fitter)
-          processor = ProcessorBuilder(
-            self.ProcessorClass,
-            self.experiments,
-            reference,
-            self.params.modelling).build()
+          executor = ProfileValidatorExecutor(self.experiments, profile_fitter)
+          processor = ProcessorBuilder(self.ProcessorClass, self.experiments, reference, self.params.modelling).build()
           processor.executor = executor
 
           # Process the reference profiles
           reference, validation, time_info = processor.process()
 
           # Print the modeller report
-          self.profile_validation_report = ProfileValidationReport(
-            self.experiments,
-            profile_fitter,
-            reference,
-            num_folds)
+          self.profile_validation_report = ProfileValidationReport(self.experiments, profile_fitter, reference,
+                                                                   num_folds)
           logger.info("")
           logger.info(self.profile_validation_report.as_str(prefix=' '))
 
@@ -1200,32 +1147,22 @@ class Integrator(object):
     logger.info("")
 
     # Create the data processor
-    executor = IntegratorExecutor(
-      self.experiments,
-      profile_fitter)
-    processor = ProcessorBuilder(
-      self.ProcessorClass,
-      self.experiments,
-      self.reflections,
-      self.params.integration).build()
+    executor = IntegratorExecutor(self.experiments, profile_fitter)
+    processor = ProcessorBuilder(self.ProcessorClass, self.experiments, self.reflections,
+                                 self.params.integration).build()
     processor.executor = executor
 
     # Process the reflections
     self.reflections, _, time_info = processor.process()
 
     # Finalize the reflections
-    finalize = self.FinalizerClass(
-      self.reflections,
-      self.experiments,
-      self.params)
+    finalize = self.FinalizerClass(self.reflections, self.experiments, self.params)
     finalize()
     self.reflections = finalize.reflections
     self.experiments = finalize.experiments
 
     # Create the integration report
-    self.integration_report = IntegrationReport(
-      self.experiments,
-      self.reflections)
+    self.integration_report = IntegrationReport(self.experiments, self.reflections)
     logger.info("")
     logger.info(self.integration_report.as_str(prefix=' '))
 
@@ -1277,7 +1214,6 @@ class Integrator(object):
       raise RuntimeError('Experiments must be all sweeps or all stills')
     task_table = table(rows, has_header=True, justify="right", prefix=" ")
 
-
 class Integrator3D(Integrator):
   '''
   Integrator for 3D algorithms
@@ -1286,7 +1222,6 @@ class Integrator3D(Integrator):
   InitializerClass = InitializerRot
   ProcessorClass = Processor3D
   FinalizerClass = FinalizerRot
-
 
 class IntegratorFlat3D(Integrator):
   '''
@@ -1297,7 +1232,6 @@ class IntegratorFlat3D(Integrator):
   ProcessorClass = ProcessorFlat3D
   FinalizerClass = FinalizerRot
 
-
 class Integrator2D(Integrator):
   '''
   Integrator for 2D algorithms
@@ -1306,7 +1240,6 @@ class Integrator2D(Integrator):
   InitializerClass = InitializerRot
   ProcessorClass = Processor2D
   FinalizerClass = FinalizerRot
-
 
 class IntegratorSingle2D(Integrator):
   '''
@@ -1317,7 +1250,6 @@ class IntegratorSingle2D(Integrator):
   ProcessorClass = ProcessorSingle2D
   FinalizerClass = FinalizerRot
 
-
 class IntegratorStills(Integrator):
   '''
   Integrator for still algorithms
@@ -1327,7 +1259,6 @@ class IntegratorStills(Integrator):
   ProcessorClass = ProcessorStills
   FinalizerClass = FinalizerStills
 
-
 class IntegratorVolume(ImageIntegrator):
   '''
   Volume integrator
@@ -1335,17 +1266,13 @@ class IntegratorVolume(ImageIntegrator):
   '''
   pass
 
-
 class Integrator3DThreaded(object):
   '''
   Integrator for 3D algorithms
 
   '''
-  def __init__(self,
-               experiments,
-               reflections,
-               params):
 
+  def __init__(self, experiments, reflections, params):
     '''
     Initialize the integrator
 
@@ -1419,27 +1346,20 @@ class Integrator3DThreaded(object):
     logger.info("")
 
     # Create summary format
-    fmt = (
-      ' Processing the following experiments:\n'
-      '\n'
-      ' Experiments: %d\n'
-      ' Beams:       %d\n'
-      ' Detectors:   %d\n'
-      ' Goniometers: %d\n'
-      ' Scans:       %d\n'
-      ' Crystals:    %d\n'
-      ' Imagesets:   %d\n'
-    )
+    fmt = (' Processing the following experiments:\n'
+           '\n'
+           ' Experiments: %d\n'
+           ' Beams:       %d\n'
+           ' Detectors:   %d\n'
+           ' Goniometers: %d\n'
+           ' Scans:       %d\n'
+           ' Crystals:    %d\n'
+           ' Imagesets:   %d\n')
 
     # Print the summary
-    logger.info(fmt % (
-      len(self.experiments),
-      len(self.experiments.beams()),
-      len(self.experiments.detectors()),
-      len(self.experiments.goniometers()),
-      len(self.experiments.scans()),
-      len(self.experiments.crystals()),
-      len(self.experiments.imagesets())))
+    logger.info(fmt % (len(self.experiments), len(self.experiments.beams()), len(self.experiments.detectors()),
+                       len(self.experiments.goniometers()), len(self.experiments.scans()),
+                       len(self.experiments.crystals()), len(self.experiments.imagesets())))
 
     # Do the initialisation
     self.initialise()
@@ -1454,9 +1374,7 @@ class Integrator3DThreaded(object):
 
       # Compute the reference profiles
       reference_calculator = ReferenceCalculatorProcessor(
-        experiments = self.experiments,
-        reflections = self.reflections,
-        params      = self.params)
+          experiments=self.experiments, reflections=self.reflections, params=self.params)
 
       # Get the reference profiles
       self.reference_profiles = reference_calculator.profiles()
@@ -1486,10 +1404,10 @@ class Integrator3DThreaded(object):
     logger.info("")
 
     integrator = IntegratorProcessor(
-      experiments = self.experiments,
-      reflections = self.reflections,
-      reference   = self.reference_profiles,
-      params      = self.params)
+        experiments=self.experiments,
+        reflections=self.reflections,
+        reference=self.reference_profiles,
+        params=self.params)
 
     # Process the reflections
     self.reflections = integrator.reflections()
@@ -1498,9 +1416,7 @@ class Integrator3DThreaded(object):
     self.finalise()
 
     # Create the integration report
-    self.integration_report = IntegrationReport(
-      self.experiments,
-      self.reflections)
+    self.integration_report = IntegrationReport(self.experiments, self.reflections)
     logger.info("")
     logger.info(self.integration_report.as_str(prefix=' '))
 
@@ -1552,7 +1468,6 @@ class Integrator3DThreaded(object):
       raise RuntimeError('Experiments must be all sweeps or all stills')
     task_table = table(rows, has_header=True, justify="right", prefix=" ")
 
-
 class IntegratorFactory(object):
   '''
   A factory for creating integrators.
@@ -1592,10 +1507,8 @@ class IntegratorFactory(object):
           params.integration.lookup.mask = pickle.load(infile)
 
     # Initialise the strategy classes
-    BackgroundAlgorithm = BackgroundIface.extension(
-      params.integration.background.algorithm)
-    CentroidAlgorithm = CentroidIface.extension(
-      params.integration.centroid.algorithm)
+    BackgroundAlgorithm = BackgroundIface.extension(params.integration.background.algorithm)
+    CentroidAlgorithm = CentroidIface.extension(params.integration.centroid.algorithm)
 
     # Set the algorithms in the reflection table
     flex.reflection_table._background_algorithm = \
@@ -1632,7 +1545,4 @@ class IntegratorFactory(object):
         experiment.scan = None
 
     # Return an instantiation of the class
-    return IntegratorClass(
-      experiments,
-      reflections,
-      params)
+    return IntegratorClass(experiments, reflections, params)

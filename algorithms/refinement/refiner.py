@@ -9,7 +9,6 @@
 #
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
-
 """Refiner is the refinement module public interface. RefinerFactory is
 what should usually be used to construct a Refiner."""
 
@@ -45,12 +44,12 @@ from dials.algorithms.refinement.constraints import phil_str as constr_phil_str
 from dials.algorithms.refinement.parameterisation.scan_varying_model_parameters \
   import phil_str as sv_phil_str
 from dials.algorithms.refinement.engine import refinery_phil_str
-format_data = {'outlier_phil':outlier_phil_str,
-               'uc_restraints_phil':uc_restraints_phil_str,
-               'constr_phil':constr_phil_str,
-               'sv_phil_str':sv_phil_str,
-               'refinery_phil':refinery_phil_str}
-phil_scope = parse('''
+format_data = {
+    'outlier_phil': outlier_phil_str, 'uc_restraints_phil': uc_restraints_phil_str, 'constr_phil': constr_phil_str,
+    'sv_phil_str': sv_phil_str, 'refinery_phil': refinery_phil_str
+}
+phil_scope = parse(
+    '''
 
 refinement
   .help = "Parameters to configure the refinement"
@@ -415,7 +414,8 @@ refinement
 
   }
 }
-'''%format_data, process_includes=True)
+''' % format_data,
+    process_includes=True)
 
 class RefinerFactory(object):
   """Factory class to create refiners"""
@@ -425,9 +425,10 @@ class RefinerFactory(object):
     '''Return a copy of the input reflections filtered to keep only
     those columns that are required by refinement'''
 
-    cols = ['id', 'miller_index', 'panel', 's1', 'xyzobs.mm.value',
-            "xyzobs.px.value", "xyzcal.px",
-            'xyzobs.mm.variance', 'flags', 'delpsical.weights']
+    cols = [
+        'id', 'miller_index', 'panel', 's1', 'xyzobs.mm.value', "xyzobs.px.value", "xyzcal.px", 'xyzobs.mm.variance',
+        'flags', 'delpsical.weights'
+    ]
     # NB xyzobs.px.value & xyzcal.px required by SauterPoon outlier rejector
     # NB delpsical.weights is used by ExternalDelPsiWeightingStrategy
     rt = flex.reflection_table()
@@ -442,12 +443,7 @@ class RefinerFactory(object):
     return rt
 
   @classmethod
-  def from_parameters_data_experiments(cls,
-                                       params,
-                                       reflections,
-                                       experiments,
-                                       verbosity=None,
-                                       copy_experiments=True):
+  def from_parameters_data_experiments(cls, params, reflections, experiments, verbosity=None, copy_experiments=True):
 
     #TODO Checks on the input
     #E.g. does every experiment contain at least one overlapping model with at
@@ -466,15 +462,11 @@ class RefinerFactory(object):
     # copy and filter the reflections
     reflections = cls._filter_reflections(reflections)
 
-    return cls._build_components(params,
-                                 reflections,
-                                 experiments,
-                                 verbosity=verbosity,
-                                 copy_experiments=copy_experiments)
+    return cls._build_components(
+        params, reflections, experiments, verbosity=verbosity, copy_experiments=copy_experiments)
 
   @classmethod
-  def _build_components(cls, params, reflections, experiments,
-                        verbosity, copy_experiments=True):
+  def _build_components(cls, params, reflections, experiments, verbosity, copy_experiments=True):
     """low level build"""
 
     if verbosity == 0:
@@ -512,8 +504,7 @@ class RefinerFactory(object):
     # create reflection manager
     refman = cls.config_refman(params, reflections, experiments, do_stills, verbosity)
 
-    logger.debug("Number of observations that pass initial inclusion criteria = %d",
-          refman.get_accepted_refs_size())
+    logger.debug("Number of observations that pass initial inclusion criteria = %d", refman.get_accepted_refs_size())
     sample_size = refman.get_sample_size()
     if sample_size > 0:
       logger.debug("Working set size = %d observations", sample_size)
@@ -563,15 +554,21 @@ class RefinerFactory(object):
     logger.debug("Building refinement engine")
 
     # create refinery
-    refinery = cls.config_refinery(params, target, pred_param,
-      constraints_manager, verbosity)
+    refinery = cls.config_refinery(params, target, pred_param, constraints_manager, verbosity)
 
     logger.debug("Refinement engine built")
 
     # build refiner interface and return
-    return Refiner(reflections, experiments,
-                    pred_param, param_reporter, refman, target, refinery,
-                    verbosity=verbosity, copy_experiments=copy_experiments)
+    return Refiner(
+        reflections,
+        experiments,
+        pred_param,
+        param_reporter,
+        refman,
+        target,
+        refinery,
+        verbosity=verbosity,
+        copy_experiments=copy_experiments)
 
   @staticmethod
   def config_sparse(params, experiments):
@@ -593,10 +590,9 @@ class RefinerFactory(object):
     # Check incompatible selection
     elif params.refinement.parameterisation.sparse and \
       params.refinement.mp.nproc > 1:
-        logger.warning("Could not set sparse=True and nproc={0}".format(
-          params.refinement.mp.nproc))
-        logger.warning("Resetting sparse=False")
-        params.refinement.parameterisation.sparse = False
+      logger.warning("Could not set sparse=True and nproc={0}".format(params.refinement.mp.nproc))
+      logger.warning("Resetting sparse=False")
+      params.refinement.parameterisation.sparse = False
     return params
 
   @classmethod
@@ -642,16 +638,13 @@ class RefinerFactory(object):
     # refinement
     analysis = None
     if options.scan_varying:
-      tst = [options.beam.smoother,
-             options.crystal.orientation.smoother,
-             options.crystal.unit_cell.smoother,
-             options.detector.smoother,
-             options.goniometer.smoother]
-      tst = [(e.absolute_num_intervals is None and
-              e.interval_width_degrees is libtbx.Auto) for e in tst]
+      tst = [
+          options.beam.smoother, options.crystal.orientation.smoother, options.crystal.unit_cell.smoother,
+          options.detector.smoother, options.goniometer.smoother
+      ]
+      tst = [(e.absolute_num_intervals is None and e.interval_width_degrees is libtbx.Auto) for e in tst]
       if any(tst):
-        logger.info('Doing centroid analysis to '
-          'automatically determine scan-varying interval widths')
+        logger.info('Doing centroid analysis to ' 'automatically determine scan-varying interval widths')
         ca = refman.get_centroid_analyser(debug=options.debug_centroid_analysis)
         analysis = ca()
 
@@ -661,27 +654,24 @@ class RefinerFactory(object):
     # than either the outlier rejection block width, or 9.0 degrees.
     if analysis is not None:
       for i, a in enumerate(analysis):
-        intervals = [a.get('x_interval'),
-                     a.get('y_interval'),
-                     a.get('phi_interval')]
+        intervals = [a.get('x_interval'), a.get('y_interval'), a.get('phi_interval')]
         try:
           min_interval = min([e for e in intervals if e is not None])
         except ValueError:
           # empty list - analysis was unable to suggest a suitable interval
           # width. Default to the safest case
-          phi_min, phi_max  = experiments[i].scan.get_oscillation_range(deg=True)
+          phi_min, phi_max = experiments[i].scan.get_oscillation_range(deg=True)
           a['interval_width'] = abs(phi_max - phi_min)
           logger.info('Exp id {0} suggested interval width could not be '
-              'determined and will be reset to the scan width of '
-              '{1:.1f} degrees'.format(i, a['interval_width']))
+                      'determined and will be reset to the scan width of '
+                      '{1:.1f} degrees'.format(i, a['interval_width']))
           continue
         min_interval = max(min_interval, 9.0)
         block_size = a.get('block_size')
         if block_size is not None:
           min_interval = max(min_interval, block_size)
         a['interval_width'] = min_interval
-        logger.info('Exp id {0} suggested interval width = {1:.1f} degrees'.format(
-            i, min_interval))
+        logger.info('Exp id {0} suggested interval width = {1:.1f} degrees'.format(i, min_interval))
 
     # Parameterise unique Beams
     beam_params = []
@@ -698,8 +688,7 @@ class RefinerFactory(object):
           # If a beam is scan-varying, then it must always be found alongside
           # the same Scan and Goniometer in any Experiments in which it appears
           if [goniometer, scan].count(None) != 0:
-            raise Sorry('A scan-varying beam model cannot be created because '
-                        'a scan or goniometer model is missing')
+            raise Sorry('A scan-varying beam model cannot be created because ' 'a scan or goniometer model is missing')
           if not all(g is goniometer and s is scan for (g, s) in assoc_models):
             raise Sorry('A single scan-varying beam model cannot be refined '
                         'when associated with more than one scan or goniometer')
@@ -715,22 +704,15 @@ class RefinerFactory(object):
               deg_per_interval = min(intervals)
             elif deg_per_interval is None:
               deg_per_interval = 36.0
-            n_intervals = max(int(
-              abs(sweep_range_deg[1] - sweep_range_deg[0]) / deg_per_interval), 1)
+            n_intervals = max(int(abs(sweep_range_deg[1] - sweep_range_deg[0]) / deg_per_interval), 1)
 
           beam_param = par.ScanVaryingBeamParameterisation(
-                                              beam,
-                                              array_range,
-                                              n_intervals,
-                                              goniometer=goniometer,
-                                              experiment_ids=exp_ids)
+              beam, array_range, n_intervals, goniometer=goniometer, experiment_ids=exp_ids)
         else: # force model to be static
-          beam_param = par.BeamParameterisation(beam, goniometer,
-                                                       experiment_ids=exp_ids)
+          beam_param = par.BeamParameterisation(beam, goniometer, experiment_ids=exp_ids)
       else:
         # Parameterise scan static beam, passing the goniometer
-        beam_param = par.BeamParameterisation(beam, goniometer,
-                                                       experiment_ids=exp_ids)
+        beam_param = par.BeamParameterisation(beam, goniometer, experiment_ids=exp_ids)
 
       # get number of fixable units, either parameters or parameter sets in
       # the scan-varying case
@@ -756,9 +738,7 @@ class RefinerFactory(object):
       if fix_list:
         names = filter_parameter_names(beam_param)
         assert len(names) == num_beam
-        to_fix = string_sel(fix_list,
-                            names,
-                            "Beam{0}".format(ibeam + 1))
+        to_fix = string_sel(fix_list, names, "Beam{0}".format(ibeam + 1))
         beam_param.set_fixed(to_fix)
 
       if beam_param.num_free() > 0:
@@ -776,12 +756,10 @@ class RefinerFactory(object):
       goniometer, scan = assoc_models[0]
       if goniometer is None:
         if not all(g is None and s is None for (g, s) in assoc_models):
-          raise Sorry('A crystal model appears in a mixture of scan and still '
-                      'experiments, which is not supported')
+          raise Sorry('A crystal model appears in a mixture of scan and still ' 'experiments, which is not supported')
 
       if options.scan_varying:
-        if (not options.crystal.orientation.force_static or
-            not options.crystal.unit_cell.force_static):
+        if (not options.crystal.orientation.force_static or not options.crystal.unit_cell.force_static):
           # If a crystal is scan-varying, then it must always be found alongside
           # the same Scan and Goniometer in any Experiments in which it appears
           if [goniometer, scan].count(None) != 0:
@@ -803,17 +781,12 @@ class RefinerFactory(object):
               deg_per_interval = min(intervals)
             elif deg_per_interval is None:
               deg_per_interval = 36.0
-            n_intervals = max(int(
-              abs(sweep_range_deg[1] - sweep_range_deg[0]) / deg_per_interval), 1)
+            n_intervals = max(int(abs(sweep_range_deg[1] - sweep_range_deg[0]) / deg_per_interval), 1)
 
           xl_ori_param = par.ScanVaryingCrystalOrientationParameterisation(
-                                              crystal,
-                                              array_range,
-                                              n_intervals,
-                                              experiment_ids=exp_ids)
+              crystal, array_range, n_intervals, experiment_ids=exp_ids)
         else: # force model to be static
-          xl_ori_param = par.CrystalOrientationParameterisation(crystal,
-                                                          experiment_ids=exp_ids)
+          xl_ori_param = par.CrystalOrientationParameterisation(crystal, experiment_ids=exp_ids)
 
         # unit cell parameterisation
         if not options.crystal.unit_cell.force_static:
@@ -825,22 +798,15 @@ class RefinerFactory(object):
               deg_per_interval = min(intervals)
             elif deg_per_interval is None:
               deg_per_interval = 36.0
-            n_intervals = max(int(
-              abs(sweep_range_deg[1] - sweep_range_deg[0]) / deg_per_interval), 1)
+            n_intervals = max(int(abs(sweep_range_deg[1] - sweep_range_deg[0]) / deg_per_interval), 1)
 
           xl_uc_param = par.ScanVaryingCrystalUnitCellParameterisation(
-                                              crystal,
-                                              array_range,
-                                              n_intervals,
-                                              experiment_ids=exp_ids)
+              crystal, array_range, n_intervals, experiment_ids=exp_ids)
         else: # force model to be static
-          xl_uc_param = par.CrystalUnitCellParameterisation(crystal,
-                                                          experiment_ids=exp_ids)
+          xl_uc_param = par.CrystalUnitCellParameterisation(crystal, experiment_ids=exp_ids)
       else: # all models scan-static
-        xl_ori_param = par.CrystalOrientationParameterisation(crystal,
-                                                        experiment_ids=exp_ids)
-        xl_uc_param = par.CrystalUnitCellParameterisation(crystal,
-                                                        experiment_ids=exp_ids)
+        xl_ori_param = par.CrystalOrientationParameterisation(crystal, experiment_ids=exp_ids)
+        xl_uc_param = par.CrystalUnitCellParameterisation(crystal, experiment_ids=exp_ids)
 
       # get number of fixable units, either parameters or parameter sets in
       # the scan-varying case
@@ -875,17 +841,13 @@ class RefinerFactory(object):
       if cell_fix_list:
         names = filter_parameter_names(xl_uc_param)
         assert len(names) == num_uc
-        to_fix = string_sel(cell_fix_list,
-                            names,
-                            "Crystal{0}".format(icrystal + 1))
+        to_fix = string_sel(cell_fix_list, names, "Crystal{0}".format(icrystal + 1))
         xl_uc_param.set_fixed(to_fix)
 
       if ori_fix_list:
         names = filter_parameter_names(xl_ori_param)
         assert len(names) == num_ori
-        to_fix = string_sel(ori_fix_list,
-                            names,
-                            "Crystal{0}".format(icrystal + 1))
+        to_fix = string_sel(ori_fix_list, names, "Crystal{0}".format(icrystal + 1))
         xl_ori_param.set_fixed(to_fix)
 
       if xl_ori_param.num_free() > 0:
@@ -905,15 +867,13 @@ class RefinerFactory(object):
       if options.detector.panels == "automatic":
         if len(detector) > 1:
           if options.scan_varying and not options.detector.force_static:
-            raise Sorry('Scan-varying multiple panel detectors are not '
-                        'currently supported')
+            raise Sorry('Scan-varying multiple panel detectors are not ' 'currently supported')
           try:
             h = detector.hierarchy()
-            det_param = par.DetectorParameterisationHierarchical(detector,
-                experiment_ids=exp_ids, level=options.detector.hierarchy_level)
+            det_param = par.DetectorParameterisationHierarchical(
+                detector, experiment_ids=exp_ids, level=options.detector.hierarchy_level)
           except AttributeError:
-            det_param = par.DetectorParameterisationMultiPanel(detector, beam,
-                                                        experiment_ids=exp_ids)
+            det_param = par.DetectorParameterisationMultiPanel(detector, beam, experiment_ids=exp_ids)
         elif options.scan_varying and not options.detector.force_static:
           # If a detector is scan-varying, then it must always be found alongside
           # the same Scan and Goniometer in any Experiments in which it appears
@@ -922,7 +882,7 @@ class RefinerFactory(object):
                         'because a scan or goniometer model is missing')
           if not all(g is goniometer and s is scan for (g, s) in assoc_models):
             raise Sorry('A single scan-varying detector model cannot be '
-              'refined when associated with more than one scan or goniometer')
+                        'refined when associated with more than one scan or goniometer')
           sweep_range_deg = scan.get_oscillation_range(deg=True)
           array_range = scan.get_array_range()
 
@@ -934,17 +894,12 @@ class RefinerFactory(object):
               deg_per_interval = min(intervals)
             elif deg_per_interval is None:
               deg_per_interval = 36.0
-            n_intervals = max(int(
-              abs(sweep_range_deg[1] - sweep_range_deg[0]) / deg_per_interval), 1)
+            n_intervals = max(int(abs(sweep_range_deg[1] - sweep_range_deg[0]) / deg_per_interval), 1)
 
           det_param = par.ScanVaryingDetectorParameterisationSinglePanel(
-              detector,
-              array_range,
-              n_intervals,
-              experiment_ids=exp_ids)
+              detector, array_range, n_intervals, experiment_ids=exp_ids)
         else:
-          det_param = par.DetectorParameterisationSinglePanel(detector,
-                                                        experiment_ids=exp_ids)
+          det_param = par.DetectorParameterisationSinglePanel(detector, experiment_ids=exp_ids)
       elif options.detector.panels == "single":
         if options.scan_varying and not options.detector.force_static:
           # If a detector is scan-varying, then it must always be found alongside
@@ -954,7 +909,7 @@ class RefinerFactory(object):
                         'because a scan or goniometer model is missing')
           if not all(g is goniometer and s is scan for (g, s) in assoc_models):
             raise Sorry('A single scan-varying detector model cannot be '
-              'refined when associated with more than one scan or goniometer')
+                        'refined when associated with more than one scan or goniometer')
           sweep_range_deg = scan.get_oscillation_range(deg=True)
           array_range = scan.get_array_range()
 
@@ -966,32 +921,24 @@ class RefinerFactory(object):
               deg_per_interval = min(intervals)
               for i in exp_ids:
                 logger.debug(('Detector interval_width_degrees for experiment id'
-                    ' {0} set to {1:.1f}').format(i, deg_per_interval))
+                              ' {0} set to {1:.1f}').format(i, deg_per_interval))
             elif deg_per_interval is None:
               deg_per_interval = 36.0
-            n_intervals = max(int(
-              abs(sweep_range_deg[1] - sweep_range_deg[0]) / deg_per_interval), 1)
+            n_intervals = max(int(abs(sweep_range_deg[1] - sweep_range_deg[0]) / deg_per_interval), 1)
 
           det_param = par.ScanVaryingDetectorParameterisationSinglePanel(
-              detector,
-              array_range,
-              n_intervals,
-              experiment_ids=exp_ids)
+              detector, array_range, n_intervals, experiment_ids=exp_ids)
         else:
-          det_param = par.DetectorParameterisationSinglePanel(detector,
-                                                        experiment_ids=exp_ids)
+          det_param = par.DetectorParameterisationSinglePanel(detector, experiment_ids=exp_ids)
       elif options.detector.panels == "multiple":
         if options.scan_varying and not options.detector.force_static:
-          raise Sorry('Scan-varying multiple panel detectors are not '
-                      'currently supported')
-        det_param = par.DetectorParameterisationMultiPanel(detector, beam,
-                                                        experiment_ids=exp_ids)
+          raise Sorry('Scan-varying multiple panel detectors are not ' 'currently supported')
+        det_param = par.DetectorParameterisationMultiPanel(detector, beam, experiment_ids=exp_ids)
       elif options.detector.panels == "hierarchical":
         if options.scan_varying and not options.detector.force_static:
-          raise Sorry('Scan-varying hierarchical detectors are not '
-                      'currently supported')
-        det_param = par.DetectorParameterisationHierarchical(detector, beam,
-                experiment_ids=exp_ids, level=options.detector.hierarchy_level)
+          raise Sorry('Scan-varying hierarchical detectors are not ' 'currently supported')
+        det_param = par.DetectorParameterisationHierarchical(
+            detector, beam, experiment_ids=exp_ids, level=options.detector.hierarchy_level)
       else: # can only get here if refinement.phil is broken
         raise RuntimeError("detector.panels value not recognised")
 
@@ -1019,9 +966,7 @@ class RefinerFactory(object):
       if fix_list:
         names = filter_parameter_names(det_param)
         assert len(names) == num_det
-        to_fix = string_sel(fix_list,
-                            names,
-                            "Detector{0}".format(idetector + 1))
+        to_fix = string_sel(fix_list, names, "Detector{0}".format(idetector + 1))
         det_param.set_fixed(to_fix)
 
       if det_param.num_free() > 0:
@@ -1043,8 +988,7 @@ class RefinerFactory(object):
           # If a goniometer is scan-varying, then it must always be found
           # alongside the same Scan in any Experiments in which it appears
           if not scan:
-            raise Sorry('A scan-varying goniometer model cannot be created '
-                        'because a scan model is missing')
+            raise Sorry('A scan-varying goniometer model cannot be created ' 'because a scan model is missing')
           if not all(s is scan for (g, s) in assoc_models):
             raise Sorry('A single scan-varying goniometer model cannot be '
                         'refined when associated with more than one scan')
@@ -1060,22 +1004,15 @@ class RefinerFactory(object):
               deg_per_interval = min(intervals)
             elif deg_per_interval is None:
               deg_per_interval = 36.0
-            n_intervals = max(int(
-              abs(sweep_range_deg[1] - sweep_range_deg[0]) / deg_per_interval), 1)
+            n_intervals = max(int(abs(sweep_range_deg[1] - sweep_range_deg[0]) / deg_per_interval), 1)
 
           gon_param = par.ScanVaryingGoniometerParameterisation(
-                                              goniometer,
-                                              array_range,
-                                              n_intervals,
-                                              beam=beam,
-                                              experiment_ids=exp_ids)
+              goniometer, array_range, n_intervals, beam=beam, experiment_ids=exp_ids)
         else: # force model to be static
-          gon_param = par.GoniometerParameterisation(goniometer, beam,
-                                                       experiment_ids=exp_ids)
+          gon_param = par.GoniometerParameterisation(goniometer, beam, experiment_ids=exp_ids)
       else:
         # Parameterise scan static goniometer
-        gon_param = par.GoniometerParameterisation(goniometer, beam,
-                                                       experiment_ids=exp_ids)
+        gon_param = par.GoniometerParameterisation(goniometer, beam, experiment_ids=exp_ids)
 
       # get number of fixable units, either parameters or parameter sets in
       # the scan-varying case
@@ -1099,9 +1036,7 @@ class RefinerFactory(object):
       if fix_list:
         names = filter_parameter_names(gon_param)
         assert len(names) == num_gon
-        to_fix = string_sel(fix_list,
-                            names,
-                            "Goniometer{0}".format(igoniometer + 1))
+        to_fix = string_sel(fix_list, names, "Goniometer{0}".format(igoniometer + 1))
         gon_param.set_fixed(to_fix)
 
       if gon_param.num_free() > 0:
@@ -1123,7 +1058,7 @@ class RefinerFactory(object):
       nref = len(isel)
       return nref - cutoff
       '''
-      return mnmn(reflections["id"],p.get_experiment_ids()).result - cutoff
+      return mnmn(reflections["id"], p.get_experiment_ids()).result - cutoff
 
     def unit_cell_nparam_minus_nref(p, reflections):
       '''Special version of model_nparam_minus_nref for crystal unit cell
@@ -1133,7 +1068,7 @@ class RefinerFactory(object):
       has no effect on predictions in the plane (0,k,l). Here, take the number
       of affected reflections for each parameter into account.'''
 
-      F_dbdp=flex.mat3_double( p.get_ds_dp() )
+      F_dbdp = flex.mat3_double(p.get_ds_dp())
       min_nref = options.auto_reduction.min_nref_per_parameter
       # if no free parameters, do as model_nparam_minus_nref
       if len(F_dbdp) == 0:
@@ -1181,9 +1116,10 @@ class RefinerFactory(object):
       """
       exp_ids = p.get_experiment_ids() #Experiments parameterised by this ModelParameterisation
       # Do we have enough reflections to support this parameterisation?
-      gp_params = [gp == group for gp in p.get_param_panel_groups()] #select the group ids for each param that matches the arg 'group'
+      gp_params = [gp == group for gp in p.get_param_panel_groups()
+                   ] #select the group ids for each param that matches the arg 'group'
       fixlist = p.get_fixed() # Get the fixed parameters; list says yes or no over all
-      free_gp_params = [a and not b for a,b in zip(gp_params, fixlist)] #Free params is the total less the fixed
+      free_gp_params = [a and not b for a, b in zip(gp_params, fixlist)] #Free params is the total less the fixed
       nparam = free_gp_params.count(True)
       cutoff = options.auto_reduction.min_nref_per_parameter * nparam
       isel = flex.size_t()
@@ -1204,8 +1140,7 @@ class RefinerFactory(object):
         logger.warning('{0} reflections on panels {1} with a cutoff of {2}'.format(nref, pnl_ids, cutoff))
       return surplus
 
-    def weak_parameterisation_search(beam_params, xl_ori_params, xl_uc_params,
-        det_params, gon_params, reflections):
+    def weak_parameterisation_search(beam_params, xl_ori_params, xl_uc_params, det_params, gon_params, reflections):
       weak = None
       nref_deficit = 0
       panels = None
@@ -1254,10 +1189,7 @@ class RefinerFactory(object):
           nref_deficit = net_nref
           weak = p
           name = 'Goniometer{0}'.format(i + 1)
-      return {'parameterisation':weak,
-              'panels':panels,
-              'panel_group_id':pnl_gp,
-              'name':name}
+      return {'parameterisation': weak, 'panels': panels, 'panel_group_id': pnl_gp, 'name': name}
 
     # As a special case for detector metrology, try reducing the number of
     # detector parameters if there are too few for some panel group. If this is
@@ -1272,7 +1204,7 @@ class RefinerFactory(object):
             surplus = panel_gp_nparam_minus_nref(dp, gp, igp, reflections, verbose=True)
             if surplus < 0:
               msg = ('Require {0} more reflections to parameterise Detector{1} '
-                     'panel group {2}').format(-1*surplus, i + 1, igp + 1)
+                     'panel group {2}').format(-1 * surplus, i + 1, igp + 1)
               logger.warning(msg + '\nAttempting reduction of non-essential parameters')
               names = filter_parameter_names(dp)
               prefix = 'Group{0}'.format(igp + 1)
@@ -1281,7 +1213,7 @@ class RefinerFactory(object):
               # try again, and fail if still unsuccessful
               surplus = panel_gp_nparam_minus_nref(dp, gp, igp, reflections, verbose=True)
               if surplus < 0:
-                msg = msg.format(-1*surplus, i + 1, igp + 1)
+                msg = msg.format(-1 * surplus, i + 1, igp + 1)
                 raise Sorry(msg + '\nFailing.')
         except AttributeError:
           if model_nparam_minus_nref(dp, reflections) < 0:
@@ -1406,8 +1338,8 @@ class RefinerFactory(object):
       warnmsg = 'Too few reflections to parameterise {0}'
       warnmsg += '\nAssociated reflections will be removed from the Reflection Manager'
       while True:
-        dat = weak_parameterisation_search(beam_params, xl_ori_params,
-            xl_uc_params, det_params, gon_params, reflections)
+        dat = weak_parameterisation_search(beam_params, xl_ori_params, xl_uc_params, det_params, gon_params,
+                                           reflections)
         if dat['parameterisation'] is None: break
         exp_ids = dat['parameterisation'].get_experiment_ids()
         if dat['panels'] is not None:
@@ -1419,7 +1351,7 @@ class RefinerFactory(object):
           dat['parameterisation'].set_fixed(fixlist)
           # identify observations on this panel group from associated experiments
           obs = refman.get_obs()
-          isel=flex.size_t()
+          isel = flex.size_t()
           for exp_id in exp_ids:
             subsel = (obs['id'] == exp_id).iselection()
             panels_this_exp = obs['panel'].select(subsel)
@@ -1431,7 +1363,7 @@ class RefinerFactory(object):
           dat['parameterisation'].set_fixed(fixlist)
           # identify observations from the associated experiments
           obs = refman.get_obs()
-          isel=flex.size_t()
+          isel = flex.size_t()
           for exp_id in exp_ids:
             isel.extend((obs['id'] == exp_id).iselection())
         # Now remove the selected reflections
@@ -1451,10 +1383,8 @@ class RefinerFactory(object):
     # Now we have the final list of model parameterisations, build a restraints
     # parameterisation (if requested). Only unit cell restraints are supported
     # at the moment.
-    if any([options.crystal.unit_cell.restraints.tie_to_target,
-            options.crystal.unit_cell.restraints.tie_to_group]):
-      restraints_param = cls.config_restraints(params, det_params, beam_params,
-        xl_ori_params, xl_uc_params, gon_params)
+    if any([options.crystal.unit_cell.restraints.tie_to_target, options.crystal.unit_cell.restraints.tie_to_group]):
+      restraints_param = cls.config_restraints(params, det_params, beam_params, xl_ori_params, xl_uc_params, gon_params)
     else:
       restraints_param = None
 
@@ -1474,9 +1404,7 @@ class RefinerFactory(object):
         else:
           from dials.algorithms.refinement.parameterisation.prediction_parameters_stills \
               import StillsPredictionParameterisation
-      pred_param = StillsPredictionParameterisation(
-          experiments,
-          det_params, beam_params, xl_ori_params, xl_uc_params)
+      pred_param = StillsPredictionParameterisation(experiments, det_params, beam_params, xl_ori_params, xl_uc_params)
 
     else: # doing scans
       if options.scan_varying:
@@ -1486,9 +1414,7 @@ class RefinerFactory(object):
         else:
           from dials.algorithms.refinement.parameterisation.scan_varying_prediction_parameters \
             import ScanVaryingPredictionParameterisation as PredParam
-        pred_param = PredParam(
-              experiments,
-              det_params, beam_params, xl_ori_params, xl_uc_params, gon_params)
+        pred_param = PredParam(experiments, det_params, beam_params, xl_ori_params, xl_uc_params, gon_params)
       else:
         if options.sparse:
           from dials.algorithms.refinement.parameterisation.prediction_parameters \
@@ -1496,19 +1422,15 @@ class RefinerFactory(object):
         else:
           from dials.algorithms.refinement.parameterisation.prediction_parameters \
             import XYPhiPredictionParameterisation as PredParam
-        pred_param = PredParam(
-            experiments,
-            det_params, beam_params, xl_ori_params, xl_uc_params, gon_params)
+        pred_param = PredParam(experiments, det_params, beam_params, xl_ori_params, xl_uc_params, gon_params)
 
     # Parameter reporting
-    param_reporter = par.ParameterReporter(det_params, beam_params,
-        xl_ori_params, xl_uc_params, gon_params)
+    param_reporter = par.ParameterReporter(det_params, beam_params, xl_ori_params, xl_uc_params, gon_params)
 
     return pred_param, param_reporter, restraints_param
 
   @staticmethod
-  def config_restraints(params, det_params, beam_params,
-        xl_ori_params, xl_uc_params, gon_params):
+  def config_restraints(params, det_params, beam_params, xl_ori_params, xl_uc_params, gon_params):
     """Given a set of user parameters plus model parameterisations, create a
     restraints plus a parameterisation of these restraints
 
@@ -1525,11 +1447,12 @@ class RefinerFactory(object):
     """
 
     from dials.algorithms.refinement.restraints import RestraintsParameterisation
-    rp = RestraintsParameterisation(detector_parameterisations = det_params,
-               beam_parameterisations = beam_params,
-               xl_orientation_parameterisations = xl_ori_params,
-               xl_unit_cell_parameterisations = xl_uc_params,
-               goniometer_parameterisations = gon_params)
+    rp = RestraintsParameterisation(
+        detector_parameterisations=det_params,
+        beam_parameterisations=beam_params,
+        xl_orientation_parameterisations=xl_ori_params,
+        xl_unit_cell_parameterisations=xl_uc_params,
+        goniometer_parameterisations=gon_params)
 
     # Shorten params path
     # FIXME Only unit cell restraints currently supported
@@ -1564,8 +1487,7 @@ class RefinerFactory(object):
     return rp
 
   @staticmethod
-  def config_refinery(params, target, pred_param, constraints_manager,
-    verbosity):
+  def config_refinery(params, target, pred_param, constraints_manager, verbosity):
     """Given a set of parameters, a target class, a prediction
     parameterisation class and a constraints_manager (which could be None),
     build a refinery
@@ -1591,26 +1513,25 @@ class RefinerFactory(object):
     elif options.engine == "SparseLevMar":
       from dials.algorithms.refinement.sparse_engine import SparseLevenbergMarquardtIterations as refinery
     else:
-      raise RuntimeError("Refinement engine " + options.engine +
-                         " not recognised")
+      raise RuntimeError("Refinement engine " + options.engine + " not recognised")
 
     logger.debug("Selected refinement engine type: %s", options.engine)
 
-    engine = refinery(target = target,
-            prediction_parameterisation = pred_param,
-            constraints_manager=constraints_manager,
-            log = options.log,
-            verbosity = verbosity,
-            tracking = options.journal,
-            max_iterations = options.max_iterations)
+    engine = refinery(
+        target=target,
+        prediction_parameterisation=pred_param,
+        constraints_manager=constraints_manager,
+        log=options.log,
+        verbosity=verbosity,
+        tracking=options.journal,
+        max_iterations=options.max_iterations)
 
     if params.refinement.mp.nproc > 1:
       nproc = params.refinement.mp.nproc
       try:
         engine.set_nproc(nproc)
       except NotImplementedError:
-        logger.warning("Could not set nproc={0} for refinement engine of type {1}".format(
-          nproc, options.engine))
+        logger.warning("Could not set nproc={0} for refinement engine of type {1}".format(nproc, options.engine))
 
     return engine
 
@@ -1642,8 +1563,7 @@ class RefinerFactory(object):
           StillsReflectionManager as refman
       # check incompatible weighting strategy
       if options.weighting_strategy.override == "statistical":
-        raise Sorry('The "statistical" weighting strategy is not compatible '
-                    'with stills refinement')
+        raise Sorry('The "statistical" weighting strategy is not compatible ' 'with stills refinement')
     else:
       from dials.algorithms.refinement.reflection_manager import ReflectionManager as refman
       # check incompatible weighting strategy
@@ -1676,12 +1596,11 @@ class RefinerFactory(object):
     else:
       if do_stills:
         colnames = ["x_resid", "y_resid"]
-        options.outlier.block_width=None
+        options.outlier.block_width = None
       else:
         colnames = ["x_resid", "y_resid", "phi_resid"]
       from dials.algorithms.refinement.outlier_detection import CentroidOutlierFactory
-      outlier_detector = CentroidOutlierFactory.from_parameters_and_colnames(
-        options, colnames, verbosity)
+      outlier_detector = CentroidOutlierFactory.from_parameters_and_colnames(options, colnames, verbosity)
 
     # override default weighting strategy?
     weighting_strategy = None
@@ -1692,8 +1611,7 @@ class RefinerFactory(object):
     elif options.weighting_strategy.override == "stills":
       from dials.algorithms.refinement.weighting_strategies \
         import StillsWeightingStrategy
-      weighting_strategy = StillsWeightingStrategy(
-        options.weighting_strategy.delpsi_constant)
+      weighting_strategy = StillsWeightingStrategy(options.weighting_strategy.delpsi_constant)
     elif options.weighting_strategy.override == "external_deltapsi":
       from dials.algorithms.refinement.weighting_strategies \
         import ExternalDelPsiWeightingStrategy
@@ -1701,8 +1619,7 @@ class RefinerFactory(object):
     elif options.weighting_strategy.override == "constant":
       from dials.algorithms.refinement.weighting_strategies \
         import ConstantWeightingStrategy
-      weighting_strategy = ConstantWeightingStrategy(
-        *options.weighting_strategy.constants, stills=do_stills)
+      weighting_strategy = ConstantWeightingStrategy(*options.weighting_strategy.constants, stills=do_stills)
 
     # calculate reflection block_width?
     if params.refinement.parameterisation.scan_varying:
@@ -1713,15 +1630,16 @@ class RefinerFactory(object):
       elif params.refinement.parameterisation.compose_model_per == "image":
         reflections = block_calculator.per_image()
 
-    return refman(reflections=reflections,
-            experiments=experiments,
-            nref_per_degree=options.reflections_per_degree,
-            max_sample_size = options.maximum_sample_size,
-            min_sample_size = options.minimum_sample_size,
-            close_to_spindle_cutoff=options.close_to_spindle_cutoff,
-            outlier_detector=outlier_detector,
-            weighting_strategy_override=weighting_strategy,
-            verbosity=verbosity)
+    return refman(
+        reflections=reflections,
+        experiments=experiments,
+        nref_per_degree=options.reflections_per_degree,
+        max_sample_size=options.maximum_sample_size,
+        min_sample_size=options.minimum_sample_size,
+        close_to_spindle_cutoff=options.close_to_spindle_cutoff,
+        outlier_detector=outlier_detector,
+        weighting_strategy_override=weighting_strategy,
+        verbosity=verbosity)
 
   @staticmethod
   def config_target(params, experiments, refman, do_stills):
@@ -1745,13 +1663,11 @@ class RefinerFactory(object):
     elif options.rmsd_cutoff == "absolute":
       absolute_cutoffs = options.absolute_cutoffs
     else:
-      raise RuntimeError("Target function rmsd_cutoff option" +
-          options.rmsd_cutoff + " not recognised")
+      raise RuntimeError("Target function rmsd_cutoff option" + options.rmsd_cutoff + " not recognised")
 
     # build managed reflection predictors
     from dials.algorithms.refinement.prediction import ExperimentsPredictor
-    ref_predictor = ExperimentsPredictor(experiments, do_stills,
-                                         spherical_relp=srm)
+    ref_predictor = ExperimentsPredictor(experiments, do_stills, spherical_relp=srm)
 
     # Determine whether the target is in X, Y, Phi space or just X, Y.
     if do_stills:
@@ -1771,14 +1687,15 @@ class RefinerFactory(object):
 
     # Here we pass in None for prediction_parameterisation and
     # restraints_parameterisation, as these will be linked to the object later
-    target = targ(experiments=experiments,
-                  reflection_predictor=ref_predictor,
-                  ref_man=refman,
-                  prediction_parameterisation=None,
-                  restraints_parameterisation=None,
-                  frac_binsize_cutoff=options.bin_size_fraction,
-                  absolute_cutoffs=absolute_cutoffs,
-                  gradient_calculation_blocksize=options.gradient_calculation_blocksize)
+    target = targ(
+        experiments=experiments,
+        reflection_predictor=ref_predictor,
+        ref_man=refman,
+        prediction_parameterisation=None,
+        restraints_parameterisation=None,
+        frac_binsize_cutoff=options.bin_size_fraction,
+        absolute_cutoffs=absolute_cutoffs,
+        gradient_calculation_blocksize=options.gradient_calculation_blocksize)
 
     return target
 
@@ -1808,9 +1725,16 @@ class Refiner(object):
 
     """
 
-  def __init__(self, reflections, experiments,
-               pred_param, param_reporter, refman, target, refinery,
-               verbosity=0, copy_experiments=True):
+  def __init__(self,
+               reflections,
+               experiments,
+               pred_param,
+               param_reporter,
+               refman,
+               target,
+               refinery,
+               verbosity=0,
+               copy_experiments=True):
     """
     Mandatory arguments:
       reflections - Input ReflectionList data
@@ -1869,7 +1793,6 @@ class Refiner(object):
 
     return self._target.rmsds_for_reflection_table(preds)
 
-
   def get_matches(self):
     """Delegated to the reflection manager"""
 
@@ -1915,7 +1838,7 @@ class Refiner(object):
 
       for (i, x) in enumerate(idx):
         for (j, y) in enumerate(idx):
-          sub_corrmat[i,j] = corrmat[x, y]
+          sub_corrmat[i, j] = corrmat[x, y]
 
       corrmats[k] = sub_corrmat
 
@@ -1926,7 +1849,7 @@ class Refiner(object):
 
     from libtbx.table_utils import simple_table
     from math import pi
-    rad2deg = 180/pi
+    rad2deg = 180 / pi
 
     logger.info("\nRefinement steps:")
 
@@ -1944,7 +1867,7 @@ class Refiner(object):
 
     rows = []
     for i in range(self._refinery.history.get_nrows()):
-      rmsds = [r*m for (r,m) in zip(self._refinery.history["rmsd"][i], rmsd_multipliers)]
+      rmsds = [r * m for (r, m) in zip(self._refinery.history["rmsd"][i], rmsd_multipliers)]
       rows.append([str(i), str(self._refinery.history["num_reflections"][i])] + \
         ["%.5g" % r for r in rmsds])
 
@@ -1959,7 +1882,7 @@ class Refiner(object):
 
     from libtbx.table_utils import simple_table
     from math import pi
-    rad2deg = 180/pi
+    rad2deg = 180 / pi
 
     # check if it makes sense to proceed
     if not "out_of_sample_rmsd" in self._refinery.history: return
@@ -1982,8 +1905,7 @@ class Refiner(object):
 
     rows = []
     for i in range(self._refinery.history.get_nrows()):
-      rmsds = [r*m for r, m in zip(self._refinery.history["out_of_sample_rmsd"][i],
-                                   rmsd_multipliers)]
+      rmsds = [r * m for r, m in zip(self._refinery.history["out_of_sample_rmsd"][i], rmsd_multipliers)]
       rows.append([str(i), str(nref)] + ["%.5g" % e for e in rmsds])
 
     st = simple_table(rows, header)
@@ -1996,7 +1918,7 @@ class Refiner(object):
 
     from libtbx.table_utils import simple_table
     from math import pi
-    rad2deg = 180/pi
+    rad2deg = 180 / pi
 
     logger.info("\nRMSDs by experiment:")
 
@@ -2024,12 +1946,12 @@ class Refiner(object):
         logger.info("The detector in experiment %d does not have the same pixel " + \
              "sizes on each panel. Skipping...", iexp)
         continue
-      px_per_mm = [1./e for e in px_size]
+      px_per_mm = [1. / e for e in px_size]
 
       scan = exp.scan
       try:
         temp = scan.get_oscillation(deg=False)
-        images_per_rad  = 1./abs(scan.get_oscillation(deg=False)[1])
+        images_per_rad = 1. / abs(scan.get_oscillation(deg=False)[1])
       except (AttributeError, ZeroDivisionError):
         images_per_rad = None
 
@@ -2067,15 +1989,15 @@ class Refiner(object):
 
     from libtbx.table_utils import simple_table
     from math import pi
-    rad2deg = 180/pi
+    rad2deg = 180 / pi
 
     if len(self._experiments.scans()) > 1:
       logger.warning('Multiple scans present. Only the first scan will be used '
-         'to determine the image width for reporting RMSDs')
+                     'to determine the image width for reporting RMSDs')
     scan = self._experiments.scans()[0]
     try:
       temp = scan.get_oscillation(deg=False)
-      images_per_rad  = 1./abs(scan.get_oscillation(deg=False)[1])
+      images_per_rad = 1. / abs(scan.get_oscillation(deg=False)[1])
     except AttributeError:
       images_per_rad = None
 
@@ -2098,7 +2020,7 @@ class Refiner(object):
       for ipanel, panel in enumerate(detector):
 
         px_size = panel.get_pixel_size()
-        px_per_mm = [1./e for e in px_size]
+        px_per_mm = [1. / e for e in px_size]
         num = self._target.get_num_matches_for_panel(ipanel)
         if num <= 0: continue
         raw_rmsds = self._target.rmsds_for_panel(ipanel)
@@ -2165,21 +2087,20 @@ class Refiner(object):
         ar_range = exp.scan.get_array_range()
 
         # write scan-varying s0 vectors back to beam models
-        s0_list = [self._pred_param.get_s0(t, iexp) for t in range(ar_range[0],
-                                                            ar_range[1]+1)]
+        s0_list = [self._pred_param.get_s0(t, iexp) for t in range(ar_range[0], ar_range[1] + 1)]
         exp.beam.set_s0_at_scan_points(s0_list)
 
         # write scan-varying setting matrices back to crystal models
-        A_list = [self._pred_param.get_UB(t, iexp) for t in range(ar_range[0],
-                                                            ar_range[1]+1)]
+        A_list = [self._pred_param.get_UB(t, iexp) for t in range(ar_range[0], ar_range[1] + 1)]
         exp.crystal.set_A_at_scan_points(A_list)
 
         # get state covariance matrices the whole range of images. We select
         # the first element of this at each image because crystal scan-varying
         # parameterisations are not multi-state
-        state_cov_list = [self._pred_param.calculate_model_state_uncertainties(
-          obs_image_number=t, experiment_id=iexp) for t in range(ar_range[0],
-                                                            ar_range[1]+1)]
+        state_cov_list = [
+            self._pred_param.calculate_model_state_uncertainties(obs_image_number=t, experiment_id=iexp)
+            for t in range(ar_range[0], ar_range[1] + 1)
+        ]
         if 'U_cov' in state_cov_list[0]:
           u_cov_list = [e['U_cov'] for e in state_cov_list]
         else:
@@ -2191,8 +2112,7 @@ class Refiner(object):
           b_cov_list = None
 
         # return these to the model parameterisations to be set in the models
-        self._pred_param.set_model_state_uncertainties(
-          u_cov_list, b_cov_list, iexp)
+        self._pred_param.set_model_state_uncertainties(u_cov_list, b_cov_list, iexp)
 
     if self._verbosity > 1:
       logger.debug("\nExperimental models after refinement:")
@@ -2239,8 +2159,7 @@ class Refiner(object):
     compose the derivatives of states of the model as this is expensive and
     they are not needed outside of a refinement run"""
 
-    reflections = self.predict_for_reflection_table(self._refman.get_indexed(),
-      skip_derivatives=True)
+    reflections = self.predict_for_reflection_table(self._refman.get_indexed(), skip_derivatives=True)
     reflections.sort('iobs')
     mask = self.selection_used_for_refinement()
     reflections.set_flags(mask, reflections.flags.used_in_refinement)

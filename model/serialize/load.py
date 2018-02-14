@@ -15,7 +15,6 @@ from __future__ import absolute_import, division
 from dxtbx.serialize.load import imageset as sweep # implicit import
 from dxtbx.serialize.load import datablock # implicit import
 
-
 def reflections(infile):
   '''
   Load the given reflection file.

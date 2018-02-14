@@ -135,10 +135,10 @@ html_sidebars = {
 }
 
 html_theme_options = {
-  #'logo': 'dials_icon.png',
-  'github_button': False,
-  'show_powered_by': False,
-  'description': 'Diffraction Integration for Advanced Light Sources',
+    #'logo': 'dials_icon.png',
+    'github_button': False,
+    'show_powered_by': False,
+    'description': 'Diffraction Integration for Advanced Light Sources',
 }
 
 # The name for this set of Sphinx documents.  If None, it defaults to
@@ -211,26 +211,24 @@ html_show_sourcelink = False
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'DIALSdoc'
 
-
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
-# The paper size ('letterpaper' or 'a4paper').
-#'papersize': 'letterpaper',
+    # The paper size ('letterpaper' or 'a4paper').
+    #'papersize': 'letterpaper',
 
-# The font size ('10pt', '11pt' or '12pt').
-#'pointsize': '10pt',
+    # The font size ('10pt', '11pt' or '12pt').
+    #'pointsize': '10pt',
 
-# Additional stuff for the LaTeX preamble.
-#'preamble': '',
+    # Additional stuff for the LaTeX preamble.
+    #'preamble': '',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'dials_manual.tex', u'DIALS Manual',
-   u'DIALS', 'manual'),
+    ('index', 'dials_manual.tex', u'DIALS Manual', u'DIALS', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -253,65 +251,24 @@ latex_documents = [
 # If false, no module index is generated.
 #latex_domain_indices = True
 
-
 # -- Options for manual page output ---------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-  (
-    'programs/dials_import',
-    'dials.import',
-    'dials.import documentation',
-    ['James Parkhurst'],
-    1),
-  (
-    'programs/dials_find_spots',
-    'dials.find_spots',
-    'dials.find_spots documentation',
-    ['James Parkhurst'],
-    1),
-  (
-    'programs/dials_index',
-    'dials.index',
-    'dials.index documentation',
-    ['James Parkhurst'],
-    1),
-  (
-    'programs/dials_reindex',
-    'dials.reindex',
-    'dials.reindex documentation',
-    ['James Parkhurst'],
-    1),
-  (
-    'programs/dials_refine_bravais_settings',
-    'dials.refine_bravais_settings',
-    'dials.refine_bravais_settings documentation',
-    ['James Parkhurst'],
-    1),
-  (
-    'programs/dials_refine',
-    'dials.refine',
-    'dials.refine documentation',
-    ['James Parkhurst'],
-    1),
-  (
-    'programs/dials_integrate',
-    'dials.integrate',
-    'dials.integrate documentation',
-    ['James Parkhurst'],
-    1),
-  (
-    'programs/dials_export_mtz',
-    'dials.export_mtz',
-    'dials.export_mtz documentation',
-    ['James Parkhurst'],
-    1),
+    ('programs/dials_import', 'dials.import', 'dials.import documentation', ['James Parkhurst'], 1),
+    ('programs/dials_find_spots', 'dials.find_spots', 'dials.find_spots documentation', ['James Parkhurst'], 1),
+    ('programs/dials_index', 'dials.index', 'dials.index documentation', ['James Parkhurst'], 1),
+    ('programs/dials_reindex', 'dials.reindex', 'dials.reindex documentation', ['James Parkhurst'], 1),
+    ('programs/dials_refine_bravais_settings', 'dials.refine_bravais_settings',
+     'dials.refine_bravais_settings documentation', ['James Parkhurst'], 1),
+    ('programs/dials_refine', 'dials.refine', 'dials.refine documentation', ['James Parkhurst'], 1),
+    ('programs/dials_integrate', 'dials.integrate', 'dials.integrate documentation', ['James Parkhurst'], 1),
+    ('programs/dials_export_mtz', 'dials.export_mtz', 'dials.export_mtz documentation', ['James Parkhurst'], 1),
 ]
 
 # If true, show URL addresses after external links.
 #man_show_urls = False
-
 
 # -- Options for Texinfo output -------------------------------------------
 
@@ -319,9 +276,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'DIALS', u'DIALS Documentation',
-   u'James Parkhurst', 'DIALS', 'One line description of project.',
-   'Miscellaneous'),
+    ('index', 'DIALS', u'DIALS Documentation', u'James Parkhurst', 'DIALS', 'One line description of project.',
+     'Miscellaneous'),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -336,9 +292,5 @@ texinfo_documents = [
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
 
-
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {
-  'http://docs.python.org/': None,
-  'http://cci.lbl.gov/cctbx_docs/': None
-}
+intersphinx_mapping = {'http://docs.python.org/': None, 'http://cci.lbl.gov/cctbx_docs/': None}

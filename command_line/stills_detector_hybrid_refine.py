@@ -10,7 +10,6 @@
 #  included in the root directory of this package.
 
 # LIBTBX_SET_DISPATCHER_NAME dev.dials.stills_detector_hybrid_refine
-
 """This script is intended for panel group refinement using still shot data
 collected on a CSPAD detector. This version of the script uses a 'hybrid
 minimiser'. Rather than a single joint refinement job of all crystals and the
@@ -37,7 +36,6 @@ from libtbx import easy_mp
 import copy
 
 class ExperimentFromCrystal(object):
-
   def __init__(self, reference_beam, reference_detector):
 
     self.reference_beam = reference_beam
@@ -46,9 +44,7 @@ class ExperimentFromCrystal(object):
 
   def __call__(self, crystal):
 
-    return Experiment(beam=self.reference_beam,
-                      detector=self.reference_detector,
-                      crystal=crystal)
+    return Experiment(beam=self.reference_beam, detector=self.reference_detector, crystal=crystal)
 
 def check_experiment(experiment, reflections):
 
@@ -78,9 +74,7 @@ def check_experiment(experiment, reflections):
 
   # rmsd calculation
   n = len(reflections)
-  rmsds = (sqrt(r_x / n),
-           sqrt(r_y / n),
-           sqrt(r_z / n))
+  rmsds = (sqrt(r_x / n), sqrt(r_y / n), sqrt(r_z / n))
 
   # check positional RMSDs are within 5 pixels
   if rmsds[0] > 5: return False
@@ -94,8 +88,7 @@ def detector_refiner(params, experiments, reflections):
     str(params.refinement.parameterisation.detector.hierarchy_level)
 
   # Here use the specialised faster refiner
-  refiner = StillsDetectorRefinerFactory.from_parameters_data_experiments(
-        params, reflections, experiments)
+  refiner = StillsDetectorRefinerFactory.from_parameters_data_experiments(params, reflections, experiments)
   refiner.run()
   return refiner.get_experiments()
 
@@ -125,7 +118,7 @@ def detector_parallel_refiners(params, experiments, reflections):
   print "The detector will be divided into", len(panel_ids_by_group), \
     "groups consisting of the following panels:"
   for i, g in enumerate(panel_ids_by_group):
-    print "Group%02d:" % (i+1), g
+    print "Group%02d:" % (i + 1), g
   print
 
   # now construct sub-detectors
@@ -142,7 +135,7 @@ def detector_parallel_refiners(params, experiments, reflections):
       newchild.set_px_mm_strategy(child.get_px_mm_strategy())
 
     m = child.get_local_d_matrix()
-    newchild.set_local_frame(m[0::3],m[1::3],m[2::3])
+    newchild.set_local_frame(m[0::3], m[1::3], m[2::3])
     newchild.set_name(child.get_name())
     if child.is_group():
       for c in child.children():
@@ -152,9 +145,7 @@ def detector_parallel_refiners(params, experiments, reflections):
   sub_detectors = [Detector() for e in groups]
   for d, g in zip(sub_detectors, groups):
     d.hierarchy().set_name(g.get_name())
-    d.hierarchy().set_frame(g.get_fast_axis(),
-                            g.get_slow_axis(),
-                            g.get_origin())
+    d.hierarchy().set_frame(g.get_fast_axis(), g.get_slow_axis(), g.get_origin())
     if g.is_group():
       for c in g.children():
         recursive_add_child(d, d.hierarchy(), c)
@@ -176,7 +167,8 @@ def detector_parallel_refiners(params, experiments, reflections):
   for pnls in panel_ids_by_group:
     isels = [(reflections['panel'] == pnl).iselection() for pnl in pnls]
     isel = flex.size_t()
-    for s in isels: isel.extend(s)
+    for s in isels:
+      isel.extend(s)
     gp_refs = reflections.select(isel)
     # reset panel number to match the sub-detector
     for new_id, old_id in enumerate(pnls):
@@ -187,29 +179,29 @@ def detector_parallel_refiners(params, experiments, reflections):
   # We wish to refine each whole sub-detector as a single group. Therefore
   # we must use hierarchy_level=0 for these jobs
   tmplevel = params.refinement.parameterisation.detector.hierarchy_level
-  params.refinement.parameterisation.detector.hierarchy_level=0
+  params.refinement.parameterisation.detector.hierarchy_level = 0
 
   # do refinements and collect the refined experiments
   def do_work(item):
     refs, exps = item
 
     if len(refs) < 20:
-      print "Cannot refine detector", exps[0].detector.hierarchy().get_name(), "due to too few reflections (", len(refs), ")"
+      print "Cannot refine detector", exps[0].detector.hierarchy().get_name(), "due to too few reflections (", len(
+          refs), ")"
       return exps # do not refine this detector element
 
     # Here use the specialised faster refiner
-    refiner = StillsDetectorRefinerFactory.from_parameters_data_experiments(
-        params, refs, exps)
+    refiner = StillsDetectorRefinerFactory.from_parameters_data_experiments(params, refs, exps)
     refiner.run()
     return refiner.get_experiments()
 
   refined_exps = easy_mp.parallel_map(
-    func = do_work,
-    iterable = zip(sub_reflections, sub_det_expts),
-    processes = params.mp.nproc,
-    method = params.mp.method,
-    asynchronous=True,
-    preserve_exception_message=True)
+      func=do_work,
+      iterable=zip(sub_reflections, sub_det_expts),
+      processes=params.mp.nproc,
+      method=params.mp.method,
+      asynchronous=True,
+      preserve_exception_message=True)
 
   # update the full detector
   for group, refined_exp in zip(groups, refined_exps):
@@ -227,19 +219,18 @@ def detector_parallel_refiners(params, experiments, reflections):
   experiments = detector_refiner(params, experiments, reflections)
 
   # reset hierarchy_level
-  params.refinement.parameterisation.detector.hierarchy_level=tmplevel
+  params.refinement.parameterisation.detector.hierarchy_level = tmplevel
 
   return experiments
 
 def crystals_refiner(params, experiments, reflections):
-
   def do_work(item):
     iexp, exp = item
 
     print "Refining crystal", iexp
     # reflection subset for a single experiment
     refs = reflections.select(reflections['id'] == iexp)
-    refs['id'] = flex.int(len(refs),0)
+    refs['id'] = flex.int(len(refs), 0)
 
     # DGW commented out as reflections.minimum_number_of_reflections no longer exists
     #if len(refs) < params.refinement.reflections.minimum_number_of_reflections:
@@ -247,11 +238,10 @@ def crystals_refiner(params, experiments, reflections):
     #  return
 
     # experiment list for a single experiment
-    exps=ExperimentList()
+    exps = ExperimentList()
     exps.append(exp)
     try:
-      refiner = RefinerFactory.from_parameters_data_experiments(
-        params, refs, exps)
+      refiner = RefinerFactory.from_parameters_data_experiments(params, refs, exps)
       # do refinement
       refiner.run()
     except Exception as e:
@@ -262,17 +252,16 @@ def crystals_refiner(params, experiments, reflections):
     # replace this experiment with the refined one
     experiments[iexp] = refined_exps[0]
 
-  print "Beginning crystal refinement with %d processor(s)"%params.mp.nproc
+  print "Beginning crystal refinement with %d processor(s)" % params.mp.nproc
   easy_mp.parallel_map(
-    func = do_work,
-    iterable = enumerate(experiments),
-    processes = params.mp.nproc,
-    method = params.mp.method,
-    asynchronous=True,
-    preserve_exception_message=True)
+      func=do_work,
+      iterable=enumerate(experiments),
+      processes=params.mp.nproc,
+      method=params.mp.method,
+      asynchronous=True,
+      preserve_exception_message=True)
 
   return experiments
-
 
 class Script(object):
   '''A class for running the script.'''
@@ -284,7 +273,8 @@ class Script(object):
     import libtbx.load_env
 
     # The phil scope
-    phil_scope = parse('''
+    phil_scope = parse(
+        '''
       output {
         experiments_filename = refined_experiments.json
           .type = str
@@ -313,7 +303,8 @@ class Script(object):
         .help = First: use the first detector found in the experiment \
                 Average: create an average detector from all experiments
 
-    ''', process_includes=True)
+    ''',
+        process_includes=True)
 
     # Set new defaults for detector and crystals refinement phases
     default_phil = parse('''
@@ -355,11 +346,7 @@ class Script(object):
 
     # Create the parser
     self.parser = OptionParser(
-      usage=usage,
-      phil=working_phil,
-      read_reflections=True,
-      read_experiments=True,
-      check_format=False)
+        usage=usage, phil=working_phil, read_reflections=True, read_experiments=True, check_format=False)
 
   def run(self):
 
@@ -367,8 +354,7 @@ class Script(object):
     params, options = self.parser.parse_args(show_diff_phil=True)
 
     #Configure the logging
-    log.config(params.detector_phase.refinement.verbosity,
-      info='dials.refine.log', debug='dials.refine.debug.log')
+    log.config(params.detector_phase.refinement.verbosity, info='dials.refine.log', debug='dials.refine.debug.log')
 
     # Try to obtain the models and data
     if not params.input.experiments:
@@ -378,15 +364,14 @@ class Script(object):
     try:
       assert len(params.input.reflections) == len(params.input.experiments)
     except AssertionError:
-      raise Sorry("The number of input reflections files does not match the "
-        "number of input experiments")
+      raise Sorry("The number of input reflections files does not match the " "number of input experiments")
 
     # set up global experiments and reflections lists
     from dials.array_family import flex
     reflections = flex.reflection_table()
     global_id = 0
     from dxtbx.model.experiment_list import ExperimentList
-    experiments=ExperimentList()
+    experiments = ExperimentList()
 
     if params.reference_detector == "first":
       # Use the first experiment of the first experiment list as the reference detector
@@ -416,28 +401,26 @@ class Script(object):
         # Averaging the fast and slow axes can make them be non-orthagonal. Fix by finding
         # the vector that goes exactly between them and rotate
         # around their cross product 45 degrees from that vector in either direction
-        vf = panel_fasts[i]/len(params.input.experiments)
-        vs = panel_slows[i]/len(params.input.experiments)
+        vf = panel_fasts[i] / len(params.input.experiments)
+        vs = panel_slows[i] / len(params.input.experiments)
         c = vf.cross(vs)
         angle = vf.angle(vs, deg=True)
-        v45 = vf.rotate(c, angle/2, deg=True)
+        v45 = vf.rotate(c, angle / 2, deg=True)
         vf = v45.rotate(c, -45, deg=True)
         vs = v45.rotate(c, 45, deg=True)
-        panel.set_frame(vf, vs,
-                        panel_oris[i]/len(params.input.experiments))
+        panel.set_frame(vf, vs, panel_oris[i] / len(params.input.experiments))
 
       print "Reference detector (averaged):", str(ref_exp.detector)
 
     # set the experiment factory that combines a crystal with the reference beam
     # and the reference detector
-    experiment_from_crystal=ExperimentFromCrystal(ref_exp.beam, ref_exp.detector)
+    experiment_from_crystal = ExperimentFromCrystal(ref_exp.beam, ref_exp.detector)
 
     # keep track of the number of refl per accepted experiment for a table
     nrefs_per_exp = []
 
     # loop through the input, building up the global lists
-    for ref_wrapper, exp_wrapper in zip(params.input.reflections,
-                                        params.input.experiments):
+    for ref_wrapper, exp_wrapper in zip(params.input.reflections, params.input.experiments):
       refs = ref_wrapper.data
       exps = exp_wrapper.data
 
@@ -471,8 +454,7 @@ class Script(object):
         nrefs_per_exp.append(len(sub_ref))
 
         # obtain mm positions on the reference detector
-        sub_ref = indexer_base.map_spots_pixel_to_mm_rad(sub_ref,
-          combined_exp.detector, combined_exp.scan)
+        sub_ref = indexer_base.map_spots_pixel_to_mm_rad(sub_ref, combined_exp.detector, combined_exp.scan)
 
         # extend refl and experiments lists
         reflections.extend(sub_ref)
@@ -513,8 +495,7 @@ class Script(object):
 
     # Write out refined reflections, if requested
     if params.output.reflections_filename:
-      print 'Saving refined reflections to {0}'.format(
-        params.output.reflections_filename)
+      print 'Saving refined reflections to {0}'.format(params.output.reflections_filename)
       reflections.as_pickle(params.output.reflections_filename)
 
     return

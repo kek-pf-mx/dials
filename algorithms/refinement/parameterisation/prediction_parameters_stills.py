@@ -433,7 +433,6 @@ from dials_refinement_helpers_ext import dRq_de
 #
 #    return dDeltaPsi_dp
 
-
 class StillsPredictionParameterisation(PredictionParameterisation):
   """Concrete class that inherits functionality of the
   PredictionParameterisation parent class and provides a detector space
@@ -541,8 +540,7 @@ class StillsPredictionParameterisation(PredictionParameterisation):
 
     return dpv_dp, dDeltaPsi_dp
 
-  def _xl_orientation_derivatives(self, isel, parameterisation=None,
-    reflections=None):
+  def _xl_orientation_derivatives(self, isel, parameterisation=None, reflections=None):
     """helper function to extend the derivatives lists by derivatives of the
     crystal orientation parameterisations"""
 
@@ -611,8 +609,7 @@ class StillsPredictionParameterisation(PredictionParameterisation):
 
     return dpv_dp, dDeltaPsi_dp
 
-  def _xl_unit_cell_derivatives(self, isel, parameterisation=None,
-    reflections=None):
+  def _xl_unit_cell_derivatives(self, isel, parameterisation=None, reflections=None):
     """helper function to extend the derivatives lists by derivatives of the
     crystal unit cell parameterisations"""
 
@@ -671,9 +668,9 @@ class StillsPredictionParameterisation(PredictionParameterisation):
       dp = 1.e-8
       del_e1 = de1_dp * dp
       e1f = e1 + del_e1 * 0.5
-      rfwd = q.rotate_around_origin(e1f , DeltaPsi)
+      rfwd = q.rotate_around_origin(e1f, DeltaPsi)
       e1r = e1 - del_e1 * 0.5
-      rrev = q.rotate_around_origin(e1r , DeltaPsi)
+      rrev = q.rotate_around_origin(e1r, DeltaPsi)
       drde_dedp = (rfwd - rrev) * (1 / dp)
 
       # calculate the derivative of pv for this parameter
@@ -702,16 +699,14 @@ class StillsPredictionParameterisation(PredictionParameterisation):
 
     return dX_dp, dY_dp
 
-class StillsPredictionParameterisationSparse(SparseGradientVectorMixin,
-  StillsPredictionParameterisation):
+class StillsPredictionParameterisationSparse(SparseGradientVectorMixin, StillsPredictionParameterisation):
   """A version of StillsPredictionParameterisation that uses a sparse matrix
   data structure for memory efficiency when there are a large number of
   Experiments"""
 
   pass
 
-class SphericalRelpStillsPredictionParameterisation(
-  StillsPredictionParameterisation):
+class SphericalRelpStillsPredictionParameterisation(StillsPredictionParameterisation):
   """Modified StillsPredictionParameterisation for the model that assumes
   relps are spherical and prediction requires that this sphere intersects the
   Ewald sphere, not that the relp centre is rotated onto the Ewald sphere.
@@ -813,8 +808,7 @@ class SphericalRelpStillsPredictionParameterisation(
 
     return dpv_dp, dDeltaPsi_dp
 
-  def _xl_orientation_derivatives(self, isel, parameterisation=None,
-    reflections=None):
+  def _xl_orientation_derivatives(self, isel, parameterisation=None, reflections=None):
     """helper function to extend the derivatives lists by
     derivatives of the crystal orientation parameterisations"""
 
@@ -869,8 +863,7 @@ class SphericalRelpStillsPredictionParameterisation(
 
     return dpv_dp, dDeltaPsi_dp
 
-  def _xl_unit_cell_derivatives(self, isel, parameterisation=None,
-    reflections=None):
+  def _xl_unit_cell_derivatives(self, isel, parameterisation=None, reflections=None):
     """helper function to extend the derivatives lists by
     derivatives of the crystal unit cell parameterisations"""
 
@@ -926,9 +919,8 @@ class SphericalRelpStillsPredictionParameterisation(
 
     return dpv_dp, dDeltaPsi_dp
 
-class SphericalRelpStillsPredictionParameterisationSparse(
-  SparseGradientVectorMixin,
-  SphericalRelpStillsPredictionParameterisation):
+class SphericalRelpStillsPredictionParameterisationSparse(SparseGradientVectorMixin,
+                                                          SphericalRelpStillsPredictionParameterisation):
   '''A version of SphericalRelpStillsPredictionParameterisation that uses a
   sparse matrix data structure for memory efficiency when there are a large
   number of Experiments'''

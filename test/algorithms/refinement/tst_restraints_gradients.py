@@ -25,17 +25,19 @@ from cctbx.uctbx import unit_cell
 from rstbx.symmetry.constraints.parameter_reduction import \
     symmetrize_reduce_enlarge
 
-DEG2RAD = pi/180.0
-RAD2DEG = 180.0/pi
+DEG2RAD = pi / 180.0
+RAD2DEG = 180.0 / pi
 
-master_phil = parse("""
+master_phil = parse(
+    """
     include scope dials.test.algorithms.refinement.geometry_phil
     include scope dials.test.algorithms.refinement.minimiser_phil
-    """, process_includes=True)
+    """,
+    process_includes=True)
 
 # make cell more oblique
-args=["a.direction.close_to.sd=5","b.direction.close_to.sd=5","c.direction.close_to.sd=5"]
-models = setup_geometry.Extract(master_phil, cmdline_args = args)
+args = ["a.direction.close_to.sd=5", "b.direction.close_to.sd=5", "c.direction.close_to.sd=5"]
+models = setup_geometry.Extract(master_phil, cmdline_args=args)
 crystal = models.crystal
 
 # a hexagonal crystal is a good test case for behaviour of oblique cells
@@ -50,9 +52,9 @@ if do_hexagonal:
     exit(0)
   data_dir = os.path.join(dials_regression, "refinement_test_data", "multi_stills")
   experiments_path = os.path.join(data_dir, "combined_experiments.json")
-  experiments = ExperimentListFactory.from_json_file(experiments_path,
-                check_format=False)
+  experiments = ExperimentListFactory.from_json_file(experiments_path, check_format=False)
   crystal = experiments[0].crystal
+
 
 # derive finite difference gradients of various quantities wrt each param
 def check_fd_gradients(parameterisation):
@@ -86,22 +88,15 @@ def check_fd_gradients(parameterisation):
     fwd_B = matrix.sqr(mp.get_model().get_B())
     fwd_O = fwd_B.transpose().inverse()
 
-    fd_uc = [(f - r) / deltas[i] for f,r in zip(fwd_uc, rev_uc)]
-    fd_vec = [(f - r) / deltas[i] for f,r in zip(fwd_vec, rev_vec)]
+    fd_uc = [(f - r) / deltas[i] for f, r in zip(fwd_uc, rev_uc)]
+    fd_vec = [(f - r) / deltas[i] for f, r in zip(fwd_vec, rev_vec)]
     fd_B = (fwd_B - rev_B) / deltas[i]
     fd_O = (fwd_O - rev_O) / deltas[i]
 
-    fd_grad.append({'da_dp':fd_uc[0],
-                    'db_dp':fd_uc[1],
-                    'dc_dp':fd_uc[2],
-                    'daa_dp':fd_uc[3],
-                    'dbb_dp':fd_uc[4],
-                    'dcc_dp':fd_uc[5],
-                    'davec_dp':fd_vec[0],
-                    'dbvec_dp':fd_vec[1],
-                    'dcvec_dp':fd_vec[2],
-                    'dB_dp':fd_B,
-                    'dO_dp':fd_O})
+    fd_grad.append({
+        'da_dp': fd_uc[0], 'db_dp': fd_uc[1], 'dc_dp': fd_uc[2], 'daa_dp': fd_uc[3], 'dbb_dp': fd_uc[4], 'dcc_dp':
+        fd_uc[5], 'davec_dp': fd_vec[0], 'dbvec_dp': fd_vec[1], 'dcvec_dp': fd_vec[2], 'dB_dp': fd_B, 'dO_dp': fd_O
+    })
 
     p_vals[i] = val
 
@@ -114,7 +109,7 @@ xlo_param = CrystalOrientationParameterisation(crystal)
 xluc_param = CrystalUnitCellParameterisation(crystal)
 
 from dials.algorithms.refinement.restraints.restraints import SingleUnitCellTie
-uct = SingleUnitCellTie(xluc_param, [None]*6, [None]*6)
+uct = SingleUnitCellTie(xluc_param, [None] * 6, [None] * 6)
 
 from scitbx.math import angle_derivative_wrt_vectors
 
@@ -134,9 +129,10 @@ dBT_dp = [dB.transpose() for dB in dB_dp]
 # calculate d[O]/dp
 dO_dp = [-O * dBT * O for dBT in dBT_dp]
 
+
 # function to get analytical derivative of angles wrt vectors
 def dangle(u, v):
-  return [matrix.col(e) for e in angle_derivative_wrt_vectors(u,v)]
+  return [matrix.col(e) for e in angle_derivative_wrt_vectors(u, v)]
 
 dalpha_db, dalpha_dc = dangle(bvec, cvec)
 dbeta_da, dbeta_dc = dangle(avec, cvec)
@@ -195,15 +191,15 @@ for i, dO in enumerate(dO_dp):
   assert approx_equal(dcv_dp, fd_grad[i]['dcvec_dp'])
 
   #print "CELL LENGTHS"
-  da_dp = 1./a * avec.dot(dav_dp)
+  da_dp = 1. / a * avec.dot(dav_dp)
   #print "d[a]/dp{2} analytical: {0:.5f} FD: {1:.5f}".format(da_dp, fd_grad[i]['da_dp'], i)
   assert approx_equal(da_dp, fd_grad[i]['da_dp'])
 
-  db_dp = 1./b * bvec.dot(dbv_dp)
+  db_dp = 1. / b * bvec.dot(dbv_dp)
   #print "d[b]/dp{2} analytical: {0:.5f} FD: {1:.5f}".format(db_dp, fd_grad[i]['db_dp'], i)
   assert approx_equal(db_dp, fd_grad[i]['db_dp'])
 
-  dc_dp = 1./c * cvec.dot(dcv_dp)
+  dc_dp = 1. / c * cvec.dot(dcv_dp)
   #print "d[c]/dp{2} analytical: {0:.5f} FD: {1:.5f}".format(dc_dp, fd_grad[i]['dc_dp'], i)
   assert approx_equal(dc_dp, fd_grad[i]['dc_dp'])
 

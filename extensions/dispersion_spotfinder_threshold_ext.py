@@ -15,7 +15,6 @@ from dials.interfaces import SpotFinderThresholdIface
 import logging
 logger = logging.getLogger("dials.extensions.dispersion_spotfinder_threshold_ext")
 
-
 class DispersionSpotFinderThresholdExt(SpotFinderThresholdIface):
   ''' Extensions to do dispersion threshold. '''
 
@@ -99,18 +98,17 @@ class DispersionSpotFinderThresholdExt(SpotFinderThresholdIface):
     if params.spotfinder.threshold.dispersion.global_threshold is libtbx.Auto:
       params.spotfinder.threshold.dispersion.global_threshold \
         = int(estimate_global_threshold(image, mask))
-      logger.info("Setting global_threshold: %i" %(
-        params.spotfinder.threshold.dispersion.global_threshold))
+      logger.info("Setting global_threshold: %i" % (params.spotfinder.threshold.dispersion.global_threshold))
 
     from dials.algorithms.spot_finding.threshold import DispersionThresholdStrategy
     self._algorithm = DispersionThresholdStrategy(
-      kernel_size=params.spotfinder.threshold.dispersion.kernel_size,
-      gain=params.spotfinder.threshold.dispersion.gain,
-      mask=params.spotfinder.lookup.mask,
-      n_sigma_b=params.spotfinder.threshold.dispersion.sigma_background,
-      n_sigma_s=params.spotfinder.threshold.dispersion.sigma_strong,
-      min_count=params.spotfinder.threshold.dispersion.min_local,
-      global_threshold=params.spotfinder.threshold.dispersion.global_threshold)
+        kernel_size=params.spotfinder.threshold.dispersion.kernel_size,
+        gain=params.spotfinder.threshold.dispersion.gain,
+        mask=params.spotfinder.lookup.mask,
+        n_sigma_b=params.spotfinder.threshold.dispersion.sigma_background,
+        n_sigma_s=params.spotfinder.threshold.dispersion.sigma_strong,
+        min_count=params.spotfinder.threshold.dispersion.min_local,
+        global_threshold=params.spotfinder.threshold.dispersion.global_threshold)
 
     return self._algorithm(image, mask)
 
@@ -133,7 +131,7 @@ def estimate_global_threshold(image, mask=None, plot=False):
 
   x = threshold.as_double()
   y = n_above_threshold.as_double()
-  slopes = (y[-1] - y[:-1])/(x[-1] - x[:-1])
+  slopes = (y[-1] - y[:-1]) / (x[-1] - x[:-1])
   p_m = flex.min_index(slopes)
 
   x1 = matrix.col((x[p_m], y[p_m]))
@@ -156,12 +154,12 @@ def estimate_global_threshold(image, mask=None, plot=False):
   y_g_ = y[p_g + p_m]
 
   # more conservative, choose point 2 left of the elbow point
-  x_g = x[p_g + p_m -2]
-  y_g = y[p_g + p_m -2]
+  x_g = x[p_g + p_m - 2]
+  y_g = y[p_g + p_m - 2]
 
   if plot:
     from matplotlib import pyplot
-    f = pyplot.figure(figsize=(16,12))
+    f = pyplot.figure(figsize=(16, 12))
     pyplot.scatter(threshold, n_above_threshold, marker='+')
     #for i in range(len(threshold)-1):
     #  pyplot.plot([threshold[i], threshold[-1]],
@@ -170,10 +168,8 @@ def estimate_global_threshold(image, mask=None, plot=False):
     #  pyplot.plot([threshold[0], threshold[i]],
     #              [n_above_threshold[0], n_above_threshold[i]])
     pyplot.plot([x_g, x_g], pyplot.ylim())
-    pyplot.plot(
-      [threshold[p_m], threshold[-1]], [n_above_threshold[p_m], n_above_threshold[-1]])
-    pyplot.plot(
-      [x_g_, threshold[-1]], [y_g_, n_above_threshold[-1]])
+    pyplot.plot([threshold[p_m], threshold[-1]], [n_above_threshold[p_m], n_above_threshold[-1]])
+    pyplot.plot([x_g_, threshold[-1]], [y_g_, n_above_threshold[-1]])
     pyplot.xlabel("Threshold")
     pyplot.ylabel("Number of pixels above threshold")
     pyplot.savefig("global_threshold.png")

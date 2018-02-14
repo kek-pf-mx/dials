@@ -8,7 +8,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """
 Test combination of multiple experiments and reflections files.
 
@@ -108,12 +107,9 @@ phil_input = """
 
 def test1():
 
-  dials_regression = libtbx.env.find_in_repositories(
-    relative_path="dials_regression",
-    test=os.path.isdir)
+  dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=os.path.isdir)
 
-  data_dir = os.path.join(dials_regression, "refinement_test_data",
-                          "multi_narrow_wedges")
+  data_dir = os.path.join(dials_regression, "refinement_test_data", "multi_narrow_wedges")
 
   # work in a temporary directory
   cwd = os.path.abspath(os.curdir)
@@ -127,16 +123,15 @@ def test1():
  reference_from_experiment.detector=0
  """
 
-  with open("input.phil","w") as phil_file:
-      phil_file.writelines(input_phil)
+  with open("input.phil", "w") as phil_file:
+    phil_file.writelines(input_phil)
 
   cmd = "dials.combine_experiments input.phil"
   #print cmd
 
   result = easy_run.fully_buffered(command=cmd).raise_if_errors()
   # load results
-  exp = ExperimentListFactory.from_json_file("combined_experiments.json",
-              check_format=False)
+  exp = ExperimentListFactory.from_json_file("combined_experiments.json", check_format=False)
   ref = flex.reflection_table.from_pickle("combined_reflections.pickle")
 
   # test the experiments
@@ -152,21 +147,17 @@ def test1():
   # test the reflections
   assert len(ref) == 11689
 
-  cmd = " ".join([
-    "dials.split_experiments",
-    "combined_experiments.json",
-    "combined_reflections.pickle"])
+  cmd = " ".join(["dials.split_experiments", "combined_experiments.json", "combined_reflections.pickle"])
 
   result = easy_run.fully_buffered(command=cmd).raise_if_errors()
   for i in range(len(exp)):
-    assert os.path.exists("experiments_%03d.json" %i)
-    assert os.path.exists("reflections_%03d.pickle" %i)
+    assert os.path.exists("experiments_%03d.json" % i)
+    assert os.path.exists("reflections_%03d.pickle" % i)
 
-    exp_single = ExperimentListFactory.from_json_file(
-      "experiments_%03d.json" %i, check_format=False)
-    ref_single = flex.reflection_table.from_pickle("reflections_%03d.pickle" %i)
+    exp_single = ExperimentListFactory.from_json_file("experiments_%03d.json" % i, check_format=False)
+    ref_single = flex.reflection_table.from_pickle("reflections_%03d.pickle" % i)
 
-    assert len(exp_single) ==1
+    assert len(exp_single) == 1
     assert exp_single[0].crystal == exp[i].crystal
     assert exp_single[0].beam == exp[i].beam
     assert exp_single[0].detector == exp[i].detector
@@ -176,43 +167,35 @@ def test1():
     assert len(ref_single) == len(ref.select(ref['id'] == i))
     assert ref_single['id'].all_eq(0)
 
-  cmd = " ".join([
-    "dials.split_experiments",
-    "combined_experiments.json",
-    "output.experiments_prefix=test"])
+  cmd = " ".join(["dials.split_experiments", "combined_experiments.json", "output.experiments_prefix=test"])
 
   result = easy_run.fully_buffered(command=cmd).raise_if_errors()
   for i in range(len(exp)):
-    assert os.path.exists("test_%03d.json" %i)
+    assert os.path.exists("test_%03d.json" % i)
 
   # Modify a copy of the detector
   import copy
   detector = copy.deepcopy(exp.detectors()[0])
   panel = detector[0]
   x, y, z = panel.get_origin()
-  panel.set_frame(panel.get_fast_axis(),
-                  panel.get_slow_axis(),
-                  (x, y, z+10))
+  panel.set_frame(panel.get_fast_axis(), panel.get_slow_axis(), (x, y, z + 10))
   # Set half of the experiments to the new detector
-  for i in xrange(len(exp)//2):
+  for i in xrange(len(exp) // 2):
     exp[i].detector = detector
   from dxtbx.serialize import dump
   dump.experiment_list(exp, "modded_experiments.json")
 
   cmd = " ".join([
-    "dials.split_experiments",
-    "modded_experiments.json",
-    "combined_reflections.pickle",
-    "output.experiments_prefix=test_by_detector",
-    "output.reflections_prefix=test_by_detector",
-    "by_detector=True"])
+      "dials.split_experiments", "modded_experiments.json", "combined_reflections.pickle",
+      "output.experiments_prefix=test_by_detector", "output.reflections_prefix=test_by_detector", "by_detector=True"
+  ])
 
   result = easy_run.fully_buffered(command=cmd).raise_if_errors()
   for i in range(2):
-    assert os.path.exists("test_by_detector_%03d.json" %i)
-    assert os.path.exists("test_by_detector_%03d.pickle" %i)
-  assert not os.path.exists("test_by_detector_%03d.json" %2)
-  assert not os.path.exists("test_by_detector_%03d.pickle" %2)
+    assert os.path.exists("test_by_detector_%03d.json" % i)
+    assert os.path.exists("test_by_detector_%03d.pickle" % i)
+  assert not os.path.exists("test_by_detector_%03d.json" % 2)
+  assert not os.path.exists("test_by_detector_%03d.pickle" % 2)
 
   return
 

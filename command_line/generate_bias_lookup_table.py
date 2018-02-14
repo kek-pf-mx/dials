@@ -13,10 +13,10 @@ def sum_of_erf(mu, sigma, N=1000):
   '''
   from math import sqrt, erf
   sum1 = 0
-  sum2 = N * erf((N+1-mu)/(sqrt(2)*sigma))
-  sum3 = N * erf((-N-mu)/(sqrt(2)*sigma))
+  sum2 = N * erf((N + 1 - mu) / (sqrt(2) * sigma))
+  sum3 = N * erf((-N - mu) / (sqrt(2) * sigma))
   for i in range(-N, N):
-    sum1 += erf((i+1-mu)/(sqrt(2)*sigma))
+    sum1 += erf((i + 1 - mu) / (sqrt(2) * sigma))
   return -0.5 * (sum1 + sum2 + sum3)
 
 def compute_normal_bias_sq(sigma, N1=1000, N2=1000):
@@ -41,10 +41,9 @@ def compute_normal_bias_sq(sigma, N1=1000, N2=1000):
   fa = function(0.0)
   fb = function(1.0)
   sum_f = 0.0
-  for i in range(1,N2):
+  for i in range(1, N2):
     sum_f += function(i * 1.0 / N2)
-  return (1.0 / N2)*(fa/2.0 + fb/2.0 + sum_f)
-
+  return (1.0 / N2) * (fa / 2.0 + fb / 2.0 + sum_f)
 
 def compute_lookup_table(max_sigma=0.5, N1=1000, N2=1000, N3=50):
   '''
@@ -65,7 +64,6 @@ def compute_lookup_table(max_sigma=0.5, N1=1000, N2=1000, N3=50):
     bias_sq.append(b)
 
   return sigma, bias_sq
-
 
 if __name__ == '__main__':
 

@@ -10,7 +10,6 @@ def add_poisson_noise(x):
   return y
 
 class Test(object):
-
   def __init__(self):
     pass
 
@@ -45,9 +44,9 @@ class Test(object):
     p = p / s
 
     # Copy profile
-    c = flex.double(flex.grid(9,9,9), 0)
+    c = flex.double(flex.grid(9, 9, 9), 0)
     b = flex.double(flex.grid(9, 9, 9), 0)
-    m = flex.bool(flex.grid(9,9,9), True)
+    m = flex.bool(flex.grid(9, 9, 9), True)
 
     # Fit
     fit = ProfileFitter(c, b, m, p)
@@ -57,8 +56,8 @@ class Test(object):
 
     # Test intensity is the same
     eps = 1e-3
-    assert(abs(I[0] - flex.sum(c)) < eps)
-    assert(abs(V[0] - I[0]) < eps)
+    assert (abs(I[0] - flex.sum(c)) < eps)
+    assert (abs(V[0] - I[0]) < eps)
 
     print 'OK'
 
@@ -77,7 +76,7 @@ class Test(object):
     # Copy profile
     c = p.deep_copy()
     b = flex.double(flex.grid(9, 9, 9), 0)
-    m = flex.bool(flex.grid(9,9,9), True)
+    m = flex.bool(flex.grid(9, 9, 9), True)
 
     # Fit
     fit = ProfileFitter(c, b, m, p)
@@ -87,8 +86,8 @@ class Test(object):
 
     # Test intensity is the same
     eps = 1e-3
-    assert(abs(I[0] - flex.sum(c)) < eps)
-    assert(abs(V[0] - I[0]) < eps)
+    assert (abs(I[0] - flex.sum(c)) < eps)
+    assert (abs(V[0] - I[0]) < eps)
 
     print 'OK'
 
@@ -107,7 +106,7 @@ class Test(object):
     # Copy profile
     c = add_poisson_noise(100 * p)
     b = flex.double(flex.grid(9, 9, 9), 0)
-    m = flex.bool(flex.grid(9,9,9), True)
+    m = flex.bool(flex.grid(9, 9, 9), True)
 
     # Fit
     fit = ProfileFitter(c, b, m, p)
@@ -117,8 +116,8 @@ class Test(object):
 
     # Test intensity is the same
     eps = 1e-3
-    assert(abs(I[0] - flex.sum(c)) < eps)
-    assert(abs(V[0] - I[0]) < eps)
+    assert (abs(I[0] - flex.sum(c)) < eps)
+    assert (abs(V[0] - I[0]) < eps)
 
     print 'OK'
 
@@ -137,7 +136,7 @@ class Test(object):
     # Copy profile
     c0 = add_poisson_noise(100 * p)
     b = flex.double(flex.grid(9, 9, 9), 10)
-    m = flex.bool(flex.grid(9,9,9), True)
+    m = flex.bool(flex.grid(9, 9, 9), True)
     b0 = add_poisson_noise(b)
     c = c0 + b0
 
@@ -152,8 +151,8 @@ class Test(object):
 
     # Test intensity is the same
     eps = 1e-3
-    assert(abs(I[0] - Iknown) < eps)
-    assert(abs(V[0] - Vknown) < eps)
+    assert (abs(I[0] - Iknown) < eps)
+    assert (abs(V[0] - Vknown) < eps)
 
     print 'OK'
 
@@ -172,13 +171,13 @@ class Test(object):
     # Copy profile
     c = p.deep_copy()
     b = flex.double(flex.grid(9, 9, 9), 0)
-    m = flex.bool(flex.grid(9,9,9), True)
+    m = flex.bool(flex.grid(9, 9, 9), True)
 
     # Get the partial profiles
-    pp = p[0:5,:,:]
-    mp = m[0:5,:,:]
-    cp = c[0:5,:,:]
-    bp = b[0:5,:,:]
+    pp = p[0:5, :, :]
+    mp = m[0:5, :, :]
+    cp = c[0:5, :, :]
+    bp = b[0:5, :, :]
 
     # Fit
     fit = ProfileFitter(cp, bp, mp, pp)
@@ -188,8 +187,8 @@ class Test(object):
 
     # Test intensity is the same
     eps = 1e-7
-    assert(abs(I[0] - flex.sum(p)) < eps)
-    assert(abs(V[0] - flex.sum(p)) < eps)
+    assert (abs(I[0] - flex.sum(p)) < eps)
+    assert (abs(V[0] - flex.sum(p)) < eps)
 
     print 'OK'
 
@@ -208,13 +207,13 @@ class Test(object):
     # Copy profile
     c = add_poisson_noise(100 * p)
     b = flex.double(flex.grid(9, 9, 9), 0)
-    m = flex.bool(flex.grid(9,9,9), True)
+    m = flex.bool(flex.grid(9, 9, 9), True)
 
     # Get the partial profiles
-    pp = p[0:5,:,:]
-    mp = m[0:5,:,:]
-    cp = c[0:5,:,:]
-    bp = b[0:5,:,:]
+    pp = p[0:5, :, :]
+    mp = m[0:5, :, :]
+    cp = c[0:5, :, :]
+    bp = b[0:5, :, :]
 
     # Fit
     fit = ProfileFitter(cp, bp, mp, pp)
@@ -227,8 +226,8 @@ class Test(object):
 
     # Test intensity is the same
     eps = 1e-7
-    assert(abs(I[0] - Iknown) < eps)
-    assert(abs(V[0] - Vknown) < eps)
+    assert (abs(I[0] - Iknown) < eps)
+    assert (abs(V[0] - Vknown) < eps)
 
     print 'OK'
 
@@ -247,15 +246,15 @@ class Test(object):
     # Copy profile
     c0 = add_poisson_noise(100 * p)
     b = flex.double(flex.grid(9, 9, 9), 1)
-    m = flex.bool(flex.grid(9,9,9), True)
+    m = flex.bool(flex.grid(9, 9, 9), True)
     c = c0 + add_poisson_noise(b)
 
     # Get the partial profiles
-    pp = p[0:5,:,:]
-    mp = m[0:5,:,:]
-    cp = c[0:5,:,:]
-    bp = b[0:5,:,:]
-    c0p = c0[0:5,:,:]
+    pp = p[0:5, :, :]
+    mp = m[0:5, :, :]
+    cp = c[0:5, :, :]
+    bp = b[0:5, :, :]
+    c0p = c0[0:5, :, :]
 
     # Fit
     fit = ProfileFitter(cp, bp, mp, pp)
@@ -268,8 +267,8 @@ class Test(object):
 
     # Test intensity is the same
     eps = 1e-7
-    assert(abs(I[0] - Iknown) < eps)
-    assert(abs(V[0] - Vknown) < eps)
+    assert (abs(I[0] - Iknown) < eps)
+    assert (abs(V[0] - Vknown) < eps)
 
     print 'OK'
 
@@ -285,9 +284,9 @@ class Test(object):
     p2.reshape(flex.grid(1, 40, 9, 9))
     p3.reshape(flex.grid(1, 40, 9, 9))
     p = flex.double(flex.grid(3, 40, 9, 9))
-    p[0:1,:,:,:] = p1
-    p[1:2,:,:,:] = p2
-    p[2:3,:,:,:] = p3
+    p[0:1, :, :, :] = p1
+    p[1:2, :, :, :] = p2
+    p[2:3, :, :, :] = p3
     return p
 
   def generate_7_profiles(self):
@@ -314,13 +313,13 @@ class Test(object):
     p6.reshape(flex.grid(1, 40, 40, 40))
     p7.reshape(flex.grid(1, 40, 40, 40))
     p = flex.double(flex.grid(7, 40, 40, 40))
-    p[0:1,:,:,:] = p1
-    p[1:2,:,:,:] = p2
-    p[2:3,:,:,:] = p3
-    p[3:4,:,:,:] = p4
-    p[4:5,:,:,:] = p5
-    p[5:6,:,:,:] = p6
-    p[6:7,:,:,:] = p7
+    p[0:1, :, :, :] = p1
+    p[1:2, :, :, :] = p2
+    p[2:3, :, :, :] = p3
+    p[3:4, :, :, :] = p4
+    p[4:5, :, :, :] = p5
+    p[5:6, :, :, :] = p6
+    p[6:7, :, :, :] = p7
     return p
 
   def tst_deconvolve_zero(self):
@@ -334,11 +333,10 @@ class Test(object):
     # Create profile
     p = self.generate_3_profiles()
 
-
     # Copy profile
     c = flex.double(flex.grid(40, 9, 9), 0)
     b = flex.double(flex.grid(40, 9, 9), 0)
-    m = flex.bool(flex.grid(40,9,9), True)
+    m = flex.bool(flex.grid(40, 9, 9), True)
 
     # Fit
     passed = False
@@ -365,18 +363,18 @@ class Test(object):
     # Create profile
     p = self.generate_3_profiles()
 
-    Ical = [[],[],[]]
+    Ical = [[], [], []]
     for it in range(1):
 
       # Copy profile
       c = flex.double(flex.grid(40, 9, 9))
       for i in range(p.all()[0]):
-        pp = p[i:i+1,:,:,:]
+        pp = p[i:i + 1, :, :, :]
         pp.reshape(c.accessor())
         cc = add_poisson_noise(I0[i] * pp)
         c += cc
       b = flex.double(flex.grid(40, 9, 9), 0)
-      m = flex.bool(flex.grid(40,9,9), True)
+      m = flex.bool(flex.grid(40, 9, 9), True)
 
       # Fit
       fit = ProfileFitter(c, b, m, p)
@@ -395,8 +393,8 @@ class Test(object):
     # Test intensity is the same
     eps = 1e-7
     for i in range(3):
-      assert(abs(I[i] - Iknown[i]) < eps)
-      assert(abs(V[i] - Iknown[i]) < eps)
+      assert (abs(I[i] - Iknown[i]) < eps)
+      assert (abs(V[i] - Iknown[i]) < eps)
 
     print 'OK'
 
@@ -411,18 +409,18 @@ class Test(object):
     # Create profile
     p = self.generate_3_profiles()
 
-    Ical = [[],[],[]]
+    Ical = [[], [], []]
     for it in range(1):
 
       # Copy profile
       c = flex.double(flex.grid(40, 9, 9))
       for i in range(p.all()[0]):
-        pp = p[i:i+1,:,:,:]
+        pp = p[i:i + 1, :, :, :]
         pp.reshape(c.accessor())
         cc = add_poisson_noise(I0[i] * pp)
         c += cc
       b = flex.double(flex.grid(40, 9, 9), 1)
-      m = flex.bool(flex.grid(40,9,9), True)
+      m = flex.bool(flex.grid(40, 9, 9), True)
       c += add_poisson_noise(b)
 
       # Fit
@@ -443,8 +441,8 @@ class Test(object):
     # Test intensity is the same
     eps = 1e-7
     for i in range(3):
-      assert(abs(I[i] - Iknown[i]) < eps)
-      assert(abs(V[i] - Vknown[i]) < eps)
+      assert (abs(I[i] - Iknown[i]) < eps)
+      assert (abs(V[i] - Vknown[i]) < eps)
 
     print 'OK'
 
@@ -459,18 +457,18 @@ class Test(object):
     # Create profile
     p = self.generate_7_profiles()
 
-    Ical = [[],[],[],[],[],[],[]]
+    Ical = [[], [], [], [], [], [], []]
     for it in range(1):
 
       # Copy profile
       c = flex.double(flex.grid(40, 40, 40))
       for i in range(p.all()[0]):
-        pp = p[i:i+1,:,:,:]
+        pp = p[i:i + 1, :, :, :]
         pp.reshape(c.accessor())
         cc = add_poisson_noise(I0[i] * pp)
         c += cc
       b = flex.double(flex.grid(40, 40, 40), 0)
-      m = flex.bool(flex.grid(40,40,40), True)
+      m = flex.bool(flex.grid(40, 40, 40), True)
 
       # Fit
       fit = ProfileFitter(c, b, m, p)
@@ -484,15 +482,16 @@ class Test(object):
     for i in range(7):
       Ical[i] = sum(Ical[i]) / len(Ical[i])
 
-    Iknown = [1012.4193633595916, 1472.3322059495797, 2072.136413825826,
-              2486.4902438469253, 3012.6132119521126, 3409.2053517072773,
-              3952.803209358826]
+    Iknown = [
+        1012.4193633595916, 1472.3322059495797, 2072.136413825826, 2486.4902438469253, 3012.6132119521126,
+        3409.2053517072773, 3952.803209358826
+    ]
 
     # Test intensity is the same
     eps = 1e-7
     for i in range(7):
-      assert(abs(I[i] - Iknown[i]) < eps)
-      assert(abs(V[i] - Iknown[i]) < eps)
+      assert (abs(I[i] - Iknown[i]) < eps)
+      assert (abs(V[i] - Iknown[i]) < eps)
 
     print 'OK'
 
@@ -507,18 +506,18 @@ class Test(object):
     # Create profile
     p = self.generate_7_profiles()
 
-    Ical = [[],[],[],[],[],[],[]]
+    Ical = [[], [], [], [], [], [], []]
     for it in range(1):
 
       # Copy profile
       c = flex.double(flex.grid(40, 40, 40))
       for i in range(p.all()[0]):
-        pp = p[i:i+1,:,:,:]
+        pp = p[i:i + 1, :, :, :]
         pp.reshape(c.accessor())
         cc = add_poisson_noise(I0[i] * pp)
         c += cc
       b = flex.double(flex.grid(40, 40, 40), 1)
-      m = flex.bool(flex.grid(40,40,40), True)
+      m = flex.bool(flex.grid(40, 40, 40), True)
       c += add_poisson_noise(b)
 
       # Fit
@@ -533,21 +532,22 @@ class Test(object):
     for i in range(7):
       Ical[i] = sum(Ical[i]) / len(Ical[i])
 
-    Iknown = [1042.4904898451261, 1447.6413897568257, 2053.2524102387893,
-              2485.2789614429703, 3063.867598583333, 3445.9230910807582,
-              3977.6744651425543]
-    Vknown = [65042.49048984377, 65447.6413897533, 66053.25241023625,
-              66485.27896144328, 67063.86759858252, 67445.92309107889,
-              67977.67446514373]
+    Iknown = [
+        1042.4904898451261, 1447.6413897568257, 2053.2524102387893, 2485.2789614429703, 3063.867598583333,
+        3445.9230910807582, 3977.6744651425543
+    ]
+    Vknown = [
+        65042.49048984377, 65447.6413897533, 66053.25241023625, 66485.27896144328, 67063.86759858252, 67445.92309107889,
+        67977.67446514373
+    ]
 
     # Test intensity is the same
     eps = 1e-7
     for i in range(7):
-      assert(abs(I[i] - Iknown[i]) < eps)
-      assert(abs(V[i] - Vknown[i]) < eps)
+      assert (abs(I[i] - Iknown[i]) < eps)
+      assert (abs(V[i] - Vknown[i]) < eps)
 
     print 'OK'
-
 
 if __name__ == '__main__':
 

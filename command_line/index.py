@@ -53,7 +53,8 @@ Examples::
 
 '''
 
-phil_scope = iotbx.phil.parse("""\
+phil_scope = iotbx.phil.parse(
+    """\
 include scope dials.algorithms.indexing.indexer.master_phil_scope
 output {
   experiments = experiments.json
@@ -73,31 +74,28 @@ output {
 verbosity = 1
   .type = int(value_min=0)
   .help = "The verbosity level"
-""", process_includes=True)
-
+""",
+    process_includes=True)
 
 def run(args):
   import libtbx.load_env
   from libtbx.utils import Sorry
   from dials.util import log
-  usage = "%s [options] datablock.json strong.pickle" %libtbx.env.dispatcher_name
+  usage = "%s [options] datablock.json strong.pickle" % libtbx.env.dispatcher_name
 
   parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_reflections=True,
-    read_datablocks=True,
-    read_experiments=True,
-    check_format=False,
-    epilog=help_message)
+      usage=usage,
+      phil=phil_scope,
+      read_reflections=True,
+      read_datablocks=True,
+      read_experiments=True,
+      check_format=False,
+      epilog=help_message)
 
   params, options = parser.parse_args(show_diff_phil=False)
 
   # Configure the logging
-  log.config(
-    params.verbosity,
-    info=params.output.log,
-    debug=params.output.debug_log)
+  log.config(params.verbosity, info=params.output.log, debug=params.output.debug_log)
 
   from dials.util.version import dials_version
   logger.info(dials_version())
@@ -140,17 +138,13 @@ def run(args):
   reflections = reflections[0]
 
   for imageset in imagesets:
-    if (imageset.get_goniometer() is not None and
-        imageset.get_scan() is not None and
-        imageset.get_scan().get_oscillation()[1] == 0):
+    if (imageset.get_goniometer() is not None and imageset.get_scan() is not None
+        and imageset.get_scan().get_oscillation()[1] == 0):
       imageset.set_goniometer(None)
       imageset.set_scan(None)
 
   from dials.algorithms.indexing.indexer import indexer_base
-  idxr = indexer_base.from_parameters(
-    reflections, imagesets,
-    known_crystal_models=known_crystal_models,
-    params=params)
+  idxr = indexer_base.from_parameters(reflections, imagesets, known_crystal_models=known_crystal_models, params=params)
   idxr.index()
   refined_experiments = idxr.refined_experiments
   reflections = copy.deepcopy(idxr.refined_reflections)
@@ -159,23 +153,17 @@ def run(args):
     if params.output.split_experiments:
       logger.info("Splitting experiments before output")
       from dxtbx.model.experiment_list import ExperimentList
-      refined_experiments = ExperimentList(
-        [copy.deepcopy(re) for re in refined_experiments])
+      refined_experiments = ExperimentList([copy.deepcopy(re) for re in refined_experiments])
     logger.info("Saving refined experiments to %s" % params.output.experiments)
-    idxr.export_as_json(refined_experiments,
-                        file_name=params.output.experiments)
+    idxr.export_as_json(refined_experiments, file_name=params.output.experiments)
     logger.info("Saving refined reflections to %s" % params.output.reflections)
-    idxr.export_reflections(
-      reflections, file_name=params.output.reflections)
+    idxr.export_reflections(reflections, file_name=params.output.reflections)
 
     if params.output.unindexed_reflections is not None:
-      logger.info("Saving unindexed reflections to %s"
-           %params.output.unindexed_reflections)
-      idxr.export_reflections(idxr.unindexed_reflections,
-                              file_name=params.output.unindexed_reflections)
+      logger.info("Saving unindexed reflections to %s" % params.output.unindexed_reflections)
+      idxr.export_reflections(idxr.unindexed_reflections, file_name=params.output.unindexed_reflections)
 
   return
-
 
 if __name__ == '__main__':
   import sys

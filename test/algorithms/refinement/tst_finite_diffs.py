@@ -8,7 +8,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """Test analytical calculation of gradients of the target function versus finite
 difference calculations"""
 
@@ -52,13 +51,11 @@ from dials.algorithms.refinement.target import \
   LeastSquaresPositionalResidualWithRmsdCutoff
 from dials.algorithms.refinement.reflection_manager import ReflectionManager
 
+
 # Local functions
-def random_direction_close_to(vector, sd = 0.5):
-  return vector.rotate_around_origin(matrix.col(
-              (random.random(),
-               random.random(),
-               random.random())).normalize(),
-               random.gauss(0, sd),  deg = True)
+def random_direction_close_to(vector, sd=0.5):
+  return vector.rotate_around_origin(
+      matrix.col((random.random(), random.random(), random.random())).normalize(), random.gauss(0, sd), deg=True)
 
 #############################
 # Setup experimental models #
@@ -74,7 +71,7 @@ master_phil = parse("""
     include scope dials.test.algorithms.refinement.geometry_phil
     """, process_includes=True)
 
-models = Extract(master_phil, overrides, cmdline_args = args)
+models = Extract(master_phil, overrides, cmdline_args=args)
 
 mydetector = models.detector
 mygonio = models.goniometer
@@ -83,20 +80,15 @@ mybeam = models.beam
 
 # Build a mock scan for a 180 degree sweep of 0.1 degree images
 sf = ScanFactory()
-myscan = sf.make_scan(image_range = (1,1800),
-                      exposure_times = 0.1,
-                      oscillation = (0, 0.1),
-                      epochs = range(1800),
-                      deg = True)
+myscan = sf.make_scan(image_range=(1, 1800), exposure_times=0.1, oscillation=(0, 0.1), epochs=range(1800), deg=True)
 sweep_range = myscan.get_oscillation_range(deg=False)
 im_width = myscan.get_oscillation(deg=False)[1]
 assert sweep_range == (0., pi)
 assert approx_equal(im_width, 0.1 * pi / 180.)
 
 experiments = ExperimentList()
-experiments.append(Experiment(
-      beam=mybeam, detector=mydetector, goniometer=mygonio,
-      scan=myscan, crystal=mycrystal, imageset=None))
+experiments.append(
+    Experiment(beam=mybeam, detector=mydetector, goniometer=mygonio, scan=myscan, crystal=mycrystal, imageset=None))
 
 ###########################
 # Parameterise the models #
@@ -112,8 +104,7 @@ xluc_param = CrystalUnitCellParameterisation(mycrystal)
 # prediction equation                                                  #
 ########################################################################
 
-pred_param = XYPhiPredictionParameterisation(experiments,
-    [det_param], [s0_param], [xlo_param], [xluc_param])
+pred_param = XYPhiPredictionParameterisation(experiments, [det_param], [s0_param], [xlo_param], [xluc_param])
 
 ################################
 # Apply known parameter shifts #
@@ -121,8 +112,7 @@ pred_param = XYPhiPredictionParameterisation(experiments,
 
 # shift detector by 0.2 mm each translation and 2 mrad each rotation
 det_p_vals = det_param.get_param_vals()
-p_vals = [a + b for a, b in zip(det_p_vals,
-                                 [2.0, 2.0, 2.0, 2.0, 2.0, 2.0])]
+p_vals = [a + b for a, b in zip(det_p_vals, [2.0, 2.0, 2.0, 2.0, 2.0, 2.0])]
 det_param.set_param_vals(p_vals)
 
 # shift beam by 2 mrad in one axis
@@ -143,7 +133,7 @@ xlo_param.set_param_vals(p_vals)
 # All indices in a 2.0 Angstrom sphere
 resolution = 2.0
 index_generator = IndexGenerator(mycrystal.get_unit_cell(),
-                space_group(space_group_symbols(1).hall()).type(), resolution)
+                                 space_group(space_group_symbols(1).hall()).type(), resolution)
 indices = index_generator.to_array()
 
 # Predict rays within the sweep range
@@ -193,8 +183,7 @@ refman = ReflectionManager(obs_refs, experiments)
 ref_predictor = ExperimentsPredictor(experiments)
 
 mytarget = LeastSquaresPositionalResidualWithRmsdCutoff(
-    experiments, ref_predictor, refman, pred_param,
-    restraints_parameterisation=None)
+    experiments, ref_predictor, refman, pred_param, restraints_parameterisation=None)
 
 # get the functional and gradients
 mytarget.predict()
@@ -203,6 +192,7 @@ L, dL_dp, curvs = mytarget.compute_functional_gradients_and_curvatures()
 ####################################
 # Do FD calculation for comparison #
 ####################################
+
 
 # function for calculating finite difference gradients of the target function
 def get_fd_gradients(target, pred_param, deltas):
@@ -254,7 +244,8 @@ def get_fd_gradients(target, pred_param, deltas):
 fdgrads = get_fd_gradients(mytarget, pred_param, [1.e-7] * len(pred_param))
 diffs = [a - b for a, b in zip(dL_dp, fdgrads[0])]
 norm_diffs = tuple([a / b for a, b in zip(diffs, fdgrads[0])])
-for e in norm_diffs: assert abs(e) < 0.001 # check differences less than 0.1%
+for e in norm_diffs:
+  assert abs(e) < 0.001 # check differences less than 0.1%
 print "OK"
 
 # test normalised differences between FD curvatures and analytical least
@@ -262,5 +253,6 @@ print "OK"
 if curvs:
   diffs = [a - b for a, b in zip(curvs, fdgrads[1])]
   norm_diffs = tuple([a / b for a, b in zip(diffs, fdgrads[1])])
-  for e in norm_diffs: assert abs(e) < 0.1 # check differences less than 10%
+  for e in norm_diffs:
+    assert abs(e) < 0.1 # check differences less than 10%
 print "OK"

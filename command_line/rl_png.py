@@ -23,8 +23,8 @@ from scitbx.array_family import flex
 from dials.command_line.reciprocal_lattice_viewer import render_3d
 from dials.command_line.reciprocal_lattice_viewer import help_message
 
-
-phil_scope= libtbx.phil.parse("""
+phil_scope = libtbx.phil.parse(
+    """
 include scope dials.command_line.reciprocal_lattice_viewer.phil_scope
 basis_vector_search {
   n_solutions = 3
@@ -34,14 +34,13 @@ plot {
   size_inches = 10,10
     .type = floats(size=2, value_min=0)
 }
-""", process_includes=True)
+""",
+    process_includes=True)
 
-def settings () :
+def settings():
   return phil_scope.fetch().extract()
 
-
 class ReciprocalLatticePng(render_3d):
-
   def __init__(self, settings=None):
     render_3d.__init__(self)
     if settings is not None:
@@ -51,7 +50,6 @@ class ReciprocalLatticePng(render_3d):
     self.viewer = PngScene(settings=self.settings)
 
 class PngScene(object):
-
   def __init__(self, settings):
     self.settings = settings
     self.rotation_axis = None
@@ -72,7 +70,7 @@ class PngScene(object):
   def set_colors(self, colors):
     import math
     # convert whites to black (background is white)
-    colors.set_selected((colors.norms() == math.sqrt(3)), (0,0,0))
+    colors.set_selected((colors.norms() == math.sqrt(3)), (0, 0, 0))
     self.colors = colors
 
   def set_palette(self, palette):
@@ -84,9 +82,9 @@ class PngScene(object):
 
     points2d = self.points - p
 
-    x = matrix.col((1,0,0))
+    x = matrix.col((1, 0, 0))
     if x.angle(n) == 0 or x.angle(-n) == 0:
-      x = matrix.col((0,1,0))
+      x = matrix.col((0, 1, 0))
 
     x = (x - x.dot(n) * n).normalize()
 
@@ -99,15 +97,14 @@ class PngScene(object):
 
     return px2d, py2d
 
-  def plot(self, filename, n=(1,0,0)):
+  def plot(self, filename, n=(1, 0, 0)):
     from matplotlib import pyplot
 
     n = matrix.col(n).normalize()
     x, y = self.project_2d(n)
     fig = pyplot.figure(figsize=self.settings.plot.size_inches)
-    pyplot.scatter(x.as_numpy_array(), y.as_numpy_array(),
-                   marker='+', s=self.settings.marker_size, c=list(self.colors))
-    pyplot.title('Plane normal: (%.2g, %.2g, %.2g)' %(n.elems))
+    pyplot.scatter(x.as_numpy_array(), y.as_numpy_array(), marker='+', s=self.settings.marker_size, c=list(self.colors))
+    pyplot.title('Plane normal: (%.2g, %.2g, %.2g)' % (n.elems))
     fig.savefig(filename)
     pyplot.close()
 
@@ -120,17 +117,16 @@ def run(args):
   from dials.util import log
   import libtbx.load_env
 
-  usage = "%s [options] datablock.json reflections.pickle" %(
-    libtbx.env.dispatcher_name)
+  usage = "%s [options] datablock.json reflections.pickle" % (libtbx.env.dispatcher_name)
 
   parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_datablocks=True,
-    read_experiments=True,
-    read_reflections=True,
-    check_format=False,
-    epilog=help_message)
+      usage=usage,
+      phil=phil_scope,
+      read_datablocks=True,
+      read_experiments=True,
+      read_reflections=True,
+      check_format=False,
+      epilog=help_message)
 
   params, options = parser.parse_args()
   datablocks = flatten_datablocks(params.input.datablock)
@@ -193,11 +189,11 @@ def run(args):
 
       prefix = ''
       if len(experiments.crystals()) > 1:
-        prefix = '%i_' %(i+1)
+        prefix = '%i_' % (i + 1)
 
-      f.viewer.plot('rl_%sa.png' %prefix, n=a)
-      f.viewer.plot('rl_%sb.png' %prefix, n=b)
-      f.viewer.plot('rl_%sc.png' %prefix, n=c)
+      f.viewer.plot('rl_%sa.png' % prefix, n=a)
+      f.viewer.plot('rl_%sb.png' % prefix, n=b)
+      f.viewer.plot('rl_%sc.png' % prefix, n=c)
 
   elif n_solutions:
     from dials.command_line.search_beam_position \
@@ -213,33 +209,30 @@ def run(args):
       reflections['imageset_id'] = reflections['id']
 
     spots_mm = indexer_base.map_spots_pixel_to_mm_rad(
-      spots=reflections, detector=imageset.get_detector(), scan=imageset.get_scan())
+        spots=reflections, detector=imageset.get_detector(), scan=imageset.get_scan())
 
     indexer_base.map_centroids_to_reciprocal_space(
-      spots_mm, detector=imageset.get_detector(), beam=imageset.get_beam(),
-      goniometer=imageset.get_goniometer())
+        spots_mm, detector=imageset.get_detector(), beam=imageset.get_beam(), goniometer=imageset.get_goniometer())
 
     if params.d_min is not None:
-      d_spacings = 1/spots_mm['rlp'].norms()
+      d_spacings = 1 / spots_mm['rlp'].norms()
       sel = d_spacings > params.d_min
       spots_mm = spots_mm.select(sel)
 
     # derive a max_cell from mm spots
 
     from dials.algorithms.indexing.indexer import find_max_cell
-    max_cell = find_max_cell(spots_mm, max_cell_multiplier=1.3,
-                             step_size=45).max_cell
+    max_cell = find_max_cell(spots_mm, max_cell_multiplier=1.3, step_size=45).max_cell
 
     result = run_dps((imageset, spots_mm, max_cell, hardcoded_phil))
     solutions = [matrix.col(v) for v in result['solutions']]
     for i in range(min(n_solutions, len(solutions))):
       v = solutions[i]
       #if i > 0:
-        #for v1 in solutions[:i-1]:
-          #angle = v.angle(v1, deg=True)
-          #print angle
-      f.viewer.plot('rl_solution_%s.png' %(i+1), n=v.elems)
-
+      #for v1 in solutions[:i-1]:
+      #angle = v.angle(v1, deg=True)
+      #print angle
+      f.viewer.plot('rl_solution_%s.png' % (i + 1), n=v.elems)
 
 if __name__ == '__main__':
   import sys

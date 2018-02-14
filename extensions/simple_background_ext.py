@@ -12,7 +12,6 @@ from __future__ import absolute_import, division
 
 from dials.interfaces import BackgroundIface
 
-
 class SimpleBackgroundExt(BackgroundIface):
   ''' An extension class implementing simple background subtraction. '''
 
@@ -125,11 +124,7 @@ class SimpleBackgroundExt(BackgroundIface):
       params = params.integration.background.simple
 
     # Create some keyword parameters
-    kwargs = {
-      'model' : params.model.algorithm,
-      'outlier' : params.outlier.algorithm,
-      'min_pixels' : params.min_pixels
-    }
+    kwargs = {'model': params.model.algorithm, 'outlier': params.outlier.algorithm, 'min_pixels': params.min_pixels}
 
     # Create all the keyword parameters
     if params.outlier.algorithm == 'null':
@@ -159,5 +154,4 @@ class SimpleBackgroundExt(BackgroundIface):
     :param reflections: The list of reflections
 
     '''
-    return self._algorithm.compute_background(
-      reflections, image_volume=image_volume)
+    return self._algorithm.compute_background(reflections, image_volume=image_volume)

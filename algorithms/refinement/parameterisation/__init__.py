@@ -13,5 +13,5 @@ from dials.algorithms.refinement.parameterisation.scan_varying_crystal_parameter
 from dials.algorithms.refinement.parameterisation.scan_varying_beam_parameters import ScanVaryingBeamParameterisation # import dependency
 from dials.algorithms.refinement.parameterisation.scan_varying_detector_parameters import ScanVaryingDetectorParameterisationSinglePanel # import dependency
 from dials.algorithms.refinement.parameterisation.scan_varying_goniometer_parameters import ScanVaryingGoniometerParameterisation # import dependency
-from dials.algorithms.refinement.parameterisation.scan_varying_prediction_parameters import ScanVaryingPredictionParameterisation  # import dependency
+from dials.algorithms.refinement.parameterisation.scan_varying_prediction_parameters import ScanVaryingPredictionParameterisation # import dependency
 from dials.algorithms.refinement.parameterisation.parameter_report import ParameterReporter # import dependency

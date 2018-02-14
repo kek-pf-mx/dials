@@ -69,9 +69,9 @@ class ComputeBackgroundAndGain(object):
 
     # Filter the image and return the mask
     filteralg = index_of_dispersion_filter(image, mask, self._kernel_size, 0)
-    filtered  = filteralg.index_of_dispersion()
-    mask      = filteralg.mask()
-    mean      = filteralg.mean()
+    filtered = filteralg.index_of_dispersion()
+    mask = filteralg.mask()
+    mean = filteralg.mean()
 
     # Return the filtered image and mask
     return filtered, mask, mean
@@ -110,5 +110,4 @@ class ComputeBackgroundAndGain(object):
     from dials.algorithms.image.filter import mean_filter
     self._background /= self._count
     self._gain *= self._mask.as_double()
-    return mean_filter(self._background, self._mask,
-        self._kernel_size, 0)
+    return mean_filter(self._background, self._mask, self._kernel_size, 0)

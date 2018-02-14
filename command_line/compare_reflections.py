@@ -37,7 +37,7 @@ class CompareReflections(object):
 
       # Get the chunks of data
       a = i * 1000
-      b = (i+1) * 1000
+      b = (i + 1) * 1000
       II1 = I1[a:b]
       II2 = I2[a:b]
       res.append(d[a])
@@ -51,8 +51,7 @@ class CompareReflections(object):
       s2 = mv2.unweighted_sample_standard_deviation()
 
       # compute the correlation coefficient
-      r = (1/(len(II1) - 1))*sum(((II1[j] - m1) / s1) * ((II2[j] - m2) / s2)
-          for j in range(len(II1)))
+      r = (1 / (len(II1) - 1)) * sum(((II1[j] - m1) / s1) * ((II2[j] - m2) / s2) for j in range(len(II1)))
       corr.append(r)
 
       # Compute the scale between the chunks
@@ -70,7 +69,6 @@ class CompareReflections(object):
     pylab.plot(scale, label="K")
     pylab.legend()
     pylab.show()
-
 
 if __name__ == '__main__':
 

@@ -41,7 +41,7 @@ Examples::
 # Create the phil scope
 from libtbx.phil import parse
 phil_scope = parse(
-'''
+    '''
 
   output {
     experiments = 'integrated_experiments.json'
@@ -127,8 +127,8 @@ phil_scope = parse(
   include scope dials.algorithms.integration.stills_significance_filter.phil_scope
   include scope dials.algorithms.integration.kapton_correction.absorption_phil_scope
 
-''', process_includes=True)
-
+''',
+    process_includes=True)
 
 class Script(object):
   ''' The integration program. '''
@@ -139,15 +139,11 @@ class Script(object):
     import libtbx.load_env
 
     # The script usage
-    usage  = "usage: %s [options] experiment.json" % libtbx.env.dispatcher_name
+    usage = "usage: %s [options] experiment.json" % libtbx.env.dispatcher_name
 
     # Create the parser
     self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      epilog=help_message,
-      read_experiments=True,
-      read_reflections=True)
+        usage=usage, phil=phil_scope, epilog=help_message, read_experiments=True, read_reflections=True)
 
   def run(self):
     ''' Perform the integration. '''
@@ -182,10 +178,7 @@ class Script(object):
         outfile.write(self.parser.diff_phil.as_str())
 
     # Configure logging
-    log.config(
-      params.verbosity,
-      info=params.output.log,
-      debug=params.output.debug_log)
+    log.config(params.verbosity, info=params.output.log, debug=params.output.debug_log)
 
     from dials.util.version import dials_version
     logger.info(dials_version())
@@ -244,10 +237,7 @@ class Script(object):
     from dials.array_family import flex
 
     # Modify experiment list if scan range is set.
-    experiments, reference = self.split_for_scan_range(
-      experiments,
-      reference,
-      params.scan_range)
+    experiments, reference = self.split_for_scan_range(experiments, reference, params.scan_range)
 
     # Modify experiment list if exclude images is set
     experiments = self.exclude_images(experiments, params.exclude_images)
@@ -259,18 +249,18 @@ class Script(object):
     logger.info(heading("Predicting reflections"))
     logger.info("")
     predicted = flex.reflection_table.from_predictions_multi(
-      experiments,
-      dmin=params.prediction.d_min,
-      dmax=params.prediction.d_max,
-      margin=params.prediction.margin,
-      force_static=params.prediction.force_static,
-      padding=params.prediction.padding)
+        experiments,
+        dmin=params.prediction.d_min,
+        dmax=params.prediction.d_max,
+        margin=params.prediction.margin,
+        force_static=params.prediction.force_static,
+        padding=params.prediction.padding)
 
     # Match reference with predicted
     if reference:
       matched, reference, unmatched = predicted.match_with_reference(reference)
-      assert(len(matched) == len(predicted))
-      assert(matched.count(True) <= len(reference))
+      assert (len(matched) == len(predicted))
+      assert (matched.count(True) <= len(reference))
       if matched.count(True) == 0:
         raise Sorry('''
           Invalid input for reference reflections.
@@ -279,8 +269,7 @@ class Script(object):
       elif len(unmatched) != 0:
         logger.info('')
         logger.info('*' * 80)
-        logger.info('Warning: %d reference spots were not matched to predictions' % (
-          len(unmatched)))
+        logger.info('Warning: %d reference spots were not matched to predictions' % (len(unmatched)))
         logger.info('*' * 80)
         logger.info('')
       rubbish.extend(unmatched)
@@ -294,6 +283,7 @@ class Script(object):
         f_rubbish = flex.reflection_table()
         f_experiments = ExperimentList()
         good_expt_count = 0
+
         def refl_extend(src, dest, eid):
           tmp = src.select(src['id'] == eid)
           tmp['id'] = flex.int(len(tmp), good_expt_count)
@@ -307,7 +297,7 @@ class Script(object):
             f_experiments.append(experiment)
             good_expt_count += 1
           else:
-            logger.info("Removing experiment %d: no reference reflections matched to predictions"%expt_id)
+            logger.info("Removing experiment %d: no reference reflections matched to predictions" % expt_id)
 
         reference = f_reference
         predicted = f_predicted
@@ -319,9 +309,7 @@ class Script(object):
       predicted = self.sample_predictions(experiments, predicted, params)
 
     # Compute the profile model
-    if (params.create_profile_model and
-        reference is not None and
-        "shoebox" in reference):
+    if (params.create_profile_model and reference is not None and "shoebox" in reference):
       experiments = ProfileModelFactory.create(params, experiments, reference)
     else:
       experiments = ProfileModelFactory.create(params, experiments)
@@ -352,14 +340,15 @@ class Script(object):
     for abs_params in params.absorption_correction:
       if abs_params.apply and abs_params.algorithm == "fuller_kapton":
         from dials.algorithms.integration.kapton_correction import multi_kapton_correction
-        experiments, reflections = multi_kapton_correction(experiments, reflections,
-          abs_params.fuller_kapton, logger=logger)()
+        experiments, reflections = multi_kapton_correction(
+            experiments, reflections, abs_params.fuller_kapton, logger=logger)()
 
     if params.significance_filter.enable:
       from dials.algorithms.integration.stills_significance_filter import SignificanceFilter
       sig_filter = SignificanceFilter(params)
       refls = sig_filter(experiments, reflections)
-      logger.info("Removed %d reflections out of %d when applying significance filter"%(len(reflections)-len(refls), len(reflections)))
+      logger.info("Removed %d reflections out of %d when applying significance filter" % (len(reflections) - len(refls),
+                                                                                          len(reflections)))
       reflections = refls
 
     # Delete the shoeboxes used for intermediate calculations, if requested
@@ -385,15 +374,15 @@ class Script(object):
     if reference is None:
       return None, None
     st = time()
-    assert("miller_index" in reference)
-    assert("id" in reference)
+    assert ("miller_index" in reference)
+    assert ("id" in reference)
     logger.info('Processing reference reflections')
     logger.info(' read %d strong spots' % len(reference))
     mask = reference.get_flags(reference.flags.indexed)
     rubbish = reference.select(mask == False)
     if mask.count(False) > 0:
       reference.del_selected(mask == False)
-      logger.info(' removing %d unindexed reflections' %  mask.count(False))
+      logger.info(' removing %d unindexed reflections' % mask.count(False))
     if len(reference) == 0:
       raise Sorry('''
         Invalid input for reference reflections.
@@ -403,12 +392,12 @@ class Script(object):
     if mask.count(True) > 0:
       rubbish.extend(reference.select(mask))
       reference.del_selected(mask)
-      logger.info(' removing %d reflections marked as centroid outliers' %  mask.count(True))
+      logger.info(' removing %d reflections marked as centroid outliers' % mask.count(True))
     mask = reference['miller_index'] == (0, 0, 0)
     if mask.count(True) > 0:
       rubbish.extend(reference.select(mask))
       reference.del_selected(mask)
-      logger.info(' removing %d reflections with hkl (0,0,0)' %  mask.count(True))
+      logger.info(' removing %d reflections with hkl (0,0,0)' % mask.count(True))
     mask = reference['id'] < 0
     if mask.count(True) > 0:
       raise Sorry('''
@@ -430,13 +419,8 @@ class Script(object):
     modified_count = 0
     for experiment, indices in reference.iterate_experiments_and_indices(experiments):
       subset = reference.select(indices)
-      modified = subset['shoebox'].mask_neighbouring(
-        subset['miller_index'],
-        experiment.beam,
-        experiment.detector,
-        experiment.goniometer,
-        experiment.scan,
-        experiment.crystal)
+      modified = subset['shoebox'].mask_neighbouring(subset['miller_index'], experiment.beam, experiment.detector,
+                                                     experiment.goniometer, experiment.scan, experiment.crystal)
       modified_count += modified.count(True)
       reference.set_selected(indices, subset)
     logger.info(" masked neighbouring pixels in %d shoeboxes" % modified_count)
@@ -486,10 +470,10 @@ class Script(object):
       # set sample size according to nref_per_degree (per experiment)
       if exp.scan and nref_per_degree:
         sweep_range_rad = exp.scan.get_oscillation_range(deg=False)
-        width = abs(sweep_range_rad[1] -
-                    sweep_range_rad[0]) * RAD2DEG
+        width = abs(sweep_range_rad[1] - sweep_range_rad[0]) * RAD2DEG
         sample_size = int(nref_per_degree * width)
-      else: sweep_range_rad = None
+      else:
+        sweep_range_rad = None
 
       # adjust sample size if below the chosen limit
       sample_size = max(sample_size, min_sample_size)
@@ -525,12 +509,11 @@ class Script(object):
     # Only do anything is the scan range is set
     if scan_range is not None and len(scan_range) > 0:
 
-
       # Ensure that all experiments have the same imageset and scan
       iset = [e.imageset for e in experiments]
       scan = [e.scan for e in experiments]
-      assert(all(x == iset[0] for x in iset))
-      assert(all(x == scan[0] for x in scan))
+      assert (all(x == iset[0] for x in iset))
+      assert (all(x == scan[0] for x in scan))
 
       # Get the imageset and scan
       iset = experiments[0].imageset
@@ -539,7 +522,7 @@ class Script(object):
       # Get the array range
       if scan is not None:
         frames_start, frames_end = scan.get_array_range()
-        assert(scan.get_num_images() == len(iset))
+        assert (scan.get_num_images() == len(iset))
       else:
         frames_start, frames_end = (0, len(iset))
 
@@ -549,31 +532,29 @@ class Script(object):
       new_reference = flex.reflection_table()
       for i in range(len(new_reference_all) - len(experiments)):
         new_reference_all.append(flex.reflection_table())
-      assert(len(new_reference_all) == len(experiments))
+      assert (len(new_reference_all) == len(experiments))
 
       # Loop through all the scan ranges and create a new experiment list with
       # the requested scan ranges.
       for scan_start, scan_end in scan_range:
         # Validate the requested scan range
         if scan_end == scan_start:
-          raise Sorry(
-              "Scan range end must be higher than start; pass {},{} for single image".
-              format(scan_start, scan_start + 1))
+          raise Sorry("Scan range end must be higher than start; pass {},{} for single image".format(
+              scan_start, scan_start + 1))
         if scan_end < scan_start:
           raise Sorry("Scan range must be in ascending order")
         elif scan_start < frames_start or scan_end > frames_end:
-          raise Sorry("Scan range must be within image range {}..{}".format(
-              frames_start, frames_end))
+          raise Sorry("Scan range must be within image range {}..{}".format(frames_start, frames_end))
 
-        assert(scan_end >  scan_start)
-        assert(scan_start >= frames_start)
-        assert(scan_end <= frames_end)
+        assert (scan_end > scan_start)
+        assert (scan_start >= frames_start)
+        assert (scan_end <= frames_end)
 
         index_start = scan_start - frames_start
         index_end = index_start + (scan_end - scan_start)
-        assert(index_start < index_end)
-        assert(index_start >= 0)
-        assert(index_end <= len(iset))
+        assert (index_start < index_end)
+        assert (index_start >= 0)
+        assert (index_end <= len(iset))
         new_iset = iset[index_start:index_end]
         if scan is None:
           new_scan = None
@@ -588,8 +569,7 @@ class Script(object):
           e2.profile = e1.profile
           e2.imageset = new_iset
           e2.scan = new_scan
-          new_reference_all[i]['id'] = flex.int(
-            len(new_reference_all[i]), len(new_experiments))
+          new_reference_all[i]['id'] = flex.int(len(new_reference_all[i]), len(new_experiments))
           new_reference.extend(new_reference_all[i])
           new_experiments.append(e2)
       experiments = new_experiments

@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 from math import pi
 from cctbx.sgtbx import bravais_types
 
-RAD2DEG = 180.0/pi
+RAD2DEG = 180.0 / pi
 
 class MMCIFOutputFile(object):
   '''
@@ -70,41 +70,33 @@ class MMCIFOutputFile(object):
 
     # Write the crystal information
     cif_loop = iotbx.cif.model.loop(
-      header=("_pdbx_diffrn_unmerged_cell.ordinal",
-              "_pdbx_diffrn_unmerged_cell.crystal_id",
-              "_pdbx_diffrn_unmerged_cell.wavelength",
-              "_pdbx_diffrn_unmerged_cell.cell_length_a",
-              "_pdbx_diffrn_unmerged_cell.cell_length_b",
-              "_pdbx_diffrn_unmerged_cell.cell_length_c",
-              "_pdbx_diffrn_unmerged_cell.cell_angle_alpha",
-              "_pdbx_diffrn_unmerged_cell.cell_angle_beta",
-              "_pdbx_diffrn_unmerged_cell.cell_angle_gamma",
-              "_pdbx_diffrn_unmerged_cell.Bravais_lattice"))
+        header=("_pdbx_diffrn_unmerged_cell.ordinal", "_pdbx_diffrn_unmerged_cell.crystal_id",
+                "_pdbx_diffrn_unmerged_cell.wavelength", "_pdbx_diffrn_unmerged_cell.cell_length_a",
+                "_pdbx_diffrn_unmerged_cell.cell_length_b", "_pdbx_diffrn_unmerged_cell.cell_length_c",
+                "_pdbx_diffrn_unmerged_cell.cell_angle_alpha", "_pdbx_diffrn_unmerged_cell.cell_angle_beta",
+                "_pdbx_diffrn_unmerged_cell.cell_angle_gamma", "_pdbx_diffrn_unmerged_cell.Bravais_lattice"))
     crystals = experiments.crystals()
-    crystal_to_id = {crystal: i+1 for i, crystal in enumerate(crystals)}
+    crystal_to_id = {crystal: i + 1 for i, crystal in enumerate(crystals)}
     for i, exp in enumerate(experiments):
       crystal = exp.crystal
       crystal_id = crystal_to_id[crystal]
       wavelength = exp.beam.get_wavelength()
       a, b, c, alpha, beta, gamma = crystal.get_unit_cell().parameters()
       latt_type = str(bravais_types.bravais_lattice(group=crystal.get_space_group()))
-      cif_loop.add_row((i+1, crystal_id, wavelength, a, b, c, alpha, beta, gamma, latt_type))
+      cif_loop.add_row((i + 1, crystal_id, wavelength, a, b, c, alpha, beta, gamma, latt_type))
       cif_block.add_loop(cif_loop)
 
     # Write the scan information
     cif_loop = iotbx.cif.model.loop(
-      header=("_pdbx_diffrn_scan.scan_id",
-              "_pdbx_diffrn_scan.crystal_id",
-              "_pdbx_diffrn_scan.image_id_begin",
-              "_pdbx_diffrn_scan.image_id_end",
-              "_pdbx_diffrn_scan.scan_angle_begin",
-              "_pdbx_diffrn_scan.scan_angle_end"))
+        header=("_pdbx_diffrn_scan.scan_id", "_pdbx_diffrn_scan.crystal_id", "_pdbx_diffrn_scan.image_id_begin",
+                "_pdbx_diffrn_scan.image_id_end", "_pdbx_diffrn_scan.scan_angle_begin",
+                "_pdbx_diffrn_scan.scan_angle_end"))
     for i, exp in enumerate(experiments):
       scan = exp.scan
       crystal_id = crystal_to_id[exp.crystal]
       image_range = scan.get_image_range()
       osc_range = scan.get_oscillation_range(deg=True)
-      cif_loop.add_row((i+1, crystal_id, image_range[0], image_range[1], osc_range[0], osc_range[1]))
+      cif_loop.add_row((i + 1, crystal_id, image_range[0], image_range[1], osc_range[0], osc_range[1]))
       cif_block.add_loop(cif_loop)
 
     # Make a dict of unit_cell parameters
@@ -151,45 +143,38 @@ class MMCIFOutputFile(object):
     # Write reflection data
     # FIXME there are three intensity fields. I've put summation in I and Isum
     cif_loop = iotbx.cif.model.loop(
-      header=("_pdbx_diffrn_unmerged_refln.reflection_id",
-              "_pdbx_diffrn_unmerged_refln.scan_id",
-              "_pdbx_diffrn_unmerged_refln.image_id_begin",
-              "_pdbx_diffrn_unmerged_refln.image_id_end",
-              "_pdbx_diffrn_unmerged_refln.index_h",
-              "_pdbx_diffrn_unmerged_refln.index_k",
-              "_pdbx_diffrn_unmerged_refln.index_l",
-              "_pdbx_diffrn_unmerged_refln.intensity_meas",
-              "_pdbx_diffrn_unmerged_refln.intensity_sigma",
-              "_pdbx_diffrn_unmerged_refln.intensity_sum",
-              "_pdbx_diffrn_unmerged_refln.intensity_sum_sigma",
-              "_pdbx_diffrn_unmerged_refln.intensity_profile",
-              "_pdbx_diffrn_unmerged_refln.intensity_profile_sigma",
-              "_pdbx_diffrn_unmerged_refln.scan_angle_reflection",
-              "_pdbx_diffrn_unmerged_refln.partiality",
-              "_pdbx_diffrn_unmerged_refln.scale_value"))
+        header=("_pdbx_diffrn_unmerged_refln.reflection_id", "_pdbx_diffrn_unmerged_refln.scan_id",
+                "_pdbx_diffrn_unmerged_refln.image_id_begin", "_pdbx_diffrn_unmerged_refln.image_id_end",
+                "_pdbx_diffrn_unmerged_refln.index_h", "_pdbx_diffrn_unmerged_refln.index_k",
+                "_pdbx_diffrn_unmerged_refln.index_l", "_pdbx_diffrn_unmerged_refln.intensity_meas",
+                "_pdbx_diffrn_unmerged_refln.intensity_sigma", "_pdbx_diffrn_unmerged_refln.intensity_sum",
+                "_pdbx_diffrn_unmerged_refln.intensity_sum_sigma", "_pdbx_diffrn_unmerged_refln.intensity_profile",
+                "_pdbx_diffrn_unmerged_refln.intensity_profile_sigma",
+                "_pdbx_diffrn_unmerged_refln.scan_angle_reflection", "_pdbx_diffrn_unmerged_refln.partiality",
+                "_pdbx_diffrn_unmerged_refln.scale_value"))
     for i, r in enumerate(reflections):
-      refl_id       = i + 1
-      scan_id       = r['id'] + 1
-      _,_,_,_,z0,z1 = r['bbox']
-      h, k, l       = r['miller_index']
-      I             = r['intensity.sum.value']
-      sigI          = r['intensity.sum.variance']
-      Isum          = r['intensity.sum.value']
-      sigIsum       = r['intensity.sum.variance']
-      Iprf          = r['intensity.prf.value']
-      sigIprf       = r['intensity.prf.variance']
-      phi           = r['xyzcal.mm'][2] * RAD2DEG
-      partiality    = r['partiality']
-      scale         = 1.0
-      cif_loop.add_row((refl_id, scan_id, z0, z1, h, k, l, I, sigI, Isum,
-          sigIsum, Iprf, sigIprf, phi, partiality, scale))
+      refl_id = i + 1
+      scan_id = r['id'] + 1
+      _, _, _, _, z0, z1 = r['bbox']
+      h, k, l = r['miller_index']
+      I = r['intensity.sum.value']
+      sigI = r['intensity.sum.variance']
+      Isum = r['intensity.sum.value']
+      sigIsum = r['intensity.sum.variance']
+      Iprf = r['intensity.prf.value']
+      sigIprf = r['intensity.prf.variance']
+      phi = r['xyzcal.mm'][2] * RAD2DEG
+      partiality = r['partiality']
+      scale = 1.0
+      cif_loop.add_row((refl_id, scan_id, z0, z1, h, k, l, I, sigI, Isum, sigIsum, Iprf, sigIprf, phi, partiality,
+                        scale))
     cif_block.add_loop(cif_loop)
 
     # Add the block
     self._cif['dials'] = cif_block
 
     # Print to file
-    print >>open(self.filename, "w"), self._cif
+    print >> open(self.filename, "w"), self._cif
 
     # Log
     logger.info("Wrote reflections to %s" % self.filename)

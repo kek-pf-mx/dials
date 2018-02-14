@@ -37,7 +37,8 @@ Examples::
 
 # The phil scope
 from libtbx.phil import parse
-phil_scope = parse('''
+phil_scope = parse(
+    '''
 
   output {
     experiments = refined_experiments.json
@@ -112,7 +113,8 @@ phil_scope = parse('''
   }
 
   include scope dials.algorithms.refinement.refiner.phil_scope
-''', process_includes=True)
+''',
+    process_includes=True)
 
 # local overrides for refiner.phil_scope
 phil_overrides = parse('''
@@ -132,7 +134,6 @@ class Script(object):
     from dials.util.options import OptionParser
     import libtbx.load_env
 
-
     # The script usage
     usage  = "usage: %s [options] [param.phil] " \
              "experiments.json reflections.pickle" \
@@ -140,19 +141,18 @@ class Script(object):
 
     # Create the parser
     self.parser = OptionParser(
-      usage=usage,
-      phil=working_phil,
-      read_reflections=True,
-      read_experiments=True,
-      check_format=False,
-      epilog=help_message)
+        usage=usage,
+        phil=working_phil,
+        read_reflections=True,
+        read_experiments=True,
+        check_format=False,
+        epilog=help_message)
 
   def write_centroids_table(self, refiner, filename):
 
     matches = refiner.get_matches()
 
-    header = ("H\tK\tL\tFrame_obs\tX_obs\tY_obs\tPhi_obs\tX_calc\t"
-        "Y_calc\tPhi_calc")
+    header = ("H\tK\tL\tFrame_obs\tX_obs\tY_obs\tPhi_obs\tX_calc\t" "Y_calc\tPhi_calc")
     msg_temp = ("%d\t%d\t%d\t%d\t%5.3f\t%5.3f\t%9.6f\t%5.3f\t%5.3f\t%9.6f")
     has_del_psi = 'delpsical.rad' in matches
     if has_del_psi:
@@ -161,7 +161,7 @@ class Script(object):
     header += "\n"
     msg_temp += "\n"
 
-    with open(filename,"w") as f:
+    with open(filename, "w") as f:
       f.write(header)
 
       for m in matches:
@@ -171,13 +171,9 @@ class Script(object):
         x_calc, y_calc, phi_calc = m['xyzcal.mm']
         if has_del_psi:
           del_psi = m['delpsical.rad']
-          msg = msg_temp % (h, k, l,
-                          frame, x_obs, y_obs, phi_obs,
-                          x_calc, y_calc, phi_calc, del_psi)
+          msg = msg_temp % (h, k, l, frame, x_obs, y_obs, phi_obs, x_calc, y_calc, phi_calc, del_psi)
         else:
-          msg = msg_temp % (h, k, l,
-                          frame, x_obs, y_obs, phi_obs,
-                          x_calc, y_calc, phi_calc)
+          msg = msg_temp % (h, k, l, frame, x_obs, y_obs, phi_obs, x_calc, y_calc, phi_calc)
         f.write(msg)
 
   @staticmethod
@@ -228,8 +224,7 @@ class Script(object):
     self.check_input(reflections)
 
     # Configure the logging
-    log.config(info=params.output.log,
-      debug=params.output.debug_log)
+    log.config(info=params.output.log, debug=params.output.debug_log)
     from dials.util.version import dials_version
     logger.info(dials_version())
 
@@ -246,13 +241,12 @@ class Script(object):
     # Warn about potentially unhelpful options
     if params.refinement.mp.nproc > 1:
       logger.warning("WARNING: setting nproc > 1 is only helpful in rare "
-        "circumstances. It is not recommended for typical data processing "
-        "tasks.\n")
+                     "circumstances. It is not recommended for typical data processing "
+                     "tasks.\n")
 
     # Get the refiner
     logger.info('Configuring refiner')
-    refiner = RefinerFactory.from_parameters_data_experiments(params,
-        reflections, experiments)
+    refiner = RefinerFactory.from_parameters_data_experiments(params, reflections, experiments)
 
     # Refine the geometry
     if nexp == 1:
@@ -264,8 +258,7 @@ class Script(object):
     history = refiner.run()
 
     if params.output.centroids:
-      logger.info("Writing table of centroids to '{0}'".format(
-        params.output.centroids))
+      logger.info("Writing table of centroids to '{0}'".format(params.output.centroids))
       self.write_centroids_table(refiner, params.output.centroids)
 
     # Get the refined experiments
@@ -275,16 +268,13 @@ class Script(object):
     if params.output.parameter_table:
       scans = experiments.scans()
       if len(scans) > 1:
-        logger.info("Writing a scan-varying parameter table is only supported "
-             "for refinement of a single scan")
+        logger.info("Writing a scan-varying parameter table is only supported " "for refinement of a single scan")
       else:
         scan = scans[0]
-        text = refiner.get_param_reporter().varying_params_vs_image_number(
-            scan.get_array_range())
+        text = refiner.get_param_reporter().varying_params_vs_image_number(scan.get_array_range())
         if text:
-          logger.info("Writing scan-varying parameter table to {0}".format(
-            params.output.parameter_table))
-          f = open(params.output.parameter_table,"w")
+          logger.info("Writing scan-varying parameter table to {0}".format(params.output.parameter_table))
+          f = open(params.output.parameter_table, "w")
           f.write(text)
           f.close()
         else:
@@ -322,15 +312,15 @@ class Script(object):
 
       # set used_in_refinement and centroid_outlier flags
       assert len(preds) == len(reflections)
-      reflections.unset_flags(flex.size_t_range(len(reflections)),
-        reflections.flags.used_in_refinement | reflections.flags.centroid_outlier)
+      reflections.unset_flags(
+          flex.size_t_range(len(reflections)),
+          reflections.flags.used_in_refinement | reflections.flags.centroid_outlier)
       mask = preds.get_flags(preds.flags.centroid_outlier)
       reflections.set_flags(mask, reflections.flags.centroid_outlier)
       mask = preds.get_flags(preds.flags.used_in_refinement)
       reflections.set_flags(mask, reflections.flags.used_in_refinement)
 
-      logger.info('Saving reflections with updated predictions to {0}'.format(
-        params.output.reflections))
+      logger.info('Saving reflections with updated predictions to {0}'.format(params.output.reflections))
       if params.output.include_unused_reflections:
         reflections.as_pickle(params.output.reflections)
       else:
@@ -340,8 +330,7 @@ class Script(object):
     # For debugging, if requested save matches to file
     if params.output.matches:
       matches = refiner.get_matches()
-      logger.info('Saving matches (use for debugging purposes) to {0}'.format(
-        params.output.matches))
+      logger.info('Saving matches (use for debugging purposes) to {0}'.format(params.output.matches))
       matches.as_pickle(params.output.matches)
 
     # Correlation plot
@@ -351,7 +340,7 @@ class Script(object):
       if not ext: ext = ".pdf"
 
       steps = params.output.correlation_plot.steps
-      if steps is None: steps = [history.get_nrows()-1]
+      if steps is None: steps = [history.get_nrows() - 1]
 
       # extract individual column names or indices
       col_select = params.output.correlation_plot.col_select
@@ -377,7 +366,7 @@ class Script(object):
             for k, corrmat in corrmats.items():
               corrmats[k] = corrmat.as_scitbx_matrix()
             logger.info('Saving parameter correlation matrices to {0}'.format(mat_fname))
-            pickle.dump({'corrmats':corrmats, 'labels':labels}, handle)
+            pickle.dump({'corrmats': corrmats, 'labels': labels}, handle)
 
       if num_plots == 0:
         msg = "Sorry, no parameter correlation plots were produced. Please set " \
@@ -388,8 +377,7 @@ class Script(object):
     # Write out refinement history, if requested
     if params.output.history:
       with open(params.output.history, 'wb') as handle:
-        logger.info('Saving refinement step history to {0}'.format(
-          params.output.history))
+        logger.info('Saving refinement step history to {0}'.format(params.output.history))
         pickle.dump(history, handle)
 
     # Log the total time taken

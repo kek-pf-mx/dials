@@ -24,11 +24,14 @@ def exercise_spots_xds():
   with open(os.path.join(tmp_dir, "SPOT.XDS"), mode="wb") as f:
     f.write(txt)
 
-  output_pickle = "%s.pickle" %f.name[:-4]
-  args = ["dials.import_xds", f.name, #xparm_file,
-          "input.method=reflections",
-          "output.filename='%s'" %output_pickle,
-          "remove_invalid=True"]
+  output_pickle = "%s.pickle" % f.name[:-4]
+  args = [
+      "dials.import_xds",
+      f.name, #xparm_file,
+      "input.method=reflections",
+      "output.filename='%s'" % output_pickle,
+      "remove_invalid=True"
+  ]
   command = " ".join(args)
   print command
   result = easy_run.fully_buffered(command=command).raise_if_errors()
@@ -47,15 +50,13 @@ def exercise_spots_xds():
   assert os.path.exists(os.path.join("xds", "SPOT.XDS"))
   with open(os.path.join("xds", "SPOT.XDS"), "rb") as f:
     txt = f.read()
-    assert not show_diff(
-      "\n".join([l.rstrip() for l in txt.split("\n")]), """\
+    assert not show_diff("\n".join([l.rstrip() for l in txt.split("\n")]), """\
  1341.63 1243.25 5.64 321.00  2 -2 11
  1125.23 1197.72 12.14 231.00  -1 2 -10
  1317.52 1171.59 19.28 120.00  6 -4 6
  1260.25 1300.55 13.67 116.00  -4 2 6
  1090.27 1199.47 41.49 114.00  -2 3 -13
 """)
-
 
 def export_xds():
   from libtbx import easy_run
@@ -71,9 +72,7 @@ def export_xds():
   tmp_dir = os.path.abspath(open_tmp_directory(suffix="export_xds"))
   os.chdir(tmp_dir)
 
-  args = ["dials.find_spots",
-          os.path.join(dials_regression, "centroid_test_data",
-                       "datablock.json")]
+  args = ["dials.find_spots", os.path.join(dials_regression, "centroid_test_data", "datablock.json")]
 
   command = " ".join(args)
   print command
@@ -81,10 +80,10 @@ def export_xds():
   pickle_path = os.path.join(tmp_dir, "strong.pickle")
   assert os.path.exists(pickle_path)
 
-  args = ["dials.export", "format=xds",
-          os.path.join(dials_regression, "centroid_test_data",
-                       "experiments.json"),
-          pickle_path]
+  args = [
+      "dials.export", "format=xds",
+      os.path.join(dials_regression, "centroid_test_data", "experiments.json"), pickle_path
+  ]
   command = " ".join(args)
   print command
   result = easy_run.fully_buffered(command=command).raise_if_errors()
@@ -96,9 +95,7 @@ def export_xds():
   os.remove("xds/XPARM.XDS")
   assert not os.path.exists("xds/XDS.INP")
   assert not os.path.exists("xds/XPARM.XDS")
-  args = ["dials.export", "format=xds",
-          os.path.join(dials_regression, "centroid_test_data",
-                       "experiments.json")]
+  args = ["dials.export", "format=xds", os.path.join(dials_regression, "centroid_test_data", "experiments.json")]
   command = " ".join(args)
   print command
   result = easy_run.fully_buffered(command=command).raise_if_errors()
@@ -106,7 +103,6 @@ def export_xds():
   assert os.path.exists("xds/XPARM.XDS")
 
   os.chdir(cwd)
-
 
 def run():
   export_xds()

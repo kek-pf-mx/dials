@@ -40,7 +40,8 @@ ice_rings_phil_str = """\
 
 ice_rings_phil_scope = parse(ice_rings_phil_str)
 
-phil_scope = parse("""
+phil_scope = parse(
+    """
   border = 0
     .type = int
     .help = "The border around the edge of the image."
@@ -94,7 +95,8 @@ phil_scope = parse("""
 
   %s
 
-""" %ice_rings_phil_str, process_includes=True)
+""" % ice_rings_phil_str,
+    process_includes=True)
 
 def generate_ice_ring_resolution_ranges(beam, panel, params):
   '''
@@ -107,9 +109,7 @@ def generate_ice_ring_resolution_ranges(beam, panel, params):
   if params.filter is True:
 
     # Get the crystal symmetry
-    crystal_symmetry = crystal.symmetry(
-      unit_cell=params.unit_cell,
-      space_group=params.space_group.group())
+    crystal_symmetry = crystal.symmetry(unit_cell=params.unit_cell, space_group=params.space_group.group())
 
     # Get the half width
     half_width = params.width * 0.5
@@ -121,9 +121,7 @@ def generate_ice_ring_resolution_ranges(beam, panel, params):
       d_min = params.d_min
 
     # Build the miller set
-    ms = crystal_symmetry.build_miller_set(
-      anomalous_flag=False,
-      d_min=d_min)
+    ms = crystal_symmetry.build_miller_set(anomalous_flag=False, d_min=d_min)
     ms = ms.sort(by_value="resolution")
 
     # Yield all the d ranges
@@ -134,7 +132,6 @@ def generate_ice_ring_resolution_ranges(beam, panel, params):
       d_min = sqrt(1.0 / d_sq_inv_min)
       d_max = sqrt(1.0 / d_sq_inv_max)
       yield (d_min, d_max)
-
 
 class MaskGenerator(object):
   ''' Generate a mask. '''
@@ -157,7 +154,7 @@ class MaskGenerator(object):
 
     # Get the first image
     image = imageset.get_raw_data(0)
-    assert(len(detector) == len(image))
+    assert (len(detector) == len(image))
 
     # Create the mask for each image
     masks = []
@@ -182,10 +179,10 @@ class MaskGenerator(object):
         height, width = mask.all()
         borderx = flex.bool(flex.grid(border, width), False)
         bordery = flex.bool(flex.grid(height, border), False)
-        mask[0:border,:] = borderx
-        mask[-border:,:] = borderx
-        mask[:,0:border] = bordery
-        mask[:,-border:] = bordery
+        mask[0:border, :] = borderx
+        mask[-border:, :] = borderx
+        mask[:, 0:border] = bordery
+        mask[:, -border:] = bordery
 
       # Apply the untrusted regions
       for region in self.params.untrusted:
@@ -210,10 +207,10 @@ class MaskGenerator(object):
           if region.polygon is not None:
             assert len(region.polygon) % 2 == 0, "Polygon must contain 2D coords"
             vertices = []
-            for i in range(int(len(region.polygon)/2)):
-              x = region.polygon[2*i]
-              y = region.polygon[2*i+1]
-              vertices.append((x,y))
+            for i in range(int(len(region.polygon) / 2)):
+              x = region.polygon[2 * i]
+              y = region.polygon[2 * i + 1]
+              vertices.append((x, y))
             polygon = flex.vec2_double(vertices)
             logger.info("Generating polygon mask:")
             logger.info(" panel = %d" % region.panel)
@@ -229,10 +226,12 @@ class MaskGenerator(object):
           self.beam = beam
           self.panel = panel
           self.result = None
+
         def __call__(self):
           if self.result is None:
             self.result = ResolutionMaskGenerator(beam, panel)
           return self.result
+
       get_resolution_mask_generator = ResolutionMaskGeneratorGetter(beam, panel)
 
       # Generate high and low resolution masks
@@ -249,8 +248,8 @@ class MaskGenerator(object):
 
       # Mask out the resolution range
       for drange in self.params.resolution_range:
-        d_min=min(drange)
-        d_max=max(drange)
+        d_min = min(drange)
+        d_max = max(drange)
         assert d_min < d_max, "d_min must be < d_max"
         logger.info("Generating resolution range mask:")
         logger.info(" d_min = %f" % d_min)
@@ -258,10 +257,9 @@ class MaskGenerator(object):
         get_resolution_mask_generator().apply(mask, d_min, d_max)
 
       # Mask out the resolution ranges for the ice rings
-      for drange in generate_ice_ring_resolution_ranges(
-          beam, panel, self.params.ice_rings):
-        d_min=min(drange)
-        d_max=max(drange)
+      for drange in generate_ice_ring_resolution_ranges(beam, panel, self.params.ice_rings):
+        d_min = min(drange)
+        d_max = max(drange)
         assert d_min < d_max, "d_min must be < d_max"
         logger.info("Generating ice ring mask:")
         logger.info(" d_min = %f" % d_min)
@@ -274,9 +272,7 @@ class MaskGenerator(object):
     # Return the mask
     return tuple(masks)
 
-
 class GoniometerShadowMaskGenerator(object):
-
   def __init__(self, goniometer, extrema_at_datum, axis):
     self.goniometer = goniometer
     self._extrema_at_datum = extrema_at_datum
@@ -293,8 +289,7 @@ class GoniometerShadowMaskGenerator(object):
 
     for i in range(len(axes)):
       sel = (self.axis <= i)
-      rotation = matrix.col(
-        axes[i]).axis_and_angle_as_r3_rotation_matrix(angles[i], deg=True)
+      rotation = matrix.col(axes[i]).axis_and_angle_as_r3_rotation_matrix(angles[i], deg=True)
       extrema.set_selected(sel, rotation.elems * extrema.select(sel))
 
     return extrema
@@ -309,8 +304,8 @@ class GoniometerShadowMaskGenerator(object):
       a = p.get_D_matrix() * coords
       x, y, z = a.parts()
       valid = z > 0
-      x.set_selected(valid, x.select(valid)/z.select(valid))
-      y.set_selected(valid, y.select(valid)/z.select(valid))
+      x.set_selected(valid, x.select(valid) / z.select(valid))
+      y.set_selected(valid, y.select(valid) / z.select(valid))
 
       if valid.count(True) < 3:
         # no shadow projected onto this panel
@@ -320,13 +315,12 @@ class GoniometerShadowMaskGenerator(object):
       # Compute convex hull of shadow points
       points = flex.vec2_double(x.select(valid), y.select(valid))
       shadow = flex.vec2_double(convex_hull(points))
-      shadow *= 1/p.get_pixel_size()[0]
+      shadow *= 1 / p.get_pixel_size()[0]
 
       shadow_orig = shadow.deep_copy()
 
       for i in (0, p.get_image_size()[0]):
-        points = flex.vec2_double(flex.double(p.get_image_size()[1], i),
-                                  flex.double_range(0, p.get_image_size()[1]))
+        points = flex.vec2_double(flex.double(p.get_image_size()[1], i), flex.double_range(0, p.get_image_size()[1]))
         inside = is_inside_polygon(shadow_orig, points)
         # only add those points needed to define vertices of shadow
         inside_isel = inside.iselection()
@@ -345,8 +339,7 @@ class GoniometerShadowMaskGenerator(object):
           inside_isel = inside_isel.select(sel)
 
       for i in (0, p.get_image_size()[1]):
-        points = flex.vec2_double(flex.double_range(0, p.get_image_size()[0]),
-                                  flex.double(p.get_image_size()[0], i))
+        points = flex.vec2_double(flex.double_range(0, p.get_image_size()[0]), flex.double(p.get_image_size()[0], i))
         inside = is_inside_polygon(shadow_orig, points)
         # only add those points needed to define vertices of shadow
         inside_isel = inside.iselection()
@@ -374,8 +367,7 @@ class GoniometerShadowMaskGenerator(object):
       from scitbx.math import principal_axes_of_inertia_2d
       com = principal_axes_of_inertia_2d(shadow).center_of_mass()
       sx, sy = shadow.parts()
-      shadow = shadow.select(
-        flex.sort_permutation(flex.atan2(sy-com[1],sx-com[0])))
+      shadow = shadow.select(flex.sort_permutation(flex.atan2(sy - com[1], sx - com[0])))
 
       shadow_boundary.append(shadow)
 
@@ -388,8 +380,7 @@ class GoniometerShadowMaskGenerator(object):
     for panel_id in range(len(detector)):
       m = None
       if shadow_boundary[panel_id].size() > 3:
-        m = flex.bool(
-          flex.grid(reversed(detector[panel_id].get_image_size())), True)
+        m = flex.bool(flex.grid(reversed(detector[panel_id].get_image_size())), True)
         mask_untrusted_polygon(m, shadow_boundary[panel_id])
       mask.append(m)
     return mask

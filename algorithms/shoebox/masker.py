@@ -27,7 +27,6 @@ class MaskerBase(object):
     # Construct the overlapping reflection mask
     self.mask_overlapping = MaskOverlapping()
 
-
   def __call__(self, reflections, adjacency_list=None):
     ''' Mask the given reflections.
 
@@ -43,12 +42,8 @@ class MaskerBase(object):
     # Mask the overlaps if an adjacency list is given
     if adjacency_list:
       logger.info('Masking overlapping reflections')
-      self.mask_overlapping(
-        reflections['shoebox'],
-        reflections['xyzcal.px'],
-        adjacency_list)
-      logger.info('Masked {0} overlapping reflections'.format(
-          len(adjacency_list)))
+      self.mask_overlapping(reflections['shoebox'], reflections['xyzcal.px'], adjacency_list)
+      logger.info('Masked {0} overlapping reflections'.format(len(adjacency_list)))
 
     # Return the reflections
     return reflections
@@ -82,13 +77,8 @@ class Masker3DProfile(MaskerBase):
     reflections = super(Masker3DProfile, self).__call__(reflections, adjacency_list)
 
     # Mask the foreground region
-    self._experiment.profile.compute_mask(
-      reflections,
-      self._experiment.crystal,
-      self._experiment.beam,
-      self._experiment.detector,
-      self._experiment.goniometer,
-      self._experiment.scan)
+    self._experiment.profile.compute_mask(reflections, self._experiment.crystal, self._experiment.beam,
+                                          self._experiment.detector, self._experiment.goniometer, self._experiment.scan)
 
     # Return the reflections
     return reflections

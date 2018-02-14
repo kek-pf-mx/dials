@@ -8,7 +8,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """
 Test multiple stills refinement.
 
@@ -25,12 +24,9 @@ from dxtbx.model.experiment_list import ExperimentListFactory
 
 def test1():
 
-  dials_regression = libtbx.env.find_in_repositories(
-    relative_path="dials_regression",
-    test=os.path.isdir)
+  dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=os.path.isdir)
 
-  data_dir = os.path.join(dials_regression, "refinement_test_data",
-                          "multi_stills")
+  data_dir = os.path.join(dials_regression, "refinement_test_data", "multi_stills")
   experiments_path = os.path.join(data_dir, "combined_experiments.json")
   reflections_path = os.path.join(data_dir, "combined_reflections.pickle")
   cmd = "dials.refine " + experiments_path + " " + reflections_path
@@ -44,10 +40,8 @@ def test1():
     result = easy_run.fully_buffered(command=cmd).raise_if_errors()
     # load results
     reg_exp = ExperimentListFactory.from_json_file(
-                os.path.join(data_dir, "regression_experiments.json"),
-                check_format=False)
-    ref_exp = ExperimentListFactory.from_json_file("refined_experiments.json",
-                check_format=False)
+        os.path.join(data_dir, "regression_experiments.json"), check_format=False)
+    ref_exp = ExperimentListFactory.from_json_file("refined_experiments.json", check_format=False)
   finally:
     os.chdir(cwd)
   print "OK"
@@ -55,10 +49,12 @@ def test1():
   # compare results
   tol = 1e-5
   for b1, b2 in zip(reg_exp.beams(), ref_exp.beams()):
-    assert b1.is_similar_to(b2, wavelength_tolerance=tol,
-                                direction_tolerance=tol,
-                                polarization_normal_tolerance=tol,
-                                polarization_fraction_tolerance=tol)
+    assert b1.is_similar_to(
+        b2,
+        wavelength_tolerance=tol,
+        direction_tolerance=tol,
+        polarization_normal_tolerance=tol,
+        polarization_fraction_tolerance=tol)
     s0_1 = matrix.col(b1.get_unit_s0())
     s0_2 = matrix.col(b2.get_unit_s0())
     assert s0_1.accute_angle(s0_2, deg=True) < 0.0057 # ~0.1 mrad
@@ -66,8 +62,7 @@ def test1():
     assert c1.is_similar_to(c2)
 
   for d1, d2 in zip(reg_exp.detectors(), ref_exp.detectors()):
-    assert d1.is_similar_to(d2,
-      fast_axis_tolerance=1e-4, slow_axis_tolerance=1e-4, origin_tolerance=1e-2)
+    assert d1.is_similar_to(d2, fast_axis_tolerance=1e-4, slow_axis_tolerance=1e-4, origin_tolerance=1e-2)
 
   print "OK"
 
@@ -77,12 +72,9 @@ def test2():
   """Compare results of multiprocess vs single process refinement to ensure
   they are the same"""
 
-  dials_regression = libtbx.env.find_in_repositories(
-    relative_path="dials_regression",
-    test=os.path.isdir)
+  dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=os.path.isdir)
 
-  data_dir = os.path.join(dials_regression, "refinement_test_data",
-                          "multi_stills")
+  data_dir = os.path.join(dials_regression, "refinement_test_data", "multi_stills")
   experiments_path = os.path.join(data_dir, "combined_experiments.json")
   reflections_path = os.path.join(data_dir, "combined_reflections.pickle")
   cmd = "dials.refine " + experiments_path + " " + reflections_path + \
@@ -90,7 +82,7 @@ def test2():
   cmd1 = cmd + "output.experiments=refined_experiments_nproc1.json nproc=1"
   print cmd1
 
-  cmd2= cmd + "output.experiments=refined_experiments_nproc4.json nproc=4"
+  cmd2 = cmd + "output.experiments=refined_experiments_nproc4.json nproc=4"
   print cmd2
   # work in a temporary directory
   cwd = os.path.abspath(os.curdir)
@@ -100,10 +92,8 @@ def test2():
     result1 = easy_run.fully_buffered(command=cmd1).raise_if_errors()
     result2 = easy_run.fully_buffered(command=cmd2).raise_if_errors()
     # load results
-    nproc1 = ExperimentListFactory.from_json_file(
-      "refined_experiments_nproc1.json", check_format=False)
-    nproc4 = ExperimentListFactory.from_json_file(
-      "refined_experiments_nproc4.json", check_format=False)
+    nproc1 = ExperimentListFactory.from_json_file("refined_experiments_nproc1.json", check_format=False)
+    nproc4 = ExperimentListFactory.from_json_file("refined_experiments_nproc4.json", check_format=False)
   finally:
     os.chdir(cwd)
   print "OK"
@@ -114,8 +104,7 @@ def test2():
   for c1, c2 in zip(nproc1.crystals(), nproc4.crystals()):
     assert c1.is_similar_to(c2)
   for d1, d2 in zip(nproc1.detectors(), nproc4.detectors()):
-    assert d1.is_similar_to(d2,
-      fast_axis_tolerance=5e-5, slow_axis_tolerance=5e-5, origin_tolerance=5e-5)
+    assert d1.is_similar_to(d2, fast_axis_tolerance=5e-5, slow_axis_tolerance=5e-5, origin_tolerance=5e-5)
   print "OK"
   return
 

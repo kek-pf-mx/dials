@@ -8,7 +8,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """
 Test command line program dev.dials.filter_reflections by filtering according to
 certain flags

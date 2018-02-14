@@ -10,7 +10,6 @@
 #
 
 # LIBTBX_SET_DISPATCHER_NAME dev.dials.plot_detector_shifts
-
 """
 Given two detector models (e.g. one refined at hierarchy_level=0 and another
 at hierarchy_level=1), plot shifts in the fast, slow and normal directions on
@@ -65,7 +64,6 @@ tag = None
 SAMPLE_FREQ = 1
 
 class PlotData(object):
-
   def __init__(self, detector1, detector2):
 
     self.det1 = detector1
@@ -99,7 +97,7 @@ class PlotData(object):
       for f in samp_fast:
         lab1.append(panel_a.get_lab_coord((f, s)))
         lab2.append(panel_b.get_lab_coord((f, s)))
-        sample_pts.append((f,s))
+        sample_pts.append((f, s))
 
     offset = lab2 - lab1
 
@@ -113,16 +111,10 @@ class PlotData(object):
 
     f, s = sample_pts.parts()
 
-    return {'lab_coord':lab1,
-            'fast':f, 'slow':s,
-            'x_offset':x_off,
-            'y_offset':y_off,
-            'z_offset':z_off,
-            'fast_offset':f_off,
-            'slow_offset':s_off,
-            'normal_offset':n_off,
-            'size_fast':size_fast,
-            'size_slow':size_slow}
+    return {
+        'lab_coord': lab1, 'fast': f, 'slow': s, 'x_offset': x_off, 'y_offset': y_off, 'z_offset': z_off, 'fast_offset':
+        f_off, 'slow_offset': s_off, 'normal_offset': n_off, 'size_fast': size_fast, 'size_slow': size_slow
+    }
 
   def angles(self, ipanel=0):
     from scitbx import matrix
@@ -138,11 +130,11 @@ class PlotData(object):
     slow_b = matrix.col(panel_b.get_slow_axis())
     norm_b = fast_b.cross(slow_b)
 
-    print 'Panel: %d dFast %.3f dSlow %.3f dNorm %.3f' % (ipanel,
-      fast_a.angle(fast_b, deg=True), slow_a.angle(slow_b, deg=True),
-      norm_a.angle(norm_b, deg=True))
+    print 'Panel: %d dFast %.3f dSlow %.3f dNorm %.3f' % (ipanel, fast_a.angle(fast_b, deg=True),
+                                                          slow_a.angle(slow_b, deg=True),
+                                                          norm_a.angle(norm_b, deg=True))
 
-def plot_grid_of_panels(panel_data, nrow, ncol, direction='fast', tag = ''):
+def plot_grid_of_panels(panel_data, nrow, ncol, direction='fast', tag=''):
   '''Plot data for each panel in a stack of subplots, with the first panel
   at the top. This is appropriate for e.g. the 24 panel model for the I23
   P12M detector, as it is simply unrolling the barrel to make a flat plot'''
@@ -162,12 +154,8 @@ def plot_grid_of_panels(panel_data, nrow, ncol, direction='fast', tag = ''):
   clim = []
   imarr = []
   for ipanel, (pnl_data, ax) in enumerate(zip(panel_data, axarr.flatten())):
-    f, s, offset = (pnl_data['fast'], pnl_data['slow'],
-                    pnl_data[direction + '_offset'])
-    im = ax.hexbin(f.as_numpy_array(),
-                           s.as_numpy_array(),
-                           offset.as_numpy_array(),
-                           gridsize=30)
+    f, s, offset = (pnl_data['fast'], pnl_data['slow'], pnl_data[direction + '_offset'])
+    im = ax.hexbin(f.as_numpy_array(), s.as_numpy_array(), offset.as_numpy_array(), gridsize=30)
     imarr.append(im)
     clim.append(im.get_clim())
     ax.invert_yaxis()
@@ -183,16 +171,17 @@ def plot_grid_of_panels(panel_data, nrow, ncol, direction='fast', tag = ''):
   if (clim[1] - clim[0]) < 1e-12:
     print "...skipping plot with shift too small to show"
     return
-  for im in imarr: im.set_clim(clim)
+  for im in imarr:
+    im.set_clim(clim)
   fig.subplots_adjust(right=0.8)
   cbar_ax = fig.add_axes([0.85, 0.15, 0.03, 0.7])
   fig.colorbar(im, cax=cbar_ax)
   cbar_ax.set_ylabel("$" + direction + "_{2} - " + direction + "_{1}$ (mm)")
-  fig.set_size_inches(10,10)
+  fig.set_size_inches(10, 10)
   plt.savefig(tag + direction + "_diff.png")
   plt.clf()
 
-def plot_spherical_polar(panel_data, beam, direction='fast', tag = ''):
+def plot_spherical_polar(panel_data, beam, direction='fast', tag=''):
   '''Plot data for all panels in a single plot by mapping pixel positions to
   the surface of the Ewald sphere, then plotting in 2D using azimuth and
   elevation angles. This distorts the image from a flat panel detector, but
@@ -237,23 +226,20 @@ def plot_spherical_polar(panel_data, beam, direction='fast', tag = ''):
     elevation.extend(el)
     offset.extend(off)
 
-  fig=plt.figure()
+  fig = plt.figure()
   plt.xlabel("azimuth (degrees)")
   plt.ylabel("elevation (degrees)")
-  ax=fig.add_subplot(111)
+  ax = fig.add_subplot(111)
   ax.set_aspect(1)
   ax.set_title(r"$\Delta " + direction + "$" + " shifts")
-  im = ax.hexbin(azimuth.as_numpy_array(),
-                 elevation.as_numpy_array(),
-                 offset.as_numpy_array(),
-                 gridsize=100)
-  ax.set_xlim(flex.min(azimuth)*1.1, flex.max(azimuth)*1.1)
-  ax.set_ylim(flex.min(elevation)*1.1, flex.max(elevation)*1.1)
+  im = ax.hexbin(azimuth.as_numpy_array(), elevation.as_numpy_array(), offset.as_numpy_array(), gridsize=100)
+  ax.set_xlim(flex.min(azimuth) * 1.1, flex.max(azimuth) * 1.1)
+  ax.set_ylim(flex.min(elevation) * 1.1, flex.max(elevation) * 1.1)
   fig.subplots_adjust(right=0.8)
   cbar_ax = fig.add_axes([0.85, 0.15, 0.03, 0.7])
   fig.colorbar(im, cax=cbar_ax)
   cbar_ax.set_ylabel("$" + direction + "_{2} - " + direction + "_{1}$ (mm)")
-  fig.set_size_inches(10,10)
+  fig.set_size_inches(10, 10)
   plt.savefig(tag + direction + "_diff.png")
   plt.clf()
 
@@ -297,7 +283,6 @@ def guess_grid_size(detector):
   return grid_size
 
 class Script(object):
-
   def __init__(self):
     '''Check script input and return two experiments if all is okay'''
 
@@ -309,24 +294,22 @@ class Script(object):
              "experiments2.json").format(libtbx.env.dispatcher_name)
 
     parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      read_datablocks=True,
-      read_experiments=True,
-      check_format=False,
-      epilog=help_message)
+        usage=usage,
+        phil=phil_scope,
+        read_datablocks=True,
+        read_experiments=True,
+        check_format=False,
+        epilog=help_message)
 
     params, options = parser.parse_args(show_diff_phil=True)
 
     if params.input.datablock:
       if params.input.experiments:
-        raise Sorry("Please provide either datablocks or experiment lists, "
-                    "not a combination of the two")
+        raise Sorry("Please provide either datablocks or experiment lists, " "not a combination of the two")
       if len(params.input.datablock) != 2:
         raise Sorry("Please provide two datablocks or experiment lists as input")
 
-      warnmsg = ("WARNING: The {0} datablock contains more than one "
-                 "detector. Only the first will be considered.")
+      warnmsg = ("WARNING: The {0} datablock contains more than one " "detector. Only the first will be considered.")
       detector1 = params.input.datablock[0].data[0].unique_detectors()
       if len(detector1) > 1:
         print warnmsg.format("first")
@@ -374,7 +357,7 @@ class Script(object):
     plot_data = PlotData(det1, det2)
 
     # do calculations in advance and store in a dictionary
-    dat=[]
+    dat = []
     for ipanel in range(len(det1)):
       #print "Calc for panel", ipanel
       plot_data.angles(ipanel)
@@ -383,7 +366,7 @@ class Script(object):
     if self.params.tag is None:
       tag = ''
     else:
-      tag = "%s_"%self.params.tag
+      tag = "%s_" % self.params.tag
 
     grid_size = self.params.grid_size
     if self.params.plot_type == 'panel_grid' and grid_size is Auto:

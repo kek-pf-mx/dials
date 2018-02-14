@@ -27,16 +27,13 @@ if __name__ == '__main__':
   from cctbx.uctbx import unit_cell
 
   def random_direction_close_to(vector):
-    return vector.rotate_around_origin(matrix.col(
-                (random.random(),
-                 random.random(),
-                 random.random())).normalize(),
-                 random.gauss(0, 1.0),  deg = True)
+    return vector.rotate_around_origin(
+        matrix.col((random.random(), random.random(), random.random())).normalize(), random.gauss(0, 1.0), deg=True)
 
   # make a random P1 crystal and parameterise it
-  a = random.uniform(10,50) * random_direction_close_to(matrix.col((1, 0, 0)))
-  b = random.uniform(10,50) * random_direction_close_to(matrix.col((0, 1, 0)))
-  c = random.uniform(10,50) * random_direction_close_to(matrix.col((0, 0, 1)))
+  a = random.uniform(10, 50) * random_direction_close_to(matrix.col((1, 0, 0)))
+  b = random.uniform(10, 50) * random_direction_close_to(matrix.col((0, 1, 0)))
+  c = random.uniform(10, 50) * random_direction_close_to(matrix.col((0, 0, 1)))
   xl = Crystal(a, b, c, space_group_symbol="P 1")
 
   xl_op = CrystalOrientationParameterisation(xl)
@@ -46,14 +43,14 @@ if __name__ == '__main__':
 
   # compare analytical and finite difference derivatives
   an_ds_dp = xl_op.get_ds_dp()
-  fd_ds_dp = get_fd_gradients(xl_op, [1.e-6 * pi/180] * 3)
+  fd_ds_dp = get_fd_gradients(xl_op, [1.e-6 * pi / 180] * 3)
   for e, f in zip(an_ds_dp, fd_ds_dp):
-    assert(approx_equal((e - f), null_mat, eps = 1.e-6))
+    assert (approx_equal((e - f), null_mat, eps=1.e-6))
 
   an_ds_dp = xl_ucp.get_ds_dp()
   fd_ds_dp = get_fd_gradients(xl_ucp, [1.e-7] * xl_ucp.num_free())
   for e, f in zip(an_ds_dp, fd_ds_dp):
-    assert(approx_equal((e - f), null_mat, eps = 1.e-6))
+    assert (approx_equal((e - f), null_mat, eps=1.e-6))
 
   # random initial orientations with a random parameter shift at each
   attempts = 100
@@ -61,22 +58,21 @@ if __name__ == '__main__':
   for i in range(attempts):
 
     # make a random P1 crystal and parameterise it
-    a = random.uniform(10,50) * random_direction_close_to(matrix.col((1, 0, 0)))
-    b = random.uniform(10,50) * random_direction_close_to(matrix.col((0, 1, 0)))
-    c = random.uniform(10,50) * random_direction_close_to(matrix.col((0, 0, 1)))
+    a = random.uniform(10, 50) * random_direction_close_to(matrix.col((1, 0, 0)))
+    b = random.uniform(10, 50) * random_direction_close_to(matrix.col((0, 1, 0)))
+    c = random.uniform(10, 50) * random_direction_close_to(matrix.col((0, 0, 1)))
     xl = Crystal(a, b, c, space_group_symbol="P 1")
     xl_op = CrystalOrientationParameterisation(xl)
     xl_uc = CrystalUnitCellParameterisation(xl)
 
     # apply a random parameter shift to the orientation
     p_vals = xl_op.get_param_vals()
-    p_vals = random_param_shift(p_vals, [1000*pi/9, 1000*pi/9,
-                                         1000*pi/9])
+    p_vals = random_param_shift(p_vals, [1000 * pi / 9, 1000 * pi / 9, 1000 * pi / 9])
     xl_op.set_param_vals(p_vals)
 
     # compare analytical and finite difference derivatives
     xl_op_an_ds_dp = xl_op.get_ds_dp()
-    xl_op_fd_ds_dp = get_fd_gradients(xl_op, [1.e-5 * pi/180] * 3)
+    xl_op_fd_ds_dp = get_fd_gradients(xl_op, [1.e-5 * pi / 180] * 3)
 
     # apply a random parameter shift to the unit cell. We have to
     # do this in a way that is respectful to metrical constraints,
@@ -94,15 +90,11 @@ if __name__ == '__main__':
     xl_uc_an_ds_dp = xl_ucp.get_ds_dp()
 
     # now doing finite differences about each parameter in turn
-    xl_uc_fd_ds_dp = get_fd_gradients(xl_ucp,
-                                      [1.e-7] * xl_ucp.num_free())
+    xl_uc_fd_ds_dp = get_fd_gradients(xl_ucp, [1.e-7] * xl_ucp.num_free())
 
     for j in range(3):
       try:
-        assert(approx_equal(
-                    (xl_op_fd_ds_dp[j] - xl_op_an_ds_dp[j]),
-                    null_mat,
-                    eps=1.e-6))
+        assert (approx_equal((xl_op_fd_ds_dp[j] - xl_op_an_ds_dp[j]), null_mat, eps=1.e-6))
       except AssertionError:
         failures += 1
         print "for try", i
@@ -117,10 +109,7 @@ if __name__ == '__main__':
 
     for j in range(xl_ucp.num_free()):
       try:
-        assert(approx_equal(
-                    (xl_uc_fd_ds_dp[j] - xl_uc_an_ds_dp[j]),
-                    null_mat,
-                    eps = 1.e-6))
+        assert (approx_equal((xl_uc_fd_ds_dp[j] - xl_uc_an_ds_dp[j]), null_mat, eps=1.e-6))
       except AssertionError:
         failures += 1
         print "for try", i

@@ -8,7 +8,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """
 Test hierarchical detector refinement.
 
@@ -20,6 +19,7 @@ import os
 import libtbx.load_env # required for libtbx.env.find_in_repositories
 from libtbx.test_utils import approx_equal
 from math import pi
+
 #from libtbx.test_utils import open_tmp_directory
 
 def generate_reflections(experiments):
@@ -37,7 +37,7 @@ def generate_reflections(experiments):
   # All indices in a 2.0 Angstrom sphere
   resolution = 2.0
   index_generator = IndexGenerator(crystal.get_unit_cell(),
-                  space_group(space_group_symbols(1).hall()).type(), resolution)
+                                   space_group(space_group_symbols(1).hall()).type(), resolution)
   indices = index_generator.to_array()
 
   # Predict rays within the sweep range
@@ -71,13 +71,10 @@ def generate_reflections(experiments):
 
 def test1():
 
-  dials_regression = libtbx.env.find_in_repositories(
-    relative_path="dials_regression",
-    test=os.path.isdir)
+  dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=os.path.isdir)
 
   # use a datablock that contains a CS-PAD detector description
-  data_dir = os.path.join(dials_regression, "refinement_test_data",
-                          "hierarchy_test")
+  data_dir = os.path.join(dials_regression, "refinement_test_data", "hierarchy_test")
   datablock_path = os.path.join(data_dir, "datablock.json")
   assert os.path.exists(datablock_path)
 
@@ -91,8 +88,7 @@ def test1():
 
   # we'll invent a crystal, goniometer and scan for this test
   from dxtbx.model import Crystal
-  crystal = Crystal((40.,0.,0.) ,(0.,40.,0.), (0.,0.,40.),
-                          space_group_symbol = "P1")
+  crystal = Crystal((40., 0., 0.), (0., 40., 0.), (0., 0., 40.), space_group_symbol="P1")
 
   from dxtbx.model import GoniometerFactory
   goniometer = GoniometerFactory.known_axis((1., 0., 0.))
@@ -100,11 +96,7 @@ def test1():
   # Build a mock scan for a 180 degree sweep
   from dxtbx.model import ScanFactory
   sf = ScanFactory()
-  scan = sf.make_scan(image_range = (1,1800),
-                      exposure_times = 0.1,
-                      oscillation = (0, 0.1),
-                      epochs = range(1800),
-                      deg = True)
+  scan = sf.make_scan(image_range=(1, 1800), exposure_times=0.1, oscillation=(0, 0.1), epochs=range(1800), deg=True)
   sweep_range = scan.get_oscillation_range(deg=False)
   im_width = scan.get_oscillation(deg=False)[1]
   assert sweep_range == (0., pi)
@@ -114,9 +106,8 @@ def test1():
 
   # Build an experiment list
   experiments = ExperimentList()
-  experiments.append(Experiment(
-        beam=beam, detector=detector, goniometer=goniometer,
-        scan=scan, crystal=crystal, imageset=None))
+  experiments.append(
+      Experiment(beam=beam, detector=detector, goniometer=goniometer, scan=scan, crystal=crystal, imageset=None))
 
   # simulate some reflections
   refs, ref_predictor = generate_reflections(experiments)
@@ -150,21 +141,19 @@ def test1():
   xluc_param = CrystalUnitCellParameterisation(crystal)
 
   # fix beam
-  beam_param.set_fixed([True]*3)
+  beam_param.set_fixed([True] * 3)
 
   # fix crystal
-  xluc_param.set_fixed([True]*6)
-  xlo_param.set_fixed([True]*3)
+  xluc_param.set_fixed([True] * 6)
+  xlo_param.set_fixed([True] * 3)
 
   # parameterisation of the prediction equation
   from dials.algorithms.refinement.parameterisation.prediction_parameters import \
       XYPhiPredictionParameterisation
   from dials.algorithms.refinement.parameterisation.parameter_report import \
       ParameterReporter
-  pred_param = XYPhiPredictionParameterisation(experiments,
-    [det_param], [beam_param], [xlo_param], [xluc_param])
-  param_reporter = ParameterReporter([det_param], [beam_param],
-                                     [xlo_param], [xluc_param])
+  pred_param = XYPhiPredictionParameterisation(experiments, [det_param], [beam_param], [xlo_param], [xluc_param])
+  param_reporter = ParameterReporter([det_param], [beam_param], [xlo_param], [xluc_param])
 
   # reflection manager and target function
   from dials.algorithms.refinement.target import \
@@ -173,29 +162,25 @@ def test1():
   refman = ReflectionManager(refs, experiments, nref_per_degree=20)
 
   # set a very tight rmsd target of 1/10000 of a pixel
-  target = LeastSquaresPositionalResidualWithRmsdCutoff(experiments,
-      ref_predictor, refman, pred_param, restraints_parameterisation=None,
-      frac_binsize_cutoff=0.0001)
+  target = LeastSquaresPositionalResidualWithRmsdCutoff(
+      experiments, ref_predictor, refman, pred_param, restraints_parameterisation=None, frac_binsize_cutoff=0.0001)
 
   # minimisation engine
   from dials.algorithms.refinement.engine \
     import LevenbergMarquardtIterations as Refinery
-  refinery = Refinery(target = target,
-                      prediction_parameterisation = pred_param,
-                      log = None,
-                      verbosity = 0,
-                      max_iterations = 20)
+  refinery = Refinery(target=target, prediction_parameterisation=pred_param, log=None, verbosity=0, max_iterations=20)
 
   # Refiner
   from dials.algorithms.refinement.refiner import Refiner
-  refiner = Refiner(reflections=refs,
-                    experiments=experiments,
-                    pred_param=pred_param,
-                    param_reporter=param_reporter,
-                    refman=refman,
-                    target=target,
-                    refinery=refinery,
-                    verbosity=0)
+  refiner = Refiner(
+      reflections=refs,
+      experiments=experiments,
+      pred_param=pred_param,
+      param_reporter=param_reporter,
+      refman=refman,
+      target=target,
+      refinery=refinery,
+      verbosity=0)
 
   history = refiner.run()
   assert history.reason_for_termination == "RMSD target achieved"
@@ -211,8 +196,7 @@ def test1():
     o1 = matrix.col(op.get_origin())
     o2 = matrix.col(rp.get_origin())
     # ...their relative lengths
-    assert approx_equal(
-      math.fabs(o1.length() - o2.length()) / o1.length(), 0, eps=1e-5)
+    assert approx_equal(math.fabs(o1.length() - o2.length()) / o1.length(), 0, eps=1e-5)
     # ...the angle between them
     assert approx_equal(o1.accute_angle(o2), 0, eps=1e-5)
 

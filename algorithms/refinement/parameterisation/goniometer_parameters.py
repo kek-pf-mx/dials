@@ -102,8 +102,7 @@ class GoniometerParameterisation(ModelParameterisation, GoniometerMixin):
     p_list = self._build_p_list(e_lab, beam)
 
     # set up the base class
-    ModelParameterisation.__init__(self, goniometer, istate, p_list,
-                                   experiment_ids=experiment_ids)
+    ModelParameterisation.__init__(self, goniometer, istate, p_list, experiment_ids=experiment_ids)
 
     # call compose to calculate all the derivatives
     self.compose()
@@ -119,8 +118,8 @@ class GoniometerParameterisation(ModelParameterisation, GoniometerMixin):
     gamma1, gamma2 = self._param
 
     # calculate new [S] and derivatives
-    S, self._dstate_dp = self._compose_core(iS, gamma1.value, gamma2.value,
-      gamma1_axis=gamma1.axis, gamma2_axis=gamma2.axis)
+    S, self._dstate_dp = self._compose_core(
+        iS, gamma1.value, gamma2.value, gamma1_axis=gamma1.axis, gamma2_axis=gamma2.axis)
 
     # now update the model with its new [S]
     self._model.set_setting_rotation(S)

@@ -26,17 +26,8 @@ def ScanStaticReflectionPredictor(experiment, dmin=None, margin=1, padding=0, **
   space_group = space_group.build_derived_patterson_group()
 
   # Create the reflection predictor
-  return _ScanStaticReflectionPredictor(
-    experiment.beam,
-    experiment.detector,
-    experiment.goniometer,
-    experiment.scan,
-    experiment.crystal.get_unit_cell(),
-    space_group.type(),
-    dmin,
-    margin,
-    padding)
-
+  return _ScanStaticReflectionPredictor(experiment.beam, experiment.detector, experiment.goniometer, experiment.scan,
+                                        experiment.crystal.get_unit_cell(), space_group.type(), dmin, margin, padding)
 
 # Override constructor with factory
 _ScanVaryingReflectionPredictor = ScanVaryingReflectionPredictor
@@ -61,19 +52,10 @@ def ScanVaryingReflectionPredictor(experiment, dmin=None, margin=1, padding=0, *
   space_group = space_group.build_derived_patterson_group()
 
   # Create the reflection predictor
-  return _ScanVaryingReflectionPredictor(
-    experiment.beam,
-    experiment.detector,
-    experiment.goniometer,
-    experiment.scan,
-    space_group.type(),
-    dmin,
-    margin,
-    padding)
+  return _ScanVaryingReflectionPredictor(experiment.beam, experiment.detector, experiment.goniometer, experiment.scan,
+                                         space_group.type(), dmin, margin, padding)
 
-
-def StillsReflectionPredictor(experiment, dmin=None, spherical_relp=False,
-                              **kwargs):
+def StillsReflectionPredictor(experiment, dmin=None, spherical_relp=False, **kwargs):
   '''
   A factory function for the reflection predictor.
 
@@ -93,33 +75,21 @@ def StillsReflectionPredictor(experiment, dmin=None, spherical_relp=False,
     dmin = experiment.detector.get_max_resolution(experiment.beam.get_s0())
 
   if spherical_relp:
-    return SphericalRelpStillsReflectionPredictor(
-      experiment.beam,
-      experiment.detector,
-      experiment.crystal.get_A(),
-      experiment.crystal.get_unit_cell(),
-      experiment.crystal.get_space_group().type(),
-      dmin)
+    return SphericalRelpStillsReflectionPredictor(experiment.beam, experiment.detector, experiment.crystal.get_A(),
+                                                  experiment.crystal.get_unit_cell(),
+                                                  experiment.crystal.get_space_group().type(), dmin)
 
   # Create the reflection predictor
   try:
     if experiment.crystal.get_half_mosaicity_deg() is not None and experiment.crystal.get_domain_size_ang() is not None:
-      return NaveStillsReflectionPredictor(
-        experiment.beam,
-        experiment.detector,
-        experiment.crystal.get_A(),
-        experiment.crystal.get_unit_cell(),
-        experiment.crystal.get_space_group().type(),
-        dmin,
-        experiment.crystal.get_half_mosaicity_deg(),
-        experiment.crystal.get_domain_size_ang())
+      return NaveStillsReflectionPredictor(experiment.beam, experiment.detector, experiment.crystal.get_A(),
+                                           experiment.crystal.get_unit_cell(),
+                                           experiment.crystal.get_space_group().type(), dmin,
+                                           experiment.crystal.get_half_mosaicity_deg(),
+                                           experiment.crystal.get_domain_size_ang())
   except AttributeError:
     pass
 
-  return StillsDeltaPsiReflectionPredictor(
-    experiment.beam,
-    experiment.detector,
-    experiment.crystal.get_A(),
-    experiment.crystal.get_unit_cell(),
-    experiment.crystal.get_space_group().type(),
-    dmin)
+  return StillsDeltaPsiReflectionPredictor(experiment.beam, experiment.detector, experiment.crystal.get_A(),
+                                           experiment.crystal.get_unit_cell(),
+                                           experiment.crystal.get_space_group().type(), dmin)

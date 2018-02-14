@@ -10,11 +10,12 @@ from dials.array_family import flex
 from wxtbx.phil_controls.intctrl import IntCtrl as PhilIntCtrl
 from wxtbx.phil_controls import EVT_PHIL_CONTROL
 
-
 myEVT_LOADIMG = wx.NewEventType()
 EVT_LOADIMG = wx.PyEventBinder(myEVT_LOADIMG, 1)
+
 class LoadImageEvent(wx.PyCommandEvent):
   """Event to signal that an image should be loaded"""
+
   def __init__(self, etype, eid, filename=None):
     """Creates the event object"""
     wx.PyCommandEvent.__init__(self, etype, eid)
@@ -26,23 +27,24 @@ class LoadImageEvent(wx.PyCommandEvent):
 def create_load_image_event(destination, filename):
   wx.PostEvent(destination, LoadImageEvent(myEVT_LOADIMG, -1, filename))
 
-
-class SpotFrame(XrayFrame) :
-  def __init__ (self, *args, **kwds) :
+class SpotFrame(XrayFrame):
+  def __init__(self, *args, **kwds):
     self.datablock = kwds["datablock"]
     self.experiments = kwds["experiments"]
     if self.datablock is not None:
       self.imagesets = self.datablock.extract_imagesets()
       self.crystals = None
     elif len(self.experiments.imagesets()) > 0:
-      assert(len(self.experiments.imagesets()) == 1)
+      assert (len(self.experiments.imagesets()) == 1)
       self.imagesets = self.experiments.imagesets()
       self.crystals = self.experiments.crystals()
     else:
       raise RuntimeError("No imageset could be constructed")
 
     self.reflections = kwds["reflections"]
-    del kwds["datablock"]; del kwds["experiments"]; del kwds["reflections"] #otherwise wx complains
+    del kwds["datablock"]
+    del kwds["experiments"]
+    del kwds["reflections"] #otherwise wx complains
     super(SpotFrame, self).__init__(*args, **kwds)
     self.viewer.reflections = self.reflections
     self.viewer.frames = self.imagesets
@@ -76,9 +78,7 @@ class SpotFrame(XrayFrame) :
     self._image_chooser_tmp_clientdata = []
     self.display_foreground_circles_patch = False #hard code this option, for now
 
-    if (self.experiments is not None
-        and not self.reflections
-        and self.params.predict_reflections):
+    if (self.experiments is not None and not self.reflections and self.params.predict_reflections):
       self.reflections = self.predict()
 
     if self.params.d_min is not None and len(self.reflections):
@@ -101,72 +101,69 @@ class SpotFrame(XrayFrame) :
                   = self.reflections[i_ref_list]['xyzcal.px']
                 self.reflections[i_ref_list]['xyzobs.px.variance'] \
                   = flex.vec3_double(len(self.reflections[i_ref_list]), (1,1,1))
-              refl = indexer.indexer_base.map_spots_pixel_to_mm_rad(
-                self.reflections[i_ref_list].select(sel),
-                imageset.get_detector(), imageset.get_scan())
+              refl = indexer.indexer_base.map_spots_pixel_to_mm_rad(self.reflections[i_ref_list].select(sel),
+                                                                    imageset.get_detector(), imageset.get_scan())
 
-            indexer.indexer_base.map_centroids_to_reciprocal_space(
-              refl, imageset.get_detector(), imageset.get_beam(),
-              imageset.get_goniometer())
+            indexer.indexer_base.map_centroids_to_reciprocal_space(refl, imageset.get_detector(), imageset.get_beam(),
+                                                                   imageset.get_goniometer())
             reflections[i_ref_list].extend(refl)
 
-        d_spacings = 1/reflections[i_ref_list]['rlp'].norms()
+        d_spacings = 1 / reflections[i_ref_list]['rlp'].norms()
         reflections[i_ref_list] = reflections[i_ref_list].select(d_spacings > self.params.d_min)
       self.reflections = reflections
     self.Bind(EVT_LOADIMG, self.load_file_event)
 
-    self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateUIMask,
-              id=self._id_mask)
+    self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateUIMask, id=self._id_mask)
 
-  def setup_toolbar(self) :
+  def setup_toolbar(self):
     from wxtbx import bitmaps
     from wxtbx import icons
 
-    btn = self.toolbar.AddLabelTool(id=-1,
-      label="Load file",
-      bitmap=icons.hkl_file.GetBitmap(),
-      shortHelp="Load file",
-      kind=wx.ITEM_NORMAL)
+    btn = self.toolbar.AddLabelTool(
+        id=-1, label="Load file", bitmap=icons.hkl_file.GetBitmap(), shortHelp="Load file", kind=wx.ITEM_NORMAL)
     self.Bind(wx.EVT_MENU, self.OnLoadFile, btn)
     #btn = self.toolbar.AddLabelTool(id=-1,
-      #label="Settings",
-      #bitmap=icons.advancedsettings.GetBitmap(),
-      #shortHelp="Settings",
-      #kind=wx.ITEM_NORMAL)
+    #label="Settings",
+    #bitmap=icons.advancedsettings.GetBitmap(),
+    #shortHelp="Settings",
+    #kind=wx.ITEM_NORMAL)
     #self.Bind(wx.EVT_MENU, self.OnShowSettings, btn)
     #btn = self.toolbar.AddLabelTool(id=-1,
-      #label="Zoom",
-      #bitmap=icons.search.GetBitmap(),
-      #shortHelp="Zoom",
-      #kind=wx.ITEM_NORMAL)
+    #label="Zoom",
+    #bitmap=icons.search.GetBitmap(),
+    #shortHelp="Zoom",
+    #kind=wx.ITEM_NORMAL)
     #self.Bind(wx.EVT_MENU, self.OnZoom, btn
-    btn = self.toolbar.AddLabelTool(id=wx.ID_SAVEAS,
-    label="Save As...",
-    bitmap=bitmaps.fetch_icon_bitmap("actions","save_all", 32),
-    shortHelp="Save As...",
-    kind=wx.ITEM_NORMAL)
+    btn = self.toolbar.AddLabelTool(
+        id=wx.ID_SAVEAS,
+        label="Save As...",
+        bitmap=bitmaps.fetch_icon_bitmap("actions", "save_all", 32),
+        shortHelp="Save As...",
+        kind=wx.ITEM_NORMAL)
     self.Bind(wx.EVT_MENU, self.OnSaveAs, btn)
     txt = wx.StaticText(self.toolbar, -1, "Image:")
     self.toolbar.AddControl(txt)
-    self.image_chooser = wx.Choice(self.toolbar, -1, size=(300,-1))
+    self.image_chooser = wx.Choice(self.toolbar, -1, size=(300, -1))
     self.toolbar.AddControl(self.image_chooser)
     self.Bind(wx.EVT_CHOICE, self.OnChooseImage, self.image_chooser)
-    btn = self.toolbar.AddLabelTool(id=wx.ID_BACKWARD,
-      label="Previous",
-      bitmap=bitmaps.fetch_icon_bitmap("actions","1leftarrow"),
-      shortHelp="Previous",
-      kind=wx.ITEM_NORMAL)
+    btn = self.toolbar.AddLabelTool(
+        id=wx.ID_BACKWARD,
+        label="Previous",
+        bitmap=bitmaps.fetch_icon_bitmap("actions", "1leftarrow"),
+        shortHelp="Previous",
+        kind=wx.ITEM_NORMAL)
     self.Bind(wx.EVT_MENU, self.OnPrevious, btn)
-    btn = self.toolbar.AddLabelTool(id=wx.ID_FORWARD,
-      label="Next",
-      bitmap=bitmaps.fetch_icon_bitmap("actions","1rightarrow"),
-      shortHelp="Next",
-      kind=wx.ITEM_NORMAL)
+    btn = self.toolbar.AddLabelTool(
+        id=wx.ID_FORWARD,
+        label="Next",
+        bitmap=bitmaps.fetch_icon_bitmap("actions", "1rightarrow"),
+        shortHelp="Next",
+        kind=wx.ITEM_NORMAL)
     self.Bind(wx.EVT_MENU, self.OnNext, btn)
     txt = wx.StaticText(self.toolbar, -1, "Jump to image:")
     self.toolbar.AddControl(txt)
 
-    self.jump_to_image = PhilIntCtrl(self.toolbar, -1, name="image", size=(50,-1))
+    self.jump_to_image = PhilIntCtrl(self.toolbar, -1, name="image", size=(50, -1))
     self.jump_to_image.SetMin(1)
     self.jump_to_image.SetValue(1)
     self.toolbar.AddControl(self.jump_to_image)
@@ -186,8 +183,7 @@ class SpotFrame(XrayFrame) :
 
     if not self._mask_frame:
       self._mask_frame = MaskSettingsFrame(
-        self, wx.ID_ANY, "Mask tool",
-        style=wx.CAPTION | wx.CLOSE_BOX | wx.RESIZE_BORDER)
+          self, wx.ID_ANY, "Mask tool", style=wx.CAPTION | wx.CLOSE_BOX | wx.RESIZE_BORDER)
       self._mask_frame.Show()
       self._mask_frame.Raise()
     else:
@@ -201,19 +197,19 @@ class SpotFrame(XrayFrame) :
     else:
       event.SetText("Show mask tool")
 
-  def OnChooseImage (self, event) :
+  def OnChooseImage(self, event):
     super(SpotFrame, self).OnChooseImage(event)
-    self.jump_to_image.SetValue(self.image_chooser.GetSelection()+1)
+    self.jump_to_image.SetValue(self.image_chooser.GetSelection() + 1)
 
-  def OnPrevious (self, event) :
+  def OnPrevious(self, event):
     super(SpotFrame, self).OnPrevious(event)
-    self.jump_to_image.SetValue(self.image_chooser.GetSelection()+1)
+    self.jump_to_image.SetValue(self.image_chooser.GetSelection() + 1)
 
-  def OnNext (self, event) :
+  def OnNext(self, event):
     super(SpotFrame, self).OnNext(event)
-    self.jump_to_image.SetValue(self.image_chooser.GetSelection()+1)
+    self.jump_to_image.SetValue(self.image_chooser.GetSelection() + 1)
 
-  def OnJumpToImage (self, event) :
+  def OnJumpToImage(self, event):
     phil_value = self.jump_to_image.GetPhilValue()
     if (self.image_chooser.GetSelection() != (phil_value - 1)):
       self.jump_to_image.SetMax(self.image_chooser.GetCount())
@@ -230,14 +226,14 @@ class SpotFrame(XrayFrame) :
 
     #self.TypeMask = 100
     #self._xxx_layer = self.pyslip.AddLayer(
-      #render=self._draw_rings_layer,
-      #data=[],
-      #map_rel=True,
-      #visible=True,
-      #show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
-      #selectable=True,
-      #name="<xxx_layer>",
-      #type=self.TypeMask, update=False)
+    #render=self._draw_rings_layer,
+    #data=[],
+    #map_rel=True,
+    #visible=True,
+    #show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
+    #selectable=True,
+    #name="<xxx_layer>",
+    #type=self.TypeMask, update=False)
     #self.image_layer = self._xxx_layer
 
     #self.add_select_handler(self._xxx_layer, self.boxSelect)
@@ -263,9 +259,9 @@ class SpotFrame(XrayFrame) :
     # get canonical box limits
     (p1x, p1y) = p1
     (p2x, p2y) = p2
-    lx = min(p1x, p2x)      # left x coord
+    lx = min(p1x, p2x) # left x coord
     rx = max(p1x, p2x)
-    ty = max(p1y, p2y)      # top y coord
+    ty = max(p1y, p2y) # top y coord
     by = min(p1y, p2y)
 
     return [(lx, by), (lx, ty), (rx, ty), (rx, by)]
@@ -283,11 +279,9 @@ class SpotFrame(XrayFrame) :
       x0, y0 = point[0]
       x1, y1 = point[2]
 
-      assert point == [(x0, y0), (x0,y1), (x1, y1), (x1, y0)]
+      assert point == [(x0, y0), (x0, y1), (x1, y1), (x1, y0)]
 
-      point = [
-        self.pyslip.tiles.map_relative_to_picture_fast_slow(*p)
-        for p in point]
+      point = [self.pyslip.tiles.map_relative_to_picture_fast_slow(*p) for p in point]
 
       detector = self.pyslip.tiles.raw_image.get_detector()
       if len(detector) > 1:
@@ -295,8 +289,7 @@ class SpotFrame(XrayFrame) :
         point_ = []
         panel_id = None
         for p in point:
-          p1, p0, p_id = self.pyslip.tiles.flex_image.picture_to_readout(
-            p[1], p[0])
+          p1, p0, p_id = self.pyslip.tiles.flex_image.picture_to_readout(p[1], p[0])
           assert p_id >= 0, "Point must be within a panel"
           if panel_id is not None:
             assert panel_id == p_id, "All points must be contained within a single panel"
@@ -350,40 +343,37 @@ class SpotFrame(XrayFrame) :
 
         assert len(polygon) % 2 == 0, "Polygon must contain 2D coords"
         vertices = []
-        for i in range(int(len(polygon)/2)):
-          x = polygon[2*i]
-          y = polygon[2*i+1]
-          vertices.append((x,y))
+        for i in range(int(len(polygon) / 2)):
+          x = polygon[2 * i]
+          y = polygon[2 * i + 1]
+          vertices.append((x, y))
 
         if len(self.pyslip.tiles.raw_image.get_detector()) > 1:
           vertices = [
-            self.pyslip.tiles.flex_image.tile_readout_to_picture(
-              int(region.panel), v[1], v[0])
-            for v in vertices]
+              self.pyslip.tiles.flex_image.tile_readout_to_picture(int(region.panel), v[1], v[0]) for v in vertices
+          ]
           vertices = [(v[1], v[0]) for v in vertices]
 
-        points_rel = [self.pyslip.tiles.picture_fast_slow_to_map_relative(*v)
-                      for v in vertices]
+        points_rel = [self.pyslip.tiles.picture_fast_slow_to_map_relative(*v) for v in vertices]
 
         points_rel.append(points_rel[0])
-        for i in range(len(points_rel)-1):
-          polygon_data.append(((points_rel[i], points_rel[i+1]), d))
+        for i in range(len(points_rel) - 1):
+          polygon_data.append(((points_rel[i], points_rel[i + 1]), d))
 
       if circle is not None:
         x, y, r = circle
         if len(self.pyslip.tiles.raw_image.get_detector()) > 1:
-          y, x = self.pyslip.tiles.flex_image.tile_readout_to_picture(
-            int(region.panel), y, x)
+          y, x = self.pyslip.tiles.flex_image.tile_readout_to_picture(int(region.panel), y, x)
         x, y = self.pyslip.tiles.picture_fast_slow_to_map_relative(x, y)
         center = matrix.col((x, y))
         e1 = matrix.col((1, 0))
         e2 = matrix.col((0, 1))
         circle_data.append((
-          center + r * (e1 + e2),
-          center + r * (e1 - e2),
-          center + r * (-e1 - e2),
-          center + r * (-e1 + e2),
-          center + r * (e1 + e2),
+            center + r * (e1 + e2),
+            center + r * (e1 - e2),
+            center + r * (-e1 - e2),
+            center + r * (-e1 + e2),
+            center + r * (e1 + e2),
         ))
 
     if polygon_data:
@@ -396,27 +386,28 @@ class SpotFrame(XrayFrame) :
     if circle_data:
       for circle in circle_data:
         self.sel_image_circle_layers.append(
-          self.pyslip.AddEllipseLayer(circle, map_rel=True,
-                                      color='#00ffff',
-                                      radius=5, visible=True,
-                                      #show_levels=[3,4],
-                                      name='<boxsel_pt_layer>'))
-
-
+            self.pyslip.AddEllipseLayer(
+                circle,
+                map_rel=True,
+                color='#00ffff',
+                radius=5,
+                visible=True,
+                #show_levels=[3,4],
+                name='<boxsel_pt_layer>'))
 
   #def __del__(self):
-    #print self.show_all_pix_timer.legend
-    #print self.show_all_pix_timer.report()
-    #print self.show_shoebox_timer.report()
-    #print self.show_max_pix_timer.report()
-    #print self.show_ctr_mass_timer.report()
-    #print self.draw_all_pix_timer.report()
-    #print self.draw_shoebox_timer.report()
-    #print self.draw_max_pix_timer.report()
-    #print self.draw_ctr_mass_timer.report()
+  #print self.show_all_pix_timer.legend
+  #print self.show_all_pix_timer.report()
+  #print self.show_shoebox_timer.report()
+  #print self.show_max_pix_timer.report()
+  #print self.show_ctr_mass_timer.report()
+  #print self.draw_all_pix_timer.report()
+  #print self.draw_shoebox_timer.report()
+  #print self.draw_max_pix_timer.report()
+  #print self.draw_ctr_mass_timer.report()
 
-  def add_file_name_or_data (self, file_name_or_data) :
-      """The add_file_name_or_data() function appends @p
+  def add_file_name_or_data(self, file_name_or_data):
+    """The add_file_name_or_data() function appends @p
       file_name_or_data to the image chooser, unless it is already
       present.  For file-backed images, the base name is displayed in
       the chooser.  If necessary, the number of entries in the chooser
@@ -426,19 +417,19 @@ class SpotFrame(XrayFrame) :
       Rename this function, because it only deals with the chooser?
       """
 
-      key = self.get_key(file_name_or_data)
-      count = self.image_chooser.GetCount()
-      for i in xrange(count) :
-        if key == str(self.image_chooser.GetClientData(i)):
-          return i
-      self._image_chooser_tmp_key.append(key)
-      self._image_chooser_tmp_clientdata.append(file_name_or_data)
-      return len(self._image_chooser_tmp_key) + count
+    key = self.get_key(file_name_or_data)
+    count = self.image_chooser.GetCount()
+    for i in xrange(count):
+      if key == str(self.image_chooser.GetClientData(i)):
+        return i
+    self._image_chooser_tmp_key.append(key)
+    self._image_chooser_tmp_clientdata.append(file_name_or_data)
+    return len(self._image_chooser_tmp_key) + count
 
   def load_file_event(self, evt):
     self.load_image(evt.get_filename())
 
-  def load_image (self, file_name_or_data) :
+  def load_image(self, file_name_or_data):
     """The load_image() function displays the image from @p
     file_name_or_data.  The chooser is updated appropriately.
     """
@@ -448,8 +439,7 @@ class SpotFrame(XrayFrame) :
       n = len(self._image_chooser_tmp_key)
       self.image_chooser.AppendItems(self._image_chooser_tmp_key)
       for i in range(n):
-        self.image_chooser.SetClientData(
-          starting_count+i, self._image_chooser_tmp_clientdata[i])
+        self.image_chooser.SetClientData(starting_count + i, self._image_chooser_tmp_clientdata[i])
       self._image_chooser_tmp_key = []
       self._image_chooser_tmp_clientdata = []
     elif isinstance(file_name_or_data, basestring):
@@ -468,9 +458,7 @@ class SpotFrame(XrayFrame) :
     show_untrusted = False
     if self.params.show_mask:
       show_untrusted = True
-    super(SpotFrame, self).load_image(
-      file_name_or_data, get_raw_data=self.get_raw_data,
-      show_untrusted=show_untrusted)
+    super(SpotFrame, self).load_image(file_name_or_data, get_raw_data=self.get_raw_data, show_untrusted=show_untrusted)
 
     # Now we've loaded the new image, destroy the caches for all the old images.
     # This is okay as at the moment we don't use the cached data (another bug)
@@ -478,8 +466,7 @@ class SpotFrame(XrayFrame) :
       if image is file_name_or_data:
         image.set_raw_data(None)
 
-
-  def OnShowSettings (self, event) :
+  def OnShowSettings(self, event):
     if self.settings_frame is None:
       frame_rect = self.GetRect()
       display_rect = wx.GetClientDisplayRect()
@@ -487,8 +474,8 @@ class SpotFrame(XrayFrame) :
       if x_start > (display_rect[2] - 400):
         x_start = display_rect[2] - 400
       y_start = frame_rect[1]
-      self.settings_frame = SpotSettingsFrame(self, -1, "Settings",
-        style=wx.CAPTION|wx.MINIMIZE_BOX, pos=(x_start, y_start))
+      self.settings_frame = SpotSettingsFrame(
+          self, -1, "Settings", style=wx.CAPTION | wx.MINIMIZE_BOX, pos=(x_start, y_start))
     self.settings_frame.Show()
 
   def _draw_rings_layer(self, dc, data, map_rel):
@@ -502,7 +489,7 @@ class SpotFrame(XrayFrame) :
     """
 
     assert map_rel is True
-    if len(data)==0:
+    if len(data) == 0:
       return
     (lon, lat, place, radius, colour, x_off, y_off, pdata) = data[0]
 
@@ -519,14 +506,12 @@ class SpotFrame(XrayFrame) :
       (x, y) = self.pyslip.ConvertGeo2View((lon, lat))
       dc.DrawCircle(x, y, radius * scale)
 
-
   def draw_resolution_rings(self, unit_cell=None, space_group=None):
     from cctbx.array_family import flex
     from cctbx import uctbx
     import math
 
-    image = self.image_chooser.GetClientData(
-      self.image_chooser.GetSelection()).image_set
+    image = self.image_chooser.GetClientData(self.image_chooser.GetSelection()).image_set
     detector = image.get_detector()
     beam = image.get_beam()
 
@@ -542,11 +527,10 @@ class SpotFrame(XrayFrame) :
 
     else:
       n_rings = 5
-      step = d_star_sq_max/n_rings
-      spacings = flex.double(
-        [uctbx.d_star_sq_as_d((i+1)*step) for i in range(0, n_rings)])
+      step = d_star_sq_max / n_rings
+      spacings = flex.double([uctbx.d_star_sq_as_d((i + 1) * step) for i in range(0, n_rings)])
     resolution_text_data = []
-    if self.settings.color_scheme > 1 : # heatmap or invert
+    if self.settings.color_scheme > 1: # heatmap or invert
       textcolour = 'white'
     else:
       textcolour = 'black'
@@ -555,12 +539,13 @@ class SpotFrame(XrayFrame) :
     distance = detector[0].get_distance()
     pixel_size = detector[0].get_pixel_size()[0] # FIXME assumes square pixels, and that all panels use same pixel size
 
-    twotheta = uctbx.d_star_sq_as_two_theta(
-      uctbx.d_as_d_star_sq(spacings), wavelength)
+    twotheta = uctbx.d_star_sq_as_two_theta(uctbx.d_as_d_star_sq(spacings), wavelength)
     L_mm = []
     L_pixels = []
-    for tt in twotheta: L_mm.append(distance * math.tan(tt))
-    for lmm in L_mm: L_pixels.append(lmm/pixel_size)
+    for tt in twotheta:
+      L_mm.append(distance * math.tan(tt))
+    for lmm in L_mm:
+      L_pixels.append(lmm / pixel_size)
 
     # Get beam vector and two orthogonal vectors
     beamvec = matrix.col(beam.get_s0())
@@ -609,7 +594,7 @@ class SpotFrame(XrayFrame) :
         cy = ys2 / 2
       else:
         t2 = (xs1 - xs2 + (ys2 - ys1) * yd1 / xd1) / (yd2 - xd2 * yd1 / xd1)
-        t1 = (ys2  + t2 * xd2 - ys1) / xd1
+        t1 = (ys2 + t2 * xd2 - ys1) / xd1
         cy = (ys1 + t1 * xd1) / 2
         assert abs(cy - (ys2 + t2 * xd2) / 2) < 0.1
       if abs(yd1) < 0.00001:
@@ -618,23 +603,18 @@ class SpotFrame(XrayFrame) :
         cx = xs2 / 2
       else:
         t2 = (xs1 - xs2 + (ys2 - ys1) * yd1 / xd1) / (yd2 - xd2 * yd1 / xd1)
-        t1 = (ys2  + t2 * xd2 - ys1) / xd1
+        t1 = (ys2 + t2 * xd2 - ys1) / xd1
         cx = (xs1 + t1 * yd1) / 2
         assert abs(cx - (xs2 + t2 * yd2) / 2) < 0.1
 
       centre = (cx, cy)
 
       if len(detector) > 1:
-        centre = self.pyslip.tiles.flex_image.tile_readout_to_picture(
-          p_id, centre[1], centre[0])[::-1]
-        dp1 = self.pyslip.tiles.flex_image.tile_readout_to_picture(
-            p_id, dp1[1], dp1[0])[::-1]
-        dp2 = self.pyslip.tiles.flex_image.tile_readout_to_picture(
-          p_id, dp2[1], dp2[0])[::-1]
-        dp3 = self.pyslip.tiles.flex_image.tile_readout_to_picture(
-          p_id, dp3[1], dp3[0])[::-1]
-        dp4 = self.pyslip.tiles.flex_image.tile_readout_to_picture(
-          p_id, dp4[1], dp4[0])[::-1]
+        centre = self.pyslip.tiles.flex_image.tile_readout_to_picture(p_id, centre[1], centre[0])[::-1]
+        dp1 = self.pyslip.tiles.flex_image.tile_readout_to_picture(p_id, dp1[1], dp1[0])[::-1]
+        dp2 = self.pyslip.tiles.flex_image.tile_readout_to_picture(p_id, dp2[1], dp2[0])[::-1]
+        dp3 = self.pyslip.tiles.flex_image.tile_readout_to_picture(p_id, dp3[1], dp3[0])[::-1]
+        dp4 = self.pyslip.tiles.flex_image.tile_readout_to_picture(p_id, dp4[1], dp4[0])[::-1]
 
       # translate ellipse centre and four points to map coordinates
       centre = self.pyslip.tiles.picture_fast_slow_to_map_relative(*centre)
@@ -666,23 +646,19 @@ class SpotFrame(XrayFrame) :
       minor = (minor[0] + centre[0], minor[1] + centre[1])
 
       p = (centre, major, minor)
-      ring_data.append((p, self.pyslip.DefaultPolygonPlacement,
-                        self.pyslip.DefaultPolygonWidth, 'red', True,
+      ring_data.append((p, self.pyslip.DefaultPolygonPlacement, self.pyslip.DefaultPolygonWidth, 'red', True,
                         self.pyslip.DefaultPolygonFilled, self.pyslip.DefaultPolygonFillcolour,
                         self.pyslip.DefaultPolygonOffsetX, self.pyslip.DefaultPolygonOffsetY, None))
 
       if unit_cell is None and space_group is None:
         for angle in (45, 135, 225, 315):
-          txtvec = cb1.rotate_around_origin(axis=beamvec, angle=angle/180*3.14159)
+          txtvec = cb1.rotate_around_origin(axis=beamvec, angle=angle / 180 * 3.14159)
           txtpos = pan.get_ray_intersection_px(txtvec)
           if len(detector) > 1:
-            txtpos = self.pyslip.tiles.flex_image.tile_readout_to_picture(
-              p_id, txtpos[1], txtpos[0])[::-1]
+            txtpos = self.pyslip.tiles.flex_image.tile_readout_to_picture(p_id, txtpos[1], txtpos[0])[::-1]
           x, y = self.pyslip.tiles.picture_fast_slow_to_map_relative(txtpos[0], txtpos[1])
-          resolution_text_data.append(
-            (x, y, "%.2f" %d, {
-              'placement':'cc', 'colour': 'red',
-              'textcolour': textcolour}))
+          resolution_text_data.append((x, y, "%.2f" % d, {'placement': 'cc', 'colour': 'red', 'textcolour':
+                                                          textcolour}))
 
     # XXX Transparency?
     # Remove the old ring layer, and draw a new one.
@@ -691,14 +667,15 @@ class SpotFrame(XrayFrame) :
       self._ring_layer = None
     if ring_data:
       self._ring_layer = self.pyslip.AddLayer(
-        self.pyslip.DrawLightweightEllipticalSpline,
-        ring_data,
-        True,
-        True,
-        show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
-        selectable=False,
-        type=self.pyslip.TypeEllipse,
-        name="<ring_layer>", update=False)
+          self.pyslip.DrawLightweightEllipticalSpline,
+          ring_data,
+          True,
+          True,
+          show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
+          selectable=False,
+          type=self.pyslip.TypeEllipse,
+          name="<ring_layer>",
+          update=False)
 
     # Remove the old resolution text layer, and draw a new one.
     if hasattr(self, "_resolution_text_layer") and self._resolution_text_layer is not None:
@@ -706,24 +683,24 @@ class SpotFrame(XrayFrame) :
       self._resolution_text_layer = None
     if resolution_text_data:
       self._resolution_text_layer = self.pyslip.AddTextLayer(
-        resolution_text_data,
-        map_rel=True,
-        visible=True,
-        show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
-        selectable=False,
-        name="<resolution_text_layer>",
-        colour='red',
-        fontsize=15, update=False)
+          resolution_text_data,
+          map_rel=True,
+          visible=True,
+          show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
+          selectable=False,
+          name="<resolution_text_layer>",
+          colour='red',
+          fontsize=15,
+          update=False)
 
   def sum_images(self):
     if self.params.sum_images > 1:
       image = self.pyslip.tiles.raw_image
       raw_data = image.get_raw_data()
       if not isinstance(raw_data, tuple):
-        raw_data = (raw_data,)
+        raw_data = (raw_data, )
 
-      i_frame = self.image_chooser.GetClientData(
-        self.image_chooser.GetSelection()).index
+      i_frame = self.image_chooser.GetClientData(self.image_chooser.GetSelection()).index
       imageset = self.image_chooser.GetClientData(i_frame).image_set
 
       for i in range(1, self.params.sum_images):
@@ -746,15 +723,14 @@ class SpotFrame(XrayFrame) :
     image.set_raw_data(None)
     raw_data = image.get_raw_data()
     if not isinstance(raw_data, tuple):
-      raw_data = (raw_data,)
+      raw_data = (raw_data, )
 
     if self.settings.display != 'image':
 
       mask = self.get_mask(image)
       gain_value = self.settings.gain
       assert gain_value > 0
-      gain_map = [flex.double(raw_data[i].accessor(), gain_value)
-                  for i in range(len(detector))]
+      gain_map = [flex.double(raw_data[i].accessor(), gain_value) for i in range(len(detector))]
 
       nsigma_b = self.settings.nsigma_b
       nsigma_s = self.settings.nsigma_s
@@ -764,9 +740,8 @@ class SpotFrame(XrayFrame) :
       kabsch_debug_list = []
       for i_panel in range(len(detector)):
         kabsch_debug_list.append(
-          DispersionThresholdDebug(
-            raw_data[i_panel].as_double(), mask[i_panel], gain_map[i_panel],
-            size, nsigma_b, nsigma_s, global_threshold, min_local))
+            DispersionThresholdDebug(raw_data[i_panel].as_double(), mask[i_panel], gain_map[i_panel], size, nsigma_b,
+                                     nsigma_s, global_threshold, min_local))
 
       if self.settings.display == 'mean':
         mean = [kabsch.mean() for kabsch in kabsch_debug_list]
@@ -806,8 +781,7 @@ class SpotFrame(XrayFrame) :
           mask.reshape(cv[i].accessor())
         raw_data = final_mask
 
-      if self.settings.display in (
-        'sigma_b', 'sigma_s', 'global', 'threshold'):
+      if self.settings.display in ('sigma_b', 'sigma_s', 'global', 'threshold'):
         raw_data = (500 * d for d in raw_data)
 
     raw_data = tuple(raw_data)
@@ -828,13 +802,12 @@ class SpotFrame(XrayFrame) :
     new_color_scheme = self.settings.color_scheme
     if new_brightness is not self.pyslip.tiles.current_brightness or \
        new_color_scheme is not self.pyslip.tiles.current_color_scheme:
-      self.pyslip.tiles.update_brightness(new_brightness,new_color_scheme)
+      self.pyslip.tiles.update_brightness(new_brightness, new_color_scheme)
 
     if self.settings.show_beam_center:
       if self.beam_layer is None and hasattr(self, 'beam_center_cross_data'):
         self.beam_layer = self.pyslip.AddPolygonLayer(
-          self.beam_center_cross_data, name="<beam_layer>",
-          show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5], update=False)
+            self.beam_center_cross_data, name="<beam_layer>", show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5], update=False)
     elif self.beam_layer is not None:
       self.pyslip.DeleteLayer(self.beam_layer, update=False)
       self.beam_layer = None
@@ -884,16 +857,21 @@ class SpotFrame(XrayFrame) :
 
       if self.settings.show_miller_indices and len(miller_indices_data):
         self.miller_indices_layer = self.pyslip.AddTextLayer(
-          miller_indices_data, map_rel=True, visible=True,
-          show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
-          selectable=False,
-          name='<miller_indices_layer>', update=False)
+            miller_indices_data,
+            map_rel=True,
+            visible=True,
+            show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
+            selectable=False,
+            name='<miller_indices_layer>',
+            update=False)
       if self.settings.show_predictions and len(predictions_data):
         self.predictions_layer = self.pyslip.AddPointLayer(
-          predictions_data, name="<predictions_layer>",
-          radius=3,
-          renderer = self.pyslip.DrawPointLayer,
-          show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5], update=False)
+            predictions_data,
+            name="<predictions_layer>",
+            radius=3,
+            renderer=self.pyslip.DrawPointLayer,
+            show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
+            update=False)
       if self.settings.show_all_pix:
         self.draw_all_pix_timer.start()
         if len(all_pix_data) > 1:
@@ -901,96 +879,129 @@ class SpotFrame(XrayFrame) :
             for key, value in all_pix_data.items():
               base_color = self.prediction_colours[key][1:]
               #dim the color so it stands apart from the prediction
-              r = base_color[0:2]; g = base_color[2:4]; b = base_color[4:6]
-              r = max(int(r,16)-int("50",16),0)
-              g = max(int(g,16)-int("50",16),0)
-              b = max(int(b,16)-int("50",16),0)
-              color = "#%02x%02x%02x"%(r,g,b)
-              self.dials_spotfinder_layers.append(self.pyslip.AddPointLayer(
-                value, color=color, name="<all_pix_layer_%d>"%key,
-                radius=2,
-                renderer = self.pyslip.LightweightDrawPointLayer2,
-                show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5], update=False))
+              r = base_color[0:2]
+              g = base_color[2:4]
+              b = base_color[4:6]
+              r = max(int(r, 16) - int("50", 16), 0)
+              g = max(int(g, 16) - int("50", 16), 0)
+              b = max(int(b, 16) - int("50", 16), 0)
+              color = "#%02x%02x%02x" % (r, g, b)
+              self.dials_spotfinder_layers.append(
+                  self.pyslip.AddPointLayer(
+                      value,
+                      color=color,
+                      name="<all_pix_layer_%d>" % key,
+                      radius=2,
+                      renderer=self.pyslip.LightweightDrawPointLayer2,
+                      show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
+                      update=False))
           else:
-            e1 = matrix.col((1.,0.))
-            e2 = matrix.col((0.,1.))
+            e1 = matrix.col((1., 0.))
+            e2 = matrix.col((0., 1.))
             for key, value in all_foreground_circles.items():
               base_color = self.prediction_colours[key][1:]
               positions = [i["position"] for i in value]
               good_radius = flex.mean(flex.double([i["radius"] for i in value]))
               vertices = []
               for model_center in positions:
-                for vertex in [model_center + good_radius*(e1+e2),
-                               model_center + good_radius*(e1-e2),
-                               model_center + good_radius*(-e1-e2),
-                               model_center + good_radius*(-e1+e2),
-                               model_center + good_radius*(e1+e2)]:
+                for vertex in [
+                    model_center + good_radius * (e1 + e2), model_center + good_radius * (e1 - e2),
+                    model_center + good_radius * (-e1 - e2), model_center + good_radius * (-e1 + e2),
+                    model_center + good_radius * (e1 + e2)
+                ]:
                   vertices.append(vertex)
 
-              if False: self.dials_spotfinder_layers.append(self.pyslip.AddPointLayer(
-                positions, color="#%s"%base_color, name="<all_pix_layer_%d>"%key,
-                radius=2,
-                renderer = self.pyslip.LightweightDrawPointLayer2,
-                show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5]))
+              if False:
+                self.dials_spotfinder_layers.append(
+                    self.pyslip.AddPointLayer(
+                        positions,
+                        color="#%s" % base_color,
+                        name="<all_pix_layer_%d>" % key,
+                        radius=2,
+                        renderer=self.pyslip.LightweightDrawPointLayer2,
+                        show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5]))
               if True:
-                self.dials_spotfinder_layers.append(self.pyslip.AddEllipseLayer(
-                    vertices, color="#%s"%base_color, name="<all_foreground_circles_%d>"%key,
-                    width=2,
-                    show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5], update=False))
-                print "Circles: center of foreground masks for the %d spots actually integrated"%(len(vertices)//5)
+                self.dials_spotfinder_layers.append(
+                    self.pyslip.AddEllipseLayer(
+                        vertices,
+                        color="#%s" % base_color,
+                        name="<all_foreground_circles_%d>" % key,
+                        width=2,
+                        show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
+                        update=False))
+                print "Circles: center of foreground masks for the %d spots actually integrated" % (len(vertices) // 5)
         else:
           if len(all_pix_data) > 0:
-            self.dials_spotfinder_layers.append(self.pyslip.AddPointLayer(
-              all_pix_data[all_pix_data.keys()[0]], color="green", name="<all_pix_layer>",
-              radius=2,
-              renderer = self.pyslip.LightweightDrawPointLayer2,
-              show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5], update=False))
+            self.dials_spotfinder_layers.append(
+                self.pyslip.AddPointLayer(
+                    all_pix_data[all_pix_data.keys()[0]],
+                    color="green",
+                    name="<all_pix_layer>",
+                    radius=2,
+                    renderer=self.pyslip.LightweightDrawPointLayer2,
+                    show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
+                    update=False))
         self.draw_all_pix_timer.stop()
       if self.settings.show_shoebox and len(shoebox_data):
         self.draw_shoebox_timer.start()
         self.shoebox_layer = self.pyslip.AddPolygonLayer(
-          shoebox_data, map_rel=True, visible=True,
-          show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
-          selectable=False,
-          name='<shoebox_layer>', update=False)
+            shoebox_data,
+            map_rel=True,
+            visible=True,
+            show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
+            selectable=False,
+            name='<shoebox_layer>',
+            update=False)
         self.draw_shoebox_timer.stop()
       if self.settings.show_ctr_mass and len(ctr_mass_data):
         self.draw_ctr_mass_timer.start()
         self.ctr_mass_layer = self.pyslip.AddPolygonLayer(
-          ctr_mass_data, map_rel=True, visible=True,
-          show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
-          selectable=False,
-          name='<ctr_mass_layer>', update=False)
+            ctr_mass_data,
+            map_rel=True,
+            visible=True,
+            show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
+            selectable=False,
+            name='<ctr_mass_layer>',
+            update=False)
         self.draw_ctr_mass_timer.stop()
       if self.settings.show_max_pix and len(max_pix_data):
         self.draw_max_pix_timer.start()
         self.max_pix_layer = self.pyslip.AddPointLayer(
-          max_pix_data, color="pink", name="<max_pix_layer>",
-          radius=2,
-          renderer = self.pyslip.LightweightDrawPointLayer,
-          show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5], update=False)
+            max_pix_data,
+            color="pink",
+            name="<max_pix_layer>",
+            radius=2,
+            renderer=self.pyslip.LightweightDrawPointLayer,
+            show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
+            update=False)
         self.draw_max_pix_timer.stop()
       if len(vector_data) and len(vector_text_data):
         self.vector_layer = self.pyslip.AddPolygonLayer(
-          vector_data, map_rel=True, visible=True,
-          show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
-          selectable=False,
-          name='<vector_layer>', update=False)
+            vector_data,
+            map_rel=True,
+            visible=True,
+            show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
+            selectable=False,
+            name='<vector_layer>',
+            update=False)
         self.vector_text_layer = self.pyslip.AddTextLayer(
-          vector_text_data, map_rel=True, visible=True,
-          show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
-          selectable=False,
-          name='<vector_text_layer>',
-          colour='#F62817', update=False)
+            vector_text_data,
+            map_rel=True,
+            visible=True,
+            show_levels=[-3, -2, -1, 0, 1, 2, 3, 4, 5],
+            selectable=False,
+            name='<vector_text_layer>',
+            colour='#F62817',
+            update=False)
 
     self.sum_images()
     #if self.params.sum_images == 1:
-      #self.show_filters()
+    #self.show_filters()
     if self.settings.show_resolution_rings:
       self.draw_resolution_rings()
     elif self.settings.show_ice_rings:
       from cctbx import sgtbx, uctbx
-      unit_cell = uctbx.unit_cell((4.498,4.498,7.338,90,90,120))
+      unit_cell = uctbx.unit_cell((4.498, 4.498, 7.338, 90, 90, 120))
       space_group = sgtbx.space_group_info(number=194).group()
       self.draw_resolution_rings(unit_cell=unit_cell, space_group=space_group)
     self.drawUntrustedPolygons()
@@ -1026,18 +1037,14 @@ class SpotFrame(XrayFrame) :
 
     def map_coords(x, y, p):
       if len(self.pyslip.tiles.raw_image.get_detector()) > 1:
-        y, x = self.pyslip.tiles.flex_image.tile_readout_to_picture(
-          p, y - 0.5, x - 0.5)
-      return self.pyslip.tiles.picture_fast_slow_to_map_relative(
-        x, y)
+        y, x = self.pyslip.tiles.flex_image.tile_readout_to_picture(p, y - 0.5, x - 0.5)
+      return self.pyslip.tiles.picture_fast_slow_to_map_relative(x, y)
 
     shoebox_dict = {'width': 2, 'color': '#0000FFA0', 'closed': False}
     ctr_mass_dict = {'width': 2, 'color': '#FF0000', 'closed': False}
     vector_dict = {'width': 4, 'color': '#F62817', 'closed': False}
-    i_frame = self.image_chooser.GetClientData(
-      self.image_chooser.GetSelection()).index
-    imageset = self.image_chooser.GetClientData(
-      self.image_chooser.GetSelection()).image_set
+    i_frame = self.image_chooser.GetClientData(self.image_chooser.GetSelection()).index
+    imageset = self.image_chooser.GetClientData(self.image_chooser.GetSelection()).image_set
     if imageset.get_scan() is not None:
       i_frame += imageset.get_scan().get_array_range()[0]
     shoebox_data = []
@@ -1054,21 +1061,19 @@ class SpotFrame(XrayFrame) :
     scan = self.pyslip.tiles.raw_image.get_scan()
     to_degrees = 180 / math.pi
     #self.prediction_colours = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c",
-                          #"#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00",
-                          #"#cab2d6"] * 10
+    #"#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00",
+    #"#cab2d6"] * 10
     # alternative colour scheme
-    self.prediction_colours = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3",
-                               "#ff7f00", "#ffff33", "#a65628", "#f781bf",
-                               "#999999"] * 10
+    self.prediction_colours = [
+        "#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65628", "#f781bf", "#999999"
+    ] * 10
     for ref_list in self.reflections:
       if self.settings.show_indexed:
-        indexed_sel = ref_list.get_flags(ref_list.flags.indexed,
-                                            all=False)
+        indexed_sel = ref_list.get_flags(ref_list.flags.indexed, all=False)
         ref_list = ref_list.select(indexed_sel)
 
       if self.settings.show_integrated:
-        integrated_sel = ref_list.get_flags(ref_list.flags.integrated,
-                                            all=False)
+        integrated_sel = ref_list.get_flags(ref_list.flags.integrated, all=False)
         ref_list = ref_list.select(integrated_sel)
       if ref_list.size() == 0: continue
       if 'bbox' in ref_list:
@@ -1076,15 +1081,15 @@ class SpotFrame(XrayFrame) :
         x0, x1, y0, y1, z0, z1 = bbox.parts()
         # ticket #107
         n = self.params.sum_images - 1
-        bbox_sel = ~ ((i_frame >= z1) | ((i_frame + n) < z0))
+        bbox_sel = ~((i_frame >= z1) | ((i_frame + n) < z0))
         for reflection in ref_list.select(bbox_sel):
           x0, x1, y0, y1, z0, z1 = reflection['bbox']
           panel = reflection['panel']
           nx = x1 - x0 # size of reflection box in x-direction
           ny = y1 - y0 # size of reflection box in y-direction
           #nz = z1 - z0 # number of frames this spot appears on
-          if (self.settings.show_all_pix and 'shoebox' in reflection
-              and reflection['shoebox'].mask.size() > 0 and n == 0):
+          if (self.settings.show_all_pix and 'shoebox' in reflection and reflection['shoebox'].mask.size() > 0
+              and n == 0):
             self.show_all_pix_timer.start()
             shoebox = reflection['shoebox']
             iz = i_frame - z0
@@ -1097,11 +1102,9 @@ class SpotFrame(XrayFrame) :
             for ix in range(nx):
               for iy in range(ny):
                 mask_value = shoebox.mask[iz, iy, ix]
-                if ((mask_value == strong_code) or
-                    (mask_value == fg_code)):
-                  x_, y_ = map_coords(
-                    ix + x0 + 0.5, iy + y0 + 0.5, panel)
-                  this_spot_foreground_pixels.append(matrix.col((x_,y_)))
+                if ((mask_value == strong_code) or (mask_value == fg_code)):
+                  x_, y_ = map_coords(ix + x0 + 0.5, iy + y0 + 0.5, panel)
+                  this_spot_foreground_pixels.append(matrix.col((x_, y_)))
                   if len(all_pix_data) > 1:
                     # look for overlapped pixels
                     found_it = False
@@ -1115,28 +1118,30 @@ class SpotFrame(XrayFrame) :
                       all_pix_data[reflection['id']].append((x_, y_))
                   else:
                     all_pix_data[reflection['id']].append((x_, y_))
-            if self.display_foreground_circles_patch and len(this_spot_foreground_pixels)>1:
-              per_spot_mean = matrix.col((0.,0.,))
+            if self.display_foreground_circles_patch and len(this_spot_foreground_pixels) > 1:
+              per_spot_mean = matrix.col((
+                  0.,
+                  0.,
+              ))
               for pxl in this_spot_foreground_pixels:
-                per_spot_mean+=pxl
+                per_spot_mean += pxl
               per_spot_mean /= len(this_spot_foreground_pixels)
-              all_foreground_circles[reflection['id']].append(dict(
-                position=per_spot_mean,radius=max([(t-per_spot_mean).length() for t in this_spot_foreground_pixels])))
+              all_foreground_circles[reflection['id']].append(
+                  dict(
+                      position=per_spot_mean,
+                      radius=max([(t - per_spot_mean).length() for t in this_spot_foreground_pixels])))
             self.show_all_pix_timer.stop()
 
           if self.settings.show_shoebox:
             self.show_shoebox_timer.start()
             x0_, y0_ = map_coords(x0, y0, panel)
             x1_, y1_ = map_coords(x1, y1, panel)
-            lines = [(((x0_, y0_), (x0_, y1_)), shoebox_dict),
-                     (((x0_, y1_), (x1_, y1_)), shoebox_dict),
-                     (((x1_, y1_), (x1_, y0_)), shoebox_dict),
-                     (((x1_, y0_), (x0_, y0_)), shoebox_dict)]
+            lines = [(((x0_, y0_), (x0_, y1_)), shoebox_dict), (((x0_, y1_), (x1_, y1_)), shoebox_dict),
+                     (((x1_, y1_), (x1_, y0_)), shoebox_dict), (((x1_, y0_), (x0_, y0_)), shoebox_dict)]
             shoebox_data.extend(lines)
             self.show_shoebox_timer.stop()
 
-          if (self.settings.show_max_pix and 'shoebox' in reflection
-              and reflection['shoebox'].data.size() > 0):
+          if (self.settings.show_max_pix and 'shoebox' in reflection and reflection['shoebox'].data.size() > 0):
             self.show_max_pix_timer.start()
             shoebox = reflection['shoebox'].data
             offset = flex.max_index(shoebox)
@@ -1145,26 +1150,19 @@ class SpotFrame(XrayFrame) :
             offset, i = divmod(offset, shoebox.all()[0])
             max_index = (i, j, k)
             if z0 + max_index[0] == i_frame:
-              x, y = map_coords(x0 + max_index[2] + 0.5,
-                                y0 + max_index[1] + 0.5,
-                                reflection['panel'])
+              x, y = map_coords(x0 + max_index[2] + 0.5, y0 + max_index[1] + 0.5, reflection['panel'])
               max_pix_data.append((x, y))
             self.show_max_pix_timer.stop()
 
-          if (self.settings.show_ctr_mass and
-              'xyzobs.px.value' in reflection):
+          if (self.settings.show_ctr_mass and 'xyzobs.px.value' in reflection):
             self.show_ctr_mass_timer.start()
             centroid = reflection['xyzobs.px.value']
             # ticket #107
             if centroid[2] >= i_frame and centroid[2] <= (i_frame + self.params.sum_images):
-              x,y = map_coords(
-                centroid[0], centroid[1], reflection['panel'])
-              xm1,ym1 = map_coords(
-                centroid[0]-1, centroid[1]-1, reflection['panel'])
-              xp1,yp1 = map_coords(
-                centroid[0]+1, centroid[1]+1, reflection['panel'])
-              lines = [(((x, ym1), (x, yp1)), ctr_mass_dict),
-                       (((xm1, y), (xp1, y)), ctr_mass_dict)]
+              x, y = map_coords(centroid[0], centroid[1], reflection['panel'])
+              xm1, ym1 = map_coords(centroid[0] - 1, centroid[1] - 1, reflection['panel'])
+              xp1, yp1 = map_coords(centroid[0] + 1, centroid[1] + 1, reflection['panel'])
+              lines = [(((x, ym1), (x, yp1)), ctr_mass_dict), (((xm1, y), (xp1, y)), ctr_mass_dict)]
               ctr_mass_data.extend(lines)
             self.show_ctr_mass_timer.stop()
 
@@ -1177,36 +1175,29 @@ class SpotFrame(XrayFrame) :
           phi = ref_list['xyzcal.mm'].parts()[2]
           frame_numbers = scan.get_array_index_from_angle(phi * to_degrees)
         n = 0 # buffer
-        for i_expt in range(flex.max(ref_list['id'])+1):
+        for i_expt in range(flex.max(ref_list['id']) + 1):
           expt_sel = ref_list['id'] == i_expt
-          frame_predictions_sel = (
-            (frame_numbers >= (i_frame-n)) & (frame_numbers < (i_frame+1+n)))
+          frame_predictions_sel = ((frame_numbers >= (i_frame - n)) & (frame_numbers < (i_frame + 1 + n)))
           for reflection in ref_list.select(frame_predictions_sel & expt_sel):
             if self.settings.show_predictions or self.settings.show_miller_indices:
               x = None
               if 'xyzcal.px' in reflection:
-                x, y = map_coords(reflection['xyzcal.px'][0],
-                                  reflection['xyzcal.px'][1],
-                                  reflection['panel'])
+                x, y = map_coords(reflection['xyzcal.px'][0], reflection['xyzcal.px'][1], reflection['panel'])
               elif 'xyzcal.mm' in reflection:
-                x, y = detector[reflection['panel']].millimeter_to_pixel(
-                  reflection['xyzcal.mm'][:2])
+                x, y = detector[reflection['panel']].millimeter_to_pixel(reflection['xyzcal.mm'][:2])
                 x, y = map_coords(x, y, reflection['panel'])
               if x is None: next
 
               if self.settings.show_predictions:
-                predictions_data.append(
-                  (x, y, {'colour':self.prediction_colours[i_expt]}))
+                predictions_data.append((x, y, {'colour': self.prediction_colours[i_expt]}))
 
-              if (self.settings.show_miller_indices and
-                  'miller_index' in reflection and
-                  reflection['miller_index'] != (0,0,0)):
-                miller_indices_data.append((x, y, str(reflection['miller_index']),
-                                            {'placement':'ne', 'radius':0}))
+              if (self.settings.show_miller_indices and 'miller_index' in reflection
+                  and reflection['miller_index'] != (0, 0, 0)):
+                miller_indices_data.append((x, y, str(reflection['miller_index']), {'placement': 'ne', 'radius': 0}))
 
     if len(overlapped_data) > 0:
       #show overlapped pixels in a different color
-      all_pix_data[max(all_pix_data.keys())+1] = overlapped_data
+      all_pix_data[max(all_pix_data.keys()) + 1] = overlapped_data
 
     if self.settings.show_basis_vectors and self.crystals is not None:
       from cctbx import crystal
@@ -1220,8 +1211,7 @@ class SpotFrame(XrayFrame) :
       gonio = imageset.get_goniometer()
       still = scan is None or gonio is None
       if not still:
-        phi = scan.get_angle_from_array_index(
-          i_frame-imageset.get_array_range()[0], deg=True)
+        phi = scan.get_angle_from_array_index(i_frame - imageset.get_array_range()[0], deg=True)
         axis = matrix.col(imageset.get_goniometer().get_rotation_axis())
       if len(detector) == 1:
         beam_centre = detector[0].get_ray_intersection(beam.get_s0())
@@ -1240,7 +1230,7 @@ class SpotFrame(XrayFrame) :
         beam_x, beam_y = detector[panel].millimeter_to_pixel(beam_centre)
         beam_x, beam_y = map_coords(beam_x, beam_y, panel)
       lines = []
-      for i, h in enumerate(((10,0,0), (0,10,0), (0,0,10))):
+      for i, h in enumerate(((10, 0, 0), (0, 10, 0), (0, 0, 10))):
         r = A * matrix.col(h)
         if still:
           s1 = matrix.col(beam.get_s0()) + r
@@ -1257,21 +1247,19 @@ class SpotFrame(XrayFrame) :
           x, y = map_coords(x, y, panel)
         vector_data.append((((beam_x, beam_y), (x, y)), vector_dict))
 
-        vector_text_data.append((x, y, ('a*', 'b*', 'c*')[i],
-                                 {'placement':'ne',
-                                  'fontsize': 20,
-                                  'color':'#F62817'}))
+        vector_text_data.append((x, y, ('a*', 'b*', 'c*')[i], {'placement': 'ne', 'fontsize': 20, 'color': '#F62817'}))
 
     from libtbx import group_args
-    return group_args(all_pix_data=all_pix_data,
-                      all_foreground_circles = all_foreground_circles,
-                      shoebox_data=shoebox_data,
-                      ctr_mass_data=ctr_mass_data,
-                      max_pix_data=max_pix_data,
-                      predictions_data=predictions_data,
-                      miller_indices_data=miller_indices_data,
-                      vector_data=vector_data,
-                      vector_text_data=vector_text_data)
+    return group_args(
+        all_pix_data=all_pix_data,
+        all_foreground_circles=all_foreground_circles,
+        shoebox_data=shoebox_data,
+        ctr_mass_data=ctr_mass_data,
+        max_pix_data=max_pix_data,
+        predictions_data=predictions_data,
+        miller_indices_data=miller_indices_data,
+        vector_data=vector_data,
+        vector_text_data=vector_text_data)
 
   def get_detector(self):
     return self.imagesets[0].get_detector()
@@ -1287,11 +1275,7 @@ class SpotFrame(XrayFrame) :
 
       # Populate the reflection table with predictions
       params = self.params.prediction
-      predicted = flex.reflection_table.from_predictions(
-        expt,
-        force_static=params.force_static,
-        dmin=params.d_min
-      )
+      predicted = flex.reflection_table.from_predictions(expt, force_static=params.force_static, dmin=params.d_min)
       predicted['id'] = flex.int(len(predicted), i_expt)
       if expt.profile is not None:
         expt.profile.params = self.params.profile
@@ -1303,9 +1287,8 @@ class SpotFrame(XrayFrame) :
 
     return predicted_all
 
-
-class SpotSettingsFrame (SettingsFrame) :
-  def __init__ (self, *args, **kwds) :
+class SpotSettingsFrame(SettingsFrame):
+  def __init__(self, *args, **kwds):
     super(SettingsFrame, self).__init__(*args, **kwds)
     self.settings = self.GetParent().settings
     self.params = self.GetParent().params
@@ -1324,9 +1307,8 @@ class SpotSettingsFrame (SettingsFrame) :
     # Allow the panel to cleanup when destroying the Frame
     self.panel.OnDestroy(event)
 
-
-class SpotSettingsPanel (wx.Panel) :
-  def __init__ (self, * args, **kwargs) :
+class SpotSettingsPanel(wx.Panel):
+  def __init__(self, *args, **kwargs):
     super(SpotSettingsPanel, self).__init__(*args, **kwargs)
 
     self.settings = self.GetParent().settings
@@ -1366,21 +1348,20 @@ class SpotSettingsPanel (wx.Panel) :
     grid = wx.FlexGridSizer(cols=2, rows=2)
     s.Add(grid)
     txt1 = wx.StaticText(self, -1, "Zoom level:")
-    grid.Add(txt1, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    grid.Add(txt1, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
     self.levels = self.GetParent().GetParent().pyslip.tiles.levels
     #from scitbx.math import continued_fraction as cf
     #choices = ["%s" %(cf.from_real(2**l).as_rational()) for l in self.levels]
-    choices = ["%g%%" %(100*2**l) for l in self.levels]
+    choices = ["%g%%" % (100 * 2**l) for l in self.levels]
     self.zoom_ctrl = wx.Choice(self, -1, choices=choices)
     self.zoom_ctrl.SetSelection(self.settings.zoom_level)
-    grid.Add(self.zoom_ctrl, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    grid.Add(self.zoom_ctrl, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
     txt11 = wx.StaticText(self, -1, "Color scheme:")
-    grid.Add(txt11, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
-    color_schemes = ["grayscale","rainbow","heatmap","invert"]
-    self.color_ctrl = wx.Choice(self, -1,
-      choices=color_schemes)
+    grid.Add(txt11, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+    color_schemes = ["grayscale", "rainbow", "heatmap", "invert"]
+    self.color_ctrl = wx.Choice(self, -1, choices=color_schemes)
     self.color_ctrl.SetSelection(color_schemes.index(self.params.color_scheme))
-    grid.Add(self.color_ctrl, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    grid.Add(self.color_ctrl, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
     self._sizer.Fit(self)
 
     box = wx.BoxSizer(wx.HORIZONTAL)
@@ -1388,21 +1369,18 @@ class SpotSettingsPanel (wx.Panel) :
     grid = wx.FlexGridSizer(cols=1, rows=2)
     box.Add(grid)
     txt2 = wx.StaticText(self, -1, "Brightness:")
-    grid.Add(txt2, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    grid.Add(txt2, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
     # Add a textual brightness control
-    self.brightness_txt_ctrl = IntCtrl(self,
-      value=self.settings.brightness, min=1, max=500,
-      name="brightness",
-      style=wx.TE_PROCESS_ENTER)
+    self.brightness_txt_ctrl = IntCtrl(
+        self, value=self.settings.brightness, min=1, max=500, name="brightness", style=wx.TE_PROCESS_ENTER)
     grid.Add(self.brightness_txt_ctrl, 0, wx.ALL, 5)
     # Add a slider brightness control
-    self.brightness_ctrl = wx.Slider(self, -1, size=(150,-1),
-      style=wx.SL_AUTOTICKS|wx.SL_LABELS)
+    self.brightness_ctrl = wx.Slider(self, -1, size=(150, -1), style=wx.SL_AUTOTICKS | wx.SL_LABELS)
     self.brightness_ctrl.SetMin(1)
     self.brightness_ctrl.SetMax(500)
     self.brightness_ctrl.SetValue(self.settings.brightness)
     self.brightness_ctrl.SetTickFreq(25)
-    box.Add(self.brightness_ctrl, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    box.Add(self.brightness_ctrl, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
 
     grid = wx.FlexGridSizer(cols=2, rows=8)
     s.Add(grid)
@@ -1410,71 +1388,71 @@ class SpotSettingsPanel (wx.Panel) :
     # Resolution rings control
     self.resolution_rings_ctrl = wx.CheckBox(self, -1, "Show resolution rings")
     self.resolution_rings_ctrl.SetValue(self.settings.show_resolution_rings)
-    grid.Add(self.resolution_rings_ctrl, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    grid.Add(self.resolution_rings_ctrl, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
 
     # Ice rings control
     self.ice_rings_ctrl = wx.CheckBox(self, -1, "Show ice rings")
     self.ice_rings_ctrl.SetValue(self.settings.show_ice_rings)
-    grid.Add(self.ice_rings_ctrl, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    grid.Add(self.ice_rings_ctrl, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
 
     # Center control
     self.center_ctrl = wx.CheckBox(self, -1, "Mark beam center")
     self.center_ctrl.SetValue(self.settings.show_beam_center)
-    grid.Add(self.center_ctrl, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    grid.Add(self.center_ctrl, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
 
     # Center of mass control
     self.ctr_mass = wx.CheckBox(self, -1, "Mark centers of mass")
     self.ctr_mass.SetValue(self.settings.show_ctr_mass)
-    grid.Add(self.ctr_mass, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    grid.Add(self.ctr_mass, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
 
     # Max pixel control
     self.max_pix = wx.CheckBox(self, -1, "Spot max pixels")
     self.max_pix.SetValue(self.settings.show_max_pix)
-    grid.Add(self.max_pix, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    grid.Add(self.max_pix, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
 
     # Spot pixels control
     self.all_pix = wx.CheckBox(self, -1, "Spot all pixels")
     self.all_pix.SetValue(self.settings.show_all_pix)
-    grid.Add(self.all_pix, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    grid.Add(self.all_pix, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
 
     # Spot shoebox control
     self.shoebox = wx.CheckBox(self, -1, "Draw reflection shoebox")
     self.shoebox.SetValue(self.settings.show_shoebox)
-    grid.Add(self.shoebox, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    grid.Add(self.shoebox, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
 
     # Spot predictions control
     self.predictions = wx.CheckBox(self, -1, "Show predictions")
     self.predictions.SetValue(self.settings.show_predictions)
-    grid.Add(self.predictions, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    grid.Add(self.predictions, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
 
     # Spot predictions control
     self.miller_indices = wx.CheckBox(self, -1, "Show hkl")
     self.miller_indices.SetValue(self.settings.show_miller_indices)
-    grid.Add(self.miller_indices, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    grid.Add(self.miller_indices, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
 
     # Spot predictions control
     self.show_mask = wx.CheckBox(self, -1, "Show mask")
     self.show_mask.SetValue(self.settings.show_mask)
-    grid.Add(self.show_mask, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    grid.Add(self.show_mask, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
 
     # Toggle basis vector display
     self.show_basis_vectors = wx.CheckBox(self, -1, "Basis vectors")
     self.show_basis_vectors.SetValue(self.settings.show_basis_vectors)
-    grid.Add(self.show_basis_vectors, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    grid.Add(self.show_basis_vectors, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
 
     # Integration shoeboxes only
     self.indexed = wx.CheckBox(self, -1, "Indexed only")
     self.indexed.SetValue(self.settings.show_indexed)
-    grid.Add(self.indexed, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    grid.Add(self.indexed, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
 
     # Integration shoeboxes only
     self.integrated = wx.CheckBox(self, -1, "Integrated only")
     self.integrated.SetValue(self.settings.show_integrated)
-    grid.Add(self.integrated, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    grid.Add(self.integrated, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
 
     grid = wx.FlexGridSizer(cols=2, rows=1)
     self.clear_all_button = wx.Button(self, -1, "Clear all")
-    grid.Add(self.clear_all_button, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    grid.Add(self.clear_all_button, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
     self.Bind(wx.EVT_BUTTON, self.OnClearAll, self.clear_all_button)
 
     s.Add(grid)
@@ -1482,8 +1460,8 @@ class SpotSettingsPanel (wx.Panel) :
     # Minimum spot area control
     box = wx.BoxSizer(wx.HORIZONTAL)
     #self.minspotarea_ctrl = PhilIntCtrl(self, -1, pos=(300,180), size=(80,-1),
-      #value=self.GetParent().GetParent().horizons_phil.distl.minimum_spot_area,
-      #name="Minimum spot area (pxls)")
+    #value=self.GetParent().GetParent().horizons_phil.distl.minimum_spot_area,
+    #name="Minimum spot area (pxls)")
     #self.minspotarea_ctrl.SetOptional(False)
     #box.Add(self.minspotarea_ctrl, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
     #txtd = wx.StaticText(self, -1,  "Minimum spot area (pxls)",)
@@ -1496,46 +1474,39 @@ class SpotSettingsPanel (wx.Panel) :
 
     from wxtbx.phil_controls.floatctrl import FloatCtrl
     txt1 = wx.StaticText(self, -1, "Sigma background")
-    grid1.Add(txt1, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
-    self.nsigma_b_ctrl = FloatCtrl(
-      self, value=self.settings.nsigma_b, name="sigma_background")
+    grid1.Add(txt1, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+    self.nsigma_b_ctrl = FloatCtrl(self, value=self.settings.nsigma_b, name="sigma_background")
     self.nsigma_b_ctrl.SetMin(0)
     grid1.Add(self.nsigma_b_ctrl, 0, wx.ALL, 5)
 
     txt2 = wx.StaticText(self, -1, "Sigma strong")
-    grid1.Add(txt2, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
-    self.nsigma_s_ctrl = FloatCtrl(
-      self, value=self.settings.nsigma_s, name="sigma_strong")
+    grid1.Add(txt2, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+    self.nsigma_s_ctrl = FloatCtrl(self, value=self.settings.nsigma_s, name="sigma_strong")
     self.nsigma_s_ctrl.SetMin(0)
     grid1.Add(self.nsigma_s_ctrl, 0, wx.ALL, 5)
 
     txt1 = wx.StaticText(self, -1, "Global Threshold")
-    grid1.Add(txt1, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
-    self.global_threshold_ctrl = FloatCtrl(
-      self, value=self.settings.global_threshold, name="global_threshold")
+    grid1.Add(txt1, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+    self.global_threshold_ctrl = FloatCtrl(self, value=self.settings.global_threshold, name="global_threshold")
     self.global_threshold_ctrl.SetMin(0)
     grid1.Add(self.global_threshold_ctrl, 0, wx.ALL, 5)
 
     txt4 = wx.StaticText(self, -1, "Min. local")
-    grid1.Add(txt4, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
-    self.min_local_ctrl = PhilIntCtrl(
-      self, value=self.settings.min_local, name="min_local")
+    grid1.Add(txt4, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+    self.min_local_ctrl = PhilIntCtrl(self, value=self.settings.min_local, name="min_local")
     self.min_local_ctrl.SetMin(0)
     grid1.Add(self.min_local_ctrl, 0, wx.ALL, 5)
 
     txt4 = wx.StaticText(self, -1, "Gain")
-    grid1.Add(txt4, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
-    self.gain_ctrl = FloatCtrl(
-      self, value=self.settings.gain, name="gain")
+    grid1.Add(txt4, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+    self.gain_ctrl = FloatCtrl(self, value=self.settings.gain, name="gain")
     self.gain_ctrl.SetMin(0)
     grid1.Add(self.gain_ctrl, 0, wx.ALL, 5)
 
     from wxtbx.phil_controls.ints import IntsCtrl
     txt3 = wx.StaticText(self, -1, "Kernel size")
-    grid1.Add(txt3, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
-    self.kernel_size_ctrl = IntsCtrl(
-      self, value=self.settings.kernel_size,
-      name="kernel_size")
+    grid1.Add(txt3, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+    self.kernel_size_ctrl = IntsCtrl(self, value=self.settings.kernel_size, name="kernel_size")
     self.kernel_size_ctrl.SetSize(2)
     self.kernel_size_ctrl.SetMin(1)
     grid1.Add(self.kernel_size_ctrl, 0, wx.ALL, 5)
@@ -1549,26 +1520,23 @@ class SpotSettingsPanel (wx.Panel) :
 
     from wxtbx.phil_controls.strctrl import StrCtrl
 
-    self.save_params_txt_ctrl = StrCtrl(
-      self, value=self.settings.find_spots_phil,
-      name="find_spots_phil")
+    self.save_params_txt_ctrl = StrCtrl(self, value=self.settings.find_spots_phil, name="find_spots_phil")
     grid1.Add(self.save_params_txt_ctrl, 0, wx.ALL, 5)
     self.Bind(EVT_PHIL_CONTROL, self.OnUpdate, self.save_params_txt_ctrl)
 
     self.save_params_button = wx.Button(self, -1, "Save")
-    grid1.Add(self.save_params_button, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+    grid1.Add(self.save_params_button, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
     self.Bind(wx.EVT_BUTTON, self.OnSaveFindSpotsParams, self.save_params_button)
 
     grid2 = wx.FlexGridSizer(cols=4, rows=2)
     s.Add(grid2)
 
     self.kabsch_buttons = []
-    self.kabsch_labels = ['image', 'mean', 'variance', 'dispersion',
-                          'sigma_b', 'sigma_s', 'global', 'threshold']
+    self.kabsch_labels = ['image', 'mean', 'variance', 'dispersion', 'sigma_b', 'sigma_s', 'global', 'threshold']
     for label in self.kabsch_labels:
       btn = wx.ToggleButton(self, -1, label)
       self.kabsch_buttons.append(btn)
-      grid2.Add(btn, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+      grid2.Add(btn, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
       self.Bind(wx.EVT_TOGGLEBUTTON, self.OnDispersionThresholdDebug, btn)
 
     for button in self.kabsch_buttons:
@@ -1582,7 +1550,7 @@ class SpotSettingsPanel (wx.Panel) :
 
     # Brightness-related events
     self.Bind(wx.EVT_SCROLL_CHANGED, self.OnUpdateBrightness, self.brightness_ctrl)
-    self.Bind(wx.EVT_SLIDER,         self.OnUpdateBrightness, self.brightness_ctrl)
+    self.Bind(wx.EVT_SLIDER, self.OnUpdateBrightness, self.brightness_ctrl)
     self.Bind(wx.EVT_TEXT_ENTER, self.OnUpdateBrightness, self.brightness_txt_ctrl)
     self.brightness_txt_ctrl.Bind(wx.EVT_KILL_FOCUS, self.OnUpdateBrightness)
 
@@ -1607,12 +1575,9 @@ class SpotSettingsPanel (wx.Panel) :
     have_thumbnail = False
     if have_thumbnail:
       txt3 = wx.StaticText(self, -1, "Thumbnail view:")
-      s.Add(txt3, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
-      self.thumb_panel = rstbx.viewer.display.ThumbnailView(
-        parent=self,
-        size=(256,256),
-        style=wx.SUNKEN_BORDER)
-      s.Add(self.thumb_panel, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+      s.Add(txt3, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+      self.thumb_panel = rstbx.viewer.display.ThumbnailView(parent=self, size=(256, 256), style=wx.SUNKEN_BORDER)
+      s.Add(self.thumb_panel, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
 
   def OnDestroy(self, event):
     "Handle any cleanup when the windows is being destroyed. Manually Called."
@@ -1620,7 +1585,7 @@ class SpotSettingsPanel (wx.Panel) :
     self.brightness_txt_ctrl.Unbind(wx.EVT_KILL_FOCUS)
 
   # CONTROLS 2:  Fetch values from widgets
-  def collect_values (self) :
+  def collect_values(self):
     if self.settings.enable_collect_values:
       self.settings.show_resolution_rings = self.resolution_rings_ctrl.GetValue()
       self.settings.show_ice_rings = self.ice_rings_ctrl.GetValue()
@@ -1656,8 +1621,7 @@ class SpotSettingsPanel (wx.Panel) :
       self.settings.find_spots_phil = self.save_params_txt_ctrl.GetPhilValue()
 
   def UpdateZoomCtrl(self, event):
-    self.settings.zoom_level = self.levels.index(
-      self.GetParent().GetParent().pyslip.level)
+    self.settings.zoom_level = self.levels.index(self.GetParent().GetParent().pyslip.level)
     self.zoom_ctrl.SetSelection(self.settings.zoom_level)
 
   def OnUpdate(self, event):
@@ -1689,10 +1653,9 @@ class SpotSettingsPanel (wx.Panel) :
     self.GetParent().GetParent().OnChooseImage(event)
 
   def OnClearAll(self, event):
-    for btn in (self.center_ctrl, self.ctr_mass, self.max_pix, self.all_pix,
-                self.shoebox, self.predictions, self.miller_indices,
-                self.show_mask, self.show_basis_vectors,
-                self.ice_rings_ctrl, self.resolution_rings_ctrl):
+    for btn in (self.center_ctrl, self.ctr_mass, self.max_pix, self.all_pix, self.shoebox, self.predictions,
+                self.miller_indices, self.show_mask, self.show_basis_vectors, self.ice_rings_ctrl,
+                self.resolution_rings_ctrl):
       btn.SetValue(False)
     self.OnUpdate(event)
 
@@ -1701,10 +1664,10 @@ class SpotSettingsPanel (wx.Panel) :
     pyslip = self.GetParent().GetParent().pyslip
 
     # get center of view in map coords
-    x, y = pyslip.view_width/2, pyslip.view_height/2
+    x, y = pyslip.view_width / 2, pyslip.view_height / 2
     center = pyslip.ConvertView2Geo((x, y))
     pyslip.ZoomToLevel(self.settings.zoom_level)
-    pyslip.ZoomIn((x,y), update=False)
+    pyslip.ZoomIn((x, y), update=False)
     pyslip.GotoPosition(center)
 
   def OnSaveFindSpotsParams(self, event):

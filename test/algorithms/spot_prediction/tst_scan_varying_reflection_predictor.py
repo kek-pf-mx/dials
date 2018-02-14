@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division
 
 class Test(object):
-
   def __init__(self):
     import libtbx.load_env
     try:
@@ -11,16 +10,12 @@ class Test(object):
       exit(0)
 
     import os
-    path = os.path.join(
-      dials_regression,
-      'prediction_test_data',
-      'experiments_scan_varying_crystal.json')
+    path = os.path.join(dials_regression, 'prediction_test_data', 'experiments_scan_varying_crystal.json')
 
     from dxtbx.model.experiment_list import ExperimentListFactory
     self.experiments = ExperimentListFactory.from_json_file(path)
-    assert(len(self.experiments) == 1)
-    assert(self.experiments[0].crystal.num_scan_points ==
-           self.experiments[0].scan.get_num_images() + 1)
+    assert (len(self.experiments) == 1)
+    assert (self.experiments[0].crystal.num_scan_points == self.experiments[0].scan.get_num_images() + 1)
 
   def run(self):
     self.tst_regression()
@@ -37,14 +32,13 @@ class Test(object):
     st = time()
     predict = ScanVaryingReflectionPredictor(self.experiments[0])
     #if hkl is None:
-    A = [self.experiments[0].crystal.get_A_at_scan_point(i) for i in
-           range(self.experiments[0].crystal.num_scan_points)]
+    A = [self.experiments[0].crystal.get_A_at_scan_point(i) for i in range(self.experiments[0].crystal.num_scan_points)]
     result = predict.for_ub(flex.mat3_double(A))
     #else:
-      #if panel is None:
-        #result = predict(hkl, frame)
-      #else:
-        #result = predict(hkl, frame, panel)
+    #if panel is None:
+    #result = predict(hkl, frame)
+    #else:
+    #result = predict(hkl, frame, panel)
 
     #print "New Time: ", time() - st
     return result
@@ -54,145 +48,144 @@ class Test(object):
     r_new = self._predict_new()
     assert len(r_new) == 1934
     assert r_new[0]['miller_index'] == (-8, -30, -23)
-    assert approx_equal(r_new[0]['xyzcal.px'],
-      (75.33831543451907, 2327.55737978813, 0.2548567552525226))
+    assert approx_equal(r_new[0]['xyzcal.px'], (75.33831543451907, 2327.55737978813, 0.2548567552525226))
     print "OK"
     return
 
   #def tst_with_hkl(self):
-    #from dials.algorithms.spot_prediction import ReekeIndexGenerator
-    #from dials.array_family import flex
-    #from scitbx import matrix
-    #import scitbx
+  #from dials.algorithms.spot_prediction import ReekeIndexGenerator
+  #from dials.array_family import flex
+  #from scitbx import matrix
+  #import scitbx
 
-    #m2 = self.experiments[0].goniometer.get_rotation_axis()
-    #s0 = self.experiments[0].beam.get_s0()
-    #dmin = self.experiments[0].detector.get_max_resolution(s0)
-    #margin = 1
-    #scan = self.experiments[0].scan
-    #crystal = self.experiments[0].crystal
-    #frame_0 = scan.get_array_range()[0]
-    #step = 1
+  #m2 = self.experiments[0].goniometer.get_rotation_axis()
+  #s0 = self.experiments[0].beam.get_s0()
+  #dmin = self.experiments[0].detector.get_max_resolution(s0)
+  #margin = 1
+  #scan = self.experiments[0].scan
+  #crystal = self.experiments[0].crystal
+  #frame_0 = scan.get_array_range()[0]
+  #step = 1
 
-    #all_indices = flex.miller_index()
-    #all_frames = flex.int()
-    #for frame in range(*scan.get_array_range()):
+  #all_indices = flex.miller_index()
+  #all_frames = flex.int()
+  #for frame in range(*scan.get_array_range()):
 
-      #phi_beg = scan.get_angle_from_array_index(frame, deg = False)
-      #phi_end = scan.get_angle_from_array_index(frame + step, deg = False)
-      #r_beg = matrix.sqr(scitbx.math.r3_rotation_axis_and_angle_as_matrix(
-          #axis = m2, angle = phi_beg, deg = False))
-      #r_end = matrix.sqr(scitbx.math.r3_rotation_axis_and_angle_as_matrix(
-          #axis = m2, angle = phi_end, deg = False))
+  #phi_beg = scan.get_angle_from_array_index(frame, deg = False)
+  #phi_end = scan.get_angle_from_array_index(frame + step, deg = False)
+  #r_beg = matrix.sqr(scitbx.math.r3_rotation_axis_and_angle_as_matrix(
+  #axis = m2, angle = phi_beg, deg = False))
+  #r_end = matrix.sqr(scitbx.math.r3_rotation_axis_and_angle_as_matrix(
+  #axis = m2, angle = phi_end, deg = False))
 
-      #A1 = r_beg * crystal.get_A_at_scan_point(frame - frame_0)
+  #A1 = r_beg * crystal.get_A_at_scan_point(frame - frame_0)
 
-      #A2 = r_end * crystal.get_A_at_scan_point(frame - frame_0 + step)
+  #A2 = r_end * crystal.get_A_at_scan_point(frame - frame_0 + step)
 
-      #indices = ReekeIndexGenerator(A1, A2, m2, s0, dmin, margin)
-      #indices = indices.to_array()
-      #all_indices.extend(indices)
-      #all_frames.extend(flex.int(len(indices), frame))
+  #indices = ReekeIndexGenerator(A1, A2, m2, s0, dmin, margin)
+  #indices = indices.to_array()
+  #all_indices.extend(indices)
+  #all_frames.extend(flex.int(len(indices), frame))
 
-    #r_old = self._predict_new()
-    #r_new = self._predict_new(all_indices, all_frames)
-    #assert(len(r_old) == len(r_new))
-    #print 'OK'
+  #r_old = self._predict_new()
+  #r_new = self._predict_new(all_indices, all_frames)
+  #assert(len(r_old) == len(r_new))
+  #print 'OK'
 
   #def tst_with_hkl_and_panel(self):
-    #from dials.algorithms.spot_prediction import ReekeIndexGenerator
-    #from dials.array_family import flex
-    #from scitbx import matrix
-    #import scitbx
+  #from dials.algorithms.spot_prediction import ReekeIndexGenerator
+  #from dials.array_family import flex
+  #from scitbx import matrix
+  #import scitbx
 
-    #m2 = self.experiments[0].goniometer.get_rotation_axis()
-    #s0 = self.experiments[0].beam.get_s0()
-    #dmin = self.experiments[0].detector.get_max_resolution(s0)
-    #margin = 1
-    #scan = self.experiments[0].scan
-    #crystal = self.experiments[0].crystal
-    #frame_0 = scan.get_array_range()[0]
-    #step = 1
+  #m2 = self.experiments[0].goniometer.get_rotation_axis()
+  #s0 = self.experiments[0].beam.get_s0()
+  #dmin = self.experiments[0].detector.get_max_resolution(s0)
+  #margin = 1
+  #scan = self.experiments[0].scan
+  #crystal = self.experiments[0].crystal
+  #frame_0 = scan.get_array_range()[0]
+  #step = 1
 
-    #all_indices = flex.miller_index()
-    #all_frames = flex.int()
-    #for frame in range(*scan.get_array_range()):
+  #all_indices = flex.miller_index()
+  #all_frames = flex.int()
+  #for frame in range(*scan.get_array_range()):
 
-      #phi_beg = scan.get_angle_from_array_index(frame, deg = False)
-      #phi_end = scan.get_angle_from_array_index(frame + step, deg = False)
-      #r_beg = matrix.sqr(scitbx.math.r3_rotation_axis_and_angle_as_matrix(
-          #axis = m2, angle = phi_beg, deg = False))
-      #r_end = matrix.sqr(scitbx.math.r3_rotation_axis_and_angle_as_matrix(
-          #axis = m2, angle = phi_end, deg = False))
+  #phi_beg = scan.get_angle_from_array_index(frame, deg = False)
+  #phi_end = scan.get_angle_from_array_index(frame + step, deg = False)
+  #r_beg = matrix.sqr(scitbx.math.r3_rotation_axis_and_angle_as_matrix(
+  #axis = m2, angle = phi_beg, deg = False))
+  #r_end = matrix.sqr(scitbx.math.r3_rotation_axis_and_angle_as_matrix(
+  #axis = m2, angle = phi_end, deg = False))
 
-      #A1 = r_beg * crystal.get_A_at_scan_point(frame - frame_0)
+  #A1 = r_beg * crystal.get_A_at_scan_point(frame - frame_0)
 
-      #A2 = r_end * crystal.get_A_at_scan_point(frame - frame_0 + step)
+  #A2 = r_end * crystal.get_A_at_scan_point(frame - frame_0 + step)
 
-      #indices = ReekeIndexGenerator(A1, A2, m2, s0, dmin, margin)
-      #indices = indices.to_array()
-      #all_indices.extend(indices)
-      #all_frames.extend(flex.int(len(indices), frame))
+  #indices = ReekeIndexGenerator(A1, A2, m2, s0, dmin, margin)
+  #indices = indices.to_array()
+  #all_indices.extend(indices)
+  #all_frames.extend(flex.int(len(indices), frame))
 
-    #r_old = self._predict_new()
-    #try:
-      #r_new = self._predict_new(all_indices, all_frames, 1)
-      #assert(False)
-    #except Exception:
-      #pass
+  #r_old = self._predict_new()
+  #try:
+  #r_new = self._predict_new(all_indices, all_frames, 1)
+  #assert(False)
+  #except Exception:
+  #pass
 
-    #r_new = self._predict_new(all_indices, all_frames, 0)
-    #assert(len(r_old) < len(r_new))
-    #print 'OK'
+  #r_new = self._predict_new(all_indices, all_frames, 0)
+  #assert(len(r_old) < len(r_new))
+  #print 'OK'
 
   #def tst_with_hkl_and_panel_list(self):
 
-    #from dials.algorithms.spot_prediction import ReekeIndexGenerator
-    #from dials.array_family import flex
-    #from scitbx import matrix
-    #import scitbx
+  #from dials.algorithms.spot_prediction import ReekeIndexGenerator
+  #from dials.array_family import flex
+  #from scitbx import matrix
+  #import scitbx
 
-    #m2 = self.experiments[0].goniometer.get_rotation_axis()
-    #s0 = self.experiments[0].beam.get_s0()
-    #dmin = self.experiments[0].detector.get_max_resolution(s0)
-    #margin = 1
-    #scan = self.experiments[0].scan
-    #crystal = self.experiments[0].crystal
-    #frame_0 = scan.get_array_range()[0]
-    #step = 1
+  #m2 = self.experiments[0].goniometer.get_rotation_axis()
+  #s0 = self.experiments[0].beam.get_s0()
+  #dmin = self.experiments[0].detector.get_max_resolution(s0)
+  #margin = 1
+  #scan = self.experiments[0].scan
+  #crystal = self.experiments[0].crystal
+  #frame_0 = scan.get_array_range()[0]
+  #step = 1
 
-    #all_indices = flex.miller_index()
-    #all_frames = flex.int()
-    #for frame in range(*scan.get_array_range()):
+  #all_indices = flex.miller_index()
+  #all_frames = flex.int()
+  #for frame in range(*scan.get_array_range()):
 
-      #phi_beg = scan.get_angle_from_array_index(frame, deg = False)
-      #phi_end = scan.get_angle_from_array_index(frame + step, deg = False)
-      #r_beg = matrix.sqr(scitbx.math.r3_rotation_axis_and_angle_as_matrix(
-          #axis = m2, angle = phi_beg, deg = False))
-      #r_end = matrix.sqr(scitbx.math.r3_rotation_axis_and_angle_as_matrix(
-          #axis = m2, angle = phi_end, deg = False))
+  #phi_beg = scan.get_angle_from_array_index(frame, deg = False)
+  #phi_end = scan.get_angle_from_array_index(frame + step, deg = False)
+  #r_beg = matrix.sqr(scitbx.math.r3_rotation_axis_and_angle_as_matrix(
+  #axis = m2, angle = phi_beg, deg = False))
+  #r_end = matrix.sqr(scitbx.math.r3_rotation_axis_and_angle_as_matrix(
+  #axis = m2, angle = phi_end, deg = False))
 
-      #A1 = r_beg * crystal.get_A_at_scan_point(frame - frame_0)
+  #A1 = r_beg * crystal.get_A_at_scan_point(frame - frame_0)
 
-      #A2 = r_end * crystal.get_A_at_scan_point(frame - frame_0 + step)
+  #A2 = r_end * crystal.get_A_at_scan_point(frame - frame_0 + step)
 
-      #indices = ReekeIndexGenerator(A1, A2, m2, s0, dmin, margin)
-      #indices = indices.to_array()
-      #all_indices.extend(indices)
-      #all_frames.extend(flex.int(len(indices), frame))
+  #indices = ReekeIndexGenerator(A1, A2, m2, s0, dmin, margin)
+  #indices = indices.to_array()
+  #all_indices.extend(indices)
+  #all_frames.extend(flex.int(len(indices), frame))
 
-    #r_old = self._predict_new()
-    #try:
-      #r_new = self._predict_new(all_indices, all_frames,
-                               #flex.size_t(len(all_indices), 1))
-      #assert(False)
-    #except Exception:
-      #pass
+  #r_old = self._predict_new()
+  #try:
+  #r_new = self._predict_new(all_indices, all_frames,
+  #flex.size_t(len(all_indices), 1))
+  #assert(False)
+  #except Exception:
+  #pass
 
-    #r_new = self._predict_new(all_indices, all_frames,
-                             #flex.size_t(len(all_indices), 0))
-    #assert(len(r_old) < len(r_new))
-    #print 'OK'
+  #r_new = self._predict_new(all_indices, all_frames,
+  #flex.size_t(len(all_indices), 0))
+  #assert(len(r_old) < len(r_new))
+  #print 'OK'
 
   def tst_vs_static(self):
     """Test that various modes of scan-varying prediction produce results
@@ -233,8 +226,7 @@ class Test(object):
     # Prediction for UB matrix and s0 vectors expressed as arrays of static
     # model states
     s0 = [beam.get_s0() for i in range(n_scan_points)]
-    result2 = predict.for_varying_models(flex.mat3_double(A),
-        flex.vec3_double(s0))
+    result2 = predict.for_varying_models(flex.mat3_double(A), flex.vec3_double(s0))
     result2.sort('miller_index')
     compare(static_preds, result2)
     print "OK"
@@ -255,7 +247,6 @@ class Test(object):
     compare(static_preds_frame0, result4)
     print "OK"
 
-
   def tst_for_reflection_table(self):
     from libtbx.test_utils import approx_equal
     from dials.algorithms.spot_prediction import \
@@ -268,8 +259,7 @@ class Test(object):
     preds['ub_matrix'] = flex.mat3_double(len(preds), self.experiments[0].crystal.get_A())
     preds['s0'] = flex.vec3_double(len(preds), self.experiments[0].beam.get_s0())
     preds['d_matrix'] = flex.mat3_double(len(preds))
-    preds['S_matrix'] = flex.mat3_double(len(preds),
-        self.experiments[0].goniometer.get_setting_rotation())
+    preds['S_matrix'] = flex.mat3_double(len(preds), self.experiments[0].goniometer.get_setting_rotation())
     for ipanel, panel in enumerate(self.experiments[0].detector):
       sel = preds['panel'] == ipanel
       D = panel.get_d_matrix()
@@ -277,11 +267,7 @@ class Test(object):
     predict = ScanVaryingReflectionPredictor(self.experiments[0])
     from copy import deepcopy
     old_preds = deepcopy(preds)
-    predict.for_reflection_table(preds,
-                                 preds['ub_matrix'],
-                                 preds['s0'],
-                                 preds['d_matrix'],
-                                 preds['S_matrix'])
+    predict.for_reflection_table(preds, preds['ub_matrix'], preds['s0'], preds['d_matrix'], preds['S_matrix'])
 
     # Because UB, s0, d and S values are the same for all reflections, the new
     # reflections should be approx equal to those produced by the scan static

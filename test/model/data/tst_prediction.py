@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division
 
 class Test(object):
-
   def __init__(self):
     from dials.model.data import Prediction
     self.pred = Prediction()
@@ -19,18 +18,18 @@ class Test(object):
   def tst_data(self):
     eps = 1e-7
 
-    assert(self.pred.miller_index == (1, 2, 3))
-    assert(self.pred.panel == 7)
-    assert(self.pred.entering)
-    assert(abs(self.pred.beam_vector[0] - 4) <= eps)
-    assert(abs(self.pred.beam_vector[1] - 5) <= eps)
-    assert(abs(self.pred.beam_vector[2] - 6) <= eps)
-    assert(abs(self.pred.position.px[0] - 8) <= eps)
-    assert(abs(self.pred.position.px[1] - 9) <= eps)
-    assert(abs(self.pred.position.px[2] - 10) <= eps)
-    assert(abs(self.pred.position.mm[0] - 11) <= eps)
-    assert(abs(self.pred.position.mm[1] - 12) <= eps)
-    assert(abs(self.pred.position.mm[2] - 13) <= eps)
+    assert (self.pred.miller_index == (1, 2, 3))
+    assert (self.pred.panel == 7)
+    assert (self.pred.entering)
+    assert (abs(self.pred.beam_vector[0] - 4) <= eps)
+    assert (abs(self.pred.beam_vector[1] - 5) <= eps)
+    assert (abs(self.pred.beam_vector[2] - 6) <= eps)
+    assert (abs(self.pred.position.px[0] - 8) <= eps)
+    assert (abs(self.pred.position.px[1] - 9) <= eps)
+    assert (abs(self.pred.position.px[2] - 10) <= eps)
+    assert (abs(self.pred.position.mm[0] - 11) <= eps)
+    assert (abs(self.pred.position.mm[1] - 12) <= eps)
+    assert (abs(self.pred.position.mm[2] - 13) <= eps)
 
     print 'OK'
 
@@ -38,25 +37,25 @@ class Test(object):
     from dials.model.data import Prediction
 
     pred2 = Prediction(self.pred)
-    assert(pred2 == self.pred)
+    assert (pred2 == self.pred)
     pred2 = Prediction(self.pred)
     pred2.miller_index = (0, 0, 0)
-    assert(pred2 != self.pred)
+    assert (pred2 != self.pred)
     pred2 = Prediction(self.pred)
     pred2.beam_vector = (0, 0, 0)
-    assert(pred2 != self.pred)
+    assert (pred2 != self.pred)
     pred2 = Prediction(self.pred)
     pred2.panel = 0
-    assert(pred2 != self.pred)
+    assert (pred2 != self.pred)
     pred2 = Prediction(self.pred)
     pred2.entering = False
-    assert(pred2 != self.pred)
+    assert (pred2 != self.pred)
     pred2 = Prediction(self.pred)
     pred2.position.px = (0, 0, 0)
-    assert(pred2 != self.pred)
+    assert (pred2 != self.pred)
     pred2 = Prediction(self.pred)
     pred2.position.mm = (0, 0, 0)
-    assert(pred2 != self.pred)
+    assert (pred2 != self.pred)
     print 'OK'
 
 if __name__ == '__main__':

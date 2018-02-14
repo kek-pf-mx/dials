@@ -3,7 +3,6 @@ from __future__ import absolute_import, division
 from dials.framework.interface import Interface
 
 class Test(object):
-
   def __init__(self):
     pass
 
@@ -16,12 +15,12 @@ class Test(object):
 
     # Currently no interfaces
     interfaces = list(Interface.interfaces())
-    assert(len(interfaces) == 0)
+    assert (len(interfaces) == 0)
 
     # Interface class has no extensions
     try:
       Inteface.extensions()
-      assert(False)
+      assert (False)
     except Exception:
       pass
 
@@ -33,7 +32,7 @@ class Test(object):
 
     # Should have three interfaces
     interfaces = list(Interface.interfaces())
-    assert(len(interfaces) == 4)
+    assert (len(interfaces) == 4)
 
     # Ensure all the interfaces we expect are there
     from dials.interfaces import ProfileModelIface
@@ -41,10 +40,10 @@ class Test(object):
     from dials.interfaces import CentroidIface
     from dials.interfaces import BackgroundIface
 
-    assert(ProfileModelIface in interfaces)
-    assert(SpotFinderThresholdIface in interfaces)
-    assert(CentroidIface in interfaces)
-    assert(BackgroundIface in interfaces)
+    assert (ProfileModelIface in interfaces)
+    assert (SpotFinderThresholdIface in interfaces)
+    assert (CentroidIface in interfaces)
+    assert (BackgroundIface in interfaces)
 
     # Test passed
     print 'OK'
@@ -58,17 +57,17 @@ class Test(object):
 
     # Should have four interfaces
     interfaces = list(Interface.interfaces())
-    assert(len(interfaces) == 4)
+    assert (len(interfaces) == 4)
 
     # Check we have the expected number of extensions for each interface
     extensions = list(ProfileModelIface.extensions())
-    assert(len(extensions) > 0)
+    assert (len(extensions) > 0)
     extensions = list(SpotFinderThresholdIface.extensions())
-    assert(len(extensions) > 0)
+    assert (len(extensions) > 0)
     extensions = list(CentroidIface.extensions())
-    assert(len(extensions) > 0)
+    assert (len(extensions) > 0)
     extensions = list(BackgroundIface.extensions())
-    assert(len(extensions) > 0)
+    assert (len(extensions) > 0)
 
     # Check the interface contain the expected extensions
     from dials.extensions import GaussianRSProfileModelExt
@@ -78,18 +77,17 @@ class Test(object):
     from dials.extensions import SimpleBackgroundExt
 
     extensions = list(ProfileModelIface.extensions())
-    assert(GaussianRSProfileModelExt in extensions)
+    assert (GaussianRSProfileModelExt in extensions)
     extensions = list(SpotFinderThresholdIface.extensions())
-    assert(DispersionSpotFinderThresholdExt in extensions)
+    assert (DispersionSpotFinderThresholdExt in extensions)
     extensions = list(CentroidIface.extensions())
-    assert(SimpleCentroidExt in extensions)
+    assert (SimpleCentroidExt in extensions)
     extensions = list(BackgroundIface.extensions())
-    assert(NullBackgroundExt in extensions)
-    assert(SimpleBackgroundExt in extensions)
+    assert (NullBackgroundExt in extensions)
+    assert (SimpleBackgroundExt in extensions)
 
     # Test passed
     print 'OK'
-
 
 if __name__ == '__main__':
   from dials.test import cd_auto
@@ -105,5 +103,5 @@ if __name__ == '__main__':
     ====================================================
     '''
 
-    e.args = (str(e.args) + '\n' + message,)
+    e.args = (str(e.args) + '\n' + message, )
     raise

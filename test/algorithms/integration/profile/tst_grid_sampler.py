@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division
 
 class Test(object):
-
   def __init__(self):
     pass
 
@@ -30,17 +29,17 @@ class Test(object):
     step_size = sampler.step_size()
     size = len(sampler)
 
-    assert(width == image_size[0])
-    assert(height == image_size[1])
-    assert(scan_range[0] == scan_range[0])
-    assert(scan_range[1] == scan_range[1])
-    assert(nx == grid_size[0])
-    assert(ny == grid_size[1])
-    assert(nz == grid_size[2])
-    assert(step_size[0] == width / nx)
-    assert(step_size[1] == height / ny)
-    assert(step_size[2] == depth / nz)
-    assert(nx * ny * nz == size)
+    assert (width == image_size[0])
+    assert (height == image_size[1])
+    assert (scan_range[0] == scan_range[0])
+    assert (scan_range[1] == scan_range[1])
+    assert (nx == grid_size[0])
+    assert (ny == grid_size[1])
+    assert (nz == grid_size[2])
+    assert (step_size[0] == width / nx)
+    assert (step_size[1] == height / ny)
+    assert (step_size[2] == depth / nz)
+    assert (nx * ny * nz == size)
     print 'OK'
 
   def tst_indexing(self):
@@ -69,12 +68,11 @@ class Test(object):
 
     for x0, y0, z0, i in zip(xp, yp, zp, range(len(sampler))):
       x1, y1, z1 = sampler.coord(i)
-      assert(abs(x0 - x1) <= eps)
-      assert(abs(y0 - y1) <= eps)
-      assert(abs(z0 - z1) <= eps)
+      assert (abs(x0 - x1) <= eps)
+      assert (abs(y0 - y1) <= eps)
+      assert (abs(z0 - z1) <= eps)
 
     print 'OK'
-
 
   def tst_nearest(self):
     from random import uniform
@@ -95,7 +93,7 @@ class Test(object):
       z = uniform(*scan_range)
       i = int(floor(x / (width / nx)))
       j = int(floor(y / (height / ny)))
-      k = int(floor((z-scan_range[0]) / (depth / nz)))
+      k = int(floor((z - scan_range[0]) / (depth / nz)))
       if i >= nx:
         i = nx - 1
       if j >= ny:
@@ -104,7 +102,7 @@ class Test(object):
         k = nz - 1
       index0 = i + j * nx + k * nx * ny
       index1 = sampler.nearest(0, (x, y, z))
-      assert(index0 == index1)
+      assert (index0 == index1)
 
     print 'OK'
 
@@ -127,7 +125,7 @@ class Test(object):
       z = uniform(*scan_range)
       i = int(floor(x * nx / width))
       j = int(floor(y * ny / height))
-      k = int(floor((z-scan_range[0]) * nz / depth))
+      k = int(floor((z - scan_range[0]) * nz / depth))
       if i >= nx:
         i = nx - 1
       if j >= ny:
@@ -136,16 +134,16 @@ class Test(object):
         k = nz - 1
       index0 = i + j * nx + k * nx * ny
       index1 = sampler.nearest_n(0, (x, y, z))
-      assert(len(set(index1)) == len(index1))
-      assert(index0 == index1[-1])
+      assert (len(set(index1)) == len(index1))
+      assert (index0 == index1[-1])
       for ind in index1:
         ii = ind % nx
         jk = ind // nx
         jj = jk % ny
         kk = jk // ny
-        assert(abs(ii - i) <= 1)
-        assert(abs(jj - j) <= 1)
-        assert(abs(kk - k) <= 1)
+        assert (abs(ii - i) <= 1)
+        assert (abs(jj - j) <= 1)
+        assert (abs(kk - k) <= 1)
 
     print 'OK'
 
@@ -167,7 +165,7 @@ class Test(object):
     for i in range(len(sampler)):
       coord = sampler.coord(i)
       weight = sampler.weight(i, 0, coord)
-      assert(abs(weight - 1.0) < eps)
+      assert (abs(weight - 1.0) < eps)
 
     # Ensure we get the expected weight at the next grid point at half way
     # between grid points
@@ -183,42 +181,42 @@ class Test(object):
           l6 = (i + 0) + ((j + 0) + (k + 1) * ny) * nx
           l7 = (i + 0) + ((j + 0) + (k - 1) * ny) * nx
           coord1 = matrix.col(sampler.coord(l1))
-          if i < nx-1:
+          if i < nx - 1:
             coord = matrix.col(sampler.coord(l2))
             weight = sampler.weight(l1, 0, coord)
-            assert(abs(weight - expected) < eps)
-            weight = sampler.weight(l1, 0, (coord + coord1)/2.0)
-            assert(abs(weight - 0.5) < eps)
+            assert (abs(weight - expected) < eps)
+            weight = sampler.weight(l1, 0, (coord + coord1) / 2.0)
+            assert (abs(weight - 0.5) < eps)
           if i > 0:
             coord = matrix.col(sampler.coord(l3))
             weight = sampler.weight(l1, 0, coord)
-            assert(abs(weight - expected) < eps)
-            weight = sampler.weight(l1, 0, (coord1 + coord)/2.0)
-            assert(abs(weight - 0.5) < eps)
-          if j < ny-1:
+            assert (abs(weight - expected) < eps)
+            weight = sampler.weight(l1, 0, (coord1 + coord) / 2.0)
+            assert (abs(weight - 0.5) < eps)
+          if j < ny - 1:
             coord = matrix.col(sampler.coord(l4))
             weight = sampler.weight(l1, 0, coord)
-            assert(abs(weight - expected) < eps)
-            weight = sampler.weight(l1, 0, (coord + coord1)/2.0)
-            assert(abs(weight - 0.5) < eps)
+            assert (abs(weight - expected) < eps)
+            weight = sampler.weight(l1, 0, (coord + coord1) / 2.0)
+            assert (abs(weight - 0.5) < eps)
           if j > 0:
             coord = matrix.col(sampler.coord(l5))
             weight = sampler.weight(l1, 0, coord)
-            assert(abs(weight - expected) < eps)
-            weight = sampler.weight(l1, 0, (coord1 + coord)/2.0)
-            assert(abs(weight - 0.5) < eps)
-          if k < nz-1:
+            assert (abs(weight - expected) < eps)
+            weight = sampler.weight(l1, 0, (coord1 + coord) / 2.0)
+            assert (abs(weight - 0.5) < eps)
+          if k < nz - 1:
             coord = matrix.col(sampler.coord(l6))
             weight = sampler.weight(l1, 0, coord)
-            assert(abs(weight - expected) < eps)
-            weight = sampler.weight(l1, 0, (coord + coord1)/2.0)
-            assert(abs(weight - 0.5) < eps)
+            assert (abs(weight - expected) < eps)
+            weight = sampler.weight(l1, 0, (coord + coord1) / 2.0)
+            assert (abs(weight - 0.5) < eps)
           if k > 0:
             coord = matrix.col(sampler.coord(l7))
             weight = sampler.weight(l1, 0, coord)
-            assert(abs(weight - expected) < eps)
-            weight = sampler.weight(l1, 0, (coord1 + coord)/2.0)
-            assert(abs(weight - 0.5) < eps)
+            assert (abs(weight - expected) < eps)
+            weight = sampler.weight(l1, 0, (coord1 + coord) / 2.0)
+            assert (abs(weight - 0.5) < eps)
 
     print 'OK'
 
@@ -236,7 +234,7 @@ class Test(object):
     for i in range(len(sampler)):
       coord = sampler.coord(i)
       index = sampler.nearest(0, coord)
-      assert(index == i)
+      assert (index == i)
 
     print 'OK'
 
@@ -259,8 +257,8 @@ class Test(object):
     tf.seek(0)
     sampler2 = pickle.load(tf)
 
-    assert(sampler.image_size() == sampler2.image_size())
-    assert(sampler.grid_size() == sampler2.grid_size())
+    assert (sampler.image_size() == sampler2.image_size())
+    assert (sampler.grid_size() == sampler2.grid_size())
 
     print 'OK'
 

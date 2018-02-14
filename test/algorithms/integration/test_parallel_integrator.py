@@ -18,17 +18,12 @@ def data(dials_regression): # read experiments and reflections
   reflections_filename = join(directory, "shoeboxes_0_0.pickle")
   reference_filename = join(directory, "reference_profiles.pickle")
 
-  experiments = ExperimentListFactory.from_json_file(experiments_filename,
-                                                     check_format=False)
+  experiments = ExperimentListFactory.from_json_file(experiments_filename, check_format=False)
   reflections = flex.reflection_table.from_pickle(reflections_filename)
   reference = pickle.load(open(reference_filename))
 
   Data = namedtuple("Data", ["experiments", "reflections", "reference"])
-  return Data(
-    experiments=experiments,
-    reflections=reflections,
-    reference=reference)
-
+  return Data(experiments=experiments, reflections=reflections, reference=reference)
 
 @pytest.mark.skip('requires boost_threads which is not built atm')
 def test_gaussianrs_mask_calculator(data):
@@ -38,7 +33,6 @@ def test_gaussianrs_mask_calculator(data):
 
   for r in reflections:
     algorithm(r, False)
-
 
 @pytest.mark.skip('requires boost_threads which is not built atm')
 def test_simple_background_calculator(data):
@@ -55,7 +49,6 @@ def test_simple_background_calculator(data):
   assert len(reflections) == 15193
   assert count == 333
 
-
 @pytest.mark.skip('requires boost_threads which is not built atm')
 def test_glm_background_calculator():
   from dials.algorithms.background.glm.algorithm import GLMBackgroundCalculatorFactory
@@ -71,28 +64,23 @@ def test_glm_background_calculator():
   assert len(reflections) == 15193
   assert count == 333
 
-
 @pytest.mark.skip('requires boost_threads which is not built atm')
 def test_gmodel_background_calculator():
   pass
 
-
 class IntensityCalculatorFactory(object):
-
   @classmethod
-  def create(Class,
-             detector_space=False,
-             deconvolution=False):
+  def create(Class, detector_space=False, deconvolution=False):
     from dials.algorithms.profile_model.gaussian_rs.algorithm import GaussianRSIntensityCalculatorFactory
     from dials.algorithms.integration.parallel_integrator import GaussianRSReferenceProfileData
     from dials.algorithms.integration.parallel_integrator import GaussianRSMultiCrystalReferenceProfileData
-    from dials.algorithms.integration.parallel_integrator import  ReferenceProfileData
+    from dials.algorithms.integration.parallel_integrator import ReferenceProfileData
     from dials.algorithms.profile_model.modeller import CircleSampler
     from dials.array_family import flex
     from dials.algorithms.profile_model.gaussian_rs.transform import TransformSpec
     from dials.algorithms.profile_model.gaussian_rs import CoordinateSystem
 
-    reference  = data.reference[0]
+    reference = data.reference[0]
     experiments = data.experiments
 
     assert len(reference) % 9 == 0
@@ -101,21 +89,17 @@ class IntensityCalculatorFactory(object):
     data_spec = GaussianRSMultiCrystalReferenceProfileData()
     for e in experiments:
 
-      sampler = CircleSampler(
-        e.detector[0].get_image_size(),
-        e.scan.get_array_range(),
-        num_scan_points)
-
+      sampler = CircleSampler(e.detector[0].get_image_size(), e.scan.get_array_range(), num_scan_points)
 
       spec = TransformSpec(
-        e.beam,
-        e.detector,
-        e.goniometer,
-        e.scan,
-        e.profile.sigma_b(deg=False),
-        e.profile.sigma_m(deg=False),
-        e.profile.n_sigma() * 1.5,
-        5)
+          e.beam,
+          e.detector,
+          e.goniometer,
+          e.scan,
+          e.profile.sigma_b(deg=False),
+          e.profile.sigma_m(deg=False),
+          e.profile.n_sigma() * 1.5,
+          5)
 
       temp = reference
 
@@ -127,17 +111,11 @@ class IntensityCalculatorFactory(object):
 
       data_spec.append(spec)
 
-    return GaussianRSIntensityCalculatorFactory.create(
-      data_spec,
-      detector_space,
-      deconvolution)
-
+    return GaussianRSIntensityCalculatorFactory.create(data_spec, detector_space, deconvolution)
 
 @pytest.mark.skip('requires boost_threads which is not built atm')
 def test_gaussianrs_reciprocal_space_intensity_calculator(data):
-  algorithm = IntensityCalculatorFactory.create(
-    detector_space = False,
-    deconvolution = False)
+  algorithm = IntensityCalculatorFactory.create(detector_space=False, deconvolution=False)
 
   reflections = flex.reflection_table_to_list_of_reflections(data.reflections)
 
@@ -152,12 +130,9 @@ def test_gaussianrs_reciprocal_space_intensity_calculator(data):
   assert len(reflections) == 15193
   assert count == 5295
 
-
 @pytest.mark.skip('requires boost_threads which is not built atm')
 def test_gaussianrs_detector_space_intensity_calculator(data):
-  algorithm = IntensityCalculatorFactory.create(
-    detector_space = True,
-    deconvolution = False)
+  algorithm = IntensityCalculatorFactory.create(detector_space=True, deconvolution=False)
 
   reflections = flex.reflection_table_to_list_of_reflections(data.reflections)
 
@@ -175,18 +150,13 @@ def test_gaussianrs_detector_space_intensity_calculator(data):
     assert partiality_old < 1.0 and partiality_old >= 0
     assert partiality_new < 1.0 and partiality_new >= 0
 
-
   assert len(reflections) == 15193
   assert count == 4801
-
-
 
 @pytest.mark.skip('requires boost_threads which is not built atm')
 def test_gaussianrs_detector_space_with_deconvolution_intensity_calculator(data):
 
-  algorithm = IntensityCalculatorFactory.create(
-    detector_space = True,
-    deconvolution = True)
+  algorithm = IntensityCalculatorFactory.create(detector_space=True, deconvolution=True)
 
   reflections = flex.reflection_table_to_list_of_reflections(data.reflections)
 
@@ -225,10 +195,10 @@ def test_gaussianrs_detector_space_with_deconvolution_intensity_calculator2(data
   mm = R.get("xyzcal.mm")
   sbox = R.get("shoebox")
 
-  px1 = (px[0]-3, px[1]-3, px[2])
-  px2 = (px[0]+3, px[1]+3, px[2])
-  mm1 = (mm[0]-3*0.172, mm[1]-3*0.172, mm[2])
-  mm2 = (mm[0]+3*0.172, mm[1]+3*0.172, mm[2])
+  px1 = (px[0] - 3, px[1] - 3, px[2])
+  px2 = (px[0] + 3, px[1] + 3, px[2])
+  mm1 = (mm[0] - 3 * 0.172, mm[1] - 3 * 0.172, mm[2])
+  mm2 = (mm[0] + 3 * 0.172, mm[1] + 3 * 0.172, mm[2])
 
   s11 = matrix.col(data.experiments[0].detector[0].get_pixel_lab_coord(px1[0:2])).normalize()
   s12 = matrix.col(data.experiments[0].detector[0].get_pixel_lab_coord(px2[0:2])).normalize()
@@ -244,9 +214,7 @@ def test_gaussianrs_detector_space_with_deconvolution_intensity_calculator2(data
   R2.set_vec3_double("xyzcal.mm", mm2)
   R2.set_vec3_double("s1", s12)
 
-  compute_intensity= IntensityCalculatorFactory.create(
-    detector_space = True,
-    deconvolution = False)
+  compute_intensity = IntensityCalculatorFactory.create(detector_space=True, deconvolution=False)
 
   compute_intensity(R, [])
   R.set_double("intensity.prf.value.old", R.get("intensity.prf.value"))
@@ -258,7 +226,6 @@ def test_gaussianrs_detector_space_with_deconvolution_intensity_calculator2(data
   #print "Intensity", R.get("intensity.prf.value")
   #print "Intensity Old", R.get("intensity.prf.value.old")
 
-
   from dials.algorithms.integration.parallel_integrator import MaskCalculatorFactory
 
   mask_calculator = MaskCalculatorFactory.create(data.experiments)
@@ -268,9 +235,7 @@ def test_gaussianrs_detector_space_with_deconvolution_intensity_calculator2(data
 
   #print R.get("shoebox").mask.as_numpy_array()[0,:,:]
 
-  compute_intensity= IntensityCalculatorFactory.create(
-    detector_space = True,
-    deconvolution = True)
+  compute_intensity = IntensityCalculatorFactory.create(detector_space=True, deconvolution=True)
 
   compute_intensity(R, [R1, R2])
   #compute_intensity(R, [R1, R2])
@@ -298,32 +263,27 @@ def test_gaussianrs_detector_space_with_deconvolution_intensity_calculator2(data
   #sbox = R.get("shoebox")
   #print sbox.mask.count(5) + sbox.mask.count(37) + sbox.mask.count(51)
 
-
 @pytest.mark.skip('requires boost_threads which is not built atm')
 def test_gaussianrs_profile_data_pickling(data):
-    from dials.algorithms.integration.parallel_integrator import GaussianRSReferenceProfileData
-    from dials.algorithms.integration.parallel_integrator import GaussianRSMultiCrystalReferenceProfileData
-    from dials.algorithms.integration.parallel_integrator import  ReferenceProfileData
-    from dials.algorithms.profile_model.modeller import CircleSampler
-    from dials.algorithms.profile_model.gaussian_rs.transform import TransformSpec
-    from dials.algorithms.profile_model.gaussian_rs import CoordinateSystem
+  from dials.algorithms.integration.parallel_integrator import GaussianRSReferenceProfileData
+  from dials.algorithms.integration.parallel_integrator import GaussianRSMultiCrystalReferenceProfileData
+  from dials.algorithms.integration.parallel_integrator import ReferenceProfileData
+  from dials.algorithms.profile_model.modeller import CircleSampler
+  from dials.algorithms.profile_model.gaussian_rs.transform import TransformSpec
+  from dials.algorithms.profile_model.gaussian_rs import CoordinateSystem
 
-    reference  = data.reference[0]
-    experiments = data.experiments
+  reference = data.reference[0]
+  experiments = data.experiments
 
-    assert len(reference) % 9 == 0
-    num_scan_points = len(reference) // 9
+  assert len(reference) % 9 == 0
+  num_scan_points = len(reference) // 9
 
-    data_spec = GaussianRSMultiCrystalReferenceProfileData()
-    for e in experiments:
+  data_spec = GaussianRSMultiCrystalReferenceProfileData()
+  for e in experiments:
 
-      sampler = CircleSampler(
-        e.detector[0].get_image_size(),
-        e.scan.get_array_range(),
-        num_scan_points)
+    sampler = CircleSampler(e.detector[0].get_image_size(), e.scan.get_array_range(), num_scan_points)
 
-
-      spec = TransformSpec(
+    spec = TransformSpec(
         e.beam,
         e.detector,
         e.goniometer,
@@ -333,20 +293,19 @@ def test_gaussianrs_profile_data_pickling(data):
         e.profile.n_sigma() * 1.5,
         5)
 
-      temp = reference
+    temp = reference
 
-      reference = ReferenceProfileData()
-      for d, m in temp:
-        reference.append(d, m)
+    reference = ReferenceProfileData()
+    for d, m in temp:
+      reference.append(d, m)
 
-      spec = GaussianRSReferenceProfileData(reference, sampler, spec)
+    spec = GaussianRSReferenceProfileData(reference, sampler, spec)
 
-      data_spec.append(spec)
+    data_spec.append(spec)
 
-    s = pickle.dumps(data_spec)
+  s = pickle.dumps(data_spec)
 
-    data_spec2 = pickle.loads(s)
-
+  data_spec2 = pickle.loads(s)
 
 @pytest.mark.skip('requires boost_threads which is not built atm')
 def test_gaussianrs_reference_profile_calculator(data):
@@ -372,11 +331,9 @@ def test_gaussianrs_reference_profile_calculator(data):
       d = p.data(j)
       m = p.mask(j)
       if len(d) != 0:
-        count+=1
+        count += 1
 
   assert count == 9
-
-
 
 @pytest.mark.skip('requires boost_threads which is not built atm')
 def test_job_list():
@@ -401,7 +358,6 @@ def test_job_list():
   for frame in range(46, 60):
     assert jobs.job_index(frame) == 4
 
-
 @pytest.mark.skip('requires boost_threads which is not built atm')
 def test_reflection_manager():
   from dials.algorithms.integration.parallel_integrator import SimpleJobList
@@ -421,9 +377,9 @@ def test_reflection_manager():
 
     for rr in r1:
       z0, z1 = rr['bbox'][4:6]
-      zc = int(math.floor((z0+z1)/2.0))
+      zc = int(math.floor((z0 + z1) / 2.0))
       j = jobs.job_index(zc)
-      assert(j == index)
+      assert (j == index)
       assert z0 >= j0 and z1 <= j1
 
   check_job(0)

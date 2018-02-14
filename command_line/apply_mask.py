@@ -24,7 +24,8 @@ Examples::
 
 '''
 
-phil_scope = parse("""
+phil_scope = parse(
+    """
 
   input {
     mask = None
@@ -37,8 +38,8 @@ phil_scope = parse("""
       .type = str
       .help = "Name of output datablock file"
   }
-""", process_includes=True)
-
+""",
+    process_includes=True)
 
 class Script(object):
   ''' A class to encapsulate the script. '''
@@ -50,11 +51,7 @@ class Script(object):
 
     # Create the parser
     usage = "usage: %s [options] datablock.json" % libtbx.env.dispatcher_name
-    self.parser = OptionParser(
-      usage=usage,
-      epilog=help_message,
-      phil=phil_scope,
-      read_datablocks=True)
+    self.parser = OptionParser(usage=usage, epilog=help_message, phil=phil_scope, read_datablocks=True)
 
   def run(self):
     ''' Run the script. '''
@@ -95,7 +92,6 @@ class Script(object):
     print "Writing datablock to %s" % params.output.datablock
     dump = DataBlockDumper(datablock)
     dump.as_json(filename=params.output.datablock)
-
 
 if __name__ == '__main__':
   from dials.util import halraiser

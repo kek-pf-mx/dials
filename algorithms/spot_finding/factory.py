@@ -20,7 +20,8 @@ def generate_phil_scope():
   import dials.extensions # import dependency
   from dials.interfaces import SpotFinderThresholdIface
 
-  phil_scope = parse('''
+  phil_scope = parse(
+      '''
 
   spotfinder
     .help = "Parameters used in the spot finding algorithm."
@@ -130,10 +131,11 @@ def generate_phil_scope():
     }
   }
 
-  ''', process_includes=True)
+  ''',
+      process_includes=True)
 
   main_scope = phil_scope.get_without_substitution("spotfinder")
-  assert(len(main_scope) == 1)
+  assert (len(main_scope) == 1)
   main_scope = main_scope[0]
   main_scope.adopt_scope(SpotFinderThresholdIface.phil_scope())
   return phil_scope
@@ -154,9 +156,9 @@ class FilterRunner(object):
 
     '''
     if filters is None:
-      self.filters=[]
+      self.filters = []
     else:
-      self.filters=filters
+      self.filters = filters
 
   def __call__(self, flags, **kwargs):
     '''
@@ -171,8 +173,7 @@ class FilterRunner(object):
       flags = f(flags, **kwargs)
     return flags
 
-  def check_flags(self, flags, predictions=None, observations=None,
-                  shoeboxes=None, **kwargs):
+  def check_flags(self, flags, predictions=None, observations=None, shoeboxes=None, **kwargs):
     '''
     Check the flags are set, if they're not then create a list
     of Trues equal to the number of items given.
@@ -193,12 +194,12 @@ class FilterRunner(object):
         length = len(predictions)
       if observations:
         if length > 0:
-          assert(length == len(observations))
+          assert (length == len(observations))
         else:
           length = len(observations)
       if shoeboxes:
         if length > 0:
-          assert(length == len(observations))
+          assert (length == len(observations))
         else:
           length = len(shoeboxes)
 
@@ -208,9 +209,7 @@ class FilterRunner(object):
     # Return the flags
     return flags
 
-
 class PeakCentroidDistanceFilter(object):
-
   def __init__(self, maxd):
     '''
     Initialise
@@ -237,15 +236,10 @@ class PeakCentroidDistanceFilter(object):
     num_before = flags.count(True)
     flags = self.run(flags, **kwargs)
     num_after = flags.count(True)
-    logger.info('Filtered {0} of {1} spots by peak-centroid distance'.format(
-      num_after,
-      num_before))
+    logger.info('Filtered {0} of {1} spots by peak-centroid distance'.format(num_after, num_before))
     return flags
 
-
-
 class BackgroundGradientFilter(object):
-
   def __init__(self, background_size=2, gradient_cutoff=4):
     self.background_size = background_size
     self.gradient_cutoff = gradient_cutoff
@@ -305,14 +299,11 @@ class BackgroundGradientFilter(object):
       # expand the bbox with a background region around the spotfinder shoebox
       # perhaps also should use a buffer zone between the shoebox and the
       # background region
-      expanded_bbox = (max(0, x1-bg_plus_buffer),
-                       min(max_x, x2+bg_plus_buffer),
-                       max(0, y1-bg_plus_buffer),
-                       min(max_y, y2+bg_plus_buffer),
-                       z1, z2)
+      expanded_bbox = (max(0, x1 - bg_plus_buffer), min(max_x, x2 + bg_plus_buffer), max(0, y1 - bg_plus_buffer),
+                       min(max_y, y2 + bg_plus_buffer), z1, z2)
       shoebox.bbox = expanded_bbox
     t1 = time.time()
-    logger.info("Time expand_shoebox: %s" %(t1-t0))
+    logger.info("Time expand_shoebox: %s" % (t1 - t0))
 
     rlist = flex.reflection_table()
     rlist['shoebox'] = shoeboxes
@@ -339,8 +330,8 @@ class BackgroundGradientFilter(object):
       for i_y, y in enumerate(range(ey1, ey2)):
         for i_x, x in enumerate(range(ex1, ex2)):
           value = data[0, i_y, i_x]
-          if (y >= (ey1+buffer_size) and y < (ey2-buffer_size) and
-              x >= (ex1+buffer_size) and x < (ex2-buffer_size)):
+          if (y >= (ey1 + buffer_size) and y < (ey2 - buffer_size) and x >= (ex1 + buffer_size)
+              and x < (ex2 - buffer_size)):
             mask[0, i_y, i_x] = False # foreground
           elif value > trusted_range[0] and value < trusted_range[1]:
             mask[0, i_y, i_x] = True # background
@@ -361,14 +352,10 @@ class BackgroundGradientFilter(object):
     num_before = flags.count(True)
     flags = self.run(flags, **kwargs)
     num_after = flags.count(True)
-    logger.info('Filtered {0} or {1} spots by background gradient'.format(
-      num_after,
-      num_before))
+    logger.info('Filtered {0} or {1} spots by background gradient'.format(num_after, num_before))
     return flags
 
-
 class SpotDensityFilter(object):
-
   def __init__(self, nbins=50, gradient_cutoff=0.002):
     self.nbins = nbins
     self.gradient_cutoff = gradient_cutoff
@@ -377,8 +364,7 @@ class SpotDensityFilter(object):
     obs_x, obs_y = observations.centroids().px_position_xy().parts()
 
     import numpy as np
-    H, xedges, yedges = np.histogram2d(
-      obs_x.as_numpy_array(), obs_y.as_numpy_array(),bins=self.nbins)
+    H, xedges, yedges = np.histogram2d(obs_x.as_numpy_array(), obs_y.as_numpy_array(), bins=self.nbins)
 
     from scitbx.array_family import flex
     H_flex = flex.double(H.flatten().astype(np.float64))
@@ -390,29 +376,26 @@ class SpotDensityFilter(object):
     for i in range(len(slots)):
       cumulative_hist[i] = slots[i]
       if i > 0:
-        cumulative_hist[i] += cumulative_hist[i-1]
+        cumulative_hist[i] += cumulative_hist[i - 1]
 
-    cumulative_hist = cumulative_hist.as_double()/flex.max(
-      cumulative_hist.as_double())
+    cumulative_hist = cumulative_hist.as_double() / flex.max(cumulative_hist.as_double())
 
     cutoff = None
     gradients = flex.double()
-    for i in range(len(slots)-1):
+    for i in range(len(slots) - 1):
       x1 = cumulative_hist[i]
-      x2 = cumulative_hist[i+1]
-      g = (x2 - x1)/hist.slot_width()
+      x2 = cumulative_hist[i + 1]
+      g = (x2 - x1) / hist.slot_width()
       gradients.append(g)
-      if (cutoff is None and  i > 0 and
-          g < self.gradient_cutoff and gradients[i-1] < self.gradient_cutoff):
-        cutoff = hist.slot_centers()[i-1]-0.5*hist.slot_width()
+      if (cutoff is None and i > 0 and g < self.gradient_cutoff and gradients[i - 1] < self.gradient_cutoff):
+        cutoff = hist.slot_centers()[i - 1] - 0.5 * hist.slot_width()
 
     H_flex = flex.double(np.ascontiguousarray(H))
     isel = (H_flex > cutoff).iselection()
     sel = np.column_stack(np.where(H > cutoff))
     for (ix, iy) in sel:
       flags.set_selected(
-        ((obs_x > xedges[ix]) & (obs_x < xedges[ix+1]) &
-         (obs_y > yedges[iy]) & (obs_y < yedges[iy+1])), False)
+          ((obs_x > xedges[ix]) & (obs_x < xedges[ix + 1]) & (obs_y > yedges[iy]) & (obs_y < yedges[iy + 1])), False)
 
     if 0:
       from matplotlib import pyplot
@@ -428,9 +411,9 @@ class SpotDensityFilter(object):
 
       fig, ax1 = pyplot.subplots()
       ax2 = ax1.twinx()
-      ax1.scatter(hist.slot_centers()-0.5*hist.slot_width(), cumulative_hist)
+      ax1.scatter(hist.slot_centers() - 0.5 * hist.slot_width(), cumulative_hist)
       ax1.set_ylim(0, 1)
-      ax2.plot(hist.slot_centers()[:-1]-0.5*hist.slot_width(), gradients)
+      ax2.plot(hist.slot_centers()[:-1] - 0.5 * hist.slot_width(), gradients)
       ymin, ymax = pyplot.ylim()
       pyplot.vlines(cutoff, ymin, ymax, color='r')
       pyplot.show()
@@ -454,11 +437,8 @@ class SpotDensityFilter(object):
     num_before = flags.count(True)
     flags = self.run(flags, **kwargs)
     num_after = flags.count(True)
-    logger.info('Filtered {0} of {1} spots by spot density'.format(
-      num_after,
-      num_before))
+    logger.info('Filtered {0} of {1} spots by spot density'.format(num_after, num_before))
     return flags
-
 
 class SpotFinderFactory(object):
   '''
@@ -505,8 +485,7 @@ class SpotFinderFactory(object):
     filter_spots = SpotFinderFactory.configure_filter(params)
 
     # Create the threshold strategy
-    threshold_function = SpotFinderFactory.configure_threshold(params,
-                                                               datablock)
+    threshold_function = SpotFinderFactory.configure_threshold(params, datablock)
 
     # Configure the mask generator
     mask_generator = MaskGenerator(params.spotfinder.filter)
@@ -517,24 +496,24 @@ class SpotFinderFactory(object):
 
     # Setup the spot finder
     return SpotFinder(
-      threshold_function        = threshold_function,
-      mask                      = params.spotfinder.lookup.mask,
-      filter_spots              = filter_spots,
-      scan_range                = params.spotfinder.scan_range,
-      write_hot_mask            = params.spotfinder.write_hot_mask,
-      hot_mask_prefix           = params.spotfinder.hot_mask_prefix,
-      mp_method                 = params.spotfinder.mp.method,
-      mp_nproc                  = params.spotfinder.mp.nproc,
-      mp_njobs                  = params.spotfinder.mp.njobs,
-      mp_chunksize              = params.spotfinder.mp.chunksize,
-      max_strong_pixel_fraction = params.spotfinder.filter.max_strong_pixel_fraction,
-      compute_mean_background   = params.spotfinder.compute_mean_background,
-      region_of_interest        = params.spotfinder.region_of_interest,
-      mask_generator            = mask_generator,
-      min_spot_size             = params.spotfinder.filter.min_spot_size,
-      max_spot_size             = params.spotfinder.filter.max_spot_size,
-      no_shoeboxes_2d           = no_shoeboxes_2d,
-      min_chunksize             = params.spotfinder.mp.min_chunksize)
+        threshold_function=threshold_function,
+        mask=params.spotfinder.lookup.mask,
+        filter_spots=filter_spots,
+        scan_range=params.spotfinder.scan_range,
+        write_hot_mask=params.spotfinder.write_hot_mask,
+        hot_mask_prefix=params.spotfinder.hot_mask_prefix,
+        mp_method=params.spotfinder.mp.method,
+        mp_nproc=params.spotfinder.mp.nproc,
+        mp_njobs=params.spotfinder.mp.njobs,
+        mp_chunksize=params.spotfinder.mp.chunksize,
+        max_strong_pixel_fraction=params.spotfinder.filter.max_strong_pixel_fraction,
+        compute_mean_background=params.spotfinder.compute_mean_background,
+        region_of_interest=params.spotfinder.region_of_interest,
+        mask_generator=mask_generator,
+        min_spot_size=params.spotfinder.filter.min_spot_size,
+        max_spot_size=params.spotfinder.filter.max_spot_size,
+        no_shoeboxes_2d=no_shoeboxes_2d,
+        min_chunksize=params.spotfinder.mp.min_chunksize)
 
   @staticmethod
   def configure_threshold(params, datablock):
@@ -548,8 +527,7 @@ class SpotFinderFactory(object):
     from dials.interfaces import SpotFinderThresholdIface
 
     # Configure the algotihm
-    Algorithm = SpotFinderThresholdIface.extension(
-      params.spotfinder.threshold.algorithm)
+    Algorithm = SpotFinderThresholdIface.extension(params.spotfinder.threshold.algorithm)
     return Algorithm(params)
 
   @staticmethod
@@ -568,14 +546,13 @@ class SpotFinderFactory(object):
 
     # Add a peak-centroid distance filter
     if params.spotfinder.filter.max_separation is not None:
-      filters.append(PeakCentroidDistanceFilter(
-        params.spotfinder.filter.max_separation))
+      filters.append(PeakCentroidDistanceFilter(params.spotfinder.filter.max_separation))
 
     if params.spotfinder.filter.background_gradient.filter:
       bg_filter_params = params.spotfinder.filter.background_gradient
-      filters.append(BackgroundGradientFilter(
-        background_size=bg_filter_params.background_size,
-        gradient_cutoff=bg_filter_params.gradient_cutoff))
+      filters.append(
+          BackgroundGradientFilter(
+              background_size=bg_filter_params.background_size, gradient_cutoff=bg_filter_params.gradient_cutoff))
 
     if params.spotfinder.filter.spot_density.filter:
       filters.append(SpotDensityFilter())
@@ -605,5 +582,5 @@ class SpotFinderFactory(object):
     # Read the image and return the image data
     image = pickle.load(open(filename_or_data))
     if not isinstance(image, tuple):
-      image = (image,)
+      image = (image, )
     return image

@@ -32,12 +32,7 @@ def run(args):
   from dials.util import log
   usage = "%s [options] datablock.json strong.pickle output.csv=rl.csv" % libtbx.env.dispatcher_name
 
-  parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_datablocks=True,
-    read_reflections=True,
-    check_format=False)
+  parser = OptionParser(usage=usage, phil=phil_scope, read_datablocks=True, read_reflections=True, check_format=False)
 
   params, options = parser.parse_args(show_diff_phil=False)
   datablocks = flatten_datablocks(params.input.datablock)
@@ -83,11 +78,10 @@ def run(args):
       refl['imageset_id'] = refl['id']
 
     reflmm = indexer_base.map_spots_pixel_to_mm_rad(
-      spots=refl, detector=imageset.get_detector(), scan=imageset.get_scan())
+        spots=refl, detector=imageset.get_detector(), scan=imageset.get_scan())
 
     indexer_base.map_centroids_to_reciprocal_space(
-      reflmm, detector=imageset.get_detector(), beam=imageset.get_beam(),
-      goniometer=imageset.get_goniometer())
+        reflmm, detector=imageset.get_detector(), beam=imageset.get_beam(), goniometer=imageset.get_goniometer())
 
     rlp = reflmm['rlp']
 

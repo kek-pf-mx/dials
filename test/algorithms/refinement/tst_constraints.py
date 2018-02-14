@@ -8,7 +8,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """
 Tests for the constraints system used in refinement
 
@@ -52,12 +51,12 @@ def test1():
   assert x + 10. == expanded
 
   # make a matrix to exercise jacobian compaction
-  j = flex.random_double(20*10)
-  j.reshape(flex.grid(20,10))
+  j = flex.random_double(20 * 10)
+  j.reshape(flex.grid(20, 10))
 
   # for constrained columns, elements that are non-zero in one column are
   # zero in the other columns. Enforce that in this example
-  mask2 = flex.bool([True]*10 + [False]*10)
+  mask2 = flex.bool([True] * 10 + [False] * 10)
   mask4 = ~mask2
   col2 = j.matrix_copy_column(1)
   col2.set_selected(mask2, 0)
@@ -66,7 +65,7 @@ def test1():
   col4.set_selected(mask4, 0)
   j.matrix_paste_column_in_place(col4, 3)
 
-  mask6 = flex.bool([False]*7 + [True]*13)
+  mask6 = flex.bool([False] * 7 + [True] * 13)
   mask7 = mask6.reversed()
   mask8 = ~(mask6 & mask7)
   col6 = j.matrix_copy_column(5)
@@ -93,7 +92,7 @@ def test1():
   assert (cj.matrix_copy_column(6) == tmp).all_eq(True)
 
   # convert to a sparse matrix to exercise the sparse Jacobian compaction
-  j2 = sparse.matrix(20,10)
+  j2 = sparse.matrix(20, 10)
   mask = flex.bool(20, True)
   for i, c in enumerate(j2.cols()):
     c.set_selected(mask, j.matrix_copy_column(i))
@@ -127,9 +126,7 @@ def test2():
     print "Skipping test2 in " + __file__ + " as dials_regression not present"
     return
 
-  dials_regression = libtbx.env.find_in_repositories(
-    relative_path="dials_regression",
-    test=os.path.isdir)
+  dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=os.path.isdir)
 
   # use the 'centroid' data for this test. The 'regularized' experiments are
   # useful because the detector has fast and slow exactly aligned with X, -Y
@@ -154,7 +151,7 @@ def test2():
   fast = panel.get_fast_axis()
   slow = panel.get_slow_axis()
   origin = panel.get_origin()
-  panel.set_frame(fast, slow, origin[0:2] + (origin[2] + 0.5,))
+  panel.set_frame(fast, slow, origin[0:2] + (origin[2] + 0.5, ))
 
   # duplicate the experiment and adjust distance by +1 mm
   e2 = deepcopy(el[0])
@@ -163,7 +160,7 @@ def test2():
   fast = panel.get_fast_axis()
   slow = panel.get_slow_axis()
   origin = panel.get_origin()
-  panel.set_frame(fast, slow, origin[0:2] + (origin[2] - 1.0,))
+  panel.set_frame(fast, slow, origin[0:2] + (origin[2] - 1.0, ))
 
   # append to the experiment list and write out
   el.append(e2)
@@ -188,13 +185,12 @@ def test2():
     import cPickle as pickle
     with open('history.pickle') as f:
       history = pickle.load(f)
-    ref_exp = ExperimentListFactory.from_json_file('refined_experiments.json',
-      check_format=False)
+    ref_exp = ExperimentListFactory.from_json_file('refined_experiments.json', check_format=False)
   finally:
     os.chdir(cwd)
 
   # we expect 8 steps of constrained refinement
-  assert history.get_nrows()  == 8
+  assert history.get_nrows() == 8
 
   # get parameter vector from the final step
   pvec = history['parameter_vector'][-1]

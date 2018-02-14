@@ -1,10 +1,7 @@
-
 from __future__ import absolute_import, division
 from dials.array_family import flex # import dependency
 
-
 class Test(object):
-
   def __init__(self):
     from os.path import join
     import libtbx.load_env
@@ -25,11 +22,12 @@ class Test(object):
     output_filename = "output_datablock.json"
     mask_filename = join(self.path, "lookup_mask.pickle")
 
-    easy_run.fully_buffered(
-      ['dials.apply_mask',
-       'input.datablock=%s' % input_filename,
-       'input.mask=%s' % mask_filename,
-       'output.datablock=%s' % output_filename]).raise_if_errors()
+    easy_run.fully_buffered([
+        'dials.apply_mask',
+        'input.datablock=%s' % input_filename,
+        'input.mask=%s' % mask_filename,
+        'output.datablock=%s' % output_filename
+    ]).raise_if_errors()
 
     from dxtbx.datablock import DataBlockFactory
     datablocks = DataBlockFactory.from_json_file(output_filename)

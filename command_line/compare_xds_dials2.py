@@ -6,7 +6,7 @@ from __future__ import absolute_import, division
 import matplotlib
 matplotlib.use('WXAgg')
 
-def pull_reference(integrate_hkl, d_min = 0.0):
+def pull_reference(integrate_hkl, d_min=0.0):
   '''Generate reference data set from integrate.hkl, check out the calculated
   x, y and z centroids as well as the Miller indices as coordinates in some
   high dimensional space. Only consider measurements with meaningful
@@ -121,13 +121,13 @@ def pull_calculated(integrate_pkl):
   for r in r_list:
     if not r.is_valid():
       continue
-    if r.intensity ** 2 < r.intensity_variance:
+    if r.intensity**2 < r.intensity_variance:
       continue
     if r.intensity <= 0.0:
       continue
     strong_reflections.append(r)
 
-  del(r_list)
+  del (r_list)
 
   hkl = []
   i = []
@@ -137,8 +137,8 @@ def pull_calculated(integrate_pkl):
 
   for r in strong_reflections:
     hkl.append(r.miller_index)
-#    i.append(r.corrected_intensity)
-#    sigi.append(math.sqrt(r.corrected_intensity_variance))
+    #    i.append(r.corrected_intensity)
+    #    sigi.append(math.sqrt(r.corrected_intensity_variance))
     i.append(r.intensity)
     sigi.append(math.sqrt(r.intensity_variance))
     lp.append(r.corrected_intensity / r.intensity)
@@ -152,7 +152,7 @@ def pull_calculated(integrate_pkl):
 def meansd(values):
   import math
 
-  assert(len(values) > 3)
+  assert (len(values) > 3)
 
   mean = sum(values) / len(values)
   var = sum([(v - mean) * (v - mean) for v in values]) / (len(values) - 1)
@@ -161,26 +161,25 @@ def meansd(values):
 
 def cc(a, b):
 
-  assert(len(a) == len(b))
+  assert (len(a) == len(b))
 
   ma, sa = meansd(a)
   mb, sb = meansd(b)
 
-  r = (1 / (len(a) - 1)) * sum([((a[j] - ma) / sa) * ((b[j] - mb) / sb)
-                                for j in range(len(a))])
+  r = (1 / (len(a) - 1)) * sum([((a[j] - ma) / sa) * ((b[j] - mb) / sb) for j in range(len(a))])
 
   return r
 
-def R(calc, obs, scale = None):
+def R(calc, obs, scale=None):
 
   import math
 
-  assert(len(calc) == len(obs))
+  assert (len(calc) == len(obs))
 
   if not scale:
     scale = sum(obs) / sum(calc)
 
-  var = sum([(scale * c - o) ** 2 for c, o in zip(calc, obs)]) / len(calc)
+  var = sum([(scale * c - o)**2 for c, o in zip(calc, obs)]) / len(calc)
 
   return sum([math.fabs(math.fabs(o) - math.fabs(scale * c)) \
               for c, o in zip(calc, obs)]) / \
@@ -189,11 +188,10 @@ def R(calc, obs, scale = None):
 def meansd(values):
   import math
   mean = sum(values) / len(values)
-  var = sum([(v - mean) ** 2 for v in values]) / len(values)
+  var = sum([(v - mean)**2 for v in values]) / len(values)
   return mean, math.sqrt(var)
 
-def compare_chunks(integrate_hkl, integrate_pkl, crystal_json, sweep_json,
-                   d_min = 0.0):
+def compare_chunks(integrate_hkl, integrate_pkl, crystal_json, sweep_json, d_min=0.0):
 
   from cctbx.array_family import flex
   from annlib_ext import AnnAdaptor as ann_adaptor
@@ -223,7 +221,7 @@ def compare_chunks(integrate_hkl, integrate_pkl, crystal_json, sweep_json,
     query.append(xyz[2])
 
   # perform the match
-  ann = ann_adaptor(data = reference, dim = 3, k = 1)
+  ann = ann_adaptor(data=reference, dim=3, k=1)
   ann.query(query)
 
   XDS = []
@@ -251,8 +249,8 @@ def compare_chunks(integrate_hkl, integrate_pkl, crystal_json, sweep_json,
   print "Found %d matches" % len(XDS)
 
   compare = CompareIntensity(sweep, uc, HKL, XYZ, XDS, DIALS, SIGMA_XDS, SIGMA_DIALS, XLP, DLP)
-#  compare.plot_scale_factor_vs_resolution()
-#  compare.plot_scale_factor_vs_frame_number()
+  #  compare.plot_scale_factor_vs_resolution()
+  #  compare.plot_scale_factor_vs_frame_number()
   compare.plot_chunked_statistics_vs_resolution()
   compare.plot_chunked_statistics_vs_frame_number()
   compare.plot_chunked_statistics_vs_i_over_sigma()
@@ -272,7 +270,7 @@ def derive_reindex_matrix(crystal_json, sweep_json, integrate_hkl):
 
   # want to align XDS -s0 vector...
   from rstbx.cftbx.coordinate_frame_helpers import align_reference_frame
-  R = align_reference_frame(- xbeam, dbeam, xaxis, daxis)
+  R = align_reference_frame(-xbeam, dbeam, xaxis, daxis)
   xA = R * integrate_hkl_to_A_matrix(integrate_hkl)
 
   # assert that this should just be a simple integer rotation matrix
@@ -281,9 +279,7 @@ def derive_reindex_matrix(crystal_json, sweep_json, integrate_hkl):
   from scitbx import matrix
   return matrix.sqr(map(int, map(round, (dA.inverse() * xA).elems)))
 
-
 class CompareIntensity(object):
-
   def __init__(self, sweep, uc, hkl, xyz, i_xds, i_dials, sigma_xds, sigma_dials, xlp, dlp):
     self.sweep = sweep
     self.hkl = hkl
@@ -342,20 +338,20 @@ class CompareIntensity(object):
     ss = []
     vs = []
     for chunk in chunks:
-        xds = i_xds[chunk[0]:chunk[1]]
-        dials = i_dials[chunk[0]:chunk[1]]
-        resols = d[chunk[0]:chunk[1]]
-        if len(xds) < 100:
-          break
-        c = cc(dials, xds)
-        r, s, v = R(dials, xds)
-        import math
-        print '%7d %4d %.3f %.3f %.3f %.3f %.3f %.3f' % \
-          (chunk[0], len(xds), min(resols), max(resols), c, r, s, math.sqrt(v))
-        ccs.append(c)
-        rs.append(r)
-        ss.append(s)
-        vs.append(math.sqrt(v))
+      xds = i_xds[chunk[0]:chunk[1]]
+      dials = i_dials[chunk[0]:chunk[1]]
+      resols = d[chunk[0]:chunk[1]]
+      if len(xds) < 100:
+        break
+      c = cc(dials, xds)
+      r, s, v = R(dials, xds)
+      import math
+      print '%7d %4d %.3f %.3f %.3f %.3f %.3f %.3f' % \
+        (chunk[0], len(xds), min(resols), max(resols), c, r, s, math.sqrt(v))
+      ccs.append(c)
+      rs.append(r)
+      ss.append(s)
+      vs.append(math.sqrt(v))
     chunks = [j for j in range(len(chunks))]
     chunks = chunks[:len(rs)]
 
@@ -363,10 +359,10 @@ class CompareIntensity(object):
     pyplot.xlabel('Chunk')
     pyplot.ylabel('Statistic')
     pyplot.title('Statistics for 1000 reflection-pair chunks')
-    pyplot.plot(chunks, ccs, label = 'CC')
-    pyplot.plot(chunks, rs, label = 'R')
-    pyplot.plot(chunks, ss, label = 'K')
-#    pyplot.plot(chunks, vs, label = 'stddev')
+    pyplot.plot(chunks, ccs, label='CC')
+    pyplot.plot(chunks, rs, label='R')
+    pyplot.plot(chunks, ss, label='K')
+    #    pyplot.plot(chunks, vs, label = 'stddev')
     pyplot.legend()
     pyplot.savefig('plot-statistics-vs-res.png')
     pyplot.close()
@@ -391,20 +387,20 @@ class CompareIntensity(object):
     ss = []
     vs = []
     for chunk in chunks:
-        xds = i_xds[chunk[0]:chunk[1]]
-        dials = i_dials[chunk[0]:chunk[1]]
-        frames = frame[chunk[0]:chunk[1]]
-        if len(xds) < 10:
-          break
-        c = cc(dials, xds)
-        r, s, v = R(dials, xds)
-        import math
-        print '%7d %4d %.3f %.3f %.3f %.3f %.3f %.3f' % \
-          (chunk[0], len(xds), min(frames), max(frames), c, r, s, math.sqrt(v))
-        ccs.append(c)
-        rs.append(r)
-        ss.append(s)
-        vs.append(math.sqrt(v))
+      xds = i_xds[chunk[0]:chunk[1]]
+      dials = i_dials[chunk[0]:chunk[1]]
+      frames = frame[chunk[0]:chunk[1]]
+      if len(xds) < 10:
+        break
+      c = cc(dials, xds)
+      r, s, v = R(dials, xds)
+      import math
+      print '%7d %4d %.3f %.3f %.3f %.3f %.3f %.3f' % \
+        (chunk[0], len(xds), min(frames), max(frames), c, r, s, math.sqrt(v))
+      ccs.append(c)
+      rs.append(r)
+      ss.append(s)
+      vs.append(math.sqrt(v))
     chunks = [j for j in range(len(chunks))]
     chunks = chunks[:len(rs)]
 
@@ -412,9 +408,9 @@ class CompareIntensity(object):
     pyplot.xlabel('Chunk')
     pyplot.ylabel('Statistic')
     pyplot.title('Statistics for 1000 reflection-pair chunks')
-    pyplot.plot(chunks, ccs, label = 'CC')
-    pyplot.plot(chunks, rs, label = 'R')
-    pyplot.plot(chunks, ss, label = 'K')
+    pyplot.plot(chunks, ccs, label='CC')
+    pyplot.plot(chunks, rs, label='R')
+    pyplot.plot(chunks, ss, label='K')
     #pyplot.plot(chunks, vs, label = 'stddev')
     pyplot.legend()
     pyplot.savefig('plot-statistics-vs-frame.png')
@@ -435,18 +431,18 @@ class CompareIntensity(object):
     rs = []
     ss = []
     for chunk in chunks:
-        xds = i_xds[chunk[0]:chunk[1]]
-        dials = i_dials[chunk[0]:chunk[1]]
-        ios = i_over_s[chunk[0]:chunk[1]]
-        if len(xds) < 100:
-          break
-        c = cc(dials, xds)
-        r, s, v = R(dials, xds)
-        print '%7d %4d %.3f %.3f %.3f %.3f %.3f' % \
-          (chunk[0], len(xds), min(ios), max(ios), c, r, s)
-        ccs.append(c)
-        rs.append(r)
-        ss.append(s)
+      xds = i_xds[chunk[0]:chunk[1]]
+      dials = i_dials[chunk[0]:chunk[1]]
+      ios = i_over_s[chunk[0]:chunk[1]]
+      if len(xds) < 100:
+        break
+      c = cc(dials, xds)
+      r, s, v = R(dials, xds)
+      print '%7d %4d %.3f %.3f %.3f %.3f %.3f' % \
+        (chunk[0], len(xds), min(ios), max(ios), c, r, s)
+      ccs.append(c)
+      rs.append(r)
+      ss.append(s)
     chunks = [j for j in range(len(chunks))]
     chunks = chunks[:len(rs)]
 
@@ -454,9 +450,9 @@ class CompareIntensity(object):
     pyplot.xlabel('Chunk')
     pyplot.ylabel('Statistic')
     pyplot.title('Statistics for 1000 reflection-pair chunks')
-    pyplot.plot(chunks, ccs, label = 'CC')
-    pyplot.plot(chunks, rs, label = 'R')
-    pyplot.plot(chunks, ss, label = 'K')
+    pyplot.plot(chunks, ccs, label='CC')
+    pyplot.plot(chunks, rs, label='R')
+    pyplot.plot(chunks, ss, label='K')
     pyplot.legend()
     pyplot.savefig('plot-statistics-vs-i_over_s.png')
     pyplot.close()
@@ -517,14 +513,14 @@ class CompareIntensity(object):
     chunks = list(zip(chunks[:-1], chunks[1:]))
     mean_i_over_sigma = []
     for chunk in chunks:
-        ios = i_over_s[chunk[0]:chunk[1]]
-        frames = frame[chunk[0]:chunk[1]]
-        if len(ios) < 10:
-          break
-        mios = sum(ios) / len(ios)
-        print '%7d %4d %.3f %.3f %.3f' % \
-          (chunk[0], len(ios), min(frames), max(frames), mios)
-        mean_i_over_sigma.append(mios)
+      ios = i_over_s[chunk[0]:chunk[1]]
+      frames = frame[chunk[0]:chunk[1]]
+      if len(ios) < 10:
+        break
+      mios = sum(ios) / len(ios)
+      print '%7d %4d %.3f %.3f %.3f' % \
+        (chunk[0], len(ios), min(frames), max(frames), mios)
+      mean_i_over_sigma.append(mios)
     chunks = [j for j in range(len(chunks))]
     chunks = chunks[:len(mean_i_over_sigma)]
 
@@ -552,14 +548,14 @@ class CompareIntensity(object):
     chunks = list(zip(chunks[:-1], chunks[1:]))
     mean_d = []
     for chunk in chunks:
-        dd = d[chunk[0]:chunk[1]]
-        frames = frame[chunk[0]:chunk[1]]
-        if len(dd) < 10:
-          break
-        md = sum(dd) / len(dd)
-        print '%7d %4d %.3f %.3f %.3f' % \
-          (chunk[0], len(dd), min(frames), max(frames), md)
-        mean_d.append(md)
+      dd = d[chunk[0]:chunk[1]]
+      frames = frame[chunk[0]:chunk[1]]
+      if len(dd) < 10:
+        break
+      md = sum(dd) / len(dd)
+      print '%7d %4d %.3f %.3f %.3f' % \
+        (chunk[0], len(dd), min(frames), max(frames), md)
+      mean_d.append(md)
     chunks = [j for j in range(len(chunks))]
     chunks = chunks[:len(mean_d)]
 
@@ -588,15 +584,15 @@ class CompareIntensity(object):
     chunks = list(zip(chunks[:-1], chunks[1:]))
     ss = []
     for chunk in chunks:
-        XLP = xlp[chunk[0]:chunk[1]]
-        DLP = dlp[chunk[0]:chunk[1]]
-        frames = frame[chunk[0]:chunk[1]]
-        if len(XLP) < 10:
-          break
-        r, s, v0 = R(DLP, XLP)
-        print '%7d %4d %.3f %.3f %.3f' % \
-          (chunk[0], len(xlp), min(frames), max(frames), s)
-        ss.append(s)
+      XLP = xlp[chunk[0]:chunk[1]]
+      DLP = dlp[chunk[0]:chunk[1]]
+      frames = frame[chunk[0]:chunk[1]]
+      if len(XLP) < 10:
+        break
+      r, s, v0 = R(DLP, XLP)
+      print '%7d %4d %.3f %.3f %.3f' % \
+        (chunk[0], len(xlp), min(frames), max(frames), s)
+      ss.append(s)
     chunks = [j for j in range(len(chunks))]
     chunks = chunks[:len(ss)]
 
@@ -639,7 +635,6 @@ class CompareIntensity(object):
     pyplot.savefig('plot-scale-vs-xy.png')
     pyplot.close()
 
-
 if __name__ == '__main__':
   import sys
   if len(sys.argv) < 5:
@@ -650,5 +645,4 @@ if __name__ == '__main__':
   if len(sys.argv) == 5:
     compare_chunks(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
   else:
-    compare_chunks(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4],
-                   d_min = float(sys.argv[5]))
+    compare_chunks(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], d_min=float(sys.argv[5]))

@@ -80,7 +80,6 @@ rotation {
 }
 """)
 
-
 def random_background_plane2(sbox, a, b, c, d):
   '''Draw values from Poisson distribution for each position where the mean for
   that distribition is equal to a + b * i + c * j + d * k where a, b, c, d are
@@ -92,7 +91,7 @@ def random_background_plane2(sbox, a, b, c, d):
   dz, dy, dx = sbox.focus()
 
   if b == c == d == 0.0:
-    g = variate(poisson_distribution(mean = a))
+    g = variate(poisson_distribution(mean=a))
     for k in range(dz):
       for j in range(dy):
         for i in range(dx):
@@ -101,8 +100,8 @@ def random_background_plane2(sbox, a, b, c, d):
     for k in range(dz):
       for j in range(dy):
         for i in range(dx):
-          pixel = a + b * (i+0.5) + c * (j+0.5) + d * (k+0.5)
-          g = variate(poisson_distribution(mean = pixel))
+          pixel = a + b * (i + 0.5) + c * (j + 0.5) + d * (k + 0.5)
+          g = variate(poisson_distribution(mean=pixel))
           sbox[k, j, i] += next(g)
   return
 
@@ -117,7 +116,7 @@ def random_background_plane(sbox, a, b, c, d):
   dz, dy, dx = sbox.focus()
 
   if b == c == d == 0.0:
-    g = variate(poisson_distribution(mean = a))
+    g = variate(poisson_distribution(mean=a))
     for k in range(dz):
       for j in range(dy):
         for i in range(dx):
@@ -127,7 +126,7 @@ def random_background_plane(sbox, a, b, c, d):
       for j in range(dy):
         for i in range(dx):
           pixel = a + b * i + c * j + d * k
-          g = variate(poisson_distribution(mean = pixel))
+          g = variate(poisson_distribution(mean=pixel))
           sbox[k, j, i] += next(g)
   return
 
@@ -148,11 +147,11 @@ def simple_gaussian_spots(params):
   # generate mask and peak values
 
   from dials.algorithms.shoebox import MaskCode
-  mask_peak = MaskCode.Valid|MaskCode.Foreground
-  mask_back = MaskCode.Valid|MaskCode.Background
+  mask_peak = MaskCode.Valid | MaskCode.Foreground
+  mask_back = MaskCode.Valid | MaskCode.Background
 
   from dials.util.command_line import ProgressBar
-  p = ProgressBar(title = 'Generating reflections')
+  p = ProgressBar(title='Generating reflections')
 
   rlist = flex.reflection_table(params.nrefl)
   hkl = flex.miller_index(params.nrefl)
@@ -164,24 +163,20 @@ def simple_gaussian_spots(params):
 
   for j in range(params.nrefl):
     p.update(j * 100.0 / params.nrefl)
-    hkl[j] = (random.randint(0, 20),
-              random.randint(0, 20),
-              random.randint(0, 20))
+    hkl[j] = (random.randint(0, 20), random.randint(0, 20), random.randint(0, 20))
     phi = 2 * math.pi * random.random()
     s1[j] = (0, 0, 0)
     xyzpx[j] = (0, 0, 0)
     xyzmm[j] = (0, 0, phi)
     panel[j] = 0
-    bbox[j] = (0, params.shoebox_size.x,
-               0, params.shoebox_size.y,
-               0, params.shoebox_size.z)
+    bbox[j] = (0, params.shoebox_size.x, 0, params.shoebox_size.y, 0, params.shoebox_size.z)
 
   p.finished('Generating %d reflections' % params.nrefl)
   intensity = flex.double(params.nrefl)
   shoebox = flex.shoebox(panel, bbox)
   shoebox.allocate_with_value(MaskCode.Valid)
 
-  p = ProgressBar(title = 'Generating shoeboxes')
+  p = ProgressBar(title='Generating shoeboxes')
 
   for i in range(len(rlist)):
 
@@ -194,7 +189,7 @@ def simple_gaussian_spots(params):
         mask[j] = mask_back
     elif params.pixel_mask == 'all':
       # flag we have no idea what anything is
-      mask_none = MaskCode.Valid|MaskCode.Foreground|MaskCode.Background
+      mask_none = MaskCode.Valid | MaskCode.Foreground | MaskCode.Background
       for j in range(len(mask)):
         mask[j] = mask_none
     elif params.pixel_mask == 'static':
@@ -213,9 +208,8 @@ def simple_gaussian_spots(params):
 
       # Calculate SUM(((xj - xj0) / sxj)**2) for each element
       xyz0 = (x0, y0, z0)
-      isxyz = (1.0/sx, 1.0/sy, 1.0/sz)
-      dxyz = sum([(x * isx)**2 for x, isx in
-        zip(((xyz - xyz0) * rotation).parts(), isxyz)])
+      isxyz = (1.0 / sx, 1.0 / sy, 1.0 / sz)
+      dxyz = sum([(x * isx)**2 for x, isx in zip(((xyz - xyz0) * rotation).parts(), isxyz)])
 
       # Set the mask values
       index = dxyz <= 1.0
@@ -263,9 +257,7 @@ def simple_gaussian_spots(params):
         sbox[z, y, x] += 1
     else:
       # or inclined
-      random_background_plane(sbox, params.background_a, params.background_b,
-                              params.background_c, params.background_d)
-
+      random_background_plane(sbox, params.background_a, params.background_b, params.background_c, params.background_d)
 
   rlist['miller_index'] = hkl
   rlist['s1'] = s1
@@ -308,24 +300,24 @@ def background_xds(rlist):
   #nsigma = 3
   #shoebox = rlist['shoebox']
   #for i in range(len(shoebox)):
-    #data = shoebox[i].data
-    #mask = shoebox[i].mask
-    #bkgrd = shoebox[i].background
+  #data = shoebox[i].data
+  #mask = shoebox[i].mask
+  #bkgrd = shoebox[i].background
 
-    #fg = flex.bool([m & MaskCode.Foreground != 0 for m in mask])
-    #bg = flex.bool([m & MaskCode.BackgroundUsed != 0 for m in mask])
-    #n = fg.count(True)
-    #m = bg.count(True)
-    #Sp = flex.sum(data.select(fg))
-    #Bp = flex.sum(data.select(bg)) / m
+  #fg = flex.bool([m & MaskCode.Foreground != 0 for m in mask])
+  #bg = flex.bool([m & MaskCode.BackgroundUsed != 0 for m in mask])
+  #n = fg.count(True)
+  #m = bg.count(True)
+  #Sp = flex.sum(data.select(fg))
+  #Bp = flex.sum(data.select(bg)) / m
 
-    #F = 1.0 - erf(nsigma / sqrt(2.0))
-    #c = 1.0 / (1 + F * n / m)
-    #B = c * (Bp - (F / m) * Sp)
- ##   print F, c, Bp, n, m, Sp, B
-    #print Bp, Sp
-    #for j in range(len(bkgrd)):
-      #bkgrd[j] = B
+  #F = 1.0 - erf(nsigma / sqrt(2.0))
+  #c = 1.0 / (1 + F * n / m)
+  #B = c * (Bp - (F / m) * Sp)
+  ##   print F, c, Bp, n, m, Sp, B
+  #print Bp, Sp
+  #for j in range(len(bkgrd)):
+  #bkgrd[j] = B
 
   return
 
@@ -351,7 +343,7 @@ def main(params):
   if params.background_method == 'xds':
     background_xds(rlist)
   elif params.background_method == 'mosflm':
-    assert(params.pixel_mask != 'all')
+    assert (params.pixel_mask != 'all')
     background_inclined(rlist)
 
   integrate_3d_summation(rlist)
@@ -376,8 +368,7 @@ def main(params):
     else:
       underestimates.append(j)
 
-  print '%d overestimates, %d underestimates' % (len(overestimates),
-                                                 len(underestimates))
+  print '%d overestimates, %d underestimates' % (len(overestimates), len(underestimates))
 
   overestimates = rlist.select(flex.size_t(overestimates))
   underestimates = rlist.select(flex.size_t(underestimates))
@@ -396,6 +387,6 @@ if __name__ == '__main__':
   import sys
 
   from libtbx.phil import command_line
-  cmd = command_line.argument_interpreter(master_params = master_phil)
-  working_phil = cmd.process_and_fetch(args = sys.argv[1:])
+  cmd = command_line.argument_interpreter(master_params=master_phil)
+  working_phil = cmd.process_and_fetch(args=sys.argv[1:])
   main(working_phil.extract())

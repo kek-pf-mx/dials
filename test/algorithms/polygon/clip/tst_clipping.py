@@ -4,9 +4,8 @@ def point_in_polygon(point, poly):
   inside = False
   j = len(poly) - 1
   for i in range(len(poly)):
-    if (((poly[i][1] > point[1]) != (poly[j][1] > point[1])) and
-        (point[0] < (poly[j][0] - poly[i][0]) * (point[1] - poly[i][1]) /
-                    (poly[j][1] - poly[i][1]) + poly[i][0])):
+    if (((poly[i][1] > point[1]) != (poly[j][1] > point[1]))
+        and (point[0] < (poly[j][0] - poly[i][0]) * (point[1] - poly[i][1]) / (poly[j][1] - poly[i][1]) + poly[i][0])):
       inside = not inside
   return inside
 
@@ -72,7 +71,6 @@ def generate_polygon(nvert, box):
   return v
 
 class TestSimpleWithConvex(object):
-
   def __init__(self):
     pass
 
@@ -89,13 +87,11 @@ class TestSimpleWithConvex(object):
       subject, target = generate_intersecting()
 
       # Do the clipping
-      result = clip.simple_with_convex(
-          flex.vec2_double(subject),
-          flex.vec2_double(target))
+      result = clip.simple_with_convex(flex.vec2_double(subject), flex.vec2_double(target))
 
       # Ensure we have roughly valid number of vertices
-      assert(len(result) >= 3)
-      assert(len(result) >= min([len(subject), len(target)]))
+      assert (len(result) >= 3)
+      assert (len(result) >= min([len(subject), len(target)]))
 
 #            for v in result:
 #                assert(point_in_polygon(v, clip))
@@ -112,18 +108,14 @@ class TestSimpleWithConvex(object):
       subject, target = generate_non_intersecting()
 
       # Do the clipping
-      result = clip.simple_with_convex(
-          flex.vec2_double(subject),
-          flex.vec2_double(target))
+      result = clip.simple_with_convex(flex.vec2_double(subject), flex.vec2_double(target))
 
       # Ensure we no vertices
-      assert(len(result) == 0)
+      assert (len(result) == 0)
 
     print 'OK'
 
-
 class TestSimpleWithRect(object):
-
   def __init__(self):
     pass
 
@@ -141,12 +133,11 @@ class TestSimpleWithRect(object):
       rect = ((0, 0), (10, 10))
 
       # Do the clipping
-      result = clip.simple_with_rect(
-          flex.vec2_double(subject), rect)
+      result = clip.simple_with_rect(flex.vec2_double(subject), rect)
 
       # Ensure we have roughly valid number of vertices
-      assert(len(result) >= 3)
-      assert(len(result) >= min([len(subject), 4]))
+      assert (len(result) >= 3)
+      assert (len(result) >= min([len(subject), 4]))
 
 #            for v in result:
 #                assert(point_in_polygon(v, clip))
@@ -163,7 +154,6 @@ class TestSimpleWithRect(object):
 #            subject, target = generate_non_intersecting(target_size=2)
 #            rect = ((0, 0), (10, 10))
 
-
 #            # Do the clipping
 #            result = clip.simple_with_rect(
 #                flex.vec2_double(subject), rect)
@@ -175,9 +165,7 @@ class TestSimpleWithRect(object):
 
 #        print 'OK'
 
-
 class TestTriangleWithTriangle(object):
-
   def __init__(self):
     pass
 
@@ -196,8 +184,8 @@ class TestTriangleWithTriangle(object):
       result = clip.triangle_with_triangle(subject, target)
 
       # Ensure we have roughly valid number of vertices
-      assert(len(result) >= 3)
-      assert(len(result) >= min([len(subject), len(target)]))
+      assert (len(result) >= 3)
+      assert (len(result) >= min([len(subject), len(target)]))
 
 #            for v in result:
 #                assert(point_in_polygon(v, clip))
@@ -216,13 +204,11 @@ class TestTriangleWithTriangle(object):
       result = clip.triangle_with_triangle(subject, target)
 
       # Ensure we no vertices
-      assert(len(result) == 0)
+      assert (len(result) == 0)
 
     print 'OK'
 
-
 class TestTriangleWithConvexQuad(object):
-
   def __init__(self):
     pass
 
@@ -241,8 +227,8 @@ class TestTriangleWithConvexQuad(object):
       result = clip.triangle_with_convex_quad(subject, target)
 
       # Ensure we have roughly valid number of vertices
-      assert(len(result) >= 3)
-      assert(len(result) >= min([len(subject), len(target)]))
+      assert (len(result) >= 3)
+      assert (len(result) >= min([len(subject), len(target)]))
 
 #            for v in result:
 #                assert(point_in_polygon(v, clip))
@@ -261,13 +247,11 @@ class TestTriangleWithConvexQuad(object):
       result = clip.triangle_with_convex_quad(subject, target)
 
       # Ensure we no vertices
-      assert(len(result) == 0)
+      assert (len(result) == 0)
 
     print 'OK'
 
-
 class TestQuadWithTriangle(object):
-
   def __init__(self):
     pass
 
@@ -286,8 +270,8 @@ class TestQuadWithTriangle(object):
       result = clip.quad_with_triangle(subject, target)
 
       # Ensure we have roughly valid number of vertices
-      assert(len(result) >= 3)
-      assert(len(result) >= min([len(subject), len(target)]))
+      assert (len(result) >= 3)
+      assert (len(result) >= min([len(subject), len(target)]))
 
 #            for v in result:
 #                assert(point_in_polygon(v, clip))
@@ -306,13 +290,11 @@ class TestQuadWithTriangle(object):
       result = clip.quad_with_triangle(subject, target)
 
       # Ensure we no vertices
-      assert(len(result) == 0)
+      assert (len(result) == 0)
 
     print 'OK'
 
-
 class TestQuadWithConvexQuad(object):
-
   def __init__(self):
     pass
 
@@ -331,8 +313,8 @@ class TestQuadWithConvexQuad(object):
       result = clip.quad_with_convex_quad(subject, target)
 
       # Ensure we have roughly valid number of vertices
-      assert(len(result) >= 3)
-      assert(len(result) >= min([len(subject), len(target)]))
+      assert (len(result) >= 3)
+      assert (len(result) >= min([len(subject), len(target)]))
 
 #            for v in result:
 #                assert(point_in_polygon(v, clip))
@@ -351,13 +333,11 @@ class TestQuadWithConvexQuad(object):
       result = clip.quad_with_convex_quad(subject, target)
 
       # Ensure we no vertices
-      assert(len(result) == 0)
+      assert (len(result) == 0)
 
     print 'OK'
 
-
 class TestLineWithRect(object):
-
   def __init__(self):
     self.box = ((-10, -10), (10, 10))
 
@@ -372,10 +352,9 @@ class TestLineWithRect(object):
       line = (point1, point2)
       line, status = clip.line_with_rect(line, self.box)
       if self.intersects(point1, point2):
-        assert(status)
+        assert (status)
       else:
-        assert(status == False)
-
+        assert (status == False)
 
     print 'OK'
 
@@ -390,35 +369,29 @@ class TestLineWithRect(object):
       c = (point1[1] - m * point1[0])
       x = self.box[0][0]
       y = m * x + c
-      if (y >= self.box[0][1] and y <= self.box[1][1] and
-          self.inbetween(y, point1[1], point2[1])):
+      if (y >= self.box[0][1] and y <= self.box[1][1] and self.inbetween(y, point1[1], point2[1])):
         return True
       x = self.box[1][0]
       y = m * x + c
-      if (y >= self.box[0][1] and y <= self.box[1][1] and
-          self.inbetween(y, point1[1], point2[1])):
+      if (y >= self.box[0][1] and y <= self.box[1][1] and self.inbetween(y, point1[1], point2[1])):
         return True
       y = self.box[0][1]
       x = (y - c) / m
-      if (x >= self.box[0][0] and x <= self.box[1][0] and
-          self.inbetween(x, point1[0], point2[0])):
+      if (x >= self.box[0][0] and x <= self.box[1][0] and self.inbetween(x, point1[0], point2[0])):
         return True
       y = self.box[1][1]
       x = (y - c) / m
-      if (x >= self.box[0][0] and x <= self.box[0][1] and
-          self.inbetween(x, point1[0], point2[0])):
+      if (x >= self.box[0][0] and x <= self.box[0][1] and self.inbetween(x, point1[0], point2[0])):
         return True
       return False
     else:
       return True
 
   def is_outside(self, point):
-    return (point[0] < self.box[0][0] or point[1] < self.box[0][1] or
-            point[0] > self.box[1][0] or point[1] > self.box[1][1])
-
+    return (point[0] < self.box[0][0] or point[1] < self.box[0][1] or point[0] > self.box[1][0]
+            or point[1] > self.box[1][1])
 
 class Test(object):
-
   def __init__(self):
     self.tst_simple_with_convex = TestSimpleWithConvex()
     self.tst_triangle_with_triangle = TestTriangleWithTriangle()
@@ -436,7 +409,6 @@ class Test(object):
     self.tst_quad_with_convex_quad()
     self.tst_line_with_rect()
     self.tst_simple_with_rect()
-
 
 if __name__ == '__main__':
   from dials.test import cd_auto

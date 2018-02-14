@@ -88,7 +88,7 @@ def pull_calculated(integrate_pkl):
     if r.intensity > math.sqrt(r.intensity_variance):
       strong_reflections.append(r)
 
-  del(r_list)
+  del (r_list)
 
   hkl = []
   i = []
@@ -111,7 +111,7 @@ def pull_calculated(integrate_pkl):
 def meansd(values):
   import math
 
-  assert(len(values) > 3)
+  assert (len(values) > 3)
 
   mean = sum(values) / len(values)
   var = sum([(v - mean) * (v - mean) for v in values]) / (len(values) - 1)
@@ -120,21 +120,20 @@ def meansd(values):
 
 def cc(a, b):
 
-  assert(len(a) == len(b))
+  assert (len(a) == len(b))
 
   ma, sa = meansd(a)
   mb, sb = meansd(b)
 
-  r = (1 / (len(a) - 1)) * sum([((a[j] - ma) / sa) * ((b[j] - mb) / sb)
-                                for j in range(len(a))])
+  r = (1 / (len(a) - 1)) * sum([((a[j] - ma) / sa) * ((b[j] - mb) / sb) for j in range(len(a))])
 
   return r
 
-def R(calc, obs, scale = None):
+def R(calc, obs, scale=None):
 
   import math
 
-  assert(len(calc) == len(obs))
+  assert (len(calc) == len(obs))
 
   if not scale:
     scale = sum(obs) / sum(calc)
@@ -171,7 +170,7 @@ def compare_chunks(integrate_mtz, integrate_pkl, crystal_json, sweep_json):
     query.append(xyz[2])
 
   # perform the match
-  ann = ann_adaptor(data = reference, dim = 3, k = 1)
+  ann = ann_adaptor(data=reference, dim=3, k=1)
   ann.query(query)
 
   MOS = []
@@ -191,7 +190,7 @@ def compare_chunks(integrate_mtz, integrate_pkl, crystal_json, sweep_json):
 
   unique = set(HKL)
 
-  resolutions = { }
+  resolutions = {}
 
   for hkl in unique:
     resolutions[hkl] = uc.d(hkl)
@@ -249,9 +248,9 @@ def compare_chunks(integrate_mtz, integrate_pkl, crystal_json, sweep_json):
   pyplot.xlabel('Chunk')
   pyplot.ylabel('Statistic')
   pyplot.title('Statistics for 1000 reflection-pair chunks')
-  pyplot.plot(chunks, ccs, label = 'CC')
-  pyplot.plot(chunks, rs, label = 'R')
-  pyplot.plot(chunks, ss, label = 'K')
+  pyplot.plot(chunks, ccs, label='CC')
+  pyplot.plot(chunks, rs, label='R')
+  pyplot.plot(chunks, ss, label='K')
   pyplot.show()
   #pyplot.legend()
   #pyplot.savefig('plot-vs-mosflm.png')

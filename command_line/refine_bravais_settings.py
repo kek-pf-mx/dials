@@ -42,7 +42,8 @@ Examples::
 
 '''
 
-phil_scope = iotbx.phil.parse("""
+phil_scope = iotbx.phil.parse(
+    """
 lepage_max_delta = 5
   .type = float
 verbosity = 0
@@ -72,11 +73,12 @@ output {
 }
 
 include scope dials.algorithms.refinement.refiner.phil_scope
-""", process_includes=True)
+""",
+    process_includes=True)
 
 # override default refinement parameters
-phil_scope = phil_scope.fetch(source=iotbx.phil.parse(
-  """\
+phil_scope = phil_scope.fetch(
+    source=iotbx.phil.parse("""\
 refinement {
   reflections {
     reflections_per_degree=100
@@ -90,7 +92,7 @@ def bravais_lattice_to_space_groups(chiral_only=True):
   import collections
   bravais_lattice_to_sg = collections.OrderedDict()
   for sgn in range(230):
-    sg = sgtbx.space_group_info(number=sgn+1).group()
+    sg = sgtbx.space_group_info(number=sgn + 1).group()
     if (not chiral_only) or (sg.is_chiral()):
       bravais_lattice = bravais_types.bravais_lattice(group=sg)
       bravais_lattice_to_sg.setdefault(str(bravais_lattice), [])
@@ -98,16 +100,12 @@ def bravais_lattice_to_space_groups(chiral_only=True):
   return bravais_lattice_to_sg
 
 def bravais_lattice_to_space_group_table(bravais_settings=None, chiral_only=True):
-  bravais_lattice_to_sg = bravais_lattice_to_space_groups(
-    chiral_only=chiral_only)
+  bravais_lattice_to_sg = bravais_lattice_to_space_groups(chiral_only=chiral_only)
   logger.info('Chiral space groups corresponding to each Bravais lattice:')
   for bravais_lattice, space_groups in bravais_lattice_to_sg.iteritems():
     if bravais_settings is not None and bravais_lattice not in bravais_settings:
       continue
-    logger.info(': '.join(
-      [bravais_lattice,
-       ' '.join(
-         [short_space_group_name(sg) for sg in space_groups])]))
+    logger.info(': '.join([bravais_lattice, ' '.join([short_space_group_name(sg) for sg in space_groups])]))
 
 def short_space_group_name(space_group):
   sgt = space_group.type()
@@ -116,19 +114,18 @@ def short_space_group_name(space_group):
     symbol = symbol.replace(' 1', '')
   return symbol.replace(' ', '')
 
-
 def run(args):
   from dials.util import log
   import libtbx.load_env
-  usage = "%s experiments.json indexed.pickle [options]" %libtbx.env.dispatcher_name
+  usage = "%s experiments.json indexed.pickle [options]" % libtbx.env.dispatcher_name
 
   parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_experiments=True,
-    read_reflections=True,
-    check_format=False,
-    epilog=help_message)
+      usage=usage,
+      phil=phil_scope,
+      read_experiments=True,
+      read_reflections=True,
+      check_format=False,
+      epilog=help_message)
 
   params, options = parser.parse_args(show_diff_phil=False)
 
@@ -150,7 +147,7 @@ def run(args):
     parser.print_help()
     return
 
-  assert(len(reflections) == 1)
+  assert (len(reflections) == 1)
   reflections = reflections[0]
 
   if len(experiments) == 0:
@@ -186,8 +183,7 @@ def run(args):
   if experiments[0].crystal.get_space_group().n_ltr() > 1:
     effective_group = experiments[0].crystal.get_space_group()\
       .build_derived_reflection_intensity_group(anomalous_flag=True)
-    sys_absent_flags = effective_group.is_sys_absent(
-      reflections['miller_index'])
+    sys_absent_flags = effective_group.is_sys_absent(reflections['miller_index'])
     reflections = reflections.select(~sys_absent_flags)
   experiments[0].crystal.update(experiments[0].crystal.change_basis(cb_op_to_primitive))
   miller_indices = reflections['miller_index']
@@ -195,8 +191,12 @@ def run(args):
   reflections['miller_index'] = miller_indices
 
   Lfat = refined_settings_factory_from_refined_triclinic(
-    params, experiments, reflections, lepage_max_delta=params.lepage_max_delta,
-    nproc=params.nproc, refiner_verbosity=params.verbosity)
+      params,
+      experiments,
+      reflections,
+      lepage_max_delta=params.lepage_max_delta,
+      nproc=params.nproc,
+      refiner_verbosity=params.verbosity)
   s = StringIO()
   possible_bravais_settings = set(solution['bravais'] for solution in Lfat)
   bravais_lattice_to_space_group_table(possible_bravais_settings)
@@ -207,10 +207,9 @@ def run(args):
   prefix = params.output.prefix
   if prefix is None:
     prefix = ''
-  summary_file = '%sbravais_summary.json' %prefix
-  logger.info('Saving summary as %s' %summary_file)
-  open(join(params.output.directory, summary_file), 'wb').write(
-    dumps(Lfat.as_dict()))
+  summary_file = '%sbravais_summary.json' % prefix
+  logger.info('Saving summary as %s' % summary_file)
+  open(join(params.output.directory, summary_file), 'wb').write(dumps(Lfat.as_dict()))
   from dxtbx.serialize import dump
   import copy
   for subgroup in Lfat:
@@ -221,7 +220,7 @@ def run(args):
       expt.beam = subgroup.beam
     soln = int(subgroup.setting_number)
     bs_json = '%sbravais_setting_%i.json' % (prefix, soln)
-    logger.info('Saving solution %i as %s' %(soln, bs_json))
+    logger.info('Saving solution %i as %s' % (soln, bs_json))
     dump.experiment_list(expts, join(params.output.directory, bs_json))
   return
 

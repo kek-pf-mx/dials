@@ -1,8 +1,6 @@
-
 from __future__ import absolute_import, division
 
 class Test(object):
-
   def __init__(self):
     pass
 
@@ -12,7 +10,6 @@ class Test(object):
     from dials.array_family import flex
 
     class Modeller(ProfileModellerIface):
-
       def __init__(self, index, expected):
         self.index = index
         self.accumulated = False
@@ -21,15 +18,15 @@ class Test(object):
         super(Modeller, self).__init__()
 
       def model(self, reflections):
-        assert(reflections['id'].all_eq(self.index))
-        assert(len(reflections) == self.expected)
+        assert (reflections['id'].all_eq(self.index))
+        assert (len(reflections) == self.expected)
 
       def accumulate(self, other):
         self.accumulated = True
-        assert(self.index == other.index)
+        assert (self.index == other.index)
 
       def finalize(self):
-        assert(self.accumulated)
+        assert (self.accumulated)
         self.finalized = True
 
     # The expected number of reflections
@@ -40,9 +37,7 @@ class Test(object):
     reflections["id"] = flex.int()
     for idx in range(len(expected)):
       for n in range(expected[idx]):
-        reflections.append({
-          "id" : idx
-        })
+        reflections.append({"id": idx})
 
     # Create two modellers
     modeller1 = MultiExpProfileModeller()
@@ -62,11 +57,10 @@ class Test(object):
     modeller1.finalize()
 
     # Check finalized
-    assert(modeller1.finalized)
+    assert (modeller1.finalized)
 
     # Test passed
     print 'OK'
-
 
 if __name__ == '__main__':
 

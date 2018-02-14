@@ -12,7 +12,6 @@ from __future__ import absolute_import, division
 # LIBTBX_SET_DISPATCHER_NAME dev.dials.simulate
 
 class Script(object):
-
   def __init__(self):
     from dials.util.options import OptionParser
     from libtbx.phil import parse
@@ -27,9 +26,7 @@ class Script(object):
     ''')
 
     # Create the parser
-    self.parser = OptionParser(
-      usage=usage,
-      phil=self.phil_scope())
+    self.parser = OptionParser(usage=usage, phil=self.phil_scope())
 
   @staticmethod
   def map_to_image_space(refl, d, dhs, dks, dls):
@@ -43,9 +40,8 @@ class Script(object):
     ys = flex.floor(dys + refl.image_coord_px[1]).iround() - bb[2]
     zs = flex.floor(dzs + refl.frame_number).iround() - bb[4]
     xyz = flex.vec3_int(zs, ys, xs)
-    xyz = xyz.select((xs >= 0 and xs < (bb[1] - bb[0])) &
-                     (ys >= 0 and ys < (bb[3] - bb[2])) &
-                     (zs >= 0 and zs < (bb[5] - bb[4])))
+    xyz = xyz.select((xs >= 0 and xs < (bb[1] - bb[0])) & (ys >= 0 and ys < (bb[3] - bb[2])) & (zs >= 0 and zs <
+                                                                                                (bb[5] - bb[4])))
     for _xyz in xyz:
       refl.shoebox[_xyz] += 1
 
@@ -124,7 +120,7 @@ class Script(object):
     scale = params.integrated_data_file_scale
 
     if reference:
-      counts_database = { }
+      counts_database = {}
       from iotbx import mtz
       m = mtz.object(reference)
       mi = m.extract_miller_indices()
@@ -137,9 +133,11 @@ class Script(object):
           counts_database[hkl] = counts
           counts_database[(-hkl[0], -hkl[1], -hkl[2])] = counts
     else:
+
       def constant_factory(value):
         import itertools
         return itertools.repeat(value).next
+
       from collections import defaultdict
       counts_database = defaultdict(constant_factory(params.counts))
 
@@ -177,9 +175,8 @@ class Script(object):
         y.append(dxyz[1] + _y)
         z.append(dxyz[2] + _z)
 
-      hkl.bounding_box = (int(math.floor(min(x))), int(math.floor(max(x)) + 1),
-                          int(math.floor(min(y))), int(math.floor(max(y)) + 1),
-                          int(math.floor(min(z))), int(math.floor(max(z)) + 1))
+      hkl.bounding_box = (int(math.floor(min(x))), int(math.floor(max(x)) + 1), int(math.floor(min(y))),
+                          int(math.floor(max(y)) + 1), int(math.floor(min(z))), int(math.floor(max(z)) + 1))
       try:
         counts = counts_database[hkl.miller_index]
         useful.append(hkl)
@@ -190,7 +187,7 @@ class Script(object):
     shoebox.allocate(useful)
 
     from dials.util.command_line import ProgressBar
-    p = ProgressBar(title = 'Generating shoeboxes')
+    p = ProgressBar(title='Generating shoeboxes')
 
     # now for each reflection perform the simulation
     for j, refl in enumerate(useful):
@@ -198,7 +195,7 @@ class Script(object):
       d = d_matrices[j]
 
       from scitbx.random import variate, normal_distribution
-      g = variate(normal_distribution(mean = 0, sigma = node_size))
+      g = variate(normal_distribution(mean=0, sigma=node_size))
       counts = counts_database[refl.miller_index]
       dhs = g(counts)
       dks = g(counts)
@@ -211,15 +208,14 @@ class Script(object):
     from dials.algorithms.simulation.generate_test_reflections import \
      random_background_plane
 
-    p = ProgressBar(title = 'Generating background')
+    p = ProgressBar(title='Generating background')
     for j, refl in enumerate(useful):
       p.update(j * 100.0 / len(useful))
       if params.background:
         random_background_plane(refl.shoebox, params.background, 0.0, 0.0, 0.0)
       else:
-        random_background_plane(
-          refl.shoebox, params.background_a, params.background_b,
-          params.background_c, params.background_d)
+        random_background_plane(refl.shoebox, params.background_a, params.background_b, params.background_c,
+                                params.background_d)
 
     p.finished('Generated %d backgrounds' % len(useful))
     if params.output.all:

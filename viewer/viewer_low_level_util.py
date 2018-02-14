@@ -17,16 +17,12 @@ import wx.lib.scrolledpanel as scroll_pan
 import wx.grid as gridlib
 import math
 
-
 class grid_frame(wx.Frame):
   def __init__(self, parent, title):
-    super(grid_frame, self).__init__(parent, title = title,
-          size = wx.DefaultSize)
+    super(grid_frame, self).__init__(parent, title=title, size=wx.DefaultSize)
 
-  def frame_ini_img(self, in_upper_panel, text_data = None):
+  def frame_ini_img(self, in_upper_panel, text_data=None):
     self.img_panel = in_upper_panel
-
-
 
     if text_data is not None:
       self.myGrid = text_data
@@ -34,10 +30,7 @@ class grid_frame(wx.Frame):
     self.my_sizer = wx.BoxSizer(wx.VERTICAL)
 
     if text_data is not None:
-      self.my_sizer.Add(self.myGrid, proportion = 3,
-                        flag =  wx.EXPAND | wx.ALL, border = 3)
-
-
+      self.my_sizer.Add(self.myGrid, proportion=3, flag=wx.EXPAND | wx.ALL, border=3)
 
     self.my_sizer.SetMinSize((900, 600))
     self.SetSizer(self.my_sizer)
@@ -47,30 +40,23 @@ class grid_frame(wx.Frame):
   def OnCloseWindow(self, event):
     wx.GetApp().Exit()
 
-
-
 class flex_3d_frame(wx.Frame):
   def __init__(self, parent, title):
-    super(flex_3d_frame, self).__init__(parent, title = title,
-          size = wx.DefaultSize)
+    super(flex_3d_frame, self).__init__(parent, title=title, size=wx.DefaultSize)
     self.table_exist = False
 
-  def frame_ini_img(self, in_upper_panel, text_data = None):
+  def frame_ini_img(self, in_upper_panel, text_data=None):
     self.img_panel = in_upper_panel
     self.myGrid = None
 
     if text_data is not None:
       self.myGrid = text_data
 
-
     self.my_sizer = wx.BoxSizer(wx.VERTICAL)
-    self.my_sizer.Add(self.img_panel, proportion = 2,
-                      flag =  wx.EXPAND | wx.ALL, border = 3)
+    self.my_sizer.Add(self.img_panel, proportion=2, flag=wx.EXPAND | wx.ALL, border=3)
 
     if text_data is not None:
-      self.my_sizer.Add(self.myGrid, proportion = 3,
-                        flag =  wx.EXPAND | wx.ALL, border = 3)
-
+      self.my_sizer.Add(self.myGrid, proportion=3, flag=wx.EXPAND | wx.ALL, border=3)
 
     self.my_sizer.SetMinSize((400, 200))
     self.SetSizer(self.my_sizer)
@@ -84,7 +70,6 @@ class flex_3d_frame(wx.Frame):
     else:
       #print "from flex_3d_frame self.myGrid .NEQ. None"
       wx.GetApp().Exit()
-
 
 class TupTable(gridlib.PyGridTableBase):
   def __init__(self, data, rowLabels=None, colLabels=None):
@@ -116,9 +101,7 @@ class TupTable(gridlib.PyGridTableBase):
   def SetValue(self, row, col, value):
     pass
 
-
 class MyGrid(gridlib.Grid):
-
   def __init__(self, parent_frame):
 
     self.parent_fr = parent_frame
@@ -187,22 +170,17 @@ class MyGrid(gridlib.Grid):
 
     self.sorted_flags[col_to_sort] = not self.sorted_flags[col_to_sort]
 
-
-
     try:
-      tupldata = sorted(self.data, key=lambda x: int(x[col_to_sort]),
-                        reverse = self.sorted_flags[col_to_sort])
+      tupldata = sorted(self.data, key=lambda x: int(x[col_to_sort]), reverse=self.sorted_flags[col_to_sort])
       print "using key=lambda x: int(x[col_to_sort])"
 
     except Exception:
       try:
-        tupldata = sorted(self.data, key=lambda x: float(x[col_to_sort]),
-                          reverse = self.sorted_flags[col_to_sort])
+        tupldata = sorted(self.data, key=lambda x: float(x[col_to_sort]), reverse=self.sorted_flags[col_to_sort])
         print "using key=lambda x: float(x[col_to_sort])"
       except Exception:
-        tupldata = sorted(self.data, key=lambda x:
-                          tuple(eval(str(x[col_to_sort]))),
-                          reverse = self.sorted_flags[col_to_sort])
+        tupldata = sorted(
+            self.data, key=lambda x: tuple(eval(str(x[col_to_sort]))), reverse=self.sorted_flags[col_to_sort])
         print "using key=lambda x: tuple(x[col_to_sort])"
 
     colLabels = tuple(self.lst_keys)
@@ -235,9 +213,9 @@ class flex_arr_img_panel(wx.Panel):
     self.palette = "black2white"
     self.row_pos = 0
     self.Pframe = parent_frame
-    self.local_bbox = (0,0,2,2,4,4)
+    self.local_bbox = (0, 0, 2, 2, 4, 4)
 
-  def ini_n_intro(self, data_in_one, data_in_two = None):
+  def ini_n_intro(self, data_in_one, data_in_two=None):
 
     self.scale = 1.0
 
@@ -269,23 +247,20 @@ class flex_arr_img_panel(wx.Panel):
 
       self.local_bbox = self.table[self.row_pos]['bbox']
 
-
     except Exception:
       self.first_lst_in, self.segn_lst_in = None, None
 
-  def _mi_list_of_wxbitmaps(self, re_scaling = False):
+  def _mi_list_of_wxbitmaps(self, re_scaling=False):
 
     if not re_scaling:
       if self.show_mask:
         self.lst_bmp_obj = wxbitmap_convert(self.first_lst_in, self.segn_lst_in)
       else:
         self.lst_bmp_obj = wxbitmap_convert(self.first_lst_in, None)
-      return self.lst_bmp_obj.get_wxbitmap_lst(show_nums = self.show_nums,
-                                               palette = self.palette,
-                                               scale = self.scale)
+      return self.lst_bmp_obj.get_wxbitmap_lst(show_nums=self.show_nums, palette=self.palette, scale=self.scale)
 
     else:
-      return self.lst_bmp_obj.scaling(scale = self.scale)
+      return self.lst_bmp_obj.scaling(scale=self.scale)
 
   def update_img_w_row_pos(self, num):
     self.row_pos = num
@@ -313,8 +288,7 @@ class flex_arr_img_panel(wx.Panel):
     self.bmp_lst = self._mi_list_of_wxbitmaps()
     self.panel_right.img_refresh(self.bmp_lst)
 
-
-  def to_change_palette(self, palette_name = None):
+  def to_change_palette(self, palette_name=None):
     if palette_name is None:
       print "Something went wrong"
     else:
@@ -337,14 +311,13 @@ class flex_arr_img_panel(wx.Panel):
           #Minimum possible zoom reached
           self.scale = 0.2
 
-    self.bmp_lst = self._mi_list_of_wxbitmaps(re_scaling = True)
+    self.bmp_lst = self._mi_list_of_wxbitmaps(re_scaling=True)
     self.panel_right.img_refresh(self.bmp_lst)
-
 
 class multi_img_scrollable(scroll_pan.ScrolledPanel):
   def __init__(self, outer_panel, i_bmp_in):
     super(multi_img_scrollable, self).__init__(outer_panel)
-    self.parent_panel  = outer_panel
+    self.parent_panel = outer_panel
     self.lst_2d_bmp = i_bmp_in
     self.SetBackgroundColour(wx.Colour(200, 200, 200))
 
@@ -355,7 +328,7 @@ class multi_img_scrollable(scroll_pan.ScrolledPanel):
 
     self.set_scroll_content()
 
-    self.mainSizer.Add(self.img_lst_v_sizer, 0, wx.CENTER|wx.ALL, 10)
+    self.mainSizer.Add(self.img_lst_v_sizer, 0, wx.CENTER | wx.ALL, 10)
     self.SetSizer(self.mainSizer)
 
     self.SetupScrolling()
@@ -400,7 +373,7 @@ class multi_img_scrollable(scroll_pan.ScrolledPanel):
       img_lst_hor_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
       for i, i_bmp in enumerate(lst_1d):
-        local_bitmap = wx.StaticBitmap(self, bitmap = i_bmp)
+        local_bitmap = wx.StaticBitmap(self, bitmap=i_bmp)
         if self.parent_panel.local_bbox == None:
           slice_string = "Slice[" + str(i) + ":" + str(i + 1) + ", :, :]"
         else:
@@ -412,25 +385,21 @@ class multi_img_scrollable(scroll_pan.ScrolledPanel):
         sigle_slice_sizer = wx.BoxSizer(wx.VERTICAL)
         sigle_slice_sizer.Clear(True)
 
-        sigle_slice_sizer.Add(local_bitmap, proportion = 0,
-                              flag = wx.ALIGN_CENTRE | wx.ALL, border = 2)
-        sigle_slice_sizer.Add(slice_sub_info_txt, proportion = 0,
-                              flag = wx.ALIGN_CENTRE | wx.ALL, border = 2)
-        img_lst_hor_sizer.Add(sigle_slice_sizer, proportion = 0,
-                              flag = wx.ALIGN_CENTER | wx.ALL, border = 2)
+        sigle_slice_sizer.Add(local_bitmap, proportion=0, flag=wx.ALIGN_CENTRE | wx.ALL, border=2)
+        sigle_slice_sizer.Add(slice_sub_info_txt, proportion=0, flag=wx.ALIGN_CENTRE | wx.ALL, border=2)
+        img_lst_hor_sizer.Add(sigle_slice_sizer, proportion=0, flag=wx.ALIGN_CENTER | wx.ALL, border=2)
 
-      self.img_lst_v_sizer.Add(img_lst_hor_sizer, 0, wx.CENTER|wx.ALL, 10)
+      self.img_lst_v_sizer.Add(img_lst_hor_sizer, 0, wx.CENTER | wx.ALL, 10)
 
       self.n_img += 1
 
     self.parent_panel.Pframe.Layout()
     self.SetScrollRate(1, 1)
+
   def OnMouseMotion(self, event):
 
     self.Mouse_Pos_x, self.Mouse_Pos_y = event.GetPosition()
     #print "OnMouseMotion(self, event)"
-
-
 
   def OnMouseWheel(self, event):
 
@@ -454,12 +423,10 @@ class multi_img_scrollable(scroll_pan.ScrolledPanel):
     self.x_uni = float(View_start_x + self.Mouse_Pos_x) / float(v_size_x)
     self.y_uni = float(View_start_y + self.Mouse_Pos_y) / float(v_size_y)
 
-
   def img_refresh(self, i_bmp_new):
 
     self.lst_2d_bmp = i_bmp_new
     self.set_scroll_content()
-
 
   def OnIdle(self, event):
     if self.scroll_rot != 0:
@@ -485,43 +452,36 @@ class multi_img_scrollable(scroll_pan.ScrolledPanel):
         #print "need to move IMG"
         pass
 
-
       self.old_Mouse_Pos_x = self.Mouse_Pos_x
       self.old_Mouse_Pos_y = self.Mouse_Pos_y
-
-
 
 class buttons_panel(wx.Panel):
   def __init__(self, outer_panel):
     super(buttons_panel, self).__init__(outer_panel)
-    self.parent_panel  = outer_panel
+    self.parent_panel = outer_panel
 
     Show_Its_CheckBox = wx.CheckBox(self, -1, "Show I nums")
     Show_Its_CheckBox.SetValue(True)
     Show_Its_CheckBox.Bind(wx.EVT_CHECKBOX, self.OnItsCheckbox)
 
     self.my_sizer = wx.BoxSizer(wx.VERTICAL)
-    self.my_sizer.Add(Show_Its_CheckBox, proportion = 0,
-                      flag = wx.ALIGN_TOP, border = 5)
+    self.my_sizer.Add(Show_Its_CheckBox, proportion=0, flag=wx.ALIGN_TOP, border=5)
 
     if self.parent_panel.segn_lst_in != None:
       Show_Msk_CheckBox = wx.CheckBox(self, -1, "Show Mask")
       Show_Msk_CheckBox.SetValue(True)
       Show_Msk_CheckBox.Bind(wx.EVT_CHECKBOX, self.OnMskCheckbox)
 
-      self.my_sizer.Add(Show_Msk_CheckBox, proportion = 0,
-                        flag = wx.ALIGN_TOP, border = 5)
+      self.my_sizer.Add(Show_Msk_CheckBox, proportion=0, flag=wx.ALIGN_TOP, border=5)
 
-      masck_conv_str =  "\n Mask Convention:"
+      masck_conv_str = "\n Mask Convention:"
       masck_conv_str += "\n [Valid]                      =  \\\\\\\\\\\\  "
       masck_conv_str += "\n [Foreground]           =  //////  "
       masck_conv_str += "\n [Background]          =  ||||||  "
       masck_conv_str += "\n [BackgroundUsed]  =  ------"
 
-
       label_mask = wx.StaticText(self, -1, masck_conv_str)
-      self.my_sizer.Add(label_mask , proportion = 0,
-                        flag = wx.ALIGN_TOP, border = 5)
+      self.my_sizer.Add(label_mask, proportion=0, flag=wx.ALIGN_TOP, border=5)
 
     label_palette = wx.StaticText(self, -1, "\nColour Palettes")
 
@@ -535,22 +495,15 @@ class buttons_panel(wx.Panel):
     self.RadButtha.Bind(wx.EVT_RADIOBUTTON, self.OnButtha)
     self.RadButthd.Bind(wx.EVT_RADIOBUTTON, self.OnButthd)
 
-    self.my_sizer.Add(label_palette, proportion = 0,
-                      flag = wx.ALIGN_TOP, border = 5)
+    self.my_sizer.Add(label_palette, proportion=0, flag=wx.ALIGN_TOP, border=5)
 
-    self.my_sizer.Add(self.RadButtb2w, proportion = 0,
-                      flag = wx.ALIGN_TOP, border = 5)
-    self.my_sizer.Add(self.RadButtw2b, proportion = 0,
-                      flag = wx.ALIGN_TOP, border = 5)
-    self.my_sizer.Add(self.RadButtha, proportion = 0,
-                      flag = wx.ALIGN_TOP, border = 5)
-    self.my_sizer.Add(self.RadButthd, proportion = 0,
-                      flag = wx.ALIGN_TOP, border = 5)
-
+    self.my_sizer.Add(self.RadButtb2w, proportion=0, flag=wx.ALIGN_TOP, border=5)
+    self.my_sizer.Add(self.RadButtw2b, proportion=0, flag=wx.ALIGN_TOP, border=5)
+    self.my_sizer.Add(self.RadButtha, proportion=0, flag=wx.ALIGN_TOP, border=5)
+    self.my_sizer.Add(self.RadButthd, proportion=0, flag=wx.ALIGN_TOP, border=5)
 
     self.my_sizer.SetMinSize((50, 300))
     self.SetSizer(self.my_sizer)
-
 
   def OnButtb2w(self, event):
     self.OnButtUpdate()
@@ -567,14 +520,13 @@ class buttons_panel(wx.Panel):
   def OnButtUpdate(self):
     print "OnButtUpdate(self):"
     if self.RadButtb2w.GetValue():
-        self.parent_panel.to_change_palette("black2white")
+      self.parent_panel.to_change_palette("black2white")
     elif self.RadButtw2b.GetValue():
-        self.parent_panel.to_change_palette("white2black")
+      self.parent_panel.to_change_palette("white2black")
     elif self.RadButtha.GetValue():
-        self.parent_panel.to_change_palette("hot ascend")
+      self.parent_panel.to_change_palette("hot ascend")
     else:
-        self.parent_panel.to_change_palette("hot descend")
-
+      self.parent_panel.to_change_palette("hot descend")
 
   def OnItsCheckbox(self, event):
 

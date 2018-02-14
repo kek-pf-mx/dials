@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division
 
 class Test(object):
-
   def __init__(self):
     from dials.algorithms.profile_model.gaussian_rs import transform
     from dials.algorithms.profile_model.gaussian_rs import CoordinateSystem
@@ -19,17 +18,14 @@ class Test(object):
       exit(0)
 
     # Set the sweep filename and load the sweep
-    filename = os.path.join(
-        dials_regression,
-        'centroid_test_data',
-        'sweep.json')
+    filename = os.path.join(dials_regression, 'centroid_test_data', 'sweep.json')
     self.sweep = load.sweep(filename)
 
     # Get the models
     self.beam = self.sweep.get_beam()
     self.detector = self.sweep.get_detector()
     self.gonio = self.sweep.get_goniometer()
-    assert(len(self.detector) == 1)
+    assert (len(self.detector) == 1)
 
     # Get some stuff
     self.s0 = self.beam.get_s0()
@@ -49,8 +45,7 @@ class Test(object):
     self.sigma_divergence = self.beam.get_sigma_divergence(deg=False)
     self.delta_divergence = 3 * self.sigma_divergence
     self.grid_half_size = 4
-    self.step_size = (self.delta_divergence / self.grid_half_size,
-                      self.delta_divergence / self.grid_half_size)
+    self.step_size = (self.delta_divergence / self.grid_half_size, self.delta_divergence / self.grid_half_size)
 
     # Create the coordinate system
     self.cs = CoordinateSystem(self.m2, self.s0, self.s1, self.phi)
@@ -59,13 +54,8 @@ class Test(object):
     self.s1_map = transform.beam_vector_map(self.detector[0], self.beam, True)
 
     # Create the grid index generator
-    self.generate_indices = transform.GridIndexGenerator(
-        self.cs,
-        self.x0,
-        self.y0,
-        self.step_size,
-        self.grid_half_size,
-        self.s1_map)
+    self.generate_indices = transform.GridIndexGenerator(self.cs, self.x0, self.y0, self.step_size, self.grid_half_size,
+                                                         self.s1_map)
 
   def run(self):
     from scitbx import matrix
@@ -82,8 +72,7 @@ class Test(object):
         gi_1, gj_1 = self.generate_indices(j, i)
 
         # Get the grid indices
-        xyz = matrix.col(self.detector[0].get_pixel_lab_coord(
-            (self.x0 + i, self.y0 + j)))
+        xyz = matrix.col(self.detector[0].get_pixel_lab_coord((self.x0 + i, self.y0 + j)))
         xyz = xyz.normalize() * matrix.col(self.s0).length()
         c1, c2 = matrix.col(self.cs.from_beam_vector(xyz))
         gi_2 = self.grid_half_size + c1 / self.step_size[0] + 0.5
@@ -92,15 +81,14 @@ class Test(object):
         # Check both are the same
         eps = 1e-7
         try:
-          assert(abs(gj_1 - gj_2) <= eps)
-          assert(abs(gi_1 - gi_2) <= eps)
+          assert (abs(gj_1 - gj_2) <= eps)
+          assert (abs(gi_1 - gi_2) <= eps)
         except Exception:
           print gi_1, gi_2, gj_1, gj_2
           raise
 
     # Test passed
     print 'OK'
-
 
 if __name__ == '__main__':
   from dials.test import cd_auto

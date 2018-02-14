@@ -17,8 +17,7 @@ from dials.algorithms.refinement.parameterisation.crystal_parameters \
     import CrystalOrientationMixin, CrystalUnitCellMixin
 from dials.algorithms.refinement.refinement_helpers import CrystalOrientationCompose
 
-class ScanVaryingCrystalOrientationParameterisation(
-  ScanVaryingModelParameterisation, CrystalOrientationMixin):
+class ScanVaryingCrystalOrientationParameterisation(ScanVaryingModelParameterisation, CrystalOrientationMixin):
   """Scan-varying parameterisation for crystal orientation, with angles
   expressed in mrad"""
 
@@ -56,9 +55,7 @@ class ScanVaryingCrystalOrientationParameterisation(
     p_list = self._build_p_list(parameter_type)
 
     # Set up the base class
-    ScanVaryingModelParameterisation.__init__(self, crystal, istate,
-                                              p_list, smoother,
-                                              experiment_ids=experiment_ids)
+    ScanVaryingModelParameterisation.__init__(self, crystal, istate, p_list, smoother, experiment_ids=experiment_ids)
 
     return
 
@@ -83,9 +80,7 @@ class ScanVaryingCrystalOrientationParameterisation(
     dphi3_dp = phi3_weights * (1. / phi3_sumweights)
 
     # calculate state and derivatives using the helper class
-    coc = CrystalOrientationCompose(U0, phi1, phi1_set.axis,
-                                    phi2, phi2_set.axis,
-                                    phi3, phi3_set.axis)
+    coc = CrystalOrientationCompose(U0, phi1, phi1_set.axis, phi2, phi2_set.axis, phi3, phi3_set.axis)
     self._U_at_t = coc.U()
     dU_dphi1 = coc.dU_dphi1()
     dU_dphi2 = coc.dU_dphi2()
@@ -93,11 +88,14 @@ class ScanVaryingCrystalOrientationParameterisation(
 
     # calculate derivatives of state wrt underlying parameters
     dU_dp1 = [None] * dphi1_dp.size
-    for (i, v) in dphi1_dp: dU_dp1[i] = dU_dphi1 * v
+    for (i, v) in dphi1_dp:
+      dU_dp1[i] = dU_dphi1 * v
     dU_dp2 = [None] * dphi2_dp.size
-    for (i, v) in dphi2_dp: dU_dp2[i] = dU_dphi2 * v
+    for (i, v) in dphi2_dp:
+      dU_dp2[i] = dU_dphi2 * v
     dU_dp3 = [None] * dphi3_dp.size
-    for (i, v) in dphi3_dp: dU_dp3[i] = dU_dphi3 * v
+    for (i, v) in dphi3_dp:
+      dU_dp3[i] = dU_dphi3 * v
 
     # store derivatives as list-of-lists
     self._dstate_dp = [dU_dp1, dU_dp2, dU_dp3]
@@ -112,9 +110,7 @@ class ScanVaryingCrystalOrientationParameterisation(
 
     return self._U_at_t
 
-
-class ScanVaryingCrystalUnitCellParameterisation(
-  ScanVaryingModelParameterisation, CrystalUnitCellMixin):
+class ScanVaryingCrystalUnitCellParameterisation(ScanVaryingModelParameterisation, CrystalUnitCellMixin):
   """Scan-varying parameterisation for the crystal unit cell"""
 
   def __init__(self, crystal, t_range, num_intervals, experiment_ids=None):
@@ -144,9 +140,7 @@ class ScanVaryingCrystalUnitCellParameterisation(
     p_list = self._build_p_list(crystal, parameter_type)
 
     # Set up the base class
-    ScanVaryingModelParameterisation.__init__(self, crystal, istate,
-                                              p_list, smoother,
-                                              experiment_ids=experiment_ids)
+    ScanVaryingModelParameterisation.__init__(self, crystal, istate, p_list, smoother, experiment_ids=experiment_ids)
 
     return
 
@@ -154,13 +148,12 @@ class ScanVaryingCrystalUnitCellParameterisation(
     """calculate state and derivatives for model at image number t"""
 
     # extract values and weights at time t using the smoother
-    vals, weights, sumweights = zip(*(self._smoother.value_weight(t,
-      pset) for pset in self._param))
+    vals, weights, sumweights = zip(*(self._smoother.value_weight(t, pset) for pset in self._param))
 
     # calculate derivatives of metrical matrix parameters wrt underlying
     # scan-varying parameters
     inv_sumw = [1. / sw for sw in sumweights]
-    dvals_dp =  [e * isw for e, isw in zip(weights, inv_sumw)]
+    dvals_dp = [e * isw for e, isw in zip(weights, inv_sumw)]
 
     # calculate new B and derivatives
     self._B_at_t, dB_dval = self._compose_core(vals)
@@ -169,7 +162,8 @@ class ScanVaryingCrystalUnitCellParameterisation(
     self._dstate_dp = [[b * e for e in a.as_dense_vector()] for a, b in zip(dvals_dp, dB_dval)]
     self._dstate_dp = [[None] * e.size for e in dvals_dp]
     for i, (dv, dB) in enumerate(zip(dvals_dp, dB_dval)):
-      for j, e in dv: self._dstate_dp[i][j] = e * dB
+      for j, e in dv:
+        self._dstate_dp[i][j] = e * dB
 
     return
 

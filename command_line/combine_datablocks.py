@@ -10,7 +10,6 @@
 #
 
 # LIBTBX_SET_DISPATCHER_NAME dev.dials.combine_datablocks
-
 """
 Utility script to combine multiple datablock and strong spot files into
 one datablock and one strong spot file. Imagesets are matched to reflections
@@ -28,7 +27,8 @@ from dials.array_family import flex
 from libtbx.utils import Sorry
 
 # The phil scope
-phil_scope = parse('''
+phil_scope = parse(
+    '''
 
   output {
     datablocks_filename = combined_datablocks.json
@@ -44,7 +44,8 @@ phil_scope = parse('''
       .help = "For JSON output use compact representation"
 
   }
-''', process_includes=True)
+''',
+    process_includes=True)
 
 help_message = '''
 
@@ -60,7 +61,6 @@ Examples::
 '''
 
 class Script(object):
-
   def __init__(self):
     '''Initialise the script.'''
     from dials.util.options import OptionParser
@@ -74,12 +74,12 @@ class Script(object):
 
     # Create the parser
     self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      read_reflections=True,
-      read_datablocks=True,
-      check_format=False,
-      epilog=help_message)
+        usage=usage,
+        phil=phil_scope,
+        read_reflections=True,
+        read_datablocks=True,
+        check_format=False,
+        epilog=help_message)
 
   def run(self):
     '''Execute the script.'''
@@ -90,8 +90,7 @@ class Script(object):
     try:
       assert len(params.input.reflections) == len(params.input.datablock)
     except AssertionError:
-      raise Sorry("The number of input reflections files does not match the "
-        "number of input datablocks")
+      raise Sorry("The number of input reflections files does not match the " "number of input datablocks")
 
     datablocks = flatten_datablocks(params.input.datablock)
     reflections = flatten_reflections(params.input.reflections)
@@ -120,7 +119,7 @@ class Script(object):
     return
 
   def combine_datablocks(self, datablocks):
-    imageset_list=[]
+    imageset_list = []
     for d in datablocks:
       imageset_list.extend(d.extract_imagesets())
     return DataBlock(imageset_list)

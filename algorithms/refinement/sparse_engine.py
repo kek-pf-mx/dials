@@ -27,39 +27,61 @@ from dials.algorithms.refinement.engine import AdaptLstbx as AdaptLstbxBase
 class AdaptLstbxSparse(DisableMPmixin, AdaptLstbxBase, non_linear_ls_eigen_wrapper):
   """Adapt the base class for Eigen"""
 
-  def __init__(self, target, prediction_parameterisation, constraints_manager=None,
-            log=None, verbosity = 0, tracking=None, max_iterations = None):
+  def __init__(self,
+               target,
+               prediction_parameterisation,
+               constraints_manager=None,
+               log=None,
+               verbosity=0,
+               tracking=None,
+               max_iterations=None):
 
     AdaptLstbxBase.__init__(
-            self, target, prediction_parameterisation,
-            constraints_manager=constraints_manager,
-            log=log, verbosity=verbosity, tracking=tracking,
-            max_iterations=max_iterations)
+        self,
+        target,
+        prediction_parameterisation,
+        constraints_manager=constraints_manager,
+        log=log,
+        verbosity=verbosity,
+        tracking=tracking,
+        max_iterations=max_iterations)
 
-    non_linear_ls_eigen_wrapper.__init__(self, n_parameters = len(self.x))
+    non_linear_ls_eigen_wrapper.__init__(self, n_parameters=len(self.x))
 
 from dials.algorithms.refinement.engine import GaussNewtonIterations as GaussNewtonIterationsBase
+
 class GaussNewtonIterations(AdaptLstbxSparse, GaussNewtonIterationsBase):
   """Refinery implementation, using lstbx Gauss Newton iterations"""
 
-  def __init__(self, target, prediction_parameterisation,
+  def __init__(self,
+               target,
+               prediction_parameterisation,
                constraints_manager=None,
-               log=None, verbosity=0, tracking=None,
-               max_iterations=20, **kwds):
+               log=None,
+               verbosity=0,
+               tracking=None,
+               max_iterations=20,
+               **kwds):
 
-    AdaptLstbxSparse.__init__(self, target, prediction_parameterisation,
-             constraints_manager=constraints_manager,
-             log=log, verbosity=verbosity, tracking=tracking,
-             max_iterations=max_iterations)
+    AdaptLstbxSparse.__init__(
+        self,
+        target,
+        prediction_parameterisation,
+        constraints_manager=constraints_manager,
+        log=log,
+        verbosity=verbosity,
+        tracking=tracking,
+        max_iterations=max_iterations)
 
     # add an attribute to the journal
-    self.history.add_column("reduced_chi_squared")#flex.double()
+    self.history.add_column("reduced_chi_squared") #flex.double()
 
     # adopt any overrides of the defaults above
     libtbx.adopt_optional_init_args(self, kwds)
 
 from dials.algorithms.refinement.engine import LevenbergMarquardtIterations
-class SparseLevenbergMarquardtIterations(GaussNewtonIterations,LevenbergMarquardtIterations):
+
+class SparseLevenbergMarquardtIterations(GaussNewtonIterations, LevenbergMarquardtIterations):
   """Levenberg Marquardt with Sparse matrix algebra"""
 
   def set_cholesky_factor(self):

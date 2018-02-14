@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division
 
 class TestSimulated:
-
   def __init__(self):
     #
     # FIXME!!!!!
@@ -12,7 +11,6 @@ class TestSimulated:
     from scitbx.array_family import flex
     seed(0)
     flex.set_random_seed(0)
-
 
   def run(self):
     self.tst_zero_intensity()
@@ -34,8 +32,8 @@ class TestSimulated:
     varz = mv.unweighted_sample_variance()
     sdevz = sqrt(varz)
     print "Z: mean=%f, sdev=%f" % (meanz, sdevz)
-    assert(abs(meanz - 0.0) < (5 * sdevz / sqrt(num)))
-    assert(abs(sdevz - 1.0) < 1e-1)
+    assert (abs(meanz - 0.0) < (5 * sdevz / sqrt(num)))
+    assert (abs(sdevz - 1.0) < 1e-1)
     print 'OK'
 
   def generate_profiles(self, num, counts):
@@ -43,8 +41,9 @@ class TestSimulated:
     from dials.algorithms.simulation.generate_test_reflections import \
       master_phil
     from libtbx.phil import command_line
-    cmd = command_line.argument_interpreter(master_params = master_phil)
-    working_phil = cmd.process_and_fetch(args = ["""
+    cmd = command_line.argument_interpreter(master_params=master_phil)
+    working_phil = cmd.process_and_fetch(args=[
+        """
       nrefl = %d
       shoebox_size {
         x = 10
@@ -81,7 +80,8 @@ class TestSimulated:
         angle = 0
       }
 
-      """ % (num, counts)])
+      """ % (num, counts)
+    ])
     main(working_phil.extract())
     import cPickle as pickle
     return pickle.load(open("all_refl.pickle", "rb"))

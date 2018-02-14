@@ -17,7 +17,7 @@ class GaussianRSProfileModelExt(ProfileModelIface):
 
   name = 'gaussian_rs'
 
-  default=True
+  default = True
 
   @classmethod
   def phil(cls):

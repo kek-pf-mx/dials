@@ -82,8 +82,7 @@ class Test(object):
 
     # Write a geometry phil file
     with open("geometry.phil", "w") as outfile:
-      outfile.write(
-        '''
+      outfile.write('''
         geometry {
           beam {
             wavelength = 2
@@ -116,7 +115,7 @@ class Test(object):
     ''')
 
     # provide mosflm beam centre to dials.import
-    cmd = 'dials.import %s geometry.phil output.datablock=override_geometry.json' %image_files
+    cmd = 'dials.import %s geometry.phil output.datablock=override_geometry.json' % image_files
     easy_run.fully_buffered(cmd).raise_if_errors()
     assert os.path.exists("override_geometry.json")
     datablock = load.datablock("override_geometry.json")[0]
@@ -128,22 +127,22 @@ class Test(object):
     scan = imgset.get_scan()
 
     assert beam.get_wavelength() == 2
-    assert beam.get_direction() == (-1,0,0)
+    assert beam.get_direction() == (-1, 0, 0)
     assert detector[0].get_name() == "New panel"
     assert detector[0].get_type() == "New type"
-    assert detector[0].get_pixel_size() == (10,20)
-    assert detector[0].get_image_size() == (30,40)
-    assert detector[0].get_trusted_range() == (50,60)
+    assert detector[0].get_pixel_size() == (10, 20)
+    assert detector[0].get_image_size() == (30, 40)
+    assert detector[0].get_trusted_range() == (50, 60)
     assert detector[0].get_thickness() == 70
     assert detector[0].get_material() == "Si"
-    assert detector[0].get_fast_axis() == (-1,0,0)
-    assert detector[0].get_slow_axis() == (0,-1,0)
-    assert detector[0].get_origin() == (100,100,100)
-    assert goniometer.get_rotation_axis_datum() == (0,0,-1)
-    assert goniometer.get_fixed_rotation() == (0,1,2,3,4,5,6,7,8)
-    assert goniometer.get_setting_rotation() == (8,7,6,5,4,3,2,1,0)
-    assert scan.get_image_range() == (1,4)
-    assert scan.get_oscillation() == (1,2)
+    assert detector[0].get_fast_axis() == (-1, 0, 0)
+    assert detector[0].get_slow_axis() == (0, -1, 0)
+    assert detector[0].get_origin() == (100, 100, 100)
+    assert goniometer.get_rotation_axis_datum() == (0, 0, -1)
+    assert goniometer.get_fixed_rotation() == (0, 1, 2, 3, 4, 5, 6, 7, 8)
+    assert goniometer.get_setting_rotation() == (8, 7, 6, 5, 4, 3, 2, 1, 0)
+    assert scan.get_image_range() == (1, 4)
+    assert scan.get_oscillation() == (1, 2)
 
     print 'OK'
 
@@ -158,22 +157,22 @@ class Test(object):
     image_files = ' '.join(image_files)
 
     # provide mosflm beam centre to dials.import
-    cmd = 'dials.import %s mosflm_beam_centre=100,200 output.datablock=mosflm_beam_centre.json' %image_files
+    cmd = 'dials.import %s mosflm_beam_centre=100,200 output.datablock=mosflm_beam_centre.json' % image_files
     easy_run.fully_buffered(cmd).raise_if_errors()
     assert os.path.exists("mosflm_beam_centre.json")
     datablock = load.datablock("mosflm_beam_centre.json")[0]
     imgset = datablock.extract_imagesets()[0]
     beam_centre = imgset.get_detector()[0].get_beam_centre(imgset.get_beam().get_s0())
-    assert approx_equal(beam_centre, (200,100))
+    assert approx_equal(beam_centre, (200, 100))
 
     # provide an alternative datablock.json to get geometry from
-    cmd = 'dials.import %s reference_geometry=mosflm_beam_centre.json output.datablock=mosflm_beam_centre2.json' %image_files
+    cmd = 'dials.import %s reference_geometry=mosflm_beam_centre.json output.datablock=mosflm_beam_centre2.json' % image_files
     easy_run.fully_buffered(cmd).raise_if_errors()
     assert os.path.exists("mosflm_beam_centre2.json")
     datablock = load.datablock("mosflm_beam_centre2.json")[0]
     imgset = datablock.extract_imagesets()[0]
     beam_centre = imgset.get_detector()[0].get_beam_centre(imgset.get_beam().get_s0())
-    assert approx_equal(beam_centre, (200,100))
+    assert approx_equal(beam_centre, (200, 100))
 
     print 'OK'
 
@@ -190,7 +189,7 @@ class Test(object):
     call('dials.import %s output.datablock=import_datablock.json' % \
            image_files, shell=True, stdout=PIPE)
 
-    assert(exists("import_datablock.json"))
+    assert (exists("import_datablock.json"))
 
     print 'OK'
 
@@ -206,7 +205,7 @@ class Test(object):
     call('dials.import template=%s output.datablock=import_datablock.json' % \
            template, shell=True, stdout=PIPE)
 
-    assert(exists("import_datablock.json"))
+    assert (exists("import_datablock.json"))
 
     print 'OK'
 
@@ -222,7 +221,7 @@ class Test(object):
     # Import from the image file
     call(cmd, shell=True, stdout=PIPE)
     try:
-      assert(exists("import_extrapolate.json"))
+      assert (exists("import_extrapolate.json"))
     except Exception:
       print cmd
       raise

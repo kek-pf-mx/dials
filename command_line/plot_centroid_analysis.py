@@ -52,7 +52,7 @@ def save_plots(params, raw, smoothed, suffix=''):
   # draw vertical lines at frequencies corresponding to periods of 54, 36 and 18
   # degrees
   if params.plot.mark_periods is not None:
-    vlines = [1./e for e in params.plot.mark_periods]
+    vlines = [1. / e for e in params.plot.mark_periods]
   else:
     vlines = []
 
@@ -63,7 +63,7 @@ def save_plots(params, raw, smoothed, suffix=''):
   nblocks = raw['nblocks']
   block_size = raw['block_size']
   phistart = raw['phi_range'][0]
-  block_centres = block_size * flex.double_range(nblocks) + phistart + block_size/2.0
+  block_centres = block_size * flex.double_range(nblocks) + phistart + block_size / 2.0
 
   # X residuals plot
   plt.figure(1)
@@ -77,17 +77,16 @@ def save_plots(params, raw, smoothed, suffix=''):
   for dat in [raw, smoothed]: # overlay raw and smoothed periodogram plots
     px = dat['x_periodogram']
     if px is None: continue
-    sample_freq = 1./dat['block_size']
+    sample_freq = 1. / dat['block_size']
     freq = px.freq * sample_freq
     line, = plt.semilogy(freq, px.spec)
   for vline in vlines:
     plt.axvline(x=vline, color='r')
   x_interval = smoothed['x_interval']
   if x_interval:
-    x_freq = 1./x_interval
+    x_freq = 1. / x_interval
     plt.axvline(x=x_freq, color='c')
-    plt.text(0.2, 0.9, 'interval width: {0:.3f}'.format(x_interval),
-             transform=line.axes.transAxes, color='c')
+    plt.text(0.2, 0.9, 'interval width: {0:.3f}'.format(x_interval), transform=line.axes.transAxes, color='c')
   plt.xlabel('frequency')
   plt.ylabel('spectrum')
 
@@ -108,17 +107,16 @@ def save_plots(params, raw, smoothed, suffix=''):
   for dat in [raw, smoothed]: # overlay raw and smoothed periodogram plots
     py = dat['y_periodogram']
     if py is None: continue
-    sample_freq = 1./dat['block_size']
+    sample_freq = 1. / dat['block_size']
     freq = py.freq * sample_freq
     line, = plt.semilogy(freq, py.spec)
   for vline in vlines:
     plt.axvline(x=vline, color='r')
   y_interval = smoothed['y_interval']
   if y_interval:
-    y_freq = 1./y_interval
+    y_freq = 1. / y_interval
     plt.axvline(x=y_freq, color='c')
-    plt.text(0.2, 0.9, 'interval width: {0:.3f}'.format(y_interval),
-             transform=line.axes.transAxes, color='c')
+    plt.text(0.2, 0.9, 'interval width: {0:.3f}'.format(y_interval), transform=line.axes.transAxes, color='c')
   plt.xlabel('frequency')
   plt.ylabel('spectrum')
 
@@ -139,17 +137,16 @@ def save_plots(params, raw, smoothed, suffix=''):
   for dat in [raw, smoothed]: # overlay raw and smoothed periodogram plots
     pz = dat['phi_periodogram']
     if pz is None: continue
-    sample_freq = 1./dat['block_size']
+    sample_freq = 1. / dat['block_size']
     freq = pz.freq * sample_freq
     line, = plt.semilogy(freq, pz.spec)
   for vline in vlines:
     plt.axvline(x=vline, color='r')
   phi_interval = smoothed['phi_interval']
   if phi_interval:
-    phi_freq = 1./phi_interval
+    phi_freq = 1. / phi_interval
     plt.axvline(x=phi_freq, color='c')
-    plt.text(0.2, 0.9, 'interval width: {0:.3f}'.format(phi_interval),
-             transform=line.axes.transAxes, color='c')
+    plt.text(0.2, 0.9, 'interval width: {0:.3f}'.format(phi_interval), transform=line.axes.transAxes, color='c')
   plt.xlabel('frequency')
   plt.ylabel('spectrum')
 
@@ -164,15 +161,11 @@ def run(args):
 
   import libtbx.load_env
   usage = """\
-%s reflections.pickle [options]""" %libtbx.env.dispatcher_name
+%s reflections.pickle [options]""" % libtbx.env.dispatcher_name
   from dials.util.options import OptionParser
   from dials.util.options import flatten_reflections
   from libtbx.utils import Sorry
-  parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_reflections=True,
-    epilog=help_message)
+  parser = OptionParser(usage=usage, phil=phil_scope, read_reflections=True, epilog=help_message)
 
   params, options = parser.parse_args(show_diff_phil=True)
   reflections = flatten_reflections(params.input.reflections)

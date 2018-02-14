@@ -114,14 +114,13 @@ def reeke_model_for_use_case(phi_beg, phi_end, margin):
   axis = matrix.col([0.0, 1.0, 0.0])
 
   # original (unrotated) setting
-  ub = matrix.sqr([-0.0133393674072, -0.00541609051856, -0.00367748834997,
-                  0.00989309470346, 0.000574825936669, -0.0054505379664,
-                  0.00475395109417, -0.0163935257377, 0.00102384915696])
-  r_beg = matrix.sqr(scitbx.math.r3_rotation_axis_and_angle_as_matrix(
-      axis = self._axis, angle = phi_beg, deg = True))
+  ub = matrix.sqr([
+      -0.0133393674072, -0.00541609051856, -0.00367748834997, 0.00989309470346, 0.000574825936669, -0.0054505379664,
+      0.00475395109417, -0.0163935257377, 0.00102384915696
+  ])
+  r_beg = matrix.sqr(scitbx.math.r3_rotation_axis_and_angle_as_matrix(axis=self._axis, angle=phi_beg, deg=True))
   r_osc = matrix.sqr(
-      scitbx.math.r3_rotation_axis_and_angle_as_matrix(
-      axis = self._axis, angle = (phi_end - phi_beg), deg=True))
+      scitbx.math.r3_rotation_axis_and_angle_as_matrix(axis=self._axis, angle=(phi_end - phi_beg), deg=True))
 
   ub_beg = r_beg * ub
   ub_end = self._r_osc * ub_mid
@@ -143,15 +142,11 @@ def regression_test():
 
   a = 50.0
 
-  ub_beg = matrix.sqr((1.0 / a, 0.0, 0.0,
-                       0.0, 1.0 / a, 0.0,
-                       0.0, 0.0, 1.0 / a))
+  ub_beg = matrix.sqr((1.0 / a, 0.0, 0.0, 0.0, 1.0 / a, 0.0, 0.0, 0.0, 1.0 / a))
 
   axis = matrix.col((0, 1, 0))
 
-  r_osc = matrix.sqr(
-          scitbx.math.r3_rotation_axis_and_angle_as_matrix(
-          axis = axis, angle = 1.0, deg=True))
+  r_osc = matrix.sqr(scitbx.math.r3_rotation_axis_and_angle_as_matrix(axis=axis, angle=1.0, deg=True))
 
   ub_end = r_osc * ub_beg
 
@@ -163,22 +158,19 @@ def regression_test():
   wavelength = 1.0
   dmin = 1.5
 
-  indices = full_sphere_indices(
-      unit_cell = uc, resolution_limit = dmin, space_group = sg)
+  indices = full_sphere_indices(unit_cell=uc, resolution_limit=dmin, space_group=sg)
 
   ra = rotation_angles(dmin, ub_beg, wavelength, axis)
 
   obs_indices, obs_angles = ra.observed_indices_and_angles_from_angle_range(
-      phi_start_rad = 0.0 * pi / 180.0,
-      phi_end_rad = 1.0 * pi / 180.0,
-      indices = indices)
+      phi_start_rad=0.0 * pi / 180.0, phi_end_rad=1.0 * pi / 180.0, indices=indices)
 
   r = reeke_model(ub_beg, ub_end, axis, s0, dmin, 1.0)
   reeke_indices = r.generate_indices()
   #r.visualize_with_rgl()
 
   for oi in obs_indices:
-    assert(tuple(map(int, oi)) in reeke_indices)
+    assert (tuple(map(int, oi)) in reeke_indices)
 
   #TODO Tests for an oblique cell
 
@@ -212,7 +204,7 @@ if __name__ == '__main__':
     rub_end = axis.axis_and_angle_as_r3_rotation_matrix(phi_end) * ub
     wavelength = cfc.get('wavelength')
     sample_to_source_vec = matrix.col(cfc.get_c('sample_to_source').normalize())
-    s0 = (- 1.0 / wavelength) * sample_to_source_vec
+    s0 = (-1.0 / wavelength) * sample_to_source_vec
     dmin = 1.20117776325
 
     r = reeke_model(rub_beg, rub_end, axis, s0, dmin, margin)

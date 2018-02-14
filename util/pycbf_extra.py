@@ -71,7 +71,6 @@ def print_info(cbf_path):
           value = '...'
         print "\t\tColumn", i, "Type:", type_of_value, value
 
-
 def get_beam_direction(cbf_handle):
   """Find the beam direction (why is this not simpler in pycbf?)
 
@@ -87,9 +86,8 @@ def get_beam_direction(cbf_handle):
     cbf_handle.find_column('vector[%d]' % (j + 1))
     beam_direction.append(cbf_handle.get_doublevalue())
 
-  B = - matrix.col(beam_direction).normalize()
+  B = -matrix.col(beam_direction).normalize()
   return B
-
 
 def compute_central_rotation_matrix(gonio):
   """Compute the central rotation matrix
@@ -104,9 +102,7 @@ def compute_central_rotation_matrix(gonio):
   R = matrix.sqr(x + y + z).transpose()
   return R
 
-
-def get_image(cbf_handle, category='array_data', column='data', row=0,
-              element=0):
+def get_image(cbf_handle, category='array_data', column='data', row=0, element=0):
   """Read an image from a CBF file
 
   This function is a bit of a hack - I'm not sure what the general structure
@@ -142,12 +138,10 @@ def get_image(cbf_handle, category='array_data', column='data', row=0,
     image.shape = (image_size)
 
   else:
-    raise TypeError('{0}:{1}:{2}:{3} is not an image'.format(
-                        category, column, row, element))
+    raise TypeError('{0}:{1}:{2}:{3} is not an image'.format(category, column, row, element))
 
   # Return the image
   return image
-
 
 def get_image_volume(cbf_paths):
   """Load the image volume from the list of cbf_paths. The list of paths is
@@ -168,13 +162,13 @@ def get_image_volume(cbf_paths):
   # Initialise the image volume
   num_slices = len(cbf_paths)
   volume = numpy.zeros(shape=(num_slices, height, width), dtype=numpy.int32)
-  volume[0,:,:] = image
+  volume[0, :, :] = image
 
   # For each CBF file, read the image and put into the image volume
   for i, filename in enumerate(cbf_paths[1:]):
     cbf_handle = pycbf.cbf_handle_struct()
     cbf_handle.read_file(filename, pycbf.MSG_DIGEST)
-    volume[i+1,:,:] = get_image(cbf_handle)
+    volume[i + 1, :, :] = get_image(cbf_handle)
 
   # Return the image volume
   return volume

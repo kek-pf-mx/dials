@@ -60,8 +60,8 @@ class SpotXDSImporter(object):
       rt.update(table)
       table = rt
       # set variances to unity
-      table['xyzobs.mm.variance'] = flex.vec3_double(len(table), (1,1,1))
-      table['xyzobs.px.variance'] = flex.vec3_double(len(table), (1,1,1))
+      table['xyzobs.mm.variance'] = flex.vec3_double(len(table), (1, 1, 1))
+      table['xyzobs.px.variance'] = flex.vec3_double(len(table), (1, 1, 1))
       Command.end('Standard columns added')
 
     # Output the table to pickle file
@@ -70,7 +70,6 @@ class SpotXDSImporter(object):
     Command.start('Saving reflection table to %s' % params.output.filename)
     table.as_pickle(params.output.filename)
     Command.end('Saved reflection table to %s' % params.output.filename)
-
 
 class IntegrateHKLImporter(object):
   ''' Class to import an integrate.hkl file to a reflection table. '''
@@ -94,11 +93,11 @@ class IntegrateHKLImporter(object):
     Command.start('Reading INTEGRATE.HKL')
     handle = integrate_hkl.reader()
     handle.read_file(self._integrate_hkl)
-    hkl    = flex.miller_index(handle.hkl)
+    hkl = flex.miller_index(handle.hkl)
     xyzcal = flex.vec3_double(handle.xyzcal)
     xyzobs = flex.vec3_double(handle.xyzobs)
-    iobs   = flex.double(handle.iobs)
-    sigma  = flex.double(handle.sigma)
+    iobs = flex.double(handle.iobs)
+    sigma = flex.double(handle.sigma)
     rlp = flex.double(handle.rlp)
     peak = flex.double(handle.peak) * 0.01
     if len(handle.iseg):
@@ -161,18 +160,14 @@ class IntegrateHKLImporter(object):
 
     # want to align XDS -s0 vector...
     from rstbx.cftbx.coordinate_frame_helpers import align_reference_frame
-    R = align_reference_frame(- xbeam, dbeam, xaxis, n.cross(dbeam))
-    xA = matrix.sqr(
-      handle.unit_cell_a_axis +
-      handle.unit_cell_b_axis +
-      handle.unit_cell_c_axis).inverse()
+    R = align_reference_frame(-xbeam, dbeam, xaxis, n.cross(dbeam))
+    xA = matrix.sqr(handle.unit_cell_a_axis + handle.unit_cell_b_axis + handle.unit_cell_c_axis).inverse()
     xA = R * xA
 
     # assert that this should just be a simple integer rotation matrix
     # i.e. reassignment of a, b, c so...
 
     return matrix.sqr(map(int, map(round, (dA.inverse() * xA).elems)))
-
 
 class XDSFileImporter(object):
   ''' Import a data block from xds. '''
@@ -232,16 +227,16 @@ class XDSFileImporter(object):
       # Print some model info
       if options.verbose > 1:
         print ""
-        if exp.beam:       print exp.beam
-        else:              print "no beam!"
-        if exp.detector:   print exp.detector
-        else:              print "no detector!"
+        if exp.beam: print exp.beam
+        else: print "no beam!"
+        if exp.detector: print exp.detector
+        else: print "no detector!"
         if exp.goniometer: print exp.goniometer
-        else:              print "no goniometer!"
-        if exp.scan:       print exp.scan
-        else:              print "no scan!"
-        if exp.crystal:    print exp.crystal
-        else:              print "no crystal!"
+        else: print "no goniometer!"
+        if exp.scan: print exp.scan
+        else: print "no scan!"
+        if exp.crystal: print exp.crystal
+        else: print "no crystal!"
 
     # Write the experiment list to a JSON or pickle file
     if params.output.filename is None:
@@ -264,10 +259,12 @@ class XDSFileImporter(object):
     from os.path import exists, join
 
     # The possible files to check
-    paths = [join(xds_dir, 'XDS_ASCII.HKL'),
-             join(xds_dir, 'INTEGRATE.HKL'),
-             join(xds_dir, 'GXPARM.XDS'),
-             join(xds_dir, 'XPARM.XDS')]
+    paths = [
+        join(xds_dir, 'XDS_ASCII.HKL'),
+        join(xds_dir, 'INTEGRATE.HKL'),
+        join(xds_dir, 'GXPARM.XDS'),
+        join(xds_dir, 'XPARM.XDS')
+    ]
 
     # Return the first path that exists
     for p in paths:
@@ -349,7 +346,7 @@ class XDSFileImporter(object):
 
     # want to align XDS -s0 vector...
     from rstbx.cftbx.coordinate_frame_helpers import align_reference_frame
-    R = align_reference_frame(- xbeam, dbeam, xaxis, daxis)
+    R = align_reference_frame(-xbeam, dbeam, xaxis, daxis)
 
     # Make a static crystal for each block
     from dxtbx.model import Crystal
@@ -423,16 +420,13 @@ class Script(object):
 
     # The option parser
     usage = "usage: %s [options] (SPOT.XDS|INTEGRATE.HKL)" % libtbx.env.dispatcher_name
-    self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope)
+    self.parser = OptionParser(usage=usage, phil=phil_scope)
 
   def run(self):
     ''' Run the script. '''
 
     # Parse the command line arguments
-    params, options, args = self.parser.parse_args(show_diff_phil=True,
-                                                   return_unhandled=True)
+    params, options, args = self.parser.parse_args(show_diff_phil=True, return_unhandled=True)
 
     # Check number of arguments
     if len(args) == 0:
@@ -456,13 +450,12 @@ class Script(object):
     if filename == 'SPOT.XDS':
       return SpotXDSImporter(args[0])
     elif filename == 'INTEGRATE.HKL':
-      assert(len(args) == 2)
+      assert (len(args) == 2)
       experiments = ExperimentListFactory.from_json_file(args[1])
-      assert(len(experiments) == 1)
+      assert (len(experiments) == 1)
       return IntegrateHKLImporter(args[0], experiments[0])
     else:
       raise RuntimeError('expected (SPOT.XDS|INTEGRATE.HKL), got %s' % filename)
-
 
 if __name__ == '__main__':
   from dials.util import halraiser

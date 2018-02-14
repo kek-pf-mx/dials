@@ -16,7 +16,6 @@ def print_refl(row):
   print 'HKL:      %d %d %d' % row['miller_index']
   print 'S vector: %.3f %.3f %.3f' % row['s1']
   print 'Bounding: %d %d %d %d %d %d' % row['bbox']
-
   ''' FIX ME '''
   #print 'Frame:    %.3f' % refl.frame_number
   #print 'Position: %.3f %.3f' % refl.image_coord_px
@@ -41,7 +40,6 @@ def print_refl(row):
 
   return
 
-
 if __name__ == '__main__':
   import cPickle as pickle
   import sys
@@ -56,11 +54,9 @@ if __name__ == '__main__':
   except Exception:
     raise Sorry('Error loading reflection table')
 
-
   for i in range(len(table)):
     row = table[i]
     print '*' * 80
     print 'Reflection %d' % i
     print_refl(row)
     print '*' * 80
-

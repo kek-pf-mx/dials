@@ -17,8 +17,7 @@ from dials.array_family import flex
 from dials_viewer_ext import rgb_img
 
 class wxbmp_from_np_array(object):
-
-  def __init__(self, lst_data_in, show_nums = True, palette = "black2white", lst_data_mask_in = None):
+  def __init__(self, lst_data_in, show_nums=True, palette="black2white", lst_data_mask_in=None):
     self.wx_bmp_arr = rgb_img()
     if lst_data_in == [None] and lst_data_mask_in == [None]:
       self._ini_wx_bmp_lst = None
@@ -59,8 +58,7 @@ class wxbmp_from_np_array(object):
 
         self._ini_wx_bmp_lst.append(single_block_lst_01)
 
-
-  def bmp_lst_scaled(self, scale = 1.0):
+  def bmp_lst_scaled(self, scale=1.0):
     if self._ini_wx_bmp_lst == None:
 
       NewW = 350
@@ -90,8 +88,7 @@ class wxbmp_from_np_array(object):
 
     return wx_bmp_lst
 
-
-  def _wx_img_w_cpp(self, np_2d_tmp, show_nums, palette, np_2d_mask = None):
+  def _wx_img_w_cpp(self, np_2d_tmp, show_nums, palette, np_2d_mask=None):
 
     xmax = np_2d_tmp.shape[1]
     ymax = np_2d_tmp.shape[0]
@@ -102,8 +99,8 @@ class wxbmp_from_np_array(object):
     transposed_data = np.zeros((ymax, xmax), 'double')
     transposed_mask = np.zeros((ymax, xmax), 'double')
 
-    transposed_data[:,:] = np_2d_tmp
-    transposed_mask[:,:] = np_2d_mask
+    transposed_data[:, :] = np_2d_tmp
+    transposed_mask[:, :] = np_2d_mask
 
     flex_data_in = flex.double(transposed_data)
     flex_mask_in = flex.double(transposed_mask)
@@ -131,9 +128,9 @@ class wxbmp_from_np_array(object):
     np_img_array = img_array_tmp.as_numpy_array()
 
     height = np.size(np_img_array[:, 0:1, 0:1])
-    width = np.size( np_img_array[0:1, :, 0:1])
-    img_array = np.empty((height, width, 3),'uint8')
-    img_array[:,:,:] = np_img_array[:,:,:]
+    width = np.size(np_img_array[0:1, :, 0:1])
+    img_array = np.empty((height, width, 3), 'uint8')
+    img_array[:, :, :] = np_img_array[:, :, :]
 
     self._wx_image = wx.EmptyImage(width, height)
     self._wx_image.SetData(img_array.tostring())
@@ -141,10 +138,6 @@ class wxbmp_from_np_array(object):
     data_to_become_bmp = (self._wx_image, width, height)
 
     return data_to_become_bmp
-
-
-
-
 
   def _wx_bmp_scaled(self, data_to_become_bmp, scale):
     to_become_bmp = data_to_become_bmp[0]
@@ -154,7 +147,6 @@ class wxbmp_from_np_array(object):
     NewW = int(width * scale)
     NewH = int(height * scale)
     to_become_bmp = to_become_bmp.Scale(NewW, NewH, wx.IMAGE_QUALITY_NORMAL)
-
 
     wxBitmap = to_become_bmp.ConvertToBitmap()
 

@@ -3,7 +3,7 @@
 from __future__ import absolute_import, division
 
 def filter_good_reflections(integrated_data):
-  assert(min(integrated_data['id']) == max(integrated_data['id']) == 0)
+  assert (min(integrated_data['id']) == max(integrated_data['id']) == 0)
 
   selection = integrated_data['intensity.sum.variance'] <= 0
   if selection.count(True) > 0:
@@ -40,14 +40,9 @@ def run(args):
       .help = "The output pickle file"
   ''')
 
-  usage = '%s integrated.pickle [hklout=hklout.pickle]' % (
-              libtbx.env.dispatcher_name)
+  usage = '%s integrated.pickle [hklout=hklout.pickle]' % (libtbx.env.dispatcher_name)
 
-  parser = OptionParser(
-    usage = usage,
-    read_reflections=True,
-    check_format=False,
-    phil=phil_scope)
+  parser = OptionParser(usage=usage, read_reflections=True, check_format=False, phil=phil_scope)
   params, options = parser.parse_args(show_diff_phil=True)
   reflections = flatten_reflections(params.input.reflections)
   if len(reflections) != 1:
@@ -55,9 +50,6 @@ def run(args):
 
   integrated_data = reflections[0]
   filter_good_reflections(integrated_data).as_pickle(params.hklout)
-
-
-
 
 if __name__ == '__main__':
   import sys

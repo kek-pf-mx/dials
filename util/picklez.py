@@ -89,14 +89,14 @@ def test():
 
   lst = [string.uppercase for j in range(1000)]
 
-  zipfile_name = tempfile.mktemp(suffix = '.pklz')
+  zipfile_name = tempfile.mktemp(suffix='.pklz')
 
   dump(lst, zipfile_name, 100)
 
   lst2 = load(zipfile_name)
 
   for l, l2 in zip(lst, lst2):
-    assert(l == l2)
+    assert (l == l2)
 
   import os
   os.remove(zipfile_name)

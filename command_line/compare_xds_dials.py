@@ -2,7 +2,7 @@ from __future__ import absolute_import, division
 
 # LIBTBX_SET_DISPATCHER_NAME dev.dials.compare_xds_dials
 
-def pull_reference(integrate_hkl, d_min = 0.0):
+def pull_reference(integrate_hkl, d_min=0.0):
   '''Generate reference data set from integrate.hkl, check out the calculated
   x, y and z centroids as well as the Miller indices as coordinates in some
   high dimensional space. Only consider measurements with meaningful
@@ -112,13 +112,13 @@ def pull_calculated(integrate_pkl):
   strong_reflections = []
 
   for r in r_list:
-    if r['intensity.sum.value'] ** 2 < r['intensity.sum.variance']:
+    if r['intensity.sum.value']**2 < r['intensity.sum.variance']:
       continue
     if r['intensity.sum.value'] <= 0.0:
       continue
     strong_reflections.append(r)
 
-  del(r_list)
+  del (r_list)
 
   hkl = []
   i = []
@@ -140,7 +140,7 @@ def pull_calculated(integrate_pkl):
 def meansd(values):
   import math
 
-  assert(len(values) > 3)
+  assert (len(values) > 3)
 
   mean = sum(values) / len(values)
   var = sum([(v - mean) * (v - mean) for v in values]) / (len(values) - 1)
@@ -149,21 +149,20 @@ def meansd(values):
 
 def cc(a, b):
 
-  assert(len(a) == len(b))
+  assert (len(a) == len(b))
 
   ma, sa = meansd(a)
   mb, sb = meansd(b)
 
-  r = (1 / (len(a) - 1)) * sum([((a[j] - ma) / sa) * ((b[j] - mb) / sb)
-                                for j in range(len(a))])
+  r = (1 / (len(a) - 1)) * sum([((a[j] - ma) / sa) * ((b[j] - mb) / sb) for j in range(len(a))])
 
   return r
 
-def R(calc, obs, scale = None):
+def R(calc, obs, scale=None):
 
   import math
 
-  assert(len(calc) == len(obs))
+  assert (len(calc) == len(obs))
 
   if not scale:
     scale = sum(obs) / sum(calc)
@@ -175,10 +174,10 @@ def R(calc, obs, scale = None):
 def meansd(values):
   import math
   mean = sum(values) / len(values)
-  var = sum([(v - mean) ** 2 for v in values]) / len(values)
+  var = sum([(v - mean)**2 for v in values]) / len(values)
   return mean, math.sqrt(var)
 
-def compare_chunks(integrate_hkl, integrate_pkl, experiments_json, d_min = 0.0):
+def compare_chunks(integrate_hkl, integrate_pkl, experiments_json, d_min=0.0):
 
   from cctbx.array_family import flex
   from annlib_ext import AnnAdaptor as ann_adaptor
@@ -206,7 +205,7 @@ def compare_chunks(integrate_hkl, integrate_pkl, experiments_json, d_min = 0.0):
     query.append(xyz[2])
 
   # perform the match
-  ann = ann_adaptor(data = reference, dim = 3, k = 1)
+  ann = ann_adaptor(data=reference, dim=3, k=1)
   ann.query(query)
 
   XDS = []
@@ -226,7 +225,7 @@ def compare_chunks(integrate_hkl, integrate_pkl, experiments_json, d_min = 0.0):
 
   unique = set(HKL)
 
-  resolutions = { }
+  resolutions = {}
 
   for hkl in unique:
     resolutions[hkl] = uc.d(hkl)
@@ -282,9 +281,9 @@ def compare_chunks(integrate_hkl, integrate_pkl, experiments_json, d_min = 0.0):
   pyplot.xlabel('Chunk')
   pyplot.ylabel('Statistic')
   pyplot.title('Statistics for 1000 reflection-pair chunks')
-  pyplot.plot(chunks, ccs, label = 'CC')
-  pyplot.plot(chunks, rs, label = 'R')
-  pyplot.plot(chunks, ss, label = 'K')
+  pyplot.plot(chunks, ccs, label='CC')
+  pyplot.plot(chunks, rs, label='R')
+  pyplot.plot(chunks, ss, label='K')
   pyplot.legend()
   pyplot.savefig('plot-vs-xds.png')
   pyplot.close()
@@ -299,7 +298,7 @@ def derive_reindex_matrix(experiments_json, integrate_hkl):
 
   # want to align XDS -s0 vector...
   from rstbx.cftbx.coordinate_frame_helpers import align_reference_frame
-  R = align_reference_frame(- xbeam, dbeam, xaxis, daxis)
+  R = align_reference_frame(-xbeam, dbeam, xaxis, daxis)
   xA = R * integrate_hkl_to_A_matrix(integrate_hkl)
 
   # assert that this should just be a simple integer rotation matrix
@@ -318,5 +317,4 @@ if __name__ == '__main__':
   if len(sys.argv) == 4:
     compare_chunks(sys.argv[1], sys.argv[2], sys.argv[3])
   else:
-    compare_chunks(sys.argv[1], sys.argv[2], sys.argv[3],
-                   d_min = float(sys.argv[4]))
+    compare_chunks(sys.argv[1], sys.argv[2], sys.argv[3], d_min=float(sys.argv[4]))

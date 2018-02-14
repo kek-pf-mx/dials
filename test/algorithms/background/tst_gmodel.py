@@ -1,8 +1,6 @@
-
 from __future__ import absolute_import, division
 
 class Test(object):
-
   def __init__(self):
     from os.path import join
     import libtbx.load_env
@@ -26,7 +24,6 @@ class Test(object):
 
     assert exists(join(self.path, 'experiments.json'))
 
-
     from dials.array_family import flex
     from dials.algorithms.background.gmodel import StaticBackgroundModel
     ysize = 2527
@@ -39,49 +36,38 @@ class Test(object):
 
     # Call dials.integrate
     easy_run.fully_buffered([
-      'dials.integrate',
-      join(self.path, 'experiments.json'),
-      'profile.fitting=False',
-      'background.algorithm=simple',
-      'background.simple.outlier.algorithm=null',
-      'output.reflections=./simple/reflections.pickle'
+        'dials.integrate',
+        join(self.path, 'experiments.json'), 'profile.fitting=False', 'background.algorithm=simple',
+        'background.simple.outlier.algorithm=null', 'output.reflections=./simple/reflections.pickle'
     ]).raise_if_errors()
 
     assert exists("simple/reflections.pickle")
 
     # Call dials.integrate
     easy_run.fully_buffered([
-      'dials.integrate',
-      join(self.path, 'experiments.json'),
-      'profile.fitting=False',
-      'background.algorithm=glm',
-      'output.reflections=./robust/reflections.pickle'
+        'dials.integrate',
+        join(self.path, 'experiments.json'), 'profile.fitting=False', 'background.algorithm=glm',
+        'output.reflections=./robust/reflections.pickle'
     ]).raise_if_errors()
 
     assert exists("robust/reflections.pickle")
 
     # Call dials.integrate
     easy_run.fully_buffered([
-      'dials.integrate',
-      join(self.path, 'experiments.json'),
-      'profile.fitting=False',
-      'background.algorithm=gmodel',
-      'background.gmodel.robust.algorithm=False',
-      'background.gmodel.model=model.pickle',
-      'output.reflections=./gmodel_simple/reflections.pickle'
+        'dials.integrate',
+        join(self.path, 'experiments.json'), 'profile.fitting=False', 'background.algorithm=gmodel',
+        'background.gmodel.robust.algorithm=False', 'background.gmodel.model=model.pickle',
+        'output.reflections=./gmodel_simple/reflections.pickle'
     ]).raise_if_errors()
 
     assert exists("gmodel_simple/reflections.pickle")
 
     # Call dials.integrate
     easy_run.fully_buffered([
-      'dials.integrate',
-      join(self.path, 'experiments.json'),
-      'profile.fitting=False',
-      'background.algorithm=gmodel',
-      'background.gmodel.robust.algorithm=True',
-      'background.gmodel.model=model.pickle',
-      'output.reflections=./gmodel_robust/reflections.pickle'
+        'dials.integrate',
+        join(self.path, 'experiments.json'), 'profile.fitting=False', 'background.algorithm=gmodel',
+        'background.gmodel.robust.algorithm=True', 'background.gmodel.model=model.pickle',
+        'output.reflections=./gmodel_robust/reflections.pickle'
     ]).raise_if_errors()
 
     assert exists("gmodel_robust/reflections.pickle")

@@ -19,9 +19,7 @@ class Test(object):
 
     input_filename = join(self.path, "datablock.json")
 
-    easy_run.fully_buffered(
-      ['dials.estimate_gain',
-       'input.datablock=%s' % input_filename]).raise_if_errors()
+    easy_run.fully_buffered(['dials.estimate_gain', 'input.datablock=%s' % input_filename]).raise_if_errors()
 
     print 'OK'
 

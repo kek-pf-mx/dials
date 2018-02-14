@@ -14,7 +14,6 @@ def _nproc():
   from libtbx.introspection import number_of_processors
   return number_of_processors(return_value_if_unknown=-1)
 
-
 def response_to_xml(d):
 
   if 'n_spots_total' in d:
@@ -25,39 +24,36 @@ def response_to_xml(d):
 <d_min>%(estimated_d_min).2f</d_min>
 <d_min_method_1>%(d_min_distl_method_1).2f</d_min_method_1>
 <d_min_method_2>%(d_min_distl_method_2).2f</d_min_method_2>
-<total_intensity>%(total_intensity).0f</total_intensity>''' %d
+<total_intensity>%(total_intensity).0f</total_intensity>''' % d
 
   else:
     assert 'error' in d
-    return '<response>\n%s\n</response>' %d['error']
+    return '<response>\n%s\n</response>' % d['error']
 
   if 'lattices' in d:
     from dxtbx.model.crystal import CrystalFactory
     for lattice in d['lattices']:
       crystal = CrystalFactory.from_dict(lattice['crystal'])
-      response = '\n'.join([
+      response = '\n'.join(
+          [response,
+           '<unit_cell>%.6g %.6g %.6g %.6g %.6g %.6g</unit_cell>' % (crystal.get_unit_cell().parameters())])
+    response = '\n'.join([
         response,
-        '<unit_cell>%.6g %.6g %.6g %.6g %.6g %.6g</unit_cell>' %(
-          crystal.get_unit_cell().parameters())])
-    response = '\n'.join([
-      response,
-      '<n_indexed>%i</n_indexed>' %d['n_indexed'],
-      '<fraction_indexed>%.2f</fraction_indexed>' %d['fraction_indexed']])
+        '<n_indexed>%i</n_indexed>' % d['n_indexed'],
+        '<fraction_indexed>%.2f</fraction_indexed>' % d['fraction_indexed']
+    ])
   if 'integrated_intensity' in d:
-    response = '\n'.join([
-      response,
-      '<integrated_intensity>%.0f</integrated_intensity>' %d['integrated_intensity']])
+    response = '\n'.join([response, '<integrated_intensity>%.0f</integrated_intensity>' % d['integrated_intensity']])
 
-  return '<response>\n%s\n</response>' %response
+  return '<response>\n%s\n</response>' % response
 
-def work_all(host, port, filenames, params, plot=False, table=False,
-             json_file=None, grid=None, nproc=None):
+def work_all(host, port, filenames, params, plot=False, table=False, json_file=None, grid=None, nproc=None):
   import json
   from multiprocessing.pool import ThreadPool as thread_pool
   if nproc is None:
-    nproc=_nproc()
+    nproc = _nproc()
   pool = thread_pool(processes=nproc)
-  threads = { }
+  threads = {}
   for filename in filenames:
     threads[filename] = pool.apply_async(work, (host, port, filename, params))
   results = []
@@ -68,7 +64,7 @@ def work_all(host, port, filenames, params, plot=False, table=False,
     print response_to_xml(d)
 
   if json_file is not None:
-    'Writing results to %s' %json_file
+    'Writing results to %s' % json_file
     with open(json_file, 'wb') as f:
       json.dump(results, f)
 
@@ -94,15 +90,16 @@ def work_all(host, port, filenames, params, plot=False, table=False,
       n_spots_no_ice.append(d['n_spots_no_ice'])
       total_intensity.append(d['total_intensity'])
 
-    stats = group_args(n_spots_total=n_spots_total,
-                       n_spots_no_ice=n_spots_no_ice,
-                       n_spots_4A=None,
-                       total_intensity=total_intensity,
-                       estimated_d_min=estimated_d_min,
-                       d_min_distl_method_1=d_min_distl_method_1,
-                       d_min_distl_method_2=d_min_distl_method_2,
-                       noisiness_method_1=None,
-                       noisiness_method_2=None)
+    stats = group_args(
+        n_spots_total=n_spots_total,
+        n_spots_no_ice=n_spots_no_ice,
+        n_spots_4A=None,
+        total_intensity=total_intensity,
+        estimated_d_min=estimated_d_min,
+        d_min_distl_method_1=d_min_distl_method_1,
+        d_min_distl_method_2=d_min_distl_method_2,
+        noisiness_method_1=None,
+        noisiness_method_2=None)
 
     if plot:
       plot_stats(stats)
@@ -179,8 +176,7 @@ if __name__ == '__main__':
   args = [arg for arg in args if not arg in filenames]
 
   interp = phil_scope.command_line_argument_interpreter()
-  params, unhandled = interp.process_and_fetch(
-    args, custom_processor='collect_remaining')
+  params, unhandled = interp.process_and_fetch(args, custom_processor='collect_remaining')
   params = params.extract()
 
   if params.nproc is libtbx.Auto:
@@ -194,7 +190,7 @@ if __name__ == '__main__':
     print 'Stopped %d findspots processes' % stopped
   elif len(unhandled) and unhandled[0] == 'ping':
     from urllib2 import urlopen
-    url = 'http://%s:%i' %(params.host, params.port)
+    url = 'http://%s:%i' % (params.host, params.port)
     try:
       data = urlopen(url).read()
       print "Success"
@@ -208,6 +204,13 @@ if __name__ == '__main__':
       import json
       print response_to_xml(json.loads(response))
     else:
-      work_all(params.host, params.port, filenames, unhandled, plot=params.plot,
-               table=params.table, json_file=params.json,
-               grid=params.grid, nproc=nproc)
+      work_all(
+          params.host,
+          params.port,
+          filenames,
+          unhandled,
+          plot=params.plot,
+          table=params.table,
+          json_file=params.json,
+          grid=params.grid,
+          nproc=nproc)

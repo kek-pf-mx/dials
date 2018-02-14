@@ -8,7 +8,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """
 Test refinement of multiple narrow sweeps.
 
@@ -55,15 +54,11 @@ phil_input = """experiments={0}/data/sweep_002/experiments.json \
   reflections={0}/data/sweep_020/reflections.pickle"""
 
 class Test(object):
-
   def __init__(self):
 
-    dials_regression = libtbx.env.find_in_repositories(
-      relative_path="dials_regression",
-      test=os.path.isdir)
+    dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=os.path.isdir)
 
-    self._data_dir = os.path.join(dials_regression, "refinement_test_data",
-                            "multi_narrow_wedges")
+    self._data_dir = os.path.join(dials_regression, "refinement_test_data", "multi_narrow_wedges")
 
     # set up a temporary directory
     self._cwd = os.path.abspath(os.curdir)
@@ -95,8 +90,7 @@ class Test(object):
            " outlier.algorithm=null close_to_spindle_cutoff=0.05")
     result = easy_run.fully_buffered(command=cmd).raise_if_errors()
 
-    self._refined_experiments = ExperimentListFactory.from_json_file(
-      "refined_experiments.json", check_format=False)
+    self._refined_experiments = ExperimentListFactory.from_json_file("refined_experiments.json", check_format=False)
     return
 
   def run(self):
@@ -114,8 +108,7 @@ class Test(object):
     """Check results are as expected"""
 
     regression_experiments = ExperimentListFactory.from_json_file(
-      os.path.join(self._data_dir, "regression_experiments.json"),
-      check_format=False)
+        os.path.join(self._data_dir, "regression_experiments.json"), check_format=False)
 
     for e1, e2 in zip(self._refined_experiments, regression_experiments):
       assert e1.crystal.is_similar_to(e2.crystal)

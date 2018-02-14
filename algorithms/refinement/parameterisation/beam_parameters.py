@@ -38,8 +38,7 @@ class BeamMixin(object):
     # rotation around s0_plane_dir2
     mu2 = parameter_type(.0, s0_plane_dir2, 'angle (mrad)', 'Mu2')
     # length of s0
-    nu = parameter_type(s0.length(), axis=None,
-      ptype='wavenumber (Angstroem^-1)', name='nu')
+    nu = parameter_type(s0.length(), axis=None, ptype='wavenumber (Angstroem^-1)', name='nu')
 
     # build the parameter list in a specific,  maintained order
     p_list = [mu1, mu2, nu]
@@ -75,9 +74,7 @@ class BeamMixin(object):
 
     # calculate derivatives of the attached beam vector, converting
     # parameters back to mrad
-    ds0_dval = [ds0_new_dir_dmu1 * nu / 1000.,
-                ds0_new_dir_dmu2 * nu / 1000.,
-                s0_new_dir]
+    ds0_dval = [ds0_new_dir_dmu1 * nu / 1000., ds0_new_dir_dmu2 * nu / 1000., s0_new_dir]
 
     return s0, ds0_dval
 
@@ -107,8 +104,7 @@ class BeamParameterisation(ModelParameterisation, BeamMixin):
     p_list = self._build_p_list(s0, goniometer)
 
     # set up the base class
-    ModelParameterisation.__init__(self, beam, istate, p_list,
-                                   experiment_ids=experiment_ids)
+    ModelParameterisation.__init__(self, beam, istate, p_list, experiment_ids=experiment_ids)
 
     # call compose to calculate all the derivatives
     self.compose()
@@ -124,8 +120,7 @@ class BeamParameterisation(ModelParameterisation, BeamMixin):
     mu1, mu2, nu = self._param
 
     # calculate new s0 and derivatives
-    s0, self._dstate_dp = self._compose_core(is0, mu1.value, mu2.value,
-      nu.value, mu1_axis=mu1.axis, mu2_axis=mu2.axis)
+    s0, self._dstate_dp = self._compose_core(is0, mu1.value, mu2.value, nu.value, mu1_axis=mu1.axis, mu2_axis=mu2.axis)
 
     # now update the model with its new s0
     self._model.set_s0(s0)

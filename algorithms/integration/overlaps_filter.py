@@ -2,7 +2,8 @@ from __future__ import division
 from libtbx.phil import parse
 from dials.array_family import flex
 
-phil_scope = parse("""
+phil_scope = parse(
+    """
 overlaps_filter {
   foreground_foreground {
     enable = False
@@ -17,7 +18,8 @@ overlaps_filter {
               "impinges on the spot's background"
   }
 }
-""", process_includes=True)
+""",
+    process_includes=True)
 
 class OverlapsFilter(object):
   from dials.algorithms.shoebox import MaskCode
@@ -26,6 +28,7 @@ class OverlapsFilter(object):
 
   def is_fgd(self, code):
     return (code & self.code_fgd) == self.code_fgd
+
   def is_bgd(self, code):
     return (code & self.code_bgd) == self.code_bgd
 
@@ -36,7 +39,7 @@ class OverlapsFilter(object):
     det = self.expt.detector
     assert len(det) == 1 # for now
     self.size_fast, self.size_slow = det[0].get_image_size()
-    self.array_size = self.size_fast*self.size_slow
+    self.array_size = self.size_fast * self.size_slow
 
   def create_simple_mask(self):
     self.masks['simple_mask'] = flex.size_t(self.array_size)
@@ -47,8 +50,8 @@ class OverlapsFilter(object):
       for f, s in zip(fast_coords, slow_coords):
         f_abs = f + shoebox.bbox[0] # relative to detector
         s_abs = s + shoebox.bbox[2] # relative to detector
-        posn = f_abs + s_abs*self.size_fast # position in mask array
-        posn_in_shoebox = f + shoebox.xsize()*s # position in shoebox
+        posn = f_abs + s_abs * self.size_fast # position in mask array
+        posn_in_shoebox = f + shoebox.xsize() * s # position in shoebox
         try:
           self.masks['simple_mask'][posn] |= shoebox.mask[posn_in_shoebox]
         except IndexError: # bbox may extend past detector limits
@@ -64,15 +67,15 @@ class OverlapsFilter(object):
       for f, s in zip(fast_coords, slow_coords):
         f_abs = f + shoebox.bbox[0] # relative to detector
         s_abs = s + shoebox.bbox[2] # relative to detector
-        posn = f_abs + s_abs*self.size_fast # position in mask array
-        posn_in_shoebox = f + shoebox.xsize()*s # position in shoebox
+        posn = f_abs + s_abs * self.size_fast # position in mask array
+        posn_in_shoebox = f + shoebox.xsize() * s # position in shoebox
         if (shoebox.mask[posn_in_shoebox] & test_code) == test_code:
           try:
             self.masks[mask_name][posn].append(idx)
           except IndexError: # bbox may extend past detector limits
             continue
 
-  def filter_using_simple_mask(self, mask_lambda, shoebox_lambda=lambda x:True):
+  def filter_using_simple_mask(self, mask_lambda, shoebox_lambda=lambda x: True):
     """At each pixel, examine the simple mask to determine if contributing
     observations should be excluded. When this condition mask_lambda is met,
     for each contributing observation, use optional condition shoebox_lambda
@@ -89,8 +92,8 @@ class OverlapsFilter(object):
       for f, s in zip(fast_coords, slow_coords):
         f_abs = f + shoebox.bbox[0] # relative to detector
         s_abs = s + shoebox.bbox[2] # relative to detector
-        posn = f_abs + s_abs*self.size_fast # position in mask array
-        posn_in_shoebox = f + shoebox.xsize()*s # position in shoebox
+        posn = f_abs + s_abs * self.size_fast # position in mask array
+        posn_in_shoebox = f + shoebox.xsize() * s # position in shoebox
         try:
           if mask_lambda(self.masks['simple_mask'][posn]): # condition met in simple mask
             if shoebox_lambda(shoebox.mask[posn_in_shoebox]): # condition met in shoebox
@@ -128,12 +131,13 @@ class OverlapsFilter(object):
 
   def remove_foreground_background_overlaps(self):
     self.create_simple_mask()
+
     def is_overlap(code):
       return self.is_fgd(code) and self.is_bgd(code)
+
     self.refl = self.refl.select(self.filter_using_simple_mask(mask_lambda=is_overlap))
 
 class OverlapsFilterMultiExpt(object):
-
   def __init__(self, refl, expt):
     self.filters = [OverlapsFilter(r, e) for (r, e) in zip(refl.split_by_experiment_id(), expt)]
 

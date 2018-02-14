@@ -31,7 +31,8 @@ Examples::
 
 '''
 
-phil_scope = parse("""
+phil_scope = parse(
+    """
   output {
     mask = mask.pickle
       .type = path
@@ -43,8 +44,8 @@ phil_scope = parse("""
   }
 
   include scope dials.util.masking.phil_scope
-""", process_includes=True)
-
+""",
+    process_includes=True)
 
 class Script(object):
   ''' A class to encapsulate the script. '''
@@ -56,11 +57,7 @@ class Script(object):
 
     # Create the parser
     usage = "usage: %s [options] datablock.json" % libtbx.env.dispatcher_name
-    self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      epilog=help_message,
-      read_datablocks=True)
+    self.parser = OptionParser(usage=usage, phil=phil_scope, epilog=help_message, read_datablocks=True)
 
   def run(self):
     ''' Run the script. '''
@@ -104,8 +101,7 @@ class Script(object):
       imageset.external_lookup.mask.data = ImageBool(mask)
       imageset.external_lookup.mask.filename = params.output.mask
       from dxtbx.datablock import DataBlockDumper
-      print 'Saving datablocks to {0}'.format(
-        params.output.datablock)
+      print 'Saving datablocks to {0}'.format(params.output.datablock)
       dump = DataBlockDumper(datablocks)
       dump.as_file(params.output.datablock)
 

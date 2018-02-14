@@ -7,7 +7,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """Contains classes required for parameterising the scale factor components
 and the overall scale."""
 
@@ -50,8 +49,7 @@ class ScaleFactor(object):
     # the same length as seq. Weight is a sparse matrix with one row per
     # element of seq. Each row has some (typically 3) non-zero values
     # corresponding to the positions nearest the element of seq.
-    value, weight, sumweight = self._smoother.multi_value_weight(seq,
-      self._param)
+    value, weight, sumweight = self._smoother.multi_value_weight(seq, self._param)
 
     # The gradient of a single smoothed value with respect to the parameters,
     # d[v]/d[p] = w_i * (1. / sum(w_i)), where the sum is over the parameters.
@@ -67,8 +65,7 @@ class IncidentBeamFactor(ScaleFactor):
 
   def __init__(self, phi_range_deg, deg_per_interval=5):
 
-    n_intervals = max(int(abs(
-      phi_range_deg[1] - phi_range_deg[0]) / deg_per_interval), 1)
+    n_intervals = max(int(abs(phi_range_deg[1] - phi_range_deg[0]) / deg_per_interval), 1)
 
     # Set up the smoother
     self._smoother = GaussianSmoother(phi_range_deg, n_intervals)
@@ -76,8 +73,7 @@ class IncidentBeamFactor(ScaleFactor):
 
     # initial value of scale factors is 1
     value = 1
-    self._param = ScanVaryingParameterSet(value, self._num_samples,
-      name = "IncidentBeam")
+    self._param = ScanVaryingParameterSet(value, self._num_samples, name="IncidentBeam")
 
   def __len__(self):
     # There is only one parameter set, so the total number of parameters is
@@ -166,4 +162,3 @@ class ScaleParameterisation(object):
       grad.assign_block(g, 0, icol)
 
     return overall_scale, grad
-

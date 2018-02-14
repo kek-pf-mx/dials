@@ -23,7 +23,7 @@ def dump(experiments, reflections, directory):
     for i, experiment in enumerate(experiments):
       suffix = ""
       if len(experiments) > 1:
-        suffix = "_%i" %(i+1)
+        suffix = "_%i" % (i + 1)
 
       sub_dir = "%s%s" % (directory, suffix)
       if not os.path.isdir(sub_dir):
@@ -47,20 +47,18 @@ def dump(experiments, reflections, directory):
       to_xds = xds.to_xds(imageset)
       xds_inp = os.path.join(sub_dir, 'XDS.INP')
       xparm_xds = os.path.join(sub_dir, 'XPARM.XDS')
-      print "Exporting experiment to %s and %s" %(xds_inp, xparm_xds)
+      print "Exporting experiment to %s and %s" % (xds_inp, xparm_xds)
       with open(xds_inp, 'wb') as f:
         to_xds.XDS_INP(
-          out=f,
-          space_group_number=crystal_model.get_space_group().type().number(),
-          real_space_a=real_space_a,
-          real_space_b=real_space_b,
-          real_space_c=real_space_c,
-          job_card="XYCORR INIT DEFPIX INTEGRATE CORRECT")
+            out=f,
+            space_group_number=crystal_model.get_space_group().type().number(),
+            real_space_a=real_space_a,
+            real_space_b=real_space_b,
+            real_space_c=real_space_c,
+            job_card="XYCORR INIT DEFPIX INTEGRATE CORRECT")
       with open(xparm_xds, 'wb') as f:
         to_xds.xparm_xds(
-          real_space_a, real_space_b, real_space_c,
-          crystal_model.get_space_group().type().number(),
-          out=f)
+            real_space_a, real_space_b, real_space_c, crystal_model.get_space_group().type().number(), out=f)
 
       if reflections is not None and len(reflections) > 0:
         ref_cryst = reflections.select(reflections['id'] == i)
@@ -86,8 +84,6 @@ def export_spot_xds(reflections, filename):
       else:
         centroids = centroids.select(selection)
         intensities = intensities.select(selection)
-    xds_writer = spot_xds.writer(centroids=centroids,
-                                 intensities=intensities,
-                                 miller_indices=miller_indices)
-    print "Exporting spot list as %s" %filename
+    xds_writer = spot_xds.writer(centroids=centroids, intensities=intensities, miller_indices=miller_indices)
+    print "Exporting spot list as %s" % filename
     xds_writer.write_file(filename=filename)

@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division
 
 class Test(object):
-
   def __init__(self):
     from math import pi
 
@@ -14,13 +13,12 @@ class Test(object):
 
     import os
 
-    filename = os.path.join(dials_regression,
-        'centroid_test_data', 'fake_long_experiments.json')
+    filename = os.path.join(dials_regression, 'centroid_test_data', 'fake_long_experiments.json')
 
     from dxtbx.model.experiment_list import ExperimentListFactory
     from dxtbx.model.experiment_list import ExperimentList
     exlist = ExperimentListFactory.from_json_file(filename)
-    assert(len(exlist) == 1)
+    assert (len(exlist) == 1)
     self.experiment = exlist[0]
 
     # Set the delta_divergence/mosaicity
@@ -39,11 +37,8 @@ class Test(object):
       PartialityCalculator3D
     from dials.array_family import flex
 
-    calculator = PartialityCalculator3D(
-      self.experiment.beam,
-      self.experiment.goniometer,
-      self.experiment.scan,
-      self.sigma_m)
+    calculator = PartialityCalculator3D(self.experiment.beam, self.experiment.goniometer, self.experiment.scan,
+                                        self.sigma_m)
 
     predicted = flex.reflection_table.from_predictions_multi(self.experiments)
     predicted['bbox'] = predicted.compute_bbox(self.experiments)
@@ -51,19 +46,16 @@ class Test(object):
     # Remove any touching edges of scan to get only fully recorded
     x0, x1, y0, y1, z0, z1 = predicted['bbox'].parts()
     predicted = predicted.select((z0 > 0) & (z1 < 100))
-    assert(len(predicted) > 0)
+    assert (len(predicted) > 0)
 
     # Compute partiality
-    partiality = calculator(
-      predicted['s1'],
-      predicted['xyzcal.px'].parts()[2],
-      predicted['bbox'])
+    partiality = calculator(predicted['s1'], predicted['xyzcal.px'].parts()[2], predicted['bbox'])
 
     # Should have all fully recorded
-    assert(len(partiality) == len(predicted))
+    assert (len(partiality) == len(predicted))
     from math import sqrt, erf
     three_sigma = 0.5 * (erf(3.0 / sqrt(2.0)) - erf(-3.0 / sqrt(2.0)))
-    assert(partiality.all_gt(three_sigma))
+    assert (partiality.all_gt(three_sigma))
 
     # Trim bounding boxes
     x0, x1, y0, y1, z0, z1 = predicted['bbox'].parts()
@@ -71,17 +63,14 @@ class Test(object):
     z1 = z1 - 1
     predicted['bbox'] = flex.int6(x0, x1, y0, y1, z0, z1)
     predicted = predicted.select(z1 > z0)
-    assert(len(predicted) > 0)
+    assert (len(predicted) > 0)
 
     # Compute partiality
-    partiality = calculator(
-      predicted['s1'],
-      predicted['xyzcal.px'].parts()[2],
-      predicted['bbox'])
+    partiality = calculator(predicted['s1'], predicted['xyzcal.px'].parts()[2], predicted['bbox'])
 
     # Should have all partials
-    assert(len(partiality) == len(predicted))
-    assert(partiality.all_le(1.0) and partiality.all_gt(0))
+    assert (len(partiality) == len(predicted))
+    assert (partiality.all_le(1.0) and partiality.all_gt(0))
 
     print 'OK'
 

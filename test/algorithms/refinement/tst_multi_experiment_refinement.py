@@ -8,7 +8,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """
 A simple test of refinement using two crystals.
 
@@ -63,18 +62,18 @@ from dials.algorithms.refinement.target import \
 #############################
 
 args = sys.argv[1:]
-master_phil = parse("""
+master_phil = parse(
+    """
     include scope dials.test.algorithms.refinement.geometry_phil
     include scope dials.test.algorithms.refinement.minimiser_phil
-    """, process_includes=True)
+    """,
+    process_includes=True)
 
-models = setup_geometry.Extract(master_phil, cmdline_args = args,
-                                 local_overrides="geometry.parameters.random_seed = 1")
+models = setup_geometry.Extract(master_phil, cmdline_args=args, local_overrides="geometry.parameters.random_seed = 1")
 
 crystal1 = models.crystal
 
-models = setup_geometry.Extract(master_phil, cmdline_args = args,
-                                 local_overrides="geometry.parameters.random_seed = 2")
+models = setup_geometry.Extract(master_phil, cmdline_args=args, local_overrides="geometry.parameters.random_seed = 2")
 
 mydetector = models.detector
 mygonio = models.goniometer
@@ -83,11 +82,7 @@ mybeam = models.beam
 
 # Build a mock scan for a 180 degree sweep
 sf = ScanFactory()
-myscan = sf.make_scan(image_range = (1,1800),
-                      exposure_times = 0.1,
-                      oscillation = (0, 0.1),
-                      epochs = range(1800),
-                      deg = True)
+myscan = sf.make_scan(image_range=(1, 1800), exposure_times=0.1, oscillation=(0, 0.1), epochs=range(1800), deg=True)
 sweep_range = myscan.get_oscillation_range(deg=False)
 im_width = myscan.get_oscillation(deg=False)[1]
 assert sweep_range == (0., pi)
@@ -95,12 +90,10 @@ assert approx_equal(im_width, 0.1 * pi / 180.)
 
 # Build an experiment list
 experiments = ExperimentList()
-experiments.append(Experiment(
-      beam=mybeam, detector=mydetector, goniometer=mygonio,
-      scan=myscan, crystal=crystal1, imageset=None))
-experiments.append(Experiment(
-      beam=mybeam, detector=mydetector, goniometer=mygonio,
-      scan=myscan, crystal=crystal2, imageset=None))
+experiments.append(
+    Experiment(beam=mybeam, detector=mydetector, goniometer=mygonio, scan=myscan, crystal=crystal1, imageset=None))
+experiments.append(
+    Experiment(beam=mybeam, detector=mydetector, goniometer=mygonio, scan=myscan, crystal=crystal2, imageset=None))
 
 assert len(experiments.detectors()) == 1
 
@@ -135,8 +128,7 @@ s0_param.set_fixed([True, False, True])
 
 # shift detector by 1.0 mm each translation and 2 mrad each rotation
 det_p_vals = det_param.get_param_vals()
-p_vals = [a + b for a, b in zip(det_p_vals,
-                                [1.0, 1.0, 1.0, 2., 2., 2.])]
+p_vals = [a + b for a, b in zip(det_p_vals, [1.0, 1.0, 1.0, 2., 2., 2.])]
 det_param.set_param_vals(p_vals)
 
 # shift beam by 2 mrad in free axis
@@ -157,12 +149,11 @@ for xlo in (xl1o_param, xl2o_param):
 # change unit cell a bit (=0.1 Angstrom length upsets, 0.1 degree of
 # gamma angle)
 xluc_p_vals = []
-for xluc, xl in ((xl1uc_param, crystal1),((xl2uc_param, crystal2))):
+for xluc, xl in ((xl1uc_param, crystal1), ((xl2uc_param, crystal2))):
   p_vals = xluc.get_param_vals()
   xluc_p_vals.append(p_vals)
   cell_params = xl.get_unit_cell().parameters()
-  cell_params = [a + b for a, b in zip(cell_params, [0.1, 0.1, 0.1, 0.0,
-                                                     0.0, 0.1])]
+  cell_params = [a + b for a, b in zip(cell_params, [0.1, 0.1, 0.1, 0.0, 0.0, 0.1])]
   new_uc = unit_cell(cell_params)
   newB = matrix.sqr(new_uc.fractionalization_matrix()).transpose()
   S = symmetrize_reduce_enlarge(xl.get_space_group())
@@ -183,13 +174,13 @@ for xluc, xl in ((xl1uc_param, crystal1),((xl2uc_param, crystal2))):
 # All indices in a 2.0 Angstrom sphere for crystal1
 resolution = 2.0
 index_generator = IndexGenerator(crystal1.get_unit_cell(),
-                space_group(space_group_symbols(1).hall()).type(), resolution)
+                                 space_group(space_group_symbols(1).hall()).type(), resolution)
 indices1 = index_generator.to_array()
 
 # All indices in a 2.0 Angstrom sphere for crystal2
 resolution = 2.0
 index_generator = IndexGenerator(crystal2.get_unit_cell(),
-                space_group(space_group_symbols(1).hall()).type(), resolution)
+                                 space_group(space_group_symbols(1).hall()).type(), resolution)
 indices2 = index_generator.to_array()
 
 # Predict rays within the sweep range. Set experiment IDs
@@ -255,19 +246,17 @@ from dials.algorithms.refinement.refiner import phil_scope
 params = phil_scope.fetch(source=parse('')).extract()
 
 # in case we want a plot
-params.refinement.refinery.journal.track_parameter_correlation=True
+params.refinement.refinery.journal.track_parameter_correlation = True
 
 # scan static first
 from dials.algorithms.refinement.refiner import RefinerFactory
-refiner = RefinerFactory.from_parameters_data_experiments(params, obs_refs,
-  experiments, verbosity=0)
+refiner = RefinerFactory.from_parameters_data_experiments(params, obs_refs, experiments, verbosity=0)
 history = refiner.run()
 print "OK"
 
 # scan varying
-params.refinement.parameterisation.scan_varying=True
-refiner = RefinerFactory.from_parameters_data_experiments(params, obs_refs,
-  experiments, verbosity=0)
+params.refinement.parameterisation.scan_varying = True
+refiner = RefinerFactory.from_parameters_data_experiments(params, obs_refs, experiments, verbosity=0)
 history = refiner.run()
 print "OK"
 

@@ -10,7 +10,6 @@
 
 from __future__ import absolute_import, division
 
-
 class SpotMatcher(object):
   '''Match the observed with predicted spots.'''
 
@@ -81,7 +80,7 @@ class SpotMatcher(object):
 
     nn_all = flex.size_t()
     dd_all = flex.double()
-    for panel in range(max_panel+1):
+    for panel in range(max_panel + 1):
       pind = predicted_panel == panel
       oind = observed_panel == panel
       pxyz = predicted_xyz.select(pind)
@@ -151,7 +150,7 @@ class SpotMatcher(object):
         if dist[i] < dist[j]:
           seen[p] = i
       else:
-        seen[p] = i;
+        seen[p] = i
 
     index = []
     for k, v in seen.iteritems():

@@ -1,9 +1,7 @@
 from __future__ import absolute_import, division
 from dials.array_family import flex # import dependency
 
-
 class Test(object):
-
   def __init__(self):
     from os.path import join
     import libtbx.load_env
@@ -32,7 +30,7 @@ class Test(object):
     import os
     from uuid import uuid4
 
-    dirname ='tmp_%s' % uuid4().hex
+    dirname = 'tmp_%s' % uuid4().hex
     os.mkdir(dirname)
     os.chdir(dirname)
 
@@ -40,21 +38,21 @@ class Test(object):
 
     # Call dials.integrate
     easy_run.fully_buffered([
-      'dials.integrate',
-      join(self.path, 'experiments.json'),
-      'profile.fitting=False',
-      'prediction.padding=0',
+        'dials.integrate',
+        join(self.path, 'experiments.json'),
+        'profile.fitting=False',
+        'prediction.padding=0',
     ]).raise_if_errors()
 
     import cPickle as pickle
     table = pickle.load(open('integrated.pickle', 'rb'))
     print len(table)
-    assert(len(table) == 751)
+    assert (len(table) == 751)
 
     # assert(len(table) == 764)
-    assert('id' in table)
+    assert ('id' in table)
     for row in table:
-      assert(row['id'] == 0)
+      assert (row['id'] == 0)
     self.table = table
     print 'OK'
 
@@ -65,23 +63,23 @@ class Test(object):
 
     # Call dials.integrate
     easy_run.fully_buffered([
-      'dials.integrate',
-      join(self.path, 'experiments.json'),
-      'profile.fitting=False',
-      'integration.integrator=3d',
-      'prediction.padding=0',
+        'dials.integrate',
+        join(self.path, 'experiments.json'),
+        'profile.fitting=False',
+        'integration.integrator=3d',
+        'prediction.padding=0',
     ]).raise_if_errors()
 
     import cPickle as pickle
     table = pickle.load(open('integrated.pickle', 'rb'))
-    mask = table.get_flags(table.flags.integrated,all=False)
-    assert(len(table) == 1996)
-    assert(mask.count(True) == 1666)
+    mask = table.get_flags(table.flags.integrated, all=False)
+    assert (len(table) == 1996)
+    assert (mask.count(True) == 1666)
 
     # assert(len(table) == 764)
-    assert('id' in table)
+    assert ('id' in table)
     for row in table:
-      assert(row['id'] == 0)
+      assert (row['id'] == 0)
     self.table = table
     print 'OK'
 
@@ -92,8 +90,7 @@ class Test(object):
     from os.path import join
     shutil.copyfile(join(self.path, "experiments.json"), "experiments.json")
     for i in range(1, 10):
-      shutil.copyfile(join(self.path, "centroid_000%d.cbf" % i),
-                      "centroid_001%d.cbf" % i)
+      shutil.copyfile(join(self.path, "centroid_000%d.cbf" % i), "centroid_001%d.cbf" % i)
 
     with open("experiments.json", "r") as infile:
       lines = infile.readlines()
@@ -129,28 +126,28 @@ class Test(object):
             inoscillation = False
             inscan = False
             break
-    assert(done1)
-    assert(done2)
+    assert (done1)
+    assert (done2)
     with open("experiments.json", "w") as outfile:
       outfile.write('\n'.join(lines))
 
     # Call dials.integrate
     easy_run.fully_buffered([
-      'dials.integrate',
-      'experiments.json',
-      'profile.fitting=False',
-      'integration.integrator=3d',
-      'prediction.padding=0',
+        'dials.integrate',
+        'experiments.json',
+        'profile.fitting=False',
+        'integration.integrator=3d',
+        'prediction.padding=0',
     ]).raise_if_errors()
 
     from math import pi
     import cPickle as pickle
     table = pickle.load(open('integrated.pickle', 'rb'))
-    mask1 = table.get_flags(table.flags.integrated,all=False)
-    assert(len(table) == 1996), "Table has %d entries instead of 1996" % len(table)
-    assert(mask1.count(True) == 1666)
-    mask2 = self.table.get_flags(table.flags.integrated,all=False)
-    assert(mask1.all_eq(mask2))
+    mask1 = table.get_flags(table.flags.integrated, all=False)
+    assert (len(table) == 1996), "Table has %d entries instead of 1996" % len(table)
+    assert (mask1.count(True) == 1666)
+    mask2 = self.table.get_flags(table.flags.integrated, all=False)
+    assert (mask1.all_eq(mask2))
     t1 = table.select(mask1)
     t2 = self.table.select(mask1)
     Cal_P1 = t1['xyzcal.mm'].parts()[2]
@@ -164,12 +161,12 @@ class Test(object):
     diff_I = t1['intensity.sum.value'] - t2['intensity.sum.value']
     diff_Cal_Z = Cal_Z1 - (Cal_Z2 + 10)
     diff_Obs_Z = Obs_Z1 - (Obs_Z2 + 10)
-    diff_Cal_P = Cal_P1 - (Cal_P2 + 2*pi)
+    diff_Cal_P = Cal_P1 - (Cal_P2 + 2 * pi)
     # diff_Obs_P = Obs_P1 - (Obs_P2 + 2*pi)
-    assert(flex.abs(diff_I).all_lt(1e-7))
-    assert(flex.abs(diff_Cal_Z).all_lt(1e-7))
-    assert(flex.abs(diff_Cal_P).all_lt(1e-7))
-    assert(flex.abs(diff_Obs_Z).all_lt(1e-7))
+    assert (flex.abs(diff_I).all_lt(1e-7))
+    assert (flex.abs(diff_Cal_Z).all_lt(1e-7))
+    assert (flex.abs(diff_Cal_P).all_lt(1e-7))
+    assert (flex.abs(diff_Obs_Z).all_lt(1e-7))
     # assert(flex.abs(diff_Obs_P).all_lt(1e-7))
 
     print 'OK'
@@ -179,17 +176,17 @@ class Test(object):
     from libtbx import easy_run
     import os
 
-    dirname ='test4'
+    dirname = 'test4'
     os.mkdir(dirname)
     os.chdir(dirname)
 
     # Call dials.integrate
     easy_run.fully_buffered([
-      'dials.integrate',
-      join(self.path, 'experiments.json'),
-      'profile.fitting=False',
-      'sampling.integrate_all_reflections=False',
-      'prediction.padding=0',
+        'dials.integrate',
+        join(self.path, 'experiments.json'),
+        'profile.fitting=False',
+        'sampling.integrate_all_reflections=False',
+        'prediction.padding=0',
     ]).raise_if_errors()
 
     import cPickle as pickle
@@ -198,12 +195,12 @@ class Test(object):
 
     # Call dials.integrate
     easy_run.fully_buffered([
-      'dials.integrate',
-      join(self.path, 'experiments.json'),
-      'profile.fitting=False',
-      'sampling.integrate_all_reflections=False',
-      'sampling.minimum_sample_size=500',
-      'prediction.padding=0',
+        'dials.integrate',
+        join(self.path, 'experiments.json'),
+        'profile.fitting=False',
+        'sampling.integrate_all_reflections=False',
+        'sampling.minimum_sample_size=500',
+        'prediction.padding=0',
     ]).raise_if_errors()
 
     import cPickle as pickle
@@ -217,16 +214,16 @@ class Test(object):
     from libtbx import easy_run
     import os
 
-    dirname ='multi_sweep'
+    dirname = 'multi_sweep'
     os.mkdir(dirname)
     os.chdir(dirname)
 
     # Call dials.integrate
     easy_run.fully_buffered([
-      'dials.integrate',
-      join(self.integration_test_data, 'multi_sweep', 'experiments.json'),
-      join(self.integration_test_data, 'multi_sweep', 'indexed.pickle'),
-      'prediction.padding=0',
+        'dials.integrate',
+        join(self.integration_test_data, 'multi_sweep', 'experiments.json'),
+        join(self.integration_test_data, 'multi_sweep', 'indexed.pickle'),
+        'prediction.padding=0',
     ]).raise_if_errors()
 
     import cPickle as pickle
@@ -258,16 +255,16 @@ class Test(object):
     from libtbx import easy_run
     import os
 
-    dirname ='multi_sweep'
+    dirname = 'multi_sweep'
     os.mkdir(dirname)
     os.chdir(dirname)
 
     # Call dials.integrate
     easy_run.fully_buffered([
-      'dials.integrate',
-      join(self.integration_test_data, 'multi_lattice', 'experiments.json'),
-      join(self.integration_test_data, 'multi_lattice', 'indexed.pickle'),
-      'prediction.padding=0',
+        'dials.integrate',
+        join(self.integration_test_data, 'multi_lattice', 'experiments.json'),
+        join(self.integration_test_data, 'multi_lattice', 'indexed.pickle'),
+        'prediction.padding=0',
     ]).raise_if_errors()
 
     import cPickle as pickle
@@ -286,14 +283,13 @@ class Test(object):
 
     print 'OK'
 
-
   def test_output_rubbish(self):
     from os.path import join, exists
     from libtbx import easy_run
     import os
     from uuid import uuid4
 
-    dirname ='tmp_%s' % uuid4().hex
+    dirname = 'tmp_%s' % uuid4().hex
     os.mkdir(dirname)
     os.chdir(dirname)
 
@@ -302,9 +298,9 @@ class Test(object):
 
     # Call dials.integrate
     easy_run.fully_buffered([
-      'dials.index',
-      join(self.path, 'datablock.json'),
-      join(self.path, 'strong.pickle'),
+        'dials.index',
+        join(self.path, 'datablock.json'),
+        join(self.path, 'strong.pickle'),
     ]).raise_if_errors()
 
     assert exists('experiments.json')
@@ -312,23 +308,22 @@ class Test(object):
 
     # Call dials.integrate
     easy_run.fully_buffered([
-      'dials.integrate',
-      'experiments.json',
-      'indexed.pickle',
-      'profile.fitting=False',
-      'prediction.padding=0',
+        'dials.integrate',
+        'experiments.json',
+        'indexed.pickle',
+        'profile.fitting=False',
+        'prediction.padding=0',
     ]).raise_if_errors()
 
     import cPickle as pickle
     table = pickle.load(open('integrated.pickle', 'rb'))
     assert table.get_flags(table.flags.bad_reference) > 0
 
-    assert('id' in table)
+    assert ('id' in table)
     for row in table:
-      assert(row['id'] == 0)
+      assert (row['id'] == 0)
     self.table = table
     print 'OK'
-
 
 if __name__ == '__main__':
   from dials.test import cd_auto

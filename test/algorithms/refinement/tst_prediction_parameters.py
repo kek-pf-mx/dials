@@ -59,7 +59,7 @@ master_phil = parse("""
     include scope dials.test.algorithms.refinement.geometry_phil
     """, process_includes=True)
 
-models = Extract(master_phil, overrides, cmdline_args = args)
+models = Extract(master_phil, overrides, cmdline_args=args)
 
 mydetector = models.detector
 mygonio = models.goniometer
@@ -67,14 +67,10 @@ mycrystal = models.crystal
 mybeam = models.beam
 
 # Build a mock scan for a 72 degree sweep
-sweep_range = (0., pi/5.)
+sweep_range = (0., pi / 5.)
 from dxtbx.model import ScanFactory
 sf = ScanFactory()
-myscan = sf.make_scan(image_range = (1,720),
-                      exposure_times = 0.1,
-                      oscillation = (0, 0.1),
-                      epochs = range(720),
-                      deg = True)
+myscan = sf.make_scan(image_range=(1, 720), exposure_times=0.1, oscillation=(0, 0.1), epochs=range(720), deg=True)
 
 #### Create parameterisations of these models
 
@@ -86,25 +82,24 @@ gon_param = GoniometerParameterisation(mygonio, mybeam)
 
 # Create an ExperimentList
 experiments = ExperimentList()
-experiments.append(Experiment(
-      beam=mybeam, detector=mydetector, goniometer=mygonio, scan=myscan,
-      crystal=mycrystal, imageset=None))
+experiments.append(
+    Experiment(beam=mybeam, detector=mydetector, goniometer=mygonio, scan=myscan, crystal=mycrystal, imageset=None))
 
 #### Unit tests
 
 # Build a prediction parameterisation
-pred_param = XYPhiPredictionParameterisation(experiments,
-               detector_parameterisations = [det_param],
-               beam_parameterisations = [s0_param],
-               xl_orientation_parameterisations = [xlo_param],
-               xl_unit_cell_parameterisations = [xluc_param],
-               goniometer_parameterisations = [gon_param])
+pred_param = XYPhiPredictionParameterisation(
+    experiments,
+    detector_parameterisations=[det_param],
+    beam_parameterisations=[s0_param],
+    xl_orientation_parameterisations=[xlo_param],
+    xl_unit_cell_parameterisations=[xluc_param],
+    goniometer_parameterisations=[gon_param])
 
 # Generate reflections
 resolution = 2.0
 index_generator = IndexGenerator(mycrystal.get_unit_cell(),
-                      space_group(space_group_symbols(1).hall()).type(),
-                      resolution)
+                                 space_group(space_group_symbols(1).hall()).type(), resolution)
 indices = index_generator.to_array()
 
 # Predict rays within the sweep range
@@ -142,8 +137,8 @@ ref_predictor = ExperimentsPredictor(experiments)
 # make a target to ensure reflections are predicted and refman is finalised
 from dials.algorithms.refinement.target import \
   LeastSquaresPositionalResidualWithRmsdCutoff
-target = LeastSquaresPositionalResidualWithRmsdCutoff(experiments,
-    ref_predictor, refman, pred_param, restraints_parameterisation=None)
+target = LeastSquaresPositionalResidualWithRmsdCutoff(
+    experiments, ref_predictor, refman, pred_param, restraints_parameterisation=None)
 
 # keep only those reflections that pass inclusion criteria and have predictions
 reflections = refman.get_matches()
@@ -189,7 +184,7 @@ for i in range(len(deltas)):
 pred_param.set_param_vals(p_vals)
 
 finish_time = time()
-print "Time Taken: ",finish_time - start_time
+print "Time Taken: ", finish_time - start_time
 
 # if we got this far,
 print "OK"

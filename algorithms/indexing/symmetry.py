@@ -8,28 +8,22 @@ from scitbx.matrix import col
 from scitbx.array_family import flex
 from rstbx.symmetry.subgroup import MetricSubgroup
 
-
-
-def dials_crystal_from_orientation(crystal_orientation,space_group):
+def dials_crystal_from_orientation(crystal_orientation, space_group):
   dm = crystal_orientation.direct_matrix()
-  AA = col((dm[0],dm[1],dm[2]))
-  BB = col((dm[3],dm[4],dm[5]))
-  CC = col((dm[6],dm[7],dm[8]))
+  AA = col((dm[0], dm[1], dm[2]))
+  BB = col((dm[3], dm[4], dm[5]))
+  CC = col((dm[6], dm[7], dm[8]))
 
   from dxtbx.model import Crystal
 
-  cryst = Crystal(real_space_a=AA, real_space_b=BB, real_space_c=CC,
-                        space_group=space_group)
+  cryst = Crystal(real_space_a=AA, real_space_b=BB, real_space_c=CC, space_group=space_group)
   return cryst
 
-
 class bravais_setting(MetricSubgroup): # inherits from dictionary
-  def __init__(self,other):
+  def __init__(self, other):
     self.update(other)
 
-
 class refined_settings_list(list):
-
   def supergroup(self):
     return self[0]
 
@@ -37,65 +31,68 @@ class refined_settings_list(list):
     return self[-1]
 
   def as_dict(self):
-    result = { }
+    result = {}
 
     for item in self:
       uc = item.refined_crystal.get_unit_cell()
       result[item.setting_number] = {
-        'max_angular_difference':item['max_angular_difference'],
-        'rmsd':item.rmsd,
-        'nspots':item.Nmatches,
-        'bravais':item['bravais'],
-        'unit_cell':uc.parameters(),
-        'cb_op':item['cb_op_inp_best'].as_abc(),
-        'max_cc':item.max_cc,
-        'min_cc':item.min_cc,
-        'correlation_coefficients':list(item.correlation_coefficients),
-        'cc_nrefs':list(item.cc_nrefs),
-        'recommended':item.recommended,
-        }
+          'max_angular_difference': item['max_angular_difference'],
+          'rmsd': item.rmsd,
+          'nspots': item.Nmatches,
+          'bravais': item['bravais'],
+          'unit_cell': uc.parameters(),
+          'cb_op': item['cb_op_inp_best'].as_abc(),
+          'max_cc': item.max_cc,
+          'min_cc': item.min_cc,
+          'correlation_coefficients': list(item.correlation_coefficients),
+          'cc_nrefs': list(item.cc_nrefs),
+          'recommended': item.recommended,
+      }
 
     return result
 
-  def labelit_printout(self,out=None):
+  def labelit_printout(self, out=None):
     from libtbx import table_utils
     if out is None:
       import sys
       out = sys.stdout
 
-    table_data = [["Solution","Metric fit","rmsd", "min/max cc", "#spots",
-                   "lattice","unit_cell","volume", "cb_op"]]
+    table_data = [["Solution", "Metric fit", "rmsd", "min/max cc", "#spots", "lattice", "unit_cell", "volume", "cb_op"]]
     for item in self:
       uc = item.refined_crystal.get_unit_cell()
       P = uc.parameters()
       min_max_cc_str = "-/-"
       if item.min_cc is not None and item.max_cc is not None:
-        min_max_cc_str = "%.3f/%.3f" %(item.min_cc, item.max_cc)
+        min_max_cc_str = "%.3f/%.3f" % (item.min_cc, item.max_cc)
       if item.recommended: status = '*'
       else: status = ''
-      table_data.append(["%1s%7d"%(status, item.setting_number),
-                         "%(max_angular_difference)6.4f"%item,
-                         "%5.3f"%item.rmsd,
-                         min_max_cc_str,
-                         "%d"%item.Nmatches,
-                         "%(bravais)s"%item,
-                         "%6.2f %6.2f %6.2f %6.2f %6.2f %6.2f"%P,
-                         "%.0f"%uc.volume(),
-                         "%s"%item['cb_op_inp_best'].as_abc()])
+      table_data.append([
+          "%1s%7d" % (status, item.setting_number),
+          "%(max_angular_difference)6.4f" % item,
+          "%5.3f" % item.rmsd, min_max_cc_str,
+          "%d" % item.Nmatches,
+          "%(bravais)s" % item,
+          "%6.2f %6.2f %6.2f %6.2f %6.2f %6.2f" % P,
+          "%.0f" % uc.volume(),
+          "%s" % item['cb_op_inp_best'].as_abc()
+      ])
 
-    print >> out, table_utils.format(
-        table_data, has_header=1, justify='right', delim=' ')
+    print >> out, table_utils.format(table_data, has_header=1, justify='right', delim=' ')
     print >> out, "* = recommended solution"
 
 # Mapping of Bravais lattice type to corresponding lowest possible symmetry
 bravais_lattice_to_lowest_symmetry_spacegroup_number = {
-  'aP':1, 'mP':3, 'mC':5, 'oP':16, 'oC':20, 'oF':22, 'oI':23, 'tP':75,
-  'tI':79, 'hP':143, 'hR':146, 'cP':195, 'cF':196, 'cI':197
+    'aP': 1, 'mP': 3, 'mC': 5, 'oP': 16, 'oC': 20, 'oF': 22, 'oI': 23, 'tP': 75, 'tI': 79, 'hP': 143, 'hR': 146, 'cP':
+    195, 'cF': 196, 'cI': 197
 }
 
-def refined_settings_factory_from_refined_triclinic(
-  params, experiments, reflections, i_setting=None,
-  lepage_max_delta=5.0, nproc=1, refiner_verbosity=0):
+def refined_settings_factory_from_refined_triclinic(params,
+                                                    experiments,
+                                                    reflections,
+                                                    i_setting=None,
+                                                    lepage_max_delta=5.0,
+                                                    nproc=1,
+                                                    refiner_verbosity=0):
 
   assert len(experiments.crystals()) == 1
   crystal = experiments.crystals()[0]
@@ -114,42 +111,40 @@ def refined_settings_factory_from_refined_triclinic(
   triclinic_miller = used_reflections['miller_index']
 
   # assert no transformation between indexing and bravais list
-  assert str(triclinic['cb_op_inp_best'])=="a,b,c"
+  assert str(triclinic['cb_op_inp_best']) == "a,b,c"
 
   Nset = len(Lfat)
-  for j in xrange(Nset):  Lfat[j].setting_number = Nset-j
+  for j in xrange(Nset):
+    Lfat[j].setting_number = Nset - j
 
   from cctbx.crystal_orientation import crystal_orientation
   from cctbx import sgtbx
   from scitbx import matrix
   for j in xrange(Nset):
     cb_op = Lfat[j]['cb_op_inp_best'].c().as_double_array()[0:9]
-    orient = crystal_orientation(crystal.get_A(),True)
+    orient = crystal_orientation(crystal.get_A(), True)
     orient_best = orient.change_basis(matrix.sqr(cb_op).transpose())
     constrain_orient = orient_best.constrain(Lfat[j]['system'])
     bravais = Lfat[j]["bravais"]
     cb_op_best_ref = Lfat[j]['best_subsym'].change_of_basis_op_to_reference_setting()
-    space_group = sgtbx.space_group_info(
-      number=bravais_lattice_to_lowest_symmetry_spacegroup_number[bravais]).group()
+    space_group = sgtbx.space_group_info(number=bravais_lattice_to_lowest_symmetry_spacegroup_number[bravais]).group()
     space_group = space_group.change_basis(cb_op_best_ref.inverse())
     bravais = str(bravais_types.bravais_lattice(group=space_group))
     Lfat[j]["bravais"] = bravais
-    Lfat[j].unrefined_crystal = dials_crystal_from_orientation(
-      constrain_orient, space_group)
+    Lfat[j].unrefined_crystal = dials_crystal_from_orientation(constrain_orient, space_group)
 
   args = []
   for subgroup in Lfat:
-    args.append((
-      params, subgroup, used_reflections, experiments, refiner_verbosity))
+    args.append((params, subgroup, used_reflections, experiments, refiner_verbosity))
 
   results = easy_mp.parallel_map(
-    func=refine_subgroup,
-    iterable=args,
-    processes=nproc,
-    method="multiprocessing",
-    preserve_order=True,
-    asynchronous=True,
-    preserve_exception_message=True)
+      func=refine_subgroup,
+      iterable=args,
+      processes=nproc,
+      method="multiprocessing",
+      preserve_order=True,
+      asynchronous=True,
+      preserve_exception_message=True)
 
   for i, result in enumerate(results):
     Lfat[i] = result
@@ -171,7 +166,6 @@ def identify_likely_solutions(all_solutions):
     elif solution.rmsd > 3 * rmsd_p1:
       continue
     solution.recommended = True
-
 
 def refine_subgroup(args):
   assert len(args) == 5
@@ -200,14 +194,13 @@ def refine_subgroup(args):
     logger.disabled = True
     iqr_multiplier = params.refinement.reflections.outlier.tukey.iqr_multiplier
     params.refinement.reflections.outlier.tukey.iqr_multiplier = 2 * iqr_multiplier
-    refinery, refined, outliers = refine(
-      params, used_reflections, experiments, verbosity=refiner_verbosity)
+    refinery, refined, outliers = refine(params, used_reflections, experiments, verbosity=refiner_verbosity)
     params.refinement.reflections.outlier.tukey.iqr_multiplier = iqr_multiplier
     refinery, refined, outliers = refine(
-      params, used_reflections, refinery.get_experiments(), verbosity=refiner_verbosity)
+        params, used_reflections, refinery.get_experiments(), verbosity=refiner_verbosity)
   except RuntimeError as e:
-    if (str(e) == "scitbx Error: g0 - astry*astry -astrz*astrz <= 0." or
-        str(e) == "scitbx Error: g1-bstrz*bstrz <= 0."):
+    if (str(e) == "scitbx Error: g0 - astry*astry -astrz*astrz <= 0."
+        or str(e) == "scitbx Error: g1-bstrz*bstrz <= 0."):
       subgroup.refined_crystal = None
       subgroup.rmsd = None
       subgroup.Nmatches = None
@@ -215,11 +208,13 @@ def refine_subgroup(args):
       subgroup.goniometer = None
       subgroup.beam = None
       subgroup.detector = None
-    else: raise
+    else:
+      raise
   else:
     dall = refinery.rmsds()
-    dx = dall[0]; dy = dall[1]
-    subgroup.rmsd = math.sqrt(dx*dx + dy*dy)
+    dx = dall[0]
+    dy = dall[1]
+    subgroup.rmsd = math.sqrt(dx * dx + dy * dy)
     subgroup.Nmatches = len(refinery.get_matches())
     refined_exps = refinery.get_experiments()
     subgroup.scan = refined_exps[0].scan
@@ -228,16 +223,14 @@ def refine_subgroup(args):
     subgroup.detector = refined_exps[0].detector
     subgroup.refined_crystal = refined_exps[0].crystal
     cs = crystal.symmetry(
-      unit_cell=subgroup.refined_crystal.get_unit_cell(),
-      space_group=subgroup.refined_crystal.get_space_group())
+        unit_cell=subgroup.refined_crystal.get_unit_cell(), space_group=subgroup.refined_crystal.get_space_group())
     if 'intensity.sum.value' in used_reflections:
       # remove refl with -ve variance
       sel = used_reflections['intensity.sum.variance'] > 0
       good_reflections = used_reflections.select(sel)
       from cctbx import miller
       ms = miller.set(cs, good_reflections['miller_index'])
-      ms = ms.array(good_reflections['intensity.sum.value'] /
-                    flex.sqrt(good_reflections['intensity.sum.variance']))
+      ms = ms.array(good_reflections['intensity.sum.value'] / flex.sqrt(good_reflections['intensity.sum.variance']))
       if params.normalise:
         if params.normalise_bins:
           ms = normalise_intensities(ms, n_bins=params.normalise_bins)
@@ -245,8 +238,7 @@ def refine_subgroup(args):
           ms = normalise_intensities(ms)
       if params.cc_n_bins is not None:
         ms.setup_binner(n_bins=params.cc_n_bins)
-      ccs, nrefs = get_symop_correlation_coefficients(
-        ms, use_binning=(params.cc_n_bins is not None))
+      ccs, nrefs = get_symop_correlation_coefficients(ms, use_binning=(params.cc_n_bins is not None))
       subgroup.correlation_coefficients = ccs
       subgroup.cc_nrefs = nrefs
       ccs = ccs.select(nrefs > 10)
@@ -263,14 +255,12 @@ from cctbx.sgtbx import change_of_basis_op
 find_max_delta = sgtbx.lattice_symmetry_find_max_delta
 
 def metric_supergroup(group):
-  return sgtbx.space_group_info(group=group).type(
-    ).expand_addl_generators_of_euclidean_normalizer(True,True
-    ).build_derived_acentric_group()
+  return sgtbx.space_group_info(group=group).type().expand_addl_generators_of_euclidean_normalizer(
+      True, True).build_derived_acentric_group()
 
 def find_matching_symmetry(unit_cell, target_space_group, max_delta=5):
   cs = crystal.symmetry(unit_cell=unit_cell, space_group=sgtbx.space_group())
-  target_bravais_t = bravais_types.bravais_lattice(
-    group=target_space_group.info().reference_setting().group())
+  target_bravais_t = bravais_types.bravais_lattice(group=target_space_group.info().reference_setting().group())
   best_subgroup = None
   best_angular_difference = 1e8
 
@@ -286,9 +276,7 @@ def find_matching_symmetry(unit_cell, target_space_group, max_delta=5):
 
   # Get highest symmetry compatible with lattice
   lattice_group = sgtbx.lattice_symmetry_group(
-    minimum_symmetry.unit_cell(),
-    max_delta=max_delta,
-    enforce_max_delta_for_generated_two_folds=True)
+      minimum_symmetry.unit_cell(), max_delta=max_delta, enforce_max_delta_for_generated_two_folds=True)
 
   # Get list of sub-spacegroups
   subgrs = subgroups.subgroups(lattice_group.info()).groups_parent_setting()
@@ -299,7 +287,7 @@ def find_matching_symmetry(unit_cell, target_space_group, max_delta=5):
     order_z = group.order_z()
     space_group_number = sgtbx.space_group_type(group, False).number()
     assert 1 <= space_group_number <= 230
-    sort_values.append(order_z*1000+space_group_number)
+    sort_values.append(order_z * 1000 + space_group_number)
   perm = flex.sort_permutation(sort_values, True)
 
   for i_subgr in perm:
@@ -312,31 +300,27 @@ def find_matching_symmetry(unit_cell, target_space_group, max_delta=5):
     # The unit cell is potentially modified to be exactly compatible
     # with the space group symmetry.
     subsym = crystal.symmetry(
-      unit_cell=minimum_symmetry.unit_cell(),
-      space_group=acentric_subgroup,
-      assert_is_compatible_unit_cell=False)
+        unit_cell=minimum_symmetry.unit_cell(), space_group=acentric_subgroup, assert_is_compatible_unit_cell=False)
     #supersym = crystal.symmetry(
-      #unit_cell=minimum_symmetry.unit_cell(),
-      #space_group=acentric_supergroup,
-      #assert_is_compatible_unit_cell=False)
+    #unit_cell=minimum_symmetry.unit_cell(),
+    #space_group=acentric_supergroup,
+    #assert_is_compatible_unit_cell=False)
     # Convert subgroup to reference setting
     cb_op_minimum_ref = subsym.space_group_info().type().cb_op()
     ref_subsym = subsym.change_basis(cb_op_minimum_ref)
     # Ignore unwanted groups
-    bravais_t = bravais_types.bravais_lattice(
-      group=ref_subsym.space_group())
+    bravais_t = bravais_types.bravais_lattice(group=ref_subsym.space_group())
     if bravais_t != target_bravais_t:
       continue
 
     # Choose best setting for monoclinic and orthorhombic systems
-    cb_op_best_cell = ref_subsym.change_of_basis_op_to_best_cell(
-      best_monoclinic_beta=True)
+    cb_op_best_cell = ref_subsym.change_of_basis_op_to_best_cell(best_monoclinic_beta=True)
 
     best_subsym = ref_subsym.change_basis(cb_op_best_cell)
     # Total basis transformation
-    cb_op_best_cell = change_of_basis_op(str(cb_op_best_cell),stop_chars='',r_den=144,t_den=144)
-    cb_op_minimum_ref=change_of_basis_op(str(cb_op_minimum_ref),stop_chars='',r_den=144,t_den=144)
-    cb_op_inp_minimum=change_of_basis_op(str(cb_op_inp_minimum),stop_chars='',r_den=144,t_den=144)
+    cb_op_best_cell = change_of_basis_op(str(cb_op_best_cell), stop_chars='', r_den=144, t_den=144)
+    cb_op_minimum_ref = change_of_basis_op(str(cb_op_minimum_ref), stop_chars='', r_den=144, t_den=144)
+    cb_op_inp_minimum = change_of_basis_op(str(cb_op_inp_minimum), stop_chars='', r_den=144, t_den=144)
     cb_op_inp_best = cb_op_best_cell * cb_op_minimum_ref * cb_op_inp_minimum
     # Use identity change-of-basis operator if possible
     if best_subsym.unit_cell().is_similar_to(input_symmetry.unit_cell()):
@@ -350,20 +334,19 @@ def find_matching_symmetry(unit_cell, target_space_group, max_delta=5):
         if best_subsym_corr.space_group() == best_subsym.space_group():
           cb_op_inp_best = cb_op_corr * cb_op_inp_best
 
-    max_angular_difference = find_max_delta(
-      reduced_cell=minimum_symmetry.unit_cell(),
-      space_group=acentric_supergroup)
+    max_angular_difference = find_max_delta(reduced_cell=minimum_symmetry.unit_cell(), space_group=acentric_supergroup)
 
     if max_angular_difference < best_angular_difference:
       #best_subgroup = subgroup
       best_angular_difference = max_angular_difference
-      best_subgroup = {'subsym':subsym,
-                       #'supersym':supersym,
-                       'ref_subsym':ref_subsym,
-                       'best_subsym':best_subsym,
-                       'cb_op_inp_best':cb_op_inp_best,
-                       'max_angular_difference':max_angular_difference
-                       }
+      best_subgroup = {
+          'subsym': subsym,
+          #'supersym':supersym,
+          'ref_subsym': ref_subsym,
+          'best_subsym': best_subsym,
+          'cb_op_inp_best': cb_op_inp_best,
+          'max_angular_difference': max_angular_difference
+      }
 
   if best_subgroup is not None:
     return best_subgroup

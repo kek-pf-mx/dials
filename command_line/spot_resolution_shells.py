@@ -11,7 +11,7 @@ Examples::
 
 '''
 
-phil_scope= libtbx.phil.parse("""
+phil_scope = libtbx.phil.parse("""
   shells = 100
     .type = int(value_min=1)
 """)
@@ -32,16 +32,14 @@ def spot_resolution_shells(imagesets, reflections, params):
     if isinstance(reflections['id'], flex.size_t):
       reflections['id'] = reflections['id'].as_int()
     refl = indexer.indexer_base.map_spots_pixel_to_mm_rad(
-      reflections.select(sel),
-      imageset.get_detector(), imageset.get_scan())
+        reflections.select(sel), imageset.get_detector(), imageset.get_scan())
 
-    indexer.indexer_base.map_centroids_to_reciprocal_space(
-      refl, imageset.get_detector(), imageset.get_beam(),
-      imageset.get_goniometer())
+    indexer.indexer_base.map_centroids_to_reciprocal_space(refl, imageset.get_detector(), imageset.get_beam(),
+                                                           imageset.get_goniometer())
     mapped_reflections.extend(refl)
   reflections = mapped_reflections
   two_theta_array = reflections['rlp'].norms()
-  h0 = flex.weighted_histogram(two_theta_array ** 2, n_slots=params.shells)
+  h0 = flex.weighted_histogram(two_theta_array**2, n_slots=params.shells)
   n = h0.slots()
   d = 1.0 / flex.sqrt(h0.slot_centers())
 
@@ -56,17 +54,16 @@ def run(args):
   from dials.util.options import flatten_reflections
   import libtbx.load_env
 
-  usage = "%s [options] datablock.json reflections.pickle" %(
-    libtbx.env.dispatcher_name)
+  usage = "%s [options] datablock.json reflections.pickle" % (libtbx.env.dispatcher_name)
 
   parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_datablocks=True,
-    read_experiments=True,
-    read_reflections=True,
-    check_format=False,
-    epilog=help_message)
+      usage=usage,
+      phil=phil_scope,
+      read_datablocks=True,
+      read_experiments=True,
+      read_reflections=True,
+      check_format=False,
+      epilog=help_message)
 
   params, options = parser.parse_args(show_diff_phil=True)
   datablocks = flatten_datablocks(params.input.datablock)

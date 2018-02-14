@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division
 
 class Test:
-
   def __init__(self):
     self.kernel = (3, 3)
 
@@ -34,15 +33,15 @@ class Test:
 
     eps = 1e-7
 
-    for j in range(self.kernel[0], ysize-self.kernel[0]):
-      for i in range(self.kernel[1], xsize-self.kernel[1]):
+    for j in range(self.kernel[0], ysize - self.kernel[0]):
+      for i in range(self.kernel[1], xsize - self.kernel[1]):
         j0 = j - self.kernel[0]
         j1 = j + self.kernel[0] + 1
         i0 = i - self.kernel[1]
         i1 = i + self.kernel[1] + 1
-        pixels = image[j0:j1,i0:i1]
+        pixels = image[j0:j1, i0:i1]
         value = median(pixels.as_numpy_array())
-        assert(abs(value - result[j,i]) < eps)
+        assert (abs(value - result[j, i]) < eps)
 
     print 'OK'
 
@@ -59,26 +58,25 @@ class Test:
     result = median_filter(image, mask, self.kernel)
     eps = 1e-7
 
-    for j in range(self.kernel[0], ysize-self.kernel[0]):
-      for i in range(self.kernel[1], xsize-self.kernel[1]):
-        if mask[j,i]:
+    for j in range(self.kernel[0], ysize - self.kernel[0]):
+      for i in range(self.kernel[1], xsize - self.kernel[1]):
+        if mask[j, i]:
           j0 = j - self.kernel[0]
           j1 = j + self.kernel[0] + 1
           i0 = i - self.kernel[1]
           i1 = i + self.kernel[1] + 1
-          pixels = image[j0:j1,i0:i1]
-          pmask = mask[j0:j1,i0:i1]
+          pixels = image[j0:j1, i0:i1]
+          pmask = mask[j0:j1, i0:i1]
           pixels = pixels.as_1d().select(pmask.as_1d())
           if len(pixels) & 1:
             value = median(pixels.as_numpy_array())
           else:
             pixels = sorted(list(pixels))
             value = pixels[len(pixels) // 2]
-          assert(abs(value - result[j,i]) < eps)
+          assert (abs(value - result[j, i]) < eps)
         else:
-          assert(abs(result[j,i] - 0.0) < eps)
+          assert (abs(result[j, i] - 0.0) < eps)
     print 'OK'
-
 
 if __name__ == '__main__':
   from dials.test import cd_auto

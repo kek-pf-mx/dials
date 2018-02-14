@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division
 
 class html_report(object):
-
   def __init__(self, external_dependencies='remote'):
     self._content = []
     self.external_dependencies = external_dependencies
@@ -26,13 +25,13 @@ class html_report(object):
       js_dir = libtbx.env.find_in_repositories('dials/static/js')
       katex_dir = libtbx.env.find_in_repositories('dials/static/katex')
 
-      plotly_js = '<script src="%s/plotly-latest.min.js"></script>' %js_dir
-      bootstrap_js = '<script src="%s/bootstrap.min.js"></script>' %js_dir
-      jquery_js = '<script src="%s/jquery-1.12.0.min.js"></script>' %js_dir
-      bootstrap_css = '<link rel="stylesheet" href="%s/bootstrap.min.css">' %css_dir
-      katex_js = '<script type="text/javascript" src=%s/katex.min.js></script>' %katex_dir
-      katex_auto_render_js = '<script type="text/javascript" src=%s/contrib/auto-render.min.js></script>' %katex_dir
-      katex_css = '<link rel="stylesheet" href="%s/katex.min.css">' %katex_dir
+      plotly_js = '<script src="%s/plotly-latest.min.js"></script>' % js_dir
+      bootstrap_js = '<script src="%s/bootstrap.min.js"></script>' % js_dir
+      jquery_js = '<script src="%s/jquery-1.12.0.min.js"></script>' % js_dir
+      bootstrap_css = '<link rel="stylesheet" href="%s/bootstrap.min.css">' % css_dir
+      katex_js = '<script type="text/javascript" src=%s/katex.min.js></script>' % katex_dir
+      katex_auto_render_js = '<script type="text/javascript" src=%s/contrib/auto-render.min.js></script>' % katex_dir
+      katex_css = '<link rel="stylesheet" href="%s/katex.min.css">' % katex_dir
 
     elif self.external_dependencies == 'embed':
       import os
@@ -41,20 +40,13 @@ class html_report(object):
       js_dir = libtbx.env.find_in_repositories('dials/static/js')
       katex_dir = libtbx.env.find_in_repositories('dials/static/katex')
 
-      plotly_js = '<script>%s</script>' %open(
-        os.path.join(js_dir, 'plotly-latest.min.js')).read()
-      bootstrap_js = '<script>%s</script>' %open(
-        os.path.join(js_dir, 'bootstrap.min.js')).read()
-      jquery_js = '<script>%s</script>' %open(
-        os.path.join(js_dir, 'jquery-1.12.0.min.js')).read()
-      bootstrap_css = '<style type="text/css">%s</style>' %open(
-        os.path.join(css_dir, 'bootstrap.min.css')).read()
-      katex_js = '<script>%s</script>' %open(
-        os.path.join(katex_dir, 'katex.min.js')).read()
-      katex_auto_render_js = '<script>%s</script>' %open(
-        os.path.join(katex_dir, 'contrib/auto-render.min.js')).read()
-      katex_css = '<style type="text/css">%s</style>' %open(
-        os.path.join(katex_dir, 'katex.min.css')).read()
+      plotly_js = '<script>%s</script>' % open(os.path.join(js_dir, 'plotly-latest.min.js')).read()
+      bootstrap_js = '<script>%s</script>' % open(os.path.join(js_dir, 'bootstrap.min.js')).read()
+      jquery_js = '<script>%s</script>' % open(os.path.join(js_dir, 'jquery-1.12.0.min.js')).read()
+      bootstrap_css = '<style type="text/css">%s</style>' % open(os.path.join(css_dir, 'bootstrap.min.css')).read()
+      katex_js = '<script>%s</script>' % open(os.path.join(katex_dir, 'katex.min.js')).read()
+      katex_auto_render_js = '<script>%s</script>' % open(os.path.join(katex_dir, 'contrib/auto-render.min.js')).read()
+      katex_css = '<style type="text/css">%s</style>' % open(os.path.join(katex_dir, 'katex.min.css')).read()
 
     html_header = '''
 <!DOCTYPE html>
@@ -109,14 +101,10 @@ class html_report(object):
 
 </head>
 
-''' %{'plotly_js': plotly_js,
-      'bootstrap_js': bootstrap_js,
-      'bootstrap_css': bootstrap_css,
-      'jquery_js': jquery_js,
-      'katex_js': katex_js,
-      'katex_auto_render_js': katex_auto_render_js,
-      'katex_css': katex_css,
-      'css': self.css()}
+''' % {
+        'plotly_js': plotly_js, 'bootstrap_js': bootstrap_js, 'bootstrap_css': bootstrap_css, 'jquery_js': jquery_js,
+        'katex_js': katex_js, 'katex_auto_render_js': katex_auto_render_js, 'katex_css': katex_css, 'css': self.css()
+    }
 
     return html_header
 
@@ -154,7 +142,7 @@ body {
         document.body);
   </script>
 </body>
-''' %('\n'.join(content.html() for content in self._content))
+''' % ('\n'.join(content.html() for content in self._content))
 
     return html_body
 
@@ -164,7 +152,6 @@ body {
   def add_content(self, content):
     self._content.append(content)
 
-
 class page_header(object):
   def __init__(self, title):
     self._title = title
@@ -173,9 +160,8 @@ class page_header(object):
     html = '''\
 <div class="page-header">
   <h1>%s</h1>
-</div>''' %self._title
+</div>''' % self._title
     return html
-
 
 class panel_group(object):
   def __init__(self, panels):
@@ -186,9 +172,8 @@ class panel_group(object):
 <div class="panel-group">
   %s
 </div>
-''' %('\n'.join(p.html() for p in self._panels))
+''' % ('\n'.join(p.html() for p in self._panels))
     return html
-
 
 class panel(object):
   def __init__(self, title, panel_id, show=False):
@@ -214,12 +199,11 @@ class panel(object):
     </div>
   </div>
 </div>
-''' %{'panel_id': self._panel_id,
-      'title': self._title,
-      'in': ' in' if self._show else '',
-      'content': '\n'.join(content.html() for content in self._content)}
+''' % {
+        'panel_id': self._panel_id, 'title': self._title, 'in': ' in'
+        if self._show else '', 'content': '\n'.join(content.html() for content in self._content)
+    }
     return html
-
 
 class table_responsive(object):
   def __init__(self, table_html, width=None):
@@ -228,16 +212,15 @@ class table_responsive(object):
 
   def html(self):
     if self._width is not None:
-      style = ' style="width: %ipx"' %self._width
+      style = ' style="width: %ipx"' % self._width
     else:
       style = ''
     html = '''
 <div class="table-responsive"%s>
   %s
 </div>
-''' %(style, self._table_html)
+''' % (style, self._table_html)
     return html
-
 
 class plotly_graph(object):
   def __init__(self, json_data, div_id):
@@ -252,15 +235,12 @@ class plotly_graph(object):
     var graphs_%(div_id)s = %(json)s;
     Plotly.newPlot(%(div_id)s, graphs_%(div_id)s.data, graphs_%(div_id)s.layout);
   </script>
-  ''' %{'div_id': self._div_id, 'json': json_str}
+  ''' % {'div_id': self._div_id, 'json': json_str}
     return javascript
 
   def html(self):
 
-    return '\n'.join((
-      '<div class="col-xs-6 col-sm-6 col-md-4 plot" id="%s"></div>' %self._div_id,
-      self.javascript()))
-
+    return '\n'.join(('<div class="col-xs-6 col-sm-6 col-md-4 plot" id="%s"></div>' % self._div_id, self.javascript()))
 
 class container_fluid(object):
   def __init__(self):
@@ -274,9 +254,8 @@ class container_fluid(object):
 <div class="container-fluid">
 %s
 </div>
-''' %'\n'.join(content.html() for content in self._content)
+''' % '\n'.join(content.html() for content in self._content)
     return html
-
 
 class div(object):
   def __init__(self):
@@ -290,9 +269,8 @@ class div(object):
 <div>
 %s
 </div>
-''' %'\n'.join(content.html() for content in self._content)
+''' % '\n'.join(content.html() for content in self._content)
     return html
-
 
 class raw_html(object):
   def __init__(self, raw_html):

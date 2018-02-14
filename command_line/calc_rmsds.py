@@ -27,24 +27,22 @@ phil_scope = parse('''
 
 from dials.command_line.refine import phil_scope
 
-
 def run(args):
   from dials.util import log
   import libtbx.load_env
-  usage = "%s experiments.json indexed.pickle [options]" %libtbx.env.dispatcher_name
-
+  usage = "%s experiments.json indexed.pickle [options]" % libtbx.env.dispatcher_name
 
   from dials.util.options import OptionParser
   from dials.util.options import flatten_reflections
   from dials.util.options import flatten_experiments
 
   parser = OptionParser(
-    usage=usage,
-    phil=phil_scope,
-    read_experiments=True,
-    read_reflections=True,
-    check_format=False,
-    epilog=help_message)
+      usage=usage,
+      phil=phil_scope,
+      read_experiments=True,
+      read_reflections=True,
+      check_format=False,
+      epilog=help_message)
 
   params, options = parser.parse_args(show_diff_phil=False)
 
@@ -62,7 +60,7 @@ def run(args):
 
   experiments = flatten_experiments(params.input.experiments)
   reflections = flatten_reflections(params.input.reflections)
-  assert(len(reflections) == 1)
+  assert (len(reflections) == 1)
   reflections = reflections[0]
 
   if len(experiments) == 0:
@@ -73,16 +71,13 @@ def run(args):
   #params = refine.phil_scope.extract()
   indexed_reflections = reflections.select(reflections['id'] > -1)
   from dials.algorithms.refinement import RefinerFactory
-  refiner = RefinerFactory.from_parameters_data_experiments(
-    params, indexed_reflections, experiments)
+  refiner = RefinerFactory.from_parameters_data_experiments(params, indexed_reflections, experiments)
   #refiner.run()
   rmsds = refiner.rmsds()
   import math
   xy_rmsds = math.sqrt(rmsds[0]**2 + rmsds[1]**2)
 
   print rmsds
-
-
 
   return
 

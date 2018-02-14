@@ -103,7 +103,6 @@ def print_error(exception):
   print '*' * 80
   print ''
 
-
 class Console(Cmd):
   '''
   A class to implement an interactive dials console
@@ -351,6 +350,7 @@ class Console(Cmd):
     from glob import glob
     from dxtbx.model.scan_helpers import template_regex
     import shlex
+
     def templates_from_filenames(filenames):
       templates = []
       for f in filenames:
@@ -359,12 +359,14 @@ class Console(Cmd):
         except Exception:
           pass
       return list(set(templates))
+
     def templates_from_directory(directory):
       filenames = []
       for f in listdir(directory):
         if isfile(join(directory, f)):
           filenames.append(join(directory, f))
       return templates_from_filenames(sorted(filenames))
+
     parameters = []
     arguments = shlex.split(line)
     for arg in arguments:
@@ -419,7 +421,6 @@ class Console(Cmd):
     '''
     return self.get_phil_completions(text, mode="import")
 
-
   def complete_find_spots(self, text, line, begidx, endidx):
     '''
     Offer tab completion options for find_spots
@@ -461,7 +462,6 @@ class Console(Cmd):
 
     '''
     return self.get_phil_completions(text, mode="refine")
-
 
   def complete_integrate(self, text, line, begidx, endidx):
     '''
@@ -506,8 +506,8 @@ class Console(Cmd):
     if before_arg == -1:
       return # arg not found
 
-    fixed = line[before_arg+1:begidx]  # fixed portion of the arg
-    arg = line[before_arg+1:endidx]
+    fixed = line[before_arg + 1:begidx] # fixed portion of the arg
+    arg = line[before_arg + 1:endidx]
     pattern = arg + '*'
 
     completions = []
@@ -516,13 +516,11 @@ class Console(Cmd):
       completions.append(path.replace(fixed, "", 1))
     return completions
 
-
 # The intre string for the console
 CONSOLE_INTRO = '''
 DIALS interactive mode
 Type "help" for more information
 '''
-
 
 if __name__ == '__main__':
 

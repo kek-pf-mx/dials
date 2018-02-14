@@ -11,7 +11,6 @@
 from __future__ import absolute_import, division
 from abc import ABCMeta, abstractmethod # implicit import
 
-
 class InterfaceMeta(ABCMeta):
   ''' The interface meta class.
 
@@ -27,7 +26,6 @@ class InterfaceMeta(ABCMeta):
     # Ensure interfaces and extensions have a name
     if 'name' not in self.__dict__:
       raise RuntimeError("%s has no member 'name'" % name)
-
 
 class Interface(object):
   ''' The interface base class.
@@ -100,11 +98,12 @@ class Interface(object):
       doc = '\n'.join('"%s"' % d for d in cls.__doc__)
       master_scope = parse('%s .help=%s {}' % (cls.name, doc))
       main_scope = master_scope.get_without_substitution(cls.name)
-      assert(len(main_scope) == 1)
+      assert (len(main_scope) == 1)
       main_scope = main_scope[0]
       if 'phil' in cls.__dict__:
         main_scope.adopt_scope(cls.phil())
       if Interface in cls.__bases__:
+
         def ext_names(extensions):
           names = []
           default_index = -1
@@ -117,6 +116,7 @@ class Interface(object):
           if names:
             names[default_index] = '*' + names[default_index]
           return names
+
         exts = list(cls.extensions())
         if exts:
           algorithm = parse('''
@@ -132,7 +132,7 @@ class Interface(object):
         help_str = '\n'.join(['"%s"' % line for line in cls.__doc__.split()])
         master_scope = parse('%s .help=%s {}' % (cls.name, help_str))
         main_scope = master_scope.get_without_substitution(cls.name)
-        assert(len(main_scope) == 1)
+        assert (len(main_scope) == 1)
         main_scope = main_scope[0]
         main_scope.adopt_scope(cls.phil())
       else:

@@ -45,49 +45,22 @@ def config(verbosity=1, info='', debug='', name='dials'):
 
   # Configure the logging
   logging.config.dictConfig({
-
-    'version' : 1,
-    'disable_existing_loggers' : False,
-
-    'formatters' : {
-      'standard' : {
-        'format' : '%(message)s'
-      },
-      'extended' : {
-        'format' : '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
-      },
-    },
-
-    'handlers' : {
-      'stream' : {
-        'level' : level,
-        'class' : 'logging.StreamHandler',
-        'formatter' : 'standard',
-        'stream': 'ext://sys.stdout',
-      },
-      'file_debug' : {
-        'level' : 'DEBUG',
-        'class' : 'logging.FileHandler',
-        'formatter' : 'standard',
-        'filename' : debug,
-        'mode' : 'w'
-      },
-      'file_info' : {
-        'level' : 'INFO',
-        'class' : 'logging.FileHandler',
-        'formatter' : 'standard',
-        'filename' : info,
-        'mode' : 'w'
+      'version': 1, 'disable_existing_loggers': False, 'formatters': {
+          'standard': {'format': '%(message)s'},
+          'extended': {'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'},
+      }, 'handlers': {
+          'stream': {
+              'level': level,
+              'class': 'logging.StreamHandler',
+              'formatter': 'standard',
+              'stream': 'ext://sys.stdout',
+          }, 'file_debug':
+          {'level': 'DEBUG', 'class': 'logging.FileHandler', 'formatter': 'standard', 'filename': debug, 'mode':
+           'w'}, 'file_info':
+          {'level': 'INFO', 'class': 'logging.FileHandler', 'formatter': 'standard', 'filename': info, 'mode': 'w'}
+      }, 'loggers': {
+          name: {'handlers': handlers, 'level': 'DEBUG', 'propagate': True},
       }
-    },
-
-    'loggers' : {
-      name : {
-        'handlers' : handlers,
-        'level' : 'DEBUG',
-        'propagate' : True
-      },
-    }
   })
 
 def config_simple_stdout(name='dials'):
@@ -99,34 +72,18 @@ def config_simple_stdout(name='dials'):
 
   # Configure the logging
   logging.config.dictConfig({
-
-    'version' : 1,
-    'disable_existing_loggers' : False,
-
-    'formatters' : {
-      'standard' : {
-        'format' : '%(message)s'
+      'version': 1, 'disable_existing_loggers': False, 'formatters': {'standard': {'format': '%(message)s'}},
+      'handlers': {
+          'stream': {
+              'level': 'DEBUG',
+              'class': 'logging.StreamHandler',
+              'formatter': 'standard',
+              'stream': 'ext://sys.stdout',
+          }
+      }, 'loggers': {
+          name: {'handlers': ['stream'], 'level': 'DEBUG', 'propagate': True},
       }
-    },
-
-    'handlers' : {
-      'stream' : {
-        'level' : 'DEBUG',
-        'class' : 'logging.StreamHandler',
-        'formatter' : 'standard',
-        'stream': 'ext://sys.stdout',
-      }
-    },
-
-    'loggers' : {
-      name : {
-        'handlers' : ['stream'],
-        'level' : 'DEBUG',
-        'propagate' : True
-      },
-    }
   })
-
 
 class CacheHandler(logging.Handler):
   ''' A simple class to store log messages. '''
@@ -151,7 +108,6 @@ class CacheHandler(logging.Handler):
   def messages(self):
     return self._messages
 
-
 def config_simple_cached():
   '''
   Configure the logging to use a cache.
@@ -161,26 +117,12 @@ def config_simple_cached():
 
   # Configure the logging
   logging.config.dictConfig({
-
-    'version' : 1,
-    'disable_existing_loggers' : False,
-
-    'handlers' : {
-      'cache' : {
-        'level' : 'DEBUG',
-        'class' : 'dials.util.log.CacheHandler',
-      }
-    },
-
-    'loggers' : {
-      'dials' : {
-        'handlers' : ['cache'],
-        'level' : 'DEBUG',
-        'propagate' : True
-      }
-    }
+      'version': 1, 'disable_existing_loggers': False, 'handlers':
+      {'cache': {
+          'level': 'DEBUG',
+          'class': 'dials.util.log.CacheHandler',
+      }}, 'loggers': {'dials': {'handlers': ['cache'], 'level': 'DEBUG', 'propagate': True}}
   })
-
 
 class LoggerIO(object):
   ''' Wrap the logger with file type object '''
@@ -211,14 +153,12 @@ class LoggerIO(object):
     '''
     pass
 
-
 def info_handle(logger):
   '''
   :return: A handle to an INFO logger file object
 
   '''
   return LoggerIO(logger, logging.INFO)
-
 
 def debug_handle(logger):
   '''

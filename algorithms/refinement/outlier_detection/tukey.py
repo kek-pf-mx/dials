@@ -19,7 +19,8 @@ class Tukey(CentroidOutlier):
   That is values more than iqr_multiplier times the interquartile range from
   the quartiles are designed outliers. When x=1.5, this is Tukey's rule."""
 
-  def __init__(self, cols=None,
+  def __init__(self,
+               cols=None,
                min_num_obs=20,
                separate_experiments=True,
                separate_panels=True,
@@ -28,12 +29,13 @@ class Tukey(CentroidOutlier):
 
     if cols is None:
       cols = ["x_resid", "y_resid", "phi_resid"]
-    CentroidOutlier.__init__(self,
-      cols=cols,
-      min_num_obs=min_num_obs,
-      separate_experiments=separate_experiments,
-      block_width=block_width,
-      separate_panels=separate_panels)
+    CentroidOutlier.__init__(
+        self,
+        cols=cols,
+        min_num_obs=min_num_obs,
+        separate_experiments=separate_experiments,
+        block_width=block_width,
+        separate_panels=separate_panels)
 
     self._iqr_multiplier = iqr_multiplier
 

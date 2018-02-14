@@ -7,7 +7,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """Auxiliary functions for the scaling package"""
 
 from __future__ import absolute_import, division
@@ -34,7 +33,7 @@ def products_omitting_one_item(items):
   # cumulatively calculate n-1 products from the front
   p = items[0]
   front_prod = [p]
-  for i in xrange(1, n-1):
+  for i in xrange(1, n - 1):
     p *= items[i]
     front_prod.append(p)
 
@@ -42,15 +41,14 @@ def products_omitting_one_item(items):
   items.reverse()
   p = items[0]
   back_prod = [p]
-  for i in xrange(1, n-1):
+  for i in xrange(1, n - 1):
     p *= items[i]
     back_prod.append(p)
 
   back_prod.reverse()
   results = [back_prod[0]]
-  for i in xrange(1, n-1):
+  for i in xrange(1, n - 1):
     results.append(back_prod[i] * front_prod[i - 1])
   results.append(front_prod[n - 2])
 
   return results
-

@@ -28,14 +28,18 @@ class LeastSquaresStillsResidualWithRmsdCutoff(Target):
   rmsd_names = ["RMSD_X", "RMSD_Y", "RMSD_DeltaPsi"]
   rmsd_units = ["mm", "mm", "rad"]
 
-  def __init__(self, experiments, reflection_predictor, ref_man,
-               prediction_parameterisation, restraints_parameterisation,
+  def __init__(self,
+               experiments,
+               reflection_predictor,
+               ref_man,
+               prediction_parameterisation,
+               restraints_parameterisation,
                frac_binsize_cutoff=0.33333,
                absolute_cutoffs=None,
                gradient_calculation_blocksize=None):
 
-    Target.__init__(self, experiments, reflection_predictor, ref_man,
-                    prediction_parameterisation, gradient_calculation_blocksize)
+    Target.__init__(self, experiments, reflection_predictor, ref_man, prediction_parameterisation,
+                    gradient_calculation_blocksize)
 
     # Set up the RMSD achieved criterion. For simplicity, we take models from
     # the first Experiment only. If this is not appropriate for refinement over
@@ -45,8 +49,7 @@ class LeastSquaresStillsResidualWithRmsdCutoff(Target):
       pixel_sizes = [p.get_pixel_size() for p in detector]
       min_px_size_x = min(e[0] for e in pixel_sizes)
       min_px_size_y = min(e[1] for e in pixel_sizes)
-      self._binsize_cutoffs = [min_px_size_x * frac_binsize_cutoff,
-                               min_px_size_y * frac_binsize_cutoff]
+      self._binsize_cutoffs = [min_px_size_x * frac_binsize_cutoff, min_px_size_y * frac_binsize_cutoff]
     else:
       self._binsize_cutoffs = absolute_cutoffs[:2]
 
@@ -55,7 +58,7 @@ class LeastSquaresStillsResidualWithRmsdCutoff(Target):
 
     return
 
-  def  _predict_core(self, reflections):
+  def _predict_core(self, reflections):
     """perform prediction for the specified reflections"""
 
     # do prediction (updates reflection table in situ).
@@ -85,8 +88,7 @@ class LeastSquaresStillsResidualWithRmsdCutoff(Target):
   def _extract_residuals_and_weights(matches):
 
     # return residuals and weights as 1d flex.double vectors
-    residuals = flex.double.concatenate(matches['x_resid'],
-                                        matches['y_resid'])
+    residuals = flex.double.concatenate(matches['x_resid'], matches['y_resid'])
     residuals.extend(matches['delpsical.rad'])
 
     weights, w_y, _ = matches['xyzobs.mm.weights'].parts()
@@ -99,8 +101,7 @@ class LeastSquaresStillsResidualWithRmsdCutoff(Target):
   @staticmethod
   def _extract_squared_residuals(matches):
 
-    residuals2 = flex.double.concatenate(matches['x_resid2'],
-                                         matches['y_resid2'])
+    residuals2 = flex.double.concatenate(matches['x_resid2'], matches['y_resid2'])
     residuals2.extend(matches['delpsical2'])
 
     return residuals2
@@ -112,9 +113,7 @@ class LeastSquaresStillsResidualWithRmsdCutoff(Target):
     resid_y = flex.sum(reflections['y_resid2'])
     resid_z = flex.sum(reflections['delpsical2'])
     n = len(reflections)
-    rmsds = (sqrt(resid_x / n),
-             sqrt(resid_y / n),
-             sqrt(resid_z / n))
+    rmsds = (sqrt(resid_x / n), sqrt(resid_y / n), sqrt(resid_z / n))
     return rmsds
 
   def achieved(self):
@@ -125,13 +124,11 @@ class LeastSquaresStillsResidualWithRmsdCutoff(Target):
     self._rmsds = None
 
     # only use RMSD_X and RMSD_Y
-    if (r[0] < self._binsize_cutoffs[0] and
-        r[1] < self._binsize_cutoffs[1]):
+    if (r[0] < self._binsize_cutoffs[0] and r[1] < self._binsize_cutoffs[1]):
       return True
     return False
 
-class LeastSquaresStillsResidualWithRmsdCutoffSparse(
-    SparseGradientsMixin, LeastSquaresStillsResidualWithRmsdCutoff):
+class LeastSquaresStillsResidualWithRmsdCutoffSparse(SparseGradientsMixin, LeastSquaresStillsResidualWithRmsdCutoff):
   """A version of the LeastSquaresStillsResidualWithRmsdCutoff Target that
   uses a sparse matrix data structure for memory efficiency when there are a
   large number of Experiments"""

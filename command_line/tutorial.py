@@ -16,8 +16,7 @@ u = urllib2.urlopen(tutorial_data)
 f = open(os.path.join(tempdir, file_name), 'wb')
 meta = u.info()
 file_size = int(meta.getheaders("Content-Length")[0])
-print "Downloading: %s Bytes: %s to %s" % (file_name, file_size,
-                                           os.path.join(tempdir, file_name))
+print "Downloading: %s Bytes: %s to %s" % (file_name, file_size, os.path.join(tempdir, file_name))
 
 file_size_dl = 0
 block_sz = 2**16
@@ -30,7 +29,7 @@ while True:
   file_size_dl += len(buffer)
   f.write(buffer)
   status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
-  status = status + chr(8)*(len(status)+1)
+  status = status + chr(8) * (len(status) + 1)
   print status,
 f.close()
 

@@ -11,12 +11,12 @@
 
 from __future__ import absolute_import, division
 
-
 class Array(object):
   '''
   A class to represent an array
 
   '''
+
   def __init__(self):
     '''
     Initialise the array
@@ -49,12 +49,12 @@ class Array(object):
     '''
     return ''
 
-
 class Table(object):
   '''
   A class to represent a table
 
   '''
+
   def __init__(self):
     '''
     Initialize the table
@@ -75,7 +75,7 @@ class Table(object):
     from collections import OrderedDict
     cols = OrderedDict()
     for col in self.cols:
-      assert(len(col) == 2)
+      assert (len(col) == 2)
       cols[col[0]] = col[1]
     rows = []
     for row in self.rows:
@@ -102,13 +102,8 @@ class Table(object):
     rows = [[col[1] for col in self.cols]]
     for i, row in enumerate(self.rows):
       rows.append([str(x) for x in row])
-    text = [
-      prefix + self.title,
-      table(rows, has_header=True, justify='left', prefix=prefix),
-      ''
-    ]
+    text = [prefix + self.title, table(rows, has_header=True, justify='left', prefix=prefix), '']
     return '\n'.join(text)
-
 
 class Report(object):
   '''
@@ -219,7 +214,6 @@ class Report(object):
 
     # Return the XML document
     return doc.toprettyxml(indent="  ")
-
 
   def as_file(self, filename):
     '''

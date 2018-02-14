@@ -42,13 +42,13 @@ def run(args):
   usage = "%s [options] datablock.json strong.pickle" % libtbx.env.dispatcher_name
 
   parser = OptionParser(
-    usage=usage,
-    read_reflections=True,
-    read_datablocks=True,
-    read_experiments=True,
-    phil=phil_scope,
-    check_format=False,
-    epilog=help_message)
+      usage=usage,
+      read_reflections=True,
+      read_datablocks=True,
+      read_experiments=True,
+      phil=phil_scope,
+      check_format=False,
+      epilog=help_message)
   from libtbx.utils import Sorry
 
   params, options = parser.parse_args(show_diff_phil=False)
@@ -78,23 +78,22 @@ def run(args):
     reflections = reflections.select(reflections['id'] == params.id)
 
   stats = per_image_analysis.stats_imageset(
-    imageset, reflections, resolution_analysis=params.resolution_analysis,
-    plot=params.individual_plots)
+      imageset, reflections, resolution_analysis=params.resolution_analysis, plot=params.individual_plots)
   per_image_analysis.print_table(stats)
 
   from libtbx import table_utils
   overall_stats = per_image_analysis.stats_single_image(
-    imageset, reflections, resolution_analysis=params.resolution_analysis)
+      imageset, reflections, resolution_analysis=params.resolution_analysis)
   rows = [
-    ("Overall statistics", ""),
-    ("#spots", "%i" % overall_stats.n_spots_total),
-    ("#spots_no_ice", "%i" % overall_stats.n_spots_no_ice),
-    ("d_min", "%.2f" % overall_stats.estimated_d_min),
-    ("d_min (distl method 1)", "%.2f (%.2f)" % (
-      overall_stats.d_min_distl_method_1, overall_stats.noisiness_method_1)),
-    ("d_min (distl method 2)", "%.2f (%.2f)" % (
-      overall_stats.d_min_distl_method_1, overall_stats.noisiness_method_1)),
-    ]
+      ("Overall statistics", ""),
+      ("#spots", "%i" % overall_stats.n_spots_total),
+      ("#spots_no_ice", "%i" % overall_stats.n_spots_no_ice),
+      ("d_min", "%.2f" % overall_stats.estimated_d_min),
+      ("d_min (distl method 1)", "%.2f (%.2f)" % (overall_stats.d_min_distl_method_1,
+                                                  overall_stats.noisiness_method_1)),
+      ("d_min (distl method 2)", "%.2f (%.2f)" % (overall_stats.d_min_distl_method_1,
+                                                  overall_stats.noisiness_method_1)),
+  ]
   print table_utils.format(rows, has_header=True, prefix="| ", postfix=" |")
 
   if params.json is not None:

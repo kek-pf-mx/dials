@@ -8,7 +8,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """
 Test refinement of beam, detector and crystal orientation parameters
 using generated reflection positions from ideal geometry.
@@ -72,12 +71,14 @@ from dials.algorithms.refinement.reflection_manager import ReflectionManager
 #############################
 
 args = sys.argv[1:]
-master_phil = parse("""
+master_phil = parse(
+    """
     include scope dials.test.algorithms.refinement.geometry_phil
     include scope dials.test.algorithms.refinement.minimiser_phil
-    """, process_includes=True)
+    """,
+    process_includes=True)
 
-models = setup_geometry.Extract(master_phil, cmdline_args = args)
+models = setup_geometry.Extract(master_phil, cmdline_args=args)
 
 mydetector = models.detector
 mygonio = models.goniometer
@@ -86,11 +87,7 @@ mybeam = models.beam
 
 # Build a mock scan for a 180 degree sweep
 sf = ScanFactory()
-myscan = sf.make_scan(image_range = (1,1800),
-                      exposure_times = 0.1,
-                      oscillation = (0, 0.1),
-                      epochs = range(1800),
-                      deg = True)
+myscan = sf.make_scan(image_range=(1, 1800), exposure_times=0.1, oscillation=(0, 0.1), epochs=range(1800), deg=True)
 sweep_range = myscan.get_oscillation_range(deg=False)
 im_width = myscan.get_oscillation(deg=False)[1]
 assert sweep_range == (0., pi)
@@ -98,9 +95,8 @@ assert approx_equal(im_width, 0.1 * pi / 180.)
 
 # Build an experiment list
 experiments = ExperimentList()
-experiments.append(Experiment(
-      beam=mybeam, detector=mydetector, goniometer=mygonio,
-      scan=myscan, crystal=mycrystal, imageset=None))
+experiments.append(
+    Experiment(beam=mybeam, detector=mydetector, goniometer=mygonio, scan=myscan, crystal=mycrystal, imageset=None))
 
 ###########################
 # Parameterise the models #
@@ -122,8 +118,7 @@ s0_param.set_fixed([True, False, True])
 # prediction equation                                                  #
 ########################################################################
 
-pred_param = XYPhiPredictionParameterisation(experiments,
-  [det_param], [s0_param], [xlo_param], [xluc_param])
+pred_param = XYPhiPredictionParameterisation(experiments, [det_param], [s0_param], [xlo_param], [xluc_param])
 
 ################################
 # Apply known parameter shifts #
@@ -131,8 +126,7 @@ pred_param = XYPhiPredictionParameterisation(experiments,
 
 # shift detector by 1.0 mm each translation and 2 mrad each rotation
 det_p_vals = det_param.get_param_vals()
-p_vals = [a + b for a, b in zip(det_p_vals,
-                                [1.0, 1.0, 1.0, 2., 2., 2.])]
+p_vals = [a + b for a, b in zip(det_p_vals, [1.0, 1.0, 1.0, 2., 2., 2.])]
 det_param.set_param_vals(p_vals)
 
 # shift beam by 2 mrad in free axis
@@ -151,8 +145,7 @@ xlo_param.set_param_vals(p_vals)
 # gamma angle)
 xluc_p_vals = xluc_param.get_param_vals()
 cell_params = mycrystal.get_unit_cell().parameters()
-cell_params = [a + b for a, b in zip(cell_params, [0.1, 0.1, 0.1, 0.0,
-                                                   0.0, 0.1])]
+cell_params = [a + b for a, b in zip(cell_params, [0.1, 0.1, 0.1, 0.0, 0.0, 0.1])]
 new_uc = unit_cell(cell_params)
 newB = matrix.sqr(new_uc.fractionalization_matrix()).transpose()
 S = symmetrize_reduce_enlarge(mycrystal.get_space_group())
@@ -176,7 +169,7 @@ print
 # All indices in a 2.0 Angstrom sphere
 resolution = 2.0
 index_generator = IndexGenerator(mycrystal.get_unit_cell(),
-                space_group(space_group_symbols(1).hall()).type(), resolution)
+                                 space_group(space_group_symbols(1).hall()).type(), resolution)
 indices = index_generator.to_array()
 
 # Predict rays within the sweep range
@@ -235,17 +228,14 @@ refman = ReflectionManager(obs_refs, experiments)
 # The current 'achieved' criterion compares RMSD against 1/3 the pixel size and
 # 1/3 the image width in radians. For the simulated data, these are just made up
 
-mytarget = LeastSquaresPositionalResidualWithRmsdCutoff(experiments,
-    ref_predictor, refman, pred_param,restraints_parameterisation=None)
+mytarget = LeastSquaresPositionalResidualWithRmsdCutoff(
+    experiments, ref_predictor, refman, pred_param, restraints_parameterisation=None)
 
 ################################
 # Set up the refinement engine #
 ################################
 
-refiner = setup_minimiser.Extract(master_phil,
-                                  mytarget,
-                                  pred_param,
-                                  cmdline_args = args).refiner
+refiner = setup_minimiser.Extract(master_phil, mytarget, pred_param, cmdline_args=args).refiner
 
 print "Prior to refinement the experimental model is:"
 print mybeam

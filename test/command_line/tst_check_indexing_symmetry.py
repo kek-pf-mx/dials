@@ -17,9 +17,7 @@ from libtbx.test_utils import open_tmp_directory
 
 def test1():
 
-  dials_regression = libtbx.env.find_in_repositories(
-    relative_path="dials_regression",
-    test=os.path.isdir)
+  dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=os.path.isdir)
 
   data_dir = os.path.join(dials_regression, "misc_test_data")
   experiments_path = os.path.join(data_dir, "i04-indexed.json")

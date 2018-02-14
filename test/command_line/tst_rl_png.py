@@ -6,9 +6,7 @@ from libtbx.test_utils import open_tmp_directory, approx_equal
 
 def test1():
 
-  dials_regression = libtbx.env.find_in_repositories(
-    relative_path="dials_regression",
-    test=os.path.isdir)
+  dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=os.path.isdir)
 
   data_dir = os.path.join(dials_regression, "centroid_test_data")
   datablock_path = os.path.join(data_dir, "datablock.json")
@@ -19,13 +17,11 @@ def test1():
   tmp_dir = open_tmp_directory(suffix="rl_png_test1")
   os.chdir(tmp_dir)
 
-  cmd = 'dials.rl_png %s %s' %(datablock_path, strong_pickle)
+  cmd = 'dials.rl_png %s %s' % (datablock_path, strong_pickle)
   result = easy_run.fully_buffered(command=cmd).raise_if_errors()
 
-
-  for s in ('beam_vector', 'e3', 'rotation_axis',
-            'solution_1', 'solution_2','solution_3'):
-    assert os.path.exists('rl_%s.png' %s), s
+  for s in ('beam_vector', 'e3', 'rotation_axis', 'solution_1', 'solution_2', 'solution_3'):
+    assert os.path.exists('rl_%s.png' % s), s
 
   os.chdir(cwd)
 
@@ -33,9 +29,7 @@ def test1():
 
 def test2():
 
-  dials_regression = libtbx.env.find_in_repositories(
-    relative_path="dials_regression",
-    test=os.path.isdir)
+  dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=os.path.isdir)
 
   data_dir = os.path.join(dials_regression, "refinement_test_data", "i04_weak_data")
   datablock_path = os.path.join(data_dir, "experiments.json")
@@ -46,11 +40,11 @@ def test2():
   tmp_dir = open_tmp_directory(suffix="rl_png_test2")
   os.chdir(tmp_dir)
 
-  cmd = 'dials.rl_png %s %s' %(datablock_path, indexed_pickle)
+  cmd = 'dials.rl_png %s %s' % (datablock_path, indexed_pickle)
   result = easy_run.fully_buffered(command=cmd).raise_if_errors()
 
-  for s in ('beam_vector', 'e3', 'rotation_axis', 'a', 'b','c'):
-    assert os.path.exists('rl_%s.png' %s), s
+  for s in ('beam_vector', 'e3', 'rotation_axis', 'a', 'b', 'c'):
+    assert os.path.exists('rl_%s.png' % s), s
 
   os.chdir(cwd)
 

@@ -1,14 +1,9 @@
-
 from __future__ import absolute_import, division
 
 schema_url = 'https://github.com/nexusformat/definitions/blob/master/contributed_definitions/NXreflections.nxdl.xml'
 
 def make_dataset(handle, name, dtype, data, description, units=None):
-  dset = handle.create_dataset(
-    name,
-    data.focus(),
-    dtype=dtype,
-    data=data.as_numpy_array().astype(dtype))
+  dset = handle.create_dataset(name, data.focus(), dtype=dtype, data=data.as_numpy_array().astype(dtype))
   dset.attrs['description'] = description
   if units is not None:
     dset.attrs['units'] = units
@@ -30,7 +25,7 @@ def make_vlen_uint(handle, name, data, description, units=None):
   import h5py
   import numpy as np
   dtype = h5py.special_dtype(vlen=np.dtype("uint64"))
-  dset = handle.create_dataset(name, (len(data),), dtype=dtype)
+  dset = handle.create_dataset(name, (len(data), ), dtype=dtype)
   for i, d in enumerate(data):
     if len(d) > 0:
       dset[i] = d
@@ -41,7 +36,7 @@ def make_vlen_uint(handle, name, data, description, units=None):
 
 def write(handle, key, data):
   from dials.array_family import flex
-  if   key == 'miller_index':
+  if key == 'miller_index':
     col1, col2, col3 = zip(*list(data))
     col1 = flex.int(col1)
     col2 = flex.int(col2)
@@ -85,8 +80,8 @@ def write(handle, key, data):
     dsc1 = 'The predicted bragg peak fast pixel location'
     dsc2 = 'The predicted bragg peak slow pixel location'
     dsc3 = 'The predicted bragg peak frame number'
-    make_float(handle, 'predicted_px_x',  col1, dsc1)
-    make_float(handle, 'predicted_px_y',  col2, dsc2)
+    make_float(handle, 'predicted_px_x', col1, dsc1)
+    make_float(handle, 'predicted_px_y', col2, dsc2)
     make_float(handle, 'predicted_frame', col3, dsc3)
   elif key == 'xyzcal.mm':
     col1, col2, col3 = data.parts()
@@ -95,26 +90,26 @@ def write(handle, key, data):
     dsc3 = 'The predicted bragg peak rotation angle number'
     make_float(handle, 'predicted_x', col1, dsc1, units='mm')
     make_float(handle, 'predicted_y', col2, dsc2, units='mm')
-    make_float(handle, 'predicted_phi',  col3, dsc3, units='rad')
+    make_float(handle, 'predicted_phi', col3, dsc3, units='rad')
   elif key == 'bbox':
     d = data.as_int()
-    d.reshape(flex.grid((len(data)),6))
+    d.reshape(flex.grid((len(data)), 6))
     make_int(handle, 'bounding_box', d, 'The reflection bounding box')
   elif key == 'xyzobs.px.value':
     col1, col2, col3 = data.parts()
     dsc1 = 'The observed centroid fast pixel value'
     dsc2 = 'The observed centroid slow pixel value'
     dsc3 = 'The observed centroid frame value'
-    make_float(handle, 'observed_px_x',  col1, dsc1)
-    make_float(handle, 'observed_px_y',  col2, dsc2)
+    make_float(handle, 'observed_px_x', col1, dsc1)
+    make_float(handle, 'observed_px_y', col2, dsc2)
     make_float(handle, 'observed_frame', col3, dsc3)
   elif key == 'xyzobs.px.variance':
     col1, col2, col3 = data.parts()
     dsc1 = 'The observed centroid fast pixel variance'
     dsc2 = 'The observed centroid slow pixel variance'
     dsc3 = 'The observed centroid frame variance'
-    make_float(handle, 'observed_px_x_var',  col1, dsc1)
-    make_float(handle, 'observed_px_y_var',  col2, dsc2)
+    make_float(handle, 'observed_px_x_var', col1, dsc1)
+    make_float(handle, 'observed_px_y_var', col2, dsc2)
     make_float(handle, 'observed_frame_var', col3, dsc3)
   elif key == 'xyzobs.mm.value':
     col1, col2, col3 = data.parts()
@@ -129,8 +124,8 @@ def write(handle, key, data):
     dsc1 = 'The observed centroid fast pixel variance'
     dsc2 = 'The observed centroid slow pixel variance'
     dsc3 = 'The observed centroid phi variance'
-    make_float(handle, 'observed_x_var',  col1, dsc1, units='mm')
-    make_float(handle, 'observed_y_var',  col2, dsc2, units='mm')
+    make_float(handle, 'observed_x_var', col1, dsc1, units='mm')
+    make_float(handle, 'observed_y_var', col2, dsc2, units='mm')
     make_float(handle, 'observed_phi_var', col3, dsc3, units='rad')
   elif key == 'background.mean':
     col = data
@@ -187,11 +182,11 @@ def read(handle, key):
   from dials.array_family import flex
   from dxtbx.format.nexus import convert_units
   import numpy as np
-  if   key == 'miller_index':
+  if key == 'miller_index':
     h = flex.int(handle['h'][:].astype(np.int32))
     k = flex.int(handle['k'][:].astype(np.int32))
     l = flex.int(handle['l'][:].astype(np.int32))
-    return flex.miller_index(h,k,l)
+    return flex.miller_index(h, k, l)
   elif key == 'id':
     return flex.int(handle['id'][:].astype(int))
   elif key == 'partial_id':
@@ -274,20 +269,16 @@ def dump(entry, reflections, experiments):
   # Add the feature
   if "features" in entry:
     features = entry['features']
-    assert(features.dtype == 'uint64')
-    features.resize((len(features)+1,))
-    features[len(features)-1] = 7
+    assert (features.dtype == 'uint64')
+    features.resize((len(features) + 1, ))
+    features[len(features) - 1] = 7
   else:
     import numpy as np
-    features = entry.create_dataset(
-      "features",
-      (1,),
-      maxshape=(None,),
-      dtype=np.uint64)
+    features = entry.create_dataset("features", (1, ), maxshape=(None, ), dtype=np.uint64)
     features[0] = 7
 
   # Create the entry
-  assert("reflections" not in entry)
+  assert ("reflections" not in entry)
   refls = entry.create_group("reflections")
   refls.attrs['NX_class'] = 'NXsubentry'
 
@@ -323,50 +314,50 @@ def load(entry):
   print "Loading NXreflections"
 
   # Check the feature is present
-  assert("features" in entry)
-  assert(7 in entry["features"])
+  assert ("features" in entry)
+  assert (7 in entry["features"])
 
   # Get the entry
   refls = entry['reflections']
-  assert(refls.attrs['NX_class'] == 'NXsubentry')
+  assert (refls.attrs['NX_class'] == 'NXsubentry')
 
   # Get the definition
   definition = refls['definition']
-  assert(definition.value == 'NXreflections')
-  assert(definition.attrs['version'] == 1)
+  assert (definition.value == 'NXreflections')
+  assert (definition.attrs['version'] == 1)
 
   # The paths to the experiments
   experiments = list(refls['experiments'])
 
   # The columns to try
   columns = [
-    'miller_index',
-    'id',
-    'partial_id',
-    'entering',
-    'flags',
-    'panel',
-    'd',
-    'partiality',
-    'xyzcal.px',
-    'xyzcal.mm',
-    'bbox',
-    'xyzobs.px.value',
-    'xyzobs.px.variance',
-    'xyzobs.mm.value',
-    'xyzobs.mm.variance',
-    'background.mean',
-    'intensity.sum.value',
-    'intensity.sum.variance',
-    'intensity.prf.value',
-    'intensity.prf.variance',
-    'profile.correlation',
-    'lp',
-    'num_pixels.background',
-    'num_pixels.foreground',
-    'num_pixels.background_used',
-    'num_pixels.valid',
-    'profile.rmsd',
+      'miller_index',
+      'id',
+      'partial_id',
+      'entering',
+      'flags',
+      'panel',
+      'd',
+      'partiality',
+      'xyzcal.px',
+      'xyzcal.mm',
+      'bbox',
+      'xyzobs.px.value',
+      'xyzobs.px.variance',
+      'xyzobs.mm.value',
+      'xyzobs.mm.variance',
+      'background.mean',
+      'intensity.sum.value',
+      'intensity.sum.variance',
+      'intensity.prf.value',
+      'intensity.prf.variance',
+      'profile.correlation',
+      'lp',
+      'num_pixels.background',
+      'num_pixels.foreground',
+      'num_pixels.background_used',
+      'num_pixels.valid',
+      'profile.rmsd',
   ]
 
   # The reflection table

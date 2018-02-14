@@ -12,7 +12,6 @@ from __future__ import absolute_import, division
 
 from dials.interfaces import BackgroundIface
 
-
 class MedianBackgroundExt(BackgroundIface):
   ''' An extension class implementing a median background algorithm. '''
 
@@ -41,5 +40,4 @@ class MedianBackgroundExt(BackgroundIface):
     :param reflections: The list of reflections
 
     '''
-    return self._algorithm.compute_background(
-      reflections, image_volume=image_volume)
+    return self._algorithm.compute_background(reflections, image_volume=image_volume)

@@ -4,7 +4,7 @@ try:
 except Exception:
   ext = None
 else:
-  ext = boost.python.import_ext("recviewer_ext", optional = False)
+  ext = boost.python.import_ext("recviewer_ext", optional=False)
 
 if ext is not None:
   from recviewer_ext import *

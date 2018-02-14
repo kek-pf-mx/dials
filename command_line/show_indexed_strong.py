@@ -4,8 +4,8 @@ from __future__ import absolute_import, division
 
 def show_indexed_strong(indexed_data):
 
-  assert('miller_index' in indexed_data)
-  assert('xyzobs.px.value' in indexed_data)
+  assert ('miller_index' in indexed_data)
+  assert ('xyzobs.px.value' in indexed_data)
 
   x_px, y_px, z_px = indexed_data['xyzobs.px.value'].parts()
   mi = indexed_data['miller_index']
@@ -20,7 +20,7 @@ def show_indexed_strong(indexed_data):
 
 def show_strong(strong_data):
 
-  assert('xyzobs.px.value' in strong_data)
+  assert ('xyzobs.px.value' in strong_data)
 
   x_px, y_px, z_px = strong_data['xyzobs.px.value'].parts()
 

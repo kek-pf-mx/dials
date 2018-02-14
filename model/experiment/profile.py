@@ -20,14 +20,7 @@ class ProfileModelIface(ProfileModelBaseIface):
   '''
 
   @classmethod
-  def create(cls,
-             params,
-             reflections,
-             crystal,
-             beam,
-             detector,
-             goniometer=None,
-             scan=None):
+  def create(cls, params, reflections, crystal, beam, detector, goniometer=None, scan=None):
     '''
     Create the profile model from data.
 
@@ -44,14 +37,7 @@ class ProfileModelIface(ProfileModelBaseIface):
     return None
 
   @abc.abstractmethod
-  def predict_reflections(self,
-                          imageset,
-                          crystal,
-                          beam,
-                          detector,
-                          goniometer=None,
-                          scan=None,
-                          **kwargs):
+  def predict_reflections(self, imageset, crystal, beam, detector, goniometer=None, scan=None, **kwargs):
     '''
     Given an experiment, predict the reflections.
 
@@ -66,14 +52,7 @@ class ProfileModelIface(ProfileModelBaseIface):
     pass
 
   @abc.abstractmethod
-  def compute_partiality(self,
-                         reflections,
-                         crystal,
-                         beam,
-                         detector,
-                         goniometer=None,
-                         scan=None,
-                         **kwargs):
+  def compute_partiality(self, reflections, crystal, beam, detector, goniometer=None, scan=None, **kwargs):
     '''
     Given an experiment and list of reflections, compute the partiality of the
     reflections
@@ -89,14 +68,7 @@ class ProfileModelIface(ProfileModelBaseIface):
     pass
 
   @abc.abstractmethod
-  def compute_bbox(self,
-                   reflections,
-                   crystal,
-                   beam,
-                   detector,
-                   goniometer=None,
-                   scan=None,
-                   **kwargs):
+  def compute_bbox(self, reflections, crystal, beam, detector, goniometer=None, scan=None, **kwargs):
     ''' Given an experiment and list of reflections, compute the
     bounding box of the reflections on the detector (and image frames).
 
@@ -111,14 +83,7 @@ class ProfileModelIface(ProfileModelBaseIface):
     pass
 
   @abc.abstractmethod
-  def compute_mask(self,
-                   reflections,
-                   crystal,
-                   beam,
-                   detector,
-                   goniometer=None,
-                   scan=None,
-                   **kwargs):
+  def compute_mask(self, reflections, crystal, beam, detector, goniometer=None, scan=None, **kwargs):
     '''
     Given an experiment and list of reflections, compute the
     foreground/background mask of the reflections.

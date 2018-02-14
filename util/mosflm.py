@@ -13,7 +13,6 @@ from __future__ import absolute_import, division
 import os
 from dxtbx.model import Crystal
 
-
 def dump(experiments, directory):
   '''
   Dump the experiments in mosflm format
@@ -26,7 +25,7 @@ def dump(experiments, directory):
   for i, experiment in enumerate(experiments):
     suffix = ""
     if len(experiments) > 1:
-      suffix = "_%i" % (i+1)
+      suffix = "_%i" % (i + 1)
 
     sub_dir = "%s%s" % (directory, suffix)
     if not os.path.isdir(sub_dir):
@@ -41,9 +40,7 @@ def dump(experiments, directory):
     imageset = experiment.imageset
 
     from rstbx.cftbx.coordinate_frame_helpers import align_reference_frame
-    R_to_mosflm = align_reference_frame(
-      beam.get_s0(), (1.0, 0.0, 0.0),
-      goniometer.get_rotation_axis(), (0.0, 0.0, 1.0))
+    R_to_mosflm = align_reference_frame(beam.get_s0(), (1.0, 0.0, 0.0), goniometer.get_rotation_axis(), (0.0, 0.0, 1.0))
 
     cryst = experiment.crystal
     cryst = cryst.change_basis(
@@ -56,9 +53,7 @@ def dump(experiments, directory):
     real_space_b = R_to_mosflm * A_inv.elems[3:6]
     real_space_c = R_to_mosflm * A_inv.elems[6:9]
 
-    cryst_mosflm = Crystal(
-      real_space_a, real_space_b, real_space_c,
-      space_group=cryst.get_space_group())
+    cryst_mosflm = Crystal(real_space_a, real_space_b, real_space_c, space_group=cryst.get_space_group())
     A_mosflm = matrix.sqr(cryst_mosflm.get_A())
     U_mosflm = matrix.sqr(cryst_mosflm.get_U())
     assert U_mosflm.is_r3_rotation_matrix(), U_mosflm
@@ -66,10 +61,10 @@ def dump(experiments, directory):
 
     index_mat = os.path.join(sub_dir, "index.mat")
     mosflm_in = os.path.join(sub_dir, "mosflm.in")
-    print "Exporting experiment to %s and %s" %(index_mat, mosflm_in)
+    print "Exporting experiment to %s and %s" % (index_mat, mosflm_in)
 
     with open(index_mat, "wb") as f:
-      print >> f, format_mosflm_mat(w*A_mosflm, U_mosflm, cryst.get_unit_cell())
+      print >> f, format_mosflm_mat(w * A_mosflm, U_mosflm, cryst.get_unit_cell())
 
     img_dir, template = os.path.split(imageset.get_template())
     symmetry = cryst_mosflm.get_space_group().type().number()
@@ -77,44 +72,40 @@ def dump(experiments, directory):
     distance = detector[0].get_directed_distance()
 
     with open(mosflm_in, "wb") as f:
-      print >> f, write_mosflm_input(directory=img_dir,
-                                     template=template,
-                                     symmetry=symmetry,
-                                     beam_centre=beam_centre,
-                                     distance=distance,
-                                     mat_file="index.mat")
+      print >> f, write_mosflm_input(
+          directory=img_dir,
+          template=template,
+          symmetry=symmetry,
+          beam_centre=beam_centre,
+          distance=distance,
+          mat_file="index.mat")
 
   return
 
-
-def format_mosflm_mat(A, U, unit_cell, missets=(0,0,0)):
+def format_mosflm_mat(A, U, unit_cell, missets=(0, 0, 0)):
   lines = []
   uc_params = unit_cell.parameters()
   for i in range(3):
-    lines.append(("%12.8f" * 3) %A.elems[i*3:3*(i+1)])
-  lines.append(("%12.3f" * 3) %missets)
+    lines.append(("%12.8f" * 3) % A.elems[i * 3:3 * (i + 1)])
+  lines.append(("%12.3f" * 3) % missets)
   for i in range(3):
-    lines.append("%12.8f" * 3 %U.elems[i*3:3*(i+1)])
-  lines.append(("%12.4f" * 6) %uc_params)
-  lines.append(("%12.3f" * 3) %missets)
+    lines.append("%12.8f" * 3 % U.elems[i * 3:3 * (i + 1)])
+  lines.append(("%12.4f" * 6) % uc_params)
+  lines.append(("%12.3f" * 3) % missets)
   return "\n".join(lines)
 
-
-def write_mosflm_input(directory=None, template=None,
-                       symmetry=None,
-                       beam_centre=None, distance=None,
-                       mat_file=None):
+def write_mosflm_input(directory=None, template=None, symmetry=None, beam_centre=None, distance=None, mat_file=None):
   lines = []
   if directory is not None:
-    lines.append("DIRECTORY %s" %directory)
+    lines.append("DIRECTORY %s" % directory)
   if template is not None:
-    lines.append("TEMPLATE %s" %template)
+    lines.append("TEMPLATE %s" % template)
   if symmetry is not None:
-    lines.append("SYMMETRY %s" %symmetry)
+    lines.append("SYMMETRY %s" % symmetry)
   if beam_centre is not None:
-    lines.append("BEAM %.3f %.3f" %beam_centre)
+    lines.append("BEAM %.3f %.3f" % beam_centre)
   if distance is not None:
-    lines.append("DISTANCE %.4f" %distance)
+    lines.append("DISTANCE %.4f" % distance)
   if mat_file is not None:
-    lines.append("MATRIX %s" %mat_file)
+    lines.append("MATRIX %s" % mat_file)
   return "\n".join(lines)

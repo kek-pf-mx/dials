@@ -35,7 +35,6 @@ phil_scope = parse('''
   }
 ''')
 
-
 class PowderRingFilter:
   '''
   A class to do powder ring filtering.
@@ -54,8 +53,8 @@ class PowderRingFilter:
     '''
     from cctbx.miller import index_generator
     from dials.array_family import flex
-    assert(d_min > 0)
-    assert(width > 0)
+    assert (d_min > 0)
+    assert (width > 0)
 
     # Correct unit cell
     unit_cell = space_group.average_unit_cell(unit_cell)
@@ -93,12 +92,7 @@ class PowderRingFilter:
     :return: The powder ring filter
 
     '''
-    return PowderRingFilter(
-      params.unit_cell,
-      params.space_group.group(),
-      params.d_min,
-      params.width)
-
+    return PowderRingFilter(params.unit_cell, params.space_group.group(), params.d_min, params.width)
 
 class MultiPowderRingFilter:
   '''
@@ -176,7 +170,6 @@ class MultiPowderRingFilter:
         filters.append(PowderRingFilter.from_params(params.powder.water_ice))
     return filters
 
-
 class IceRingFilter:
   '''
   A class to do ice ring filtering
@@ -192,20 +185,20 @@ class IceRingFilter:
     '''
     # Hexagonal ice ring resolution ranges in 1/d^2
     self.ice_rings = [
-      (0.0640, 0.0690),
-      (0.0710, 0.0780),
-      (0.0825, 0.0880),
-      ( 0.138,  0.144),
-      ( 0.190,  0.205),
-      ( 0.228,  0.240),
-      ( 0.262,  0.266),
-      ( 0.267,  0.278),
-      ( 0.280,  0.288),
-      ( 0.337,  0.341),
-      ( 0.429,  0.435),
-      ( 0.459,  0.466),
-      ( 0.478,  0.486),
-      ( 0.531,  0.537),
+        (0.0640, 0.0690),
+        (0.0710, 0.0780),
+        (0.0825, 0.0880),
+        (0.138, 0.144),
+        (0.190, 0.205),
+        (0.228, 0.240),
+        (0.262, 0.266),
+        (0.267, 0.278),
+        (0.280, 0.288),
+        (0.337, 0.341),
+        (0.429, 0.435),
+        (0.459, 0.466),
+        (0.478, 0.486),
+        (0.531, 0.537),
     ]
 
   def __call__(self, d):

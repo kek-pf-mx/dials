@@ -37,25 +37,16 @@ def run(args):
   import libtbx.load_env
   from dials.util.options import OptionParser
 
-  usage = '%s hklin=hklin.nxs hklout=hklout.mtz [options]' % (
-              libtbx.env.dispatcher_name)
+  usage = '%s hklin=hklin.nxs hklout=hklout.mtz [options]' % (libtbx.env.dispatcher_name)
 
-  parser = OptionParser(
-    usage = usage,
-    phil=phil_scope,
-    epilog=help_message)
+  parser = OptionParser(usage=usage, phil=phil_scope, epilog=help_message)
   params, options = parser.parse_args(show_diff_phil=True)
 
   # Load the experiments and reflections from the NXmx file
   experiments, reflections = load(params.hklin)
 
   # Export the experiments and reflections to the MTZ file
-  m = export_mtz(
-    reflections,
-    experiments,
-    params.hklout,
-    params.ignore_panels,
-    params.include_partials)
+  m = export_mtz(reflections, experiments, params.hklout, params.ignore_panels, params.include_partials)
   m.show_summary()
 
 if __name__ == '__main__':

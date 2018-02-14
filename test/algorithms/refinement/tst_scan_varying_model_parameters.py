@@ -35,7 +35,8 @@ from dials.algorithms.refinement.parameterisation.scan_varying_detector_paramete
 
 class SmootherTest(object):
   """Test a bare parameter set with the smoother"""
-  def __init__(self, plots = False):
+
+  def __init__(self, plots=False):
 
     # make scatterplots
     self.do_plots = plots
@@ -91,11 +92,11 @@ class SmootherTest(object):
 
     print "OK"
 
+
 # Use classes to wrap up ScanVarying*Parameterisation classes with
 # compose and get_state overridden, so they can be passed to the existing FD
 # derivative code.
 class TestOrientationModel(ScanVaryingCrystalOrientationParameterisation):
-
   def __init__(self, image_number, *args):
 
     ScanVaryingCrystalOrientationParameterisation.__init__(self, *args)
@@ -114,8 +115,7 @@ class TestOrientationModel(ScanVaryingCrystalOrientationParameterisation):
   def _compose(self):
     """override for compose to pass in the requested t"""
 
-    ScanVaryingCrystalOrientationParameterisation.compose(self,
-            self.image_number)
+    ScanVaryingCrystalOrientationParameterisation.compose(self, self.image_number)
 
   def _get_state(self):
     """override for get_state to do so only at the requested t"""
@@ -125,7 +125,6 @@ class TestOrientationModel(ScanVaryingCrystalOrientationParameterisation):
     return ScanVaryingCrystalOrientationParameterisation.get_state(self)
 
 class TestUnitCellModel(ScanVaryingCrystalUnitCellParameterisation):
-
   def __init__(self, image_number, *args):
 
     ScanVaryingCrystalUnitCellParameterisation.__init__(self, *args)
@@ -144,8 +143,7 @@ class TestUnitCellModel(ScanVaryingCrystalUnitCellParameterisation):
   def _compose(self):
     """override for compose to pass in the requested t"""
 
-    ScanVaryingCrystalUnitCellParameterisation.compose(self,
-            self.image_number)
+    ScanVaryingCrystalUnitCellParameterisation.compose(self, self.image_number)
 
   def _get_state(self):
     """override for get_state to do so only at the requested t"""
@@ -155,7 +153,6 @@ class TestUnitCellModel(ScanVaryingCrystalUnitCellParameterisation):
     return ScanVaryingCrystalUnitCellParameterisation.get_state(self)
 
 class TestBeamModel(ScanVaryingBeamParameterisation):
-
   def __init__(self, image_number, *args):
 
     ScanVaryingBeamParameterisation.__init__(self, *args)
@@ -174,8 +171,7 @@ class TestBeamModel(ScanVaryingBeamParameterisation):
   def _compose(self):
     """override for compose to pass in the requested t"""
 
-    ScanVaryingBeamParameterisation.compose(self,
-            self.image_number)
+    ScanVaryingBeamParameterisation.compose(self, self.image_number)
 
   def _get_state(self):
     """override for get_state to do so only at the requested t"""
@@ -185,7 +181,6 @@ class TestBeamModel(ScanVaryingBeamParameterisation):
     return ScanVaryingBeamParameterisation.get_state(self)
 
 class TestDetectorModel(ScanVaryingDetectorParameterisationSinglePanel):
-
   def __init__(self, image_number, *args):
 
     ScanVaryingDetectorParameterisationSinglePanel.__init__(self, *args)
@@ -204,8 +199,7 @@ class TestDetectorModel(ScanVaryingDetectorParameterisationSinglePanel):
   def _compose(self):
     """override for compose to pass in the requested t"""
 
-    ScanVaryingDetectorParameterisationSinglePanel.compose(self,
-            self.image_number)
+    ScanVaryingDetectorParameterisationSinglePanel.compose(self, self.image_number)
 
   def _get_state(self):
     """override for get_state to do so only at the requested t"""
@@ -215,8 +209,7 @@ class TestDetectorModel(ScanVaryingDetectorParameterisationSinglePanel):
     return ScanVaryingDetectorParameterisationSinglePanel.get_state(self)
 
 class TestScanVaryingModelParameterisation(object):
-
-  def __init__(self, plots = False):
+  def __init__(self, plots=False):
 
     # Do we make scatterplots?
     self.do_plots = plots
@@ -231,7 +224,7 @@ class TestScanVaryingModelParameterisation(object):
         self.random_direction_close_to(matrix.col((0, 1, 0)))
     c = random.uniform(10,50) * \
         self.random_direction_close_to(matrix.col((0, 0, 1)))
-    self.xl = Crystal(a, b, c, space_group_symbol = "P 1")
+    self.xl = Crystal(a, b, c, space_group_symbol="P 1")
 
     # Make a beam with wavelength in the range 0.8--1.2 and s0 direction close
     # to 0,0,1
@@ -240,7 +233,7 @@ class TestScanVaryingModelParameterisation(object):
     self.beam = Beam(s0)
 
     # Make a standard goniometer model along X
-    self.goniometer = Goniometer((1,0,0))
+    self.goniometer = Goniometer((1, 0, 0))
 
     # Make a simple single panel detector
     d1 = matrix.col((1, 0, 0))
@@ -249,16 +242,12 @@ class TestScanVaryingModelParameterisation(object):
     npx_slow = 1679
     pix_size_f = pix_size_s = 0.172
     from dxtbx.model import DetectorFactory
-    self.detector = DetectorFactory.make_detector("PAD", d1, d2,
-      matrix.col((0, 0, -110)), (pix_size_f, pix_size_s),
-      (npx_fast, npx_slow), (0, 2e20))
+    self.detector = DetectorFactory.make_detector("PAD", d1, d2, matrix.col((0, 0, -110)), (pix_size_f, pix_size_s),
+                                                  (npx_fast, npx_slow), (0, 2e20))
 
   def random_direction_close_to(self, vector):
-    return vector.rotate_around_origin(matrix.col(
-                (random.random(),
-                 random.random(),
-                 random.random())).normalize(),
-                 random.gauss(0, 1.0),  deg = True)
+    return vector.rotate_around_origin(
+        matrix.col((random.random(), random.random(), random.random())).normalize(), random.gauss(0, 1.0), deg=True)
 
 class TestScanVaryingCrystalOrientationParameterisation(TestScanVaryingModelParameterisation):
   """Test a ScanVaryingCrystalOrientationParameterisation"""
@@ -287,12 +276,12 @@ class TestScanVaryingCrystalOrientationParameterisation(TestScanVaryingModelPara
 
     # compare analytical and finite difference derivatives at image 50
     an_ds_dp = xl_op.get_ds_dp()
-    fd_ds_dp = get_fd_gradients(xl_op, [1.e-6 * pi/180] * num_param)
+    fd_ds_dp = get_fd_gradients(xl_op, [1.e-6 * pi / 180] * num_param)
     param_names = xl_op.get_param_names()
 
     null_mat = matrix.sqr((0., 0., 0., 0., 0., 0., 0., 0., 0.))
     for e, f in zip(an_ds_dp, fd_ds_dp):
-      assert(approx_equal((e - f), null_mat, eps = 1.e-6))
+      assert (approx_equal((e - f), null_mat, eps=1.e-6))
 
     # Now test gradients at equally spaced time points across the whole
     # range
@@ -313,7 +302,7 @@ class TestScanVaryingCrystalOrientationParameterisation(TestScanVaryingModelPara
 
       xl_op.set_time_point(t)
       an_ds_dp = xl_op.get_ds_dp()
-      fd_ds_dp = get_fd_gradients(xl_op, [1.e-6 * pi/180] * num_param)
+      fd_ds_dp = get_fd_gradients(xl_op, [1.e-6 * pi / 180] * num_param)
       #print t
       #print "Gradients:"
       #for s, a, f in zip(param_names, an_ds_dp, fd_ds_dp):
@@ -324,7 +313,7 @@ class TestScanVaryingCrystalOrientationParameterisation(TestScanVaryingModelPara
       #    print
       #
       for e, f in zip(an_ds_dp, fd_ds_dp):
-        assert(approx_equal((e - f), null_mat, eps = 1.e-6))
+        assert (approx_equal((e - f), null_mat, eps=1.e-6))
 
     if self.do_plots:
       try:
@@ -398,8 +387,7 @@ class TestScanVaryingCrystalOrientationParameterisation(TestScanVaryingModelPara
 
       for j in range(num_param):
         try:
-          assert(approx_equal((xl_op_fd_ds_dp[j] - xl_op_an_ds_dp[j]),
-                              null_mat, eps = 1.e-6))
+          assert (approx_equal((xl_op_fd_ds_dp[j] - xl_op_an_ds_dp[j]), null_mat, eps=1.e-6))
         except Exception:
           failures += 1
           print "for try", i
@@ -437,7 +425,7 @@ class TestScanVaryingCrystalUnitCellParameterisation(TestScanVaryingModelParamet
     # apply a random parameter shift to the unit cell, on order of 2% of
     # the initial metrical matrix parameters
     p_vals = xl_ucp.get_param_vals()
-    sigmas = [0.02  * p for p in p_vals]
+    sigmas = [0.02 * p for p in p_vals]
     new_vals = random_param_shift(p_vals, sigmas)
     xl_ucp.set_param_vals(new_vals)
 
@@ -452,7 +440,7 @@ class TestScanVaryingCrystalUnitCellParameterisation(TestScanVaryingModelParamet
     param_names = xl_ucp.get_param_names()
 
     for e, f in zip(an_ds_dp, fd_ds_dp):
-      assert(approx_equal((e - f), null_mat, eps = 1.e-6))
+      assert (approx_equal((e - f), null_mat, eps=1.e-6))
 
     print "OK"
     return
@@ -472,8 +460,7 @@ class TestScanVaryingBeamParameterisation(TestScanVaryingModelParameterisation):
 
     # Parameterise the crystal with the image range and five intervals. Init
     # TestOrientationModel to explore gradients at image 50
-    beam_p = TestBeamModel(50, self.beam, self.image_range, nintervals,
-      self.goniometer)
+    beam_p = TestBeamModel(50, self.beam, self.image_range, nintervals, self.goniometer)
 
     # How many parameters?
     num_param = beam_p.num_free()
@@ -481,7 +468,7 @@ class TestScanVaryingBeamParameterisation(TestScanVaryingModelParameterisation):
     # apply a random parameter shift to the beam, on order of 2% of
     # the initial values
     p_vals = beam_p.get_param_vals()
-    sigmas = [0.02  * p for p in p_vals]
+    sigmas = [0.02 * p for p in p_vals]
     new_vals = random_param_shift(p_vals, sigmas)
     beam_p.set_param_vals(new_vals)
 
@@ -496,7 +483,7 @@ class TestScanVaryingBeamParameterisation(TestScanVaryingModelParameterisation):
     param_names = beam_p.get_param_names()
 
     for e, f in zip(an_ds_dp, fd_ds_dp):
-      assert(approx_equal((e - f), null_vec, eps = 1.e-6))
+      assert (approx_equal((e - f), null_vec, eps=1.e-6))
 
     print "OK"
     return
@@ -524,7 +511,7 @@ class TestScanVaryingDetectorParameterisation(TestScanVaryingModelParameterisati
     # apply a random parameter shift to the detector, on order of 2% of
     # the initial values
     p_vals = det_p.get_param_vals()
-    sigmas = [0.02  * p for p in p_vals]
+    sigmas = [0.02 * p for p in p_vals]
     new_vals = random_param_shift(p_vals, sigmas)
     det_p.set_param_vals(new_vals)
 
@@ -539,7 +526,7 @@ class TestScanVaryingDetectorParameterisation(TestScanVaryingModelParameterisati
     param_names = det_p.get_param_names()
 
     for e, f in zip(an_ds_dp, fd_ds_dp):
-      assert(approx_equal((e - f), null_mat, eps = 1.e-6))
+      assert (approx_equal((e - f), null_mat, eps=1.e-6))
 
     print "OK"
     return
@@ -551,27 +538,26 @@ class TestScanVaryingDetectorParameterisation(TestScanVaryingModelParameterisati
 
     return
 
-
 if __name__ == '__main__':
 
   print "Testing the GaussianSmoother and ScanVaryingParameterSet"
-  test = SmootherTest(plots = False)
+  test = SmootherTest(plots=False)
   test.run()
   print
 
   print "Testing the ScanVaryingCrystalOrientationParameterisation"
-  test = TestScanVaryingCrystalOrientationParameterisation(plots = False)
+  test = TestScanVaryingCrystalOrientationParameterisation(plots=False)
   test.run()
   print
 
   print "Testing the ScanVaryingCrystalUnitCellParameterisation"
-  test = TestScanVaryingCrystalUnitCellParameterisation(plots = False)
+  test = TestScanVaryingCrystalUnitCellParameterisation(plots=False)
   test.run()
 
   print "Testing the ScanVaryingBeamParameterisation"
-  test = TestScanVaryingBeamParameterisation(plots = False)
+  test = TestScanVaryingBeamParameterisation(plots=False)
   test.run()
 
   print "Testing the ScanVaryingDetectorParameterisationSinglePanel"
-  test = TestScanVaryingDetectorParameterisation(plots = False)
+  test = TestScanVaryingDetectorParameterisation(plots=False)
   test.run()

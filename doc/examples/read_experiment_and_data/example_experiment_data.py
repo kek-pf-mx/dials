@@ -38,12 +38,12 @@ class Script(object):
             % libtbx.env.dispatcher_name
 
     self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      epilog=help_message,
-      check_format=False,
-      read_experiments=True,
-      read_reflections=True)
+        usage=usage,
+        phil=phil_scope,
+        epilog=help_message,
+        check_format=False,
+        read_experiments=True,
+        read_reflections=True)
 
   def run(self):
     from dials.array_family import flex # import dependency
@@ -68,8 +68,7 @@ class Script(object):
 
     print 'Read %d reflections' % len(reflections)
 
-    indexed = reflections.select(reflections.get_flags(
-      reflections.flags.indexed))
+    indexed = reflections.select(reflections.get_flags(reflections.flags.indexed))
 
     print 'Kept %d indexed reflections' % len(indexed)
 
@@ -105,8 +104,7 @@ class Script(object):
     goniometer = experiments[0].goniometer
 
     if scan and goniometer:
-      angle = scan.get_angle_from_array_index(
-        0.5 * sum(imageset.get_array_range()))
+      angle = scan.get_angle_from_array_index(0.5 * sum(imageset.get_array_range()))
       axis = matrix.col(goniometer.get_rotation_axis_datum())
       F = matrix.sqr(goniometer.get_fixed_rotation())
       S = matrix.sqr(goniometer.get_setting_rotation())
@@ -114,8 +112,7 @@ class Script(object):
     else:
       R = matrix.sqr((1, 0, 0, 0, 1, 0, 0, 0, 1))
 
-    assert(len(detector) == 1)
-
+    assert (len(detector) == 1)
 
 if __name__ == '__main__':
   from dials.util import halraiser

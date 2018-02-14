@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division
 
 class TestMapFramesForward(object):
-
   def __init__(self, filename):
 
     from math import pi
@@ -38,10 +37,8 @@ class TestMapFramesForward(object):
         self.grid_size[2])
 
     # Create the bounding box calculator
-    self.calculate_bbox = BBoxCalculator3D(
-        self.beam, self.detector, self.gonio, self.scan,
-        self.delta_divergence,
-        self.delta_mosaicity)
+    self.calculate_bbox = BBoxCalculator3D(self.beam, self.detector, self.gonio, self.scan, self.delta_divergence,
+                                           self.delta_mosaicity)
 
   def __call__(self):
 
@@ -49,7 +46,7 @@ class TestMapFramesForward(object):
     from random import uniform
     from dials.algorithms.profile_model.gaussian_rs import CoordinateSystem
     from scitbx.array_family import flex
-    assert(len(self.detector) == 1)
+    assert (len(self.detector) == 1)
     s0 = self.beam.get_s0()
     m2 = self.gonio.get_rotation_axis()
     s0_length = matrix.col(self.beam.get_s0()).length()
@@ -62,8 +59,7 @@ class TestMapFramesForward(object):
       z = uniform(0, 9)
 
       # Get random s1, phi, panel
-      s1 = matrix.col(self.detector[0].get_pixel_lab_coord(
-          (x, y))).normalize() * s0_length
+      s1 = matrix.col(self.detector[0].get_pixel_lab_coord((x, y))).normalize() * s0_length
       phi = self.scan.get_angle_from_array_index(z, deg=False)
       panel = 0
 
@@ -82,36 +78,34 @@ class TestMapFramesForward(object):
       # Ensure the minimum and maximum are 0 < 1
       fmax = flex.max(fraction)
       fmin = flex.min(fraction)
-      assert(fmax <= (1.0 + 5e-15) and fmax > 0.0), "%.16f not between 0 and 1" % fmax
-      assert(fmin >= 0.0 and fmin <= 1.0)
+      assert (fmax <= (1.0 + 5e-15) and fmax > 0.0), "%.16f not between 0 and 1" % fmax
+      assert (fmin >= 0.0 and fmin <= 1.0)
 
       # Ensure the fraction for each image frame adds up to 1.0 for
       # all those frames completely within the grid
-      for j in range(1, fraction.all()[0]-1):
-        tot = flex.sum(fraction[j:j+1,:])
-        assert(abs(tot - 1.0) < 1e-7)
+      for j in range(1, fraction.all()[0] - 1):
+        tot = flex.sum(fraction[j:j + 1, :])
+        assert (abs(tot - 1.0) < 1e-7)
 
       # Ensure the frames follow a progression through the grid. I.e,
       # check that values increase then decrease and don't jump around
       for j in range(fraction.all()[0]):
-        f = fraction[j:j+1,:]
+        f = fraction[j:j + 1, :]
         last = f[0]
         rev = False
-        for i in range(1,len(f)):
+        for i in range(1, len(f)):
           curr = f[1]
           if rev == False:
             if curr < last:
               rev = True
           else:
-            assert(curr <= last)
+            assert (curr <= last)
           last = curr
 
     # Test passed
     print 'OK'
 
-
 class TestMapFramesReverse(object):
-
   def __init__(self, filename):
 
     from math import pi
@@ -148,10 +142,8 @@ class TestMapFramesReverse(object):
         self.grid_size[2])
 
     # Create the bounding box calculator
-    self.calculate_bbox = BBoxCalculator3D(
-        self.beam, self.detector, self.gonio, self.scan,
-        self.delta_divergence,
-        self.delta_mosaicity)
+    self.calculate_bbox = BBoxCalculator3D(self.beam, self.detector, self.gonio, self.scan, self.delta_divergence,
+                                           self.delta_mosaicity)
 
   def __call__(self):
 
@@ -172,8 +164,7 @@ class TestMapFramesReverse(object):
       z = uniform(0, 9)
 
       # Get random s1, phi, panel
-      s1 = matrix.col(self.detector[0].get_pixel_lab_coord(
-          (x, y))).normalize() * s0_length
+      s1 = matrix.col(self.detector[0].get_pixel_lab_coord((x, y))).normalize() * s0_length
       phi = self.scan.get_angle_from_array_index(z, deg=False)
       panel = 0
 
@@ -196,36 +187,34 @@ class TestMapFramesReverse(object):
       # Ensure the minimum and maximum are 0 < 1
       fmax = flex.max(fraction)
       fmin = flex.min(fraction)
-      assert(fmax <= 1.0 and fmax > 0.0)
-      assert(fmin >= 0.0 and fmin <= 1.0)
+      assert (fmax <= 1.0 and fmax > 0.0)
+      assert (fmin >= 0.0 and fmin <= 1.0)
 
       # Ensure the fraction for image adds up to 1.0 for
       # all those images completely within the image
       for v3 in range(fraction.all()[0]):
-        tot = flex.sum(fraction[v3:v3+1,:])
-        assert(abs(tot - 1.0) < 1e-7)
+        tot = flex.sum(fraction[v3:v3 + 1, :])
+        assert (abs(tot - 1.0) < 1e-7)
 
       # Ensure the frames follow a progression through the grid. I.e,
       # check that values increase then decrease and don't jump around
       for v3 in range(fraction.all()[0]):
-        f = fraction[v3:v3+1,:]
+        f = fraction[v3:v3 + 1, :]
         last = f[0]
         rev = False
-        for i in range(1,len(f)):
+        for i in range(1, len(f)):
           curr = f[1]
           if rev == False:
             if curr < last:
               rev = True
           else:
-            assert(curr <= last)
+            assert (curr <= last)
           last = curr
 
     # Test passed
     print 'OK'
 
-
 class TestMapForwardReverse(object):
-
   def __init__(self, filename):
 
     from math import pi
@@ -272,10 +261,8 @@ class TestMapForwardReverse(object):
         self.grid_size[2])
 
     # Create the bounding box calculator
-    self.calculate_bbox = BBoxCalculator3D(
-        self.beam, self.detector, self.gonio, self.scan,
-        self.delta_divergence,
-        self.delta_mosaicity)
+    self.calculate_bbox = BBoxCalculator3D(self.beam, self.detector, self.gonio, self.scan, self.delta_divergence,
+                                           self.delta_mosaicity)
 
   def __call__(self):
 
@@ -295,8 +282,7 @@ class TestMapForwardReverse(object):
       z = uniform(0, 9)
 
       # Get random s1, phi, panel
-      s1 = matrix.col(self.detector[0].get_pixel_lab_coord(
-          (x, y))).normalize() * s0_length
+      s1 = matrix.col(self.detector[0].get_pixel_lab_coord((x, y))).normalize() * s0_length
       phi = self.scan.get_angle_from_array_index(z, deg=False)
       panel = 0
 
@@ -319,17 +305,15 @@ class TestMapForwardReverse(object):
       eps = 1e-7
       for j in range(forward_fraction.all()[0]):
         for i in range(forward_fraction.all()[1]):
-          if forward_fraction[j,i] > 0.0:
-            assert(reverse_fraction[i,j] > 0.0)
+          if forward_fraction[j, i] > 0.0:
+            assert (reverse_fraction[i, j] > 0.0)
           else:
-            assert(reverse_fraction[i,j] < eps)
+            assert (reverse_fraction[i, j] < eps)
 
     # Test passed
     print 'OK'
 
-
 class Test(object):
-
   def __init__(self):
 
     import libtbx.load_env
@@ -341,8 +325,7 @@ class Test(object):
 
     import os
 
-    filename = os.path.join(dials_regression,
-        'centroid_test_data', 'sweep.json')
+    filename = os.path.join(dials_regression, 'centroid_test_data', 'sweep.json')
 
     self.tst_map_frames_forward = TestMapFramesForward(filename)
     self.tst_map_frames_reverse = TestMapFramesReverse(filename)

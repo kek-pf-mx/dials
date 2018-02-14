@@ -8,7 +8,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """
 Test dials.rs_mapper on images if dials_regression is present.
 
@@ -23,9 +22,7 @@ from libtbx.test_utils import open_tmp_directory, approx_equal
 
 def test1():
 
-  dials_regression = libtbx.env.find_in_repositories(
-    relative_path="dials_regression",
-    test=os.path.isdir)
+  dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=os.path.isdir)
 
   data_dir = os.path.join(dials_regression, "centroid_test_data")
   datablock_path = os.path.join(data_dir, "datablock.json")

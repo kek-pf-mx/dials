@@ -36,5 +36,4 @@ if __name__ == '__main__':
   if not os.paths.exists(hklout):
     raise Sorry('%s does not exist' % hklout)
 
-  print 'Removed %d absent reflections' % remove_absent_reflections(
-    hklin, hklout)
+  print 'Removed %d absent reflections' % remove_absent_reflections(hklin, hklout)

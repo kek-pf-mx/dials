@@ -6,7 +6,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """Contains classes for refinement engines. Refinery is the shared interface,
 LevenbergMarquardtIterations, GaussNewtonIterations, SimpleLBFGS and LBFGScurvs
 are the current concrete implementations"""
@@ -85,7 +84,6 @@ refinery
 '''
 refinery_phil_scope = parse(refinery_phil_str)
 
-
 class Journal(dict):
   """Container in which to store information about refinement history.
 
@@ -160,9 +158,14 @@ class Refinery(object):
   # Refinery to be able to refer to it directly. So refinery should keep a
   # separate link to its PredictionParameterisation.
 
-  def __init__(self, target, prediction_parameterisation, constraints_manager=None,
-               log = None, verbosity = 0, tracking=None,
-               max_iterations = None):
+  def __init__(self,
+               target,
+               prediction_parameterisation,
+               constraints_manager=None,
+               log=None,
+               verbosity=0,
+               tracking=None,
+               max_iterations=None):
 
     # reference to PredictionParameterisation, Target and ConstraintsManager
     # objects
@@ -199,19 +202,19 @@ class Refinery(object):
       tracking = refinery_phil_scope.extract().refinery.journal
     self.history = Journal()
     self.history.add_column("num_reflections")
-    self.history.add_column("objective")#flex.double()
+    self.history.add_column("objective") #flex.double()
     if tracking.track_gradient:
       self.history.add_column("gradient")
-    self.history.add_column("gradient_norm")#flex.double()
+    self.history.add_column("gradient_norm") #flex.double()
     if tracking.track_parameter_correlation:
       self.history.add_column("parameter_correlation")
     if tracking.track_step:
       self.history.add_column("solution")
     if tracking.track_out_of_sample_rmsd:
       self.history.add_column("out_of_sample_rmsd")
-    self.history.add_column("solution_norm")#flex.double()
+    self.history.add_column("solution_norm") #flex.double()
     self.history.add_column("parameter_vector")
-    self.history.add_column("parameter_vector_norm")#flex.double()
+    self.history.add_column("parameter_vector_norm") #flex.double()
     self.history.add_column("rmsd")
     if tracking.track_condition_number:
       self.history.add_column("condition_number")
@@ -255,16 +258,14 @@ class Refinery(object):
       # split Jacobian into dense matrix blocks corresponding to each residual
       jblocks = self.split_jacobian_into_blocks()
       corrmats = {}
-      for r, j  in zip(resid_names, jblocks):
-        corrmats[r]=self._packed_corr_mat(j)
+      for r, j in zip(resid_names, jblocks):
+        corrmats[r] = self._packed_corr_mat(j)
       self.history.set_last_cell("parameter_correlation", corrmats)
-    if "condition_number" in  self.history and self._jacobian is not None:
-      self.history.set_last_cell("condition_number",
-        self.jacobian_condition_number())
+    if "condition_number" in self.history and self._jacobian is not None:
+      self.history.set_last_cell("condition_number", self.jacobian_condition_number())
     if "out_of_sample_rmsd" in self.history:
       preds = self._target.predict_for_free_reflections()
-      self.history.set_last_cell("out_of_sample_rmsd",
-        self._target.rmsds_for_reflection_table(preds))
+      self.history.set_last_cell("out_of_sample_rmsd", self._target.rmsds_for_reflection_table(preds))
     return
 
   def split_jacobian_into_blocks(self):
@@ -280,7 +281,7 @@ class Refinery(object):
       j = self._jacobian
 
     nr, nc = j.all()
-    nr_block = int(nr/nblocks)
+    nr_block = int(nr / nblocks)
     row_start = [e * nr_block for e in range(nblocks)]
     blocks = [j.matrix_copy_block(rs, 0, nr_block, nc) for rs in row_start]
 
@@ -302,7 +303,7 @@ class Refinery(object):
     except AttributeError:
       pass # assume m is already scitbx_sparse_ext.matrix
 
-    packed_len = (m.n_cols*(m.n_cols + 1)) // 2
+    packed_len = (m.n_cols * (m.n_cols + 1)) // 2
     i = 0
     tmp = flex.double(packed_len)
     for col1 in range(m.n_cols):
@@ -413,7 +414,7 @@ class Refinery(object):
     except IndexError:
       return False
 
-    tests = [abs((e[1] - e[0])/e[1]) < 0.0001 if e[1] > 0 else True for e in zip(r1, r2)]
+    tests = [abs((e[1] - e[0]) / e[1]) < 0.0001 if e[1] > 0 else True for e in zip(r1, r2)]
 
     return all(tests)
 
@@ -457,7 +458,6 @@ class DisableMPmixin(object):
       raise NotImplementedError()
     return
 
-
 class AdaptLbfgs(Refinery):
   """Adapt Refinery for L-BFGS minimiser"""
 
@@ -465,8 +465,7 @@ class AdaptLbfgs(Refinery):
 
     Refinery.__init__(self, *args, **kwargs)
 
-    self._termination_params = lbfgs.termination_parameters(
-        max_iterations = self._max_iterations)
+    self._termination_params = lbfgs.termination_parameters(max_iterations=self._max_iterations)
 
     import cStringIO
     self._log_string = cStringIO.StringIO
@@ -484,15 +483,15 @@ class AdaptLbfgs(Refinery):
     self.prepare_for_step()
 
     # observation terms
-    blocks = self._target.split_matches_into_blocks(nproc = self._nproc)
+    blocks = self._target.split_matches_into_blocks(nproc=self._nproc)
     if self._nproc > 1:
       task_results = easy_mp.parallel_map(
-        func=self._target.compute_functional_gradients_and_curvatures,
-        iterable=blocks,
-        processes=self._nproc,
-        method="multiprocessing",
-        #preserve_exception_message=True
-        )
+          func=self._target.compute_functional_gradients_and_curvatures,
+          iterable=blocks,
+          processes=self._nproc,
+          method="multiprocessing",
+          #preserve_exception_message=True
+      )
 
     else:
       task_results = [self._target. \
@@ -512,8 +511,8 @@ class AdaptLbfgs(Refinery):
 
     if restraints:
       f += restraints[0]
-      g = [a + b for a,b in zip(g, restraints[1])]
-      c = [a + b for a,b in zip(c, restraints[2])]
+      g = [a + b for a, b in zip(g, restraints[1])]
+      c = [a + b for a, b in zip(c, restraints[2])]
 
     # compact and reorder according to the constraints
     if self._constr_manager is not None:
@@ -548,9 +547,7 @@ class AdaptLbfgs(Refinery):
 
     ref_log = self._log_string()
     if curvatures: self.diag_mode = "always"
-    self.minimizer = lbfgs.run(target_evaluator=self,
-        termination_params=self._termination_params,
-        log=ref_log)
+    self.minimizer = lbfgs.run(target_evaluator=self, termination_params=self._termination_params, log=ref_log)
 
     log = ref_log.getvalue()
     if self._log:
@@ -564,7 +561,8 @@ class AdaptLbfgs(Refinery):
       if self.history.reason_for_termination:
         self.history.reason_for_termination += "\n"
         self.history.reason_for_termination += msg
-      else: self.history.reason_for_termination = msg
+      else:
+        self.history.reason_for_termination = msg
 
     if self.minimizer.error:
       self.history.reason_for_termination = self.minimizer.error
@@ -597,24 +595,32 @@ class LBFGScurvs(AdaptLbfgs):
     diags = 1. / curvs
 
     if self._verbosity > 2:
-      msg = "  curv: " +  "%.5f " * len(tuple(curvs))
+      msg = "  curv: " + "%.5f " * len(tuple(curvs))
       logger.debug(msg, *curvs)
 
     return self._f, self._g, diags
 
-
-class AdaptLstbx(
-    Refinery,
-    normal_eqns.non_linear_ls,
-    normal_eqns.non_linear_ls_mixin):
+class AdaptLstbx(Refinery, normal_eqns.non_linear_ls, normal_eqns.non_linear_ls_mixin):
   """Adapt Refinery for lstbx"""
 
-  def __init__(self, target, prediction_parameterisation, constraints_manager=None,
-               log=None, verbosity=0, tracking=None, max_iterations=None):
+  def __init__(self,
+               target,
+               prediction_parameterisation,
+               constraints_manager=None,
+               log=None,
+               verbosity=0,
+               tracking=None,
+               max_iterations=None):
 
-    Refinery.__init__(self, target, prediction_parameterisation, constraints_manager,
-             log=log, verbosity=verbosity, tracking=tracking,
-             max_iterations=max_iterations)
+    Refinery.__init__(
+        self,
+        target,
+        prediction_parameterisation,
+        constraints_manager,
+        log=log,
+        verbosity=verbosity,
+        tracking=tracking,
+        max_iterations=max_iterations)
 
     # required for restart to work (do I need that method?)
     self.x_0 = self.x.deep_copy()
@@ -622,7 +628,7 @@ class AdaptLstbx(
     # keep attribute for the Cholesky factor required for ESD calculation
     self.cf = None
 
-    normal_eqns.non_linear_ls.__init__(self, n_parameters = len(self.x))
+    normal_eqns.non_linear_ls.__init__(self, n_parameters=len(self.x))
 
   def restart(self):
     self.x = self.x_0.deep_copy()
@@ -651,7 +657,7 @@ class AdaptLstbx(
       residuals, weights = self._target.compute_residuals()
       self.add_residuals(residuals, weights)
     else:
-      blocks = self._target.split_matches_into_blocks(nproc = self._nproc)
+      blocks = self._target.split_matches_into_blocks(nproc=self._nproc)
 
       if self._nproc > 1:
 
@@ -662,9 +668,8 @@ class AdaptLstbx(
         def task_wrapper(block):
           residuals, jacobian, weights = \
             self._target.compute_residuals_and_gradients(block)
-          return dict(residuals=residuals,
-                      jacobian=jacobian,
-                      weights=weights)
+          return dict(residuals=residuals, jacobian=jacobian, weights=weights)
+
         def callback_wrapper(result):
           j = result['jacobian']
           if self._constr_manager is not None:
@@ -677,13 +682,13 @@ class AdaptLstbx(
           return
 
         task_results = easy_mp.parallel_map(
-          func=task_wrapper,
-          iterable=blocks,
-          processes=self._nproc,
-          callback=callback_wrapper,
-          method="multiprocessing",
-          #preserve_exception_message=True
-          )
+            func=task_wrapper,
+            iterable=blocks,
+            processes=self._nproc,
+            callback=callback_wrapper,
+            method="multiprocessing",
+            #preserve_exception_message=True
+        )
 
       else:
         for block in blocks:
@@ -748,8 +753,7 @@ class AdaptLstbx(
     self.parameter_var_cov = \
         self.history["reduced_chi_squared"][-1] * nm_inv
     # send this back to the models to calculate their uncertainties
-    self._parameters.calculate_model_state_uncertainties(
-      self.parameter_var_cov)
+    self._parameters.calculate_model_state_uncertainties(self.parameter_var_cov)
 
     # send parameter variances back to the parameter classes
     # themselves, for reporting purposes and for building restraints
@@ -780,17 +784,28 @@ class GaussNewtonIterations(AdaptLstbx, normal_eqns_solving.iterations):
   max_shift_over_esd = 15
   convergence_as_shift_over_esd = 1e-5
 
-  def __init__(self, target, prediction_parameterisation, constraints_manager=None,
-               log=None, verbosity=0, tracking=None,
-               max_iterations=20, **kwds):
+  def __init__(self,
+               target,
+               prediction_parameterisation,
+               constraints_manager=None,
+               log=None,
+               verbosity=0,
+               tracking=None,
+               max_iterations=20,
+               **kwds):
 
     AdaptLstbx.__init__(
-             self, target, prediction_parameterisation, constraints_manager,
-             log=log, verbosity=verbosity, tracking=tracking,
-             max_iterations=max_iterations)
+        self,
+        target,
+        prediction_parameterisation,
+        constraints_manager,
+        log=log,
+        verbosity=verbosity,
+        tracking=tracking,
+        max_iterations=max_iterations)
 
     # add an attribute to the journal
-    self.history.add_column("reduced_chi_squared")#flex.double()
+    self.history.add_column("reduced_chi_squared") #flex.double()
 
     # adopt any overrides of the defaults above
     libtbx.adopt_optional_init_args(self, kwds)
@@ -866,7 +881,6 @@ class GaussNewtonIterations(AdaptLstbx, normal_eqns_solving.iterations):
     self.calculate_esds()
 
     return
-
 
 class LevenbergMarquardtIterations(GaussNewtonIterations):
   """Refinery implementation, employing lstbx Levenberg Marquadt
@@ -980,16 +994,16 @@ class LevenbergMarquardtIterations(GaussNewtonIterations):
         break
 
       h = self.step()
-      expected_decrease = 0.5*h.dot(self.mu*h - self._g)
+      expected_decrease = 0.5 * h.dot(self.mu * h - self._g)
       self.step_forward()
       self.n_iterations += 1
       self.build_up(objective_only=True)
       objective_new = self.objective()
       self.report_progress(objective_new)
       actual_decrease = self._f - objective_new
-      rho = actual_decrease/expected_decrease
+      rho = actual_decrease / expected_decrease
       if rho > 0:
-        self.mu *= max(1/3, 1 - (2*rho - 1)**3)
+        self.mu *= max(1 / 3, 1 - (2 * rho - 1)**3)
         nu = 2
       else:
         self.step_backward()

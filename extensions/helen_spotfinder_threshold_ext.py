@@ -73,12 +73,12 @@ class HelenSpotFinderThresholdExt(SpotFinderThresholdIface):
     params = self.params.spotfinder.threshold.helen
 
     self._algorithm = BlobThresholdAlgorithm(
-      pixels_per_row     = image.all()[1],
-      row_count          = image.all()[0],
-      exp_spot_dimension = params.exp_spot_dimension,
-      global_threshold   = params.global_threshold,
-      min_blob_score     = params.min_blob_score,
-      num_passes         = params.num_passes)
+        pixels_per_row=image.all()[1],
+        row_count=image.all()[0],
+        exp_spot_dimension=params.exp_spot_dimension,
+        global_threshold=params.global_threshold,
+        min_blob_score=params.min_blob_score,
+        num_passes=params.num_passes)
 
     result = self._algorithm.threshold(image, mask)
 

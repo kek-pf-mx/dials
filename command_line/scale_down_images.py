@@ -14,8 +14,7 @@ def joiner(args):
 def scale_down_images(in_template, out_template, start, end, scale_factor):
   from multiprocessing import Pool
 
-  jobs = [(in_template % j, out_template % j, scale_factor) for j in
-          range(start, end + 1)]
+  jobs = [(in_template % j, out_template % j, scale_factor) for j in range(start, end + 1)]
 
   pool = Pool(processes=nproc())
   result = pool.map_async(joiner, jobs)

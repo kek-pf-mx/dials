@@ -8,7 +8,6 @@
 #  This code is distributed under the BSD license, a copy of which is
 #  included in the root directory of this package.
 #
-
 """
 Tests for RestraintsParameterisation and associated classes used in refinement
 
@@ -49,7 +48,8 @@ def test1():
   geometry.parameters.crystal.b.length.range = 10 50
   geometry.parameters.crystal.c.length.range = 10 50"""
 
-  master_phil = parse("""
+  master_phil = parse(
+      """
       include scope dials.test.algorithms.refinement.geometry_phil
       """, process_includes=True)
 
@@ -61,14 +61,10 @@ def test1():
   mybeam = models.beam
 
   # Build a mock scan for a 72 degree sweep
-  sweep_range = (0., pi/5.)
+  sweep_range = (0., pi / 5.)
   from dxtbx.model import ScanFactory
   sf = ScanFactory()
-  myscan = sf.make_scan(image_range = (1,720),
-                        exposure_times = 0.1,
-                        oscillation = (0, 0.1),
-                        epochs = range(720),
-                        deg = True)
+  myscan = sf.make_scan(image_range=(1, 720), exposure_times=0.1, oscillation=(0, 0.1), epochs=range(720), deg=True)
 
   # Create parameterisations of these models
 
@@ -79,30 +75,30 @@ def test1():
 
   # Create an ExperimentList
   experiments = ExperimentList()
-  experiments.append(Experiment(
-        beam=mybeam, detector=mydetector, goniometer=mygonio, scan=myscan,
-        crystal=mycrystal, imageset=None))
+  experiments.append(
+      Experiment(beam=mybeam, detector=mydetector, goniometer=mygonio, scan=myscan, crystal=mycrystal, imageset=None))
 
   # Build a prediction parameterisation
-  pred_param = XYPhiPredictionParameterisation(experiments,
-                 detector_parameterisations = [det_param],
-                 beam_parameterisations = [s0_param],
-                 xl_orientation_parameterisations = [xlo_param],
-                 xl_unit_cell_parameterisations = [xluc_param])
+  pred_param = XYPhiPredictionParameterisation(
+      experiments,
+      detector_parameterisations=[det_param],
+      beam_parameterisations=[s0_param],
+      xl_orientation_parameterisations=[xlo_param],
+      xl_unit_cell_parameterisations=[xluc_param])
 
   # Build a restraints parameterisation
-  rp = RestraintsParameterisation(detector_parameterisations = [det_param],
-               beam_parameterisations = [s0_param],
-               xl_orientation_parameterisations = [xlo_param],
-               xl_unit_cell_parameterisations = [xluc_param])
+  rp = RestraintsParameterisation(
+      detector_parameterisations=[det_param],
+      beam_parameterisations=[s0_param],
+      xl_orientation_parameterisations=[xlo_param],
+      xl_unit_cell_parameterisations=[xluc_param])
 
   # make a unit cell target
   sigma = 1.
   uc = mycrystal.get_unit_cell().parameters()
   target_uc = [gauss(e, sigma) for e in uc]
 
-  rp.add_restraints_to_target_xl_unit_cell(experiment_id=0, values=target_uc,
-                                           sigma=[sigma]*6)
+  rp.add_restraints_to_target_xl_unit_cell(experiment_id=0, values=target_uc, sigma=[sigma] * 6)
 
   # get analytical values and gradients
   vals, grads, weights = rp.get_residuals_gradients_and_weights()
@@ -111,7 +107,7 @@ def test1():
   p_vals = pred_param.get_param_vals()
   deltas = [1.e-7] * len(p_vals)
 
-  fd_grad=[]
+  fd_grad = []
   for i in range(len(deltas)):
 
     val = p_vals[i]
@@ -167,7 +163,8 @@ def test2():
   geometry.parameters.crystal.b.length.range = 10 50
   geometry.parameters.crystal.c.length.range = 10 50"""
 
-  master_phil = parse("""
+  master_phil = parse(
+      """
       include scope dials.test.algorithms.refinement.geometry_phil
       """, process_includes=True)
 
@@ -182,14 +179,10 @@ def test2():
   mybeam = models.beam
 
   # Build a mock scan for a 72 degree sweep
-  sweep_range = (0., pi/5.)
+  sweep_range = (0., pi / 5.)
   from dxtbx.model import ScanFactory
   sf = ScanFactory()
-  myscan = sf.make_scan(image_range = (1,720),
-                        exposure_times = 0.1,
-                        oscillation = (0, 0.1),
-                        epochs = range(720),
-                        deg = True)
+  myscan = sf.make_scan(image_range=(1, 720), exposure_times=0.1, oscillation=(0, 0.1), epochs=range(720), deg=True)
 
   # Create parameterisations of these models
   det_param = DetectorParameterisationSinglePanel(mydetector)
@@ -200,35 +193,33 @@ def test2():
 
   # Create an ExperimentList with the crystal duplicated
   experiments = ExperimentList()
-  experiments.append(Experiment(
-        beam=mybeam, detector=mydetector, goniometer=mygonio, scan=myscan,
-        crystal=mycrystal, imageset=None))
-  experiments.append(Experiment(
-        beam=mybeam, detector=mydetector, goniometer=mygonio, scan=myscan,
-        crystal=mycrystal2, imageset=None))
+  experiments.append(
+      Experiment(beam=mybeam, detector=mydetector, goniometer=mygonio, scan=myscan, crystal=mycrystal, imageset=None))
+  experiments.append(
+      Experiment(beam=mybeam, detector=mydetector, goniometer=mygonio, scan=myscan, crystal=mycrystal2, imageset=None))
 
   # Build a prediction parameterisation
-  pred_param = XYPhiPredictionParameterisation(experiments,
-                 detector_parameterisations = [det_param],
-                 beam_parameterisations = [s0_param],
-                 xl_orientation_parameterisations = [xlo_param],
-                 xl_unit_cell_parameterisations = [xluc_param, xluc_param2])
+  pred_param = XYPhiPredictionParameterisation(
+      experiments,
+      detector_parameterisations=[det_param],
+      beam_parameterisations=[s0_param],
+      xl_orientation_parameterisations=[xlo_param],
+      xl_unit_cell_parameterisations=[xluc_param, xluc_param2])
 
   # Build a restraints parameterisation
-  rp = RestraintsParameterisation(detector_parameterisations = [det_param],
-               beam_parameterisations = [s0_param],
-               xl_orientation_parameterisations = [xlo_param],
-               xl_unit_cell_parameterisations = [xluc_param, xluc_param2])
+  rp = RestraintsParameterisation(
+      detector_parameterisations=[det_param],
+      beam_parameterisations=[s0_param],
+      xl_orientation_parameterisations=[xlo_param],
+      xl_unit_cell_parameterisations=[xluc_param, xluc_param2])
 
   # make a unit cell target
   sigma = 1.
   uc = mycrystal.get_unit_cell().parameters()
   target_uc = [gauss(e, sigma) for e in uc]
 
-  rp.add_restraints_to_target_xl_unit_cell(experiment_id=0, values=target_uc,
-                                           sigma=[sigma]*6)
-  rp.add_restraints_to_target_xl_unit_cell(experiment_id=1, values=target_uc,
-                                           sigma=[sigma]*6)
+  rp.add_restraints_to_target_xl_unit_cell(experiment_id=0, values=target_uc, sigma=[sigma] * 6)
+  rp.add_restraints_to_target_xl_unit_cell(experiment_id=1, values=target_uc, sigma=[sigma] * 6)
 
   # get analytical values and gradients
   vals, grads, weights = rp.get_residuals_gradients_and_weights()
@@ -237,7 +228,7 @@ def test2():
   p_vals = pred_param.get_param_vals()
   deltas = [1.e-7] * len(p_vals)
 
-  fd_grad=[]
+  fd_grad = []
   for i in range(len(deltas)):
 
     val = p_vals[i]
@@ -304,21 +295,17 @@ def test3():
   working_phil = phil_scope.fetch(source=user_phil)
   working_params = working_phil.extract()
 
-  dials_regression = libtbx.env.find_in_repositories(
-    relative_path="dials_regression",
-    test=os.path.isdir)
+  dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=os.path.isdir)
 
   # use the multi stills test data
   data_dir = os.path.join(dials_regression, "refinement_test_data", "multi_stills")
   experiments_path = os.path.join(data_dir, "combined_experiments.json")
   pickle_path = os.path.join(data_dir, "combined_reflections.pickle")
 
-  experiments = ExperimentListFactory.from_json_file(experiments_path,
-                check_format=False)
+  experiments = ExperimentListFactory.from_json_file(experiments_path, check_format=False)
   reflections = flex.reflection_table.from_pickle(pickle_path)
 
-  refiner = RefinerFactory.from_parameters_data_experiments(working_params,
-        reflections, experiments)
+  refiner = RefinerFactory.from_parameters_data_experiments(working_params, reflections, experiments)
 
   # hack to extract the objects needed from the Refiner
   rp = refiner._target._restraints_parameterisation
@@ -331,7 +318,7 @@ def test3():
   p_vals = pred_param.get_param_vals()
   deltas = [1.e-7] * len(p_vals)
 
-  fd_grad=[]
+  fd_grad = []
   for i in range(len(deltas)):
 
     val = p_vals[i]
@@ -403,21 +390,17 @@ def test4():
   working_phil = phil_scope.fetch(source=user_phil)
   working_params = working_phil.extract()
 
-  dials_regression = libtbx.env.find_in_repositories(
-    relative_path="dials_regression",
-    test=os.path.isdir)
+  dials_regression = libtbx.env.find_in_repositories(relative_path="dials_regression", test=os.path.isdir)
 
   # use the multi stills test data
   data_dir = os.path.join(dials_regression, "refinement_test_data", "multi_stills")
   experiments_path = os.path.join(data_dir, "combined_experiments.json")
   pickle_path = os.path.join(data_dir, "combined_reflections.pickle")
 
-  experiments = ExperimentListFactory.from_json_file(experiments_path,
-                check_format=False)
+  experiments = ExperimentListFactory.from_json_file(experiments_path, check_format=False)
   reflections = flex.reflection_table.from_pickle(pickle_path)
 
-  refiner = RefinerFactory.from_parameters_data_experiments(working_params,
-        reflections, experiments)
+  refiner = RefinerFactory.from_parameters_data_experiments(working_params, reflections, experiments)
 
   # hack to extract the objects needed from the Refiner
   rp = refiner._target._restraints_parameterisation
@@ -430,7 +413,7 @@ def test4():
   p_vals = pred_param.get_param_vals()
   deltas = [1.e-7] * len(p_vals)
 
-  fd_grad=[]
+  fd_grad = []
   for i in range(len(deltas)):
 
     val = p_vals[i]

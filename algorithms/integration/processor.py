@@ -17,26 +17,22 @@ from dials.util import phil
 import libtbx
 
 class ExecutorAux(Executor, boost.python.injector):
-
   def __getinitargs__(self):
     return ()
-
 
 class _Job(object):
   def __init__(self):
     self.index = 0
     self.nthreads = 1
 
-
 job = _Job()
-
-
 
 class MultiProcessing(object):
   '''
   Multi processing parameters
 
   '''
+
   def __init__(self):
     self.method = "multiprocessing"
     self.nproc = 1
@@ -54,6 +50,7 @@ class Lookup(object):
   Lookup parameters
 
   '''
+
   def __init__(self):
     self.mask = None
 
@@ -65,6 +62,7 @@ class Block(object):
   Block parameters
 
   '''
+
   def __init__(self):
     self.size = libtbx.Auto
     self.units = 'degrees'
@@ -84,6 +82,7 @@ class Shoebox(object):
   Shoebox parameters
 
   '''
+
   def __init__(self):
     self.flatten = False
     self.partials = False
@@ -97,6 +96,7 @@ class Debug(object):
   Debug parameters
 
   '''
+
   def __init__(self):
     self.output = False
     self.select = None
@@ -114,6 +114,7 @@ class Parameters(object):
   Class to handle parameters for the processor
 
   '''
+
   def __init__(self):
     '''
     Initialize the parameters
@@ -136,12 +137,12 @@ class Parameters(object):
     self.shoebox.update(other.shoebox)
     self.debug.update(other.debug)
 
-
 class TimingInfo(object):
   '''
   A class to contain timing info.
 
   '''
+
   def __init__(self):
     self.read = 0
     self.extract = 0
@@ -155,16 +156,15 @@ class TimingInfo(object):
     ''' Convert to string. '''
     from libtbx.table_utils import format as table
     rows = [
-      ["Read time"        , "%.2f seconds" % (self.read)       ],
-      ["Extract time"     , "%.2f seconds" % (self.extract)    ],
-      ["Pre-process time" , "%.2f seconds" % (self.initialize) ],
-      ["Process time"     , "%.2f seconds" % (self.process)    ],
-      ["Post-process time", "%.2f seconds" % (self.finalize)   ],
-      ["Total time"       , "%.2f seconds" % (self.total)      ],
-      ["User time"        , "%.2f seconds" % (self.user)       ],
+        ["Read time", "%.2f seconds" % (self.read)],
+        ["Extract time", "%.2f seconds" % (self.extract)],
+        ["Pre-process time", "%.2f seconds" % (self.initialize)],
+        ["Process time", "%.2f seconds" % (self.process)],
+        ["Post-process time", "%.2f seconds" % (self.finalize)],
+        ["Total time", "%.2f seconds" % (self.total)],
+        ["User time", "%.2f seconds" % (self.user)],
     ]
     return table(rows, justify='right', prefix=' ')
-
 
 class ExecuteParallelTask(object):
   '''
@@ -180,7 +180,6 @@ class ExecuteParallelTask(object):
     handlers = logging.getLogger('dials').handlers
     assert len(handlers) == 1, "Invalid number of logging handlers"
     return result, handlers[0].messages()
-
 
 class Processor(object):
   ''' Processor interface class. '''
@@ -235,7 +234,8 @@ class Processor(object):
     mp_method = self.manager.params.mp.method
     mp_njobs = self.manager.params.mp.njobs
     mp_nproc = self.manager.params.mp.nproc
-    if (mp_njobs * mp_nproc) > 1 and platform.system() == "Windows": # platform.system() forks which is bad for MPI, so don't use it unless nproc > 1
+    if (mp_njobs * mp_nproc) > 1 and platform.system(
+    ) == "Windows": # platform.system() forks which is bad for MPI, so don't use it unless nproc > 1
       logger.warn("")
       logger.warn("*" * 80)
       logger.warn("Multiprocessing is not available on windows. Setting nproc = 1")
@@ -254,21 +254,23 @@ class Processor(object):
     else:
       logger.info(' Using multiprocessing with %d parallel job(s)\n' % (mp_nproc))
     if mp_njobs * mp_nproc > 1:
+
       def process_output(result):
         for message in result[1]:
           logger.log(message.levelno, message.msg)
         self.manager.accumulate(result[0])
         result[0].reflections = None
         result[0].data = None
+
       multi_node_parallel_map(
-        func                       = ExecuteParallelTask(),
-        iterable                   = list(self.manager.tasks()),
-        njobs                      = mp_njobs,
-        nproc                      = mp_nproc,
-        callback                   = process_output,
-        cluster_method             = mp_method,
-        preserve_order             = True,
-        preserve_exception_message = True)
+          func=ExecuteParallelTask(),
+          iterable=list(self.manager.tasks()),
+          njobs=mp_njobs,
+          nproc=mp_nproc,
+          callback=process_output,
+          cluster_method=mp_method,
+          preserve_order=True,
+          preserve_exception_message=True)
     else:
       for task in self.manager.tasks():
         self.manager.accumulate(task())
@@ -277,7 +279,6 @@ class Processor(object):
     self.manager.time.user_time = end_time - start_time
     result1, result2 = self.manager.result()
     return result1, result2, self.manager.time
-
 
 class Result(object):
   '''
@@ -298,12 +299,12 @@ class Result(object):
     self.reflections = reflections
     self.data = data
 
-
 class NullTask(object):
   '''
   A class to perform a null task.
 
   '''
+
   def __init__(self, index, reflections):
     '''
     Initialise the task
@@ -330,20 +331,13 @@ class NullTask(object):
     result.total_time = 0
     return result
 
-
 class Task(object):
   '''
   A class to perform a processing task.
 
   '''
 
-  def __init__(self,
-               index,
-               job,
-               experiments,
-               reflections,
-               params,
-               executor=None):
+  def __init__(self, index, job, experiments, reflections, params, executor=None):
     '''
     Initialise the task.
 
@@ -359,7 +353,7 @@ class Task(object):
     '''
     assert executor is not None, "No executor given"
     assert len(reflections) > 0, "Zero reflections given"
-    assert params.block.max_memory_usage >  0.0, "Max memory % must be > 0"
+    assert params.block.max_memory_usage > 0.0, "Max memory % must be > 0"
     assert params.block.max_memory_usage <= 1.0, "Max memory % must be < 1"
     self.index = index
     self.job = job
@@ -421,18 +415,11 @@ class Task(object):
 
     # Set the shoeboxes (dont't allocate)
     self.reflections['shoebox'] = flex.shoebox(
-      self.reflections['panel'],
-      self.reflections['bbox'],
-      allocate=False,
-      flatten=self.params.shoebox.flatten)
+        self.reflections['panel'], self.reflections['bbox'], allocate=False, flatten=self.params.shoebox.flatten)
 
     # Create the processor
-    processor = ShoeboxProcessor(
-      self.reflections,
-      len(imageset.get_detector()),
-      frame0,
-      frame1,
-      self.params.debug.output)
+    processor = ShoeboxProcessor(self.reflections, len(imageset.get_detector()), frame0, frame1,
+                                 self.params.debug.output)
 
     # Compute percentage of max available. The function is not portable to
     # windows so need to add a check if the function fails. On windows no
@@ -442,7 +429,7 @@ class Task(object):
     sbox_memory = processor.compute_max_memory_usage()
     if total_memory is not None:
       assert total_memory > 0, "Your system appears to have no memory!"
-      assert self.params.block.max_memory_usage >  0.0, "maximum memory usage must be > 0"
+      assert self.params.block.max_memory_usage > 0.0, "maximum memory usage must be > 0"
       assert self.params.block.max_memory_usage <= 1.0, "maximum memory usage must be <= 1"
       limit_memory = total_memory * self.params.block.max_memory_usage
       if sbox_memory > limit_memory:
@@ -454,12 +441,12 @@ class Task(object):
           Total system memory: %g GB
           Limit shoebox memory: %g GB
           Required shoebox memory: %g GB
-        ''' % (total_memory/1e9, limit_memory/1e9, sbox_memory/1e9))
+        ''' % (total_memory / 1e9, limit_memory / 1e9, sbox_memory / 1e9))
       else:
         logger.info(' Memory usage:')
-        logger.info('  Total system memory: %g GB' % (total_memory/1e9))
-        logger.info('  Limit shoebox memory: %g GB' % (limit_memory/1e9))
-        logger.info('  Required shoebox memory: %g GB' % (sbox_memory/1e9))
+        logger.info('  Total system memory: %g GB' % (total_memory / 1e9))
+        logger.info('  Limit shoebox memory: %g GB' % (limit_memory / 1e9))
+        logger.info('  Required shoebox memory: %g GB' % (sbox_memory / 1e9))
         logger.info('')
 
     # Loop through the imageset, extract pixels and process reflections
@@ -511,7 +498,6 @@ class Task(object):
     result.process_time = processor.process_time()
     result.total_time = time() - start_time
     return result
-
 
 class Manager(object):
   '''
@@ -591,21 +577,19 @@ class Manager(object):
     assert expr_id[1] > expr_id[0], "Invalid experiment id"
     assert expr_id[0] >= 0, "Invalid experiment id"
     assert expr_id[1] <= len(self.experiments), "Invalid experiment id"
-    experiments = self.experiments#[expr_id[0]:expr_id[1]]
+    experiments = self.experiments #[expr_id[0]:expr_id[1]]
     reflections = self.manager.split(index)
     if len(reflections) == 0:
       logger.warn("*** WARNING: no reflections in job %d ***" % index)
-      task = NullTask(
-        index=index,
-        reflections=reflections)
+      task = NullTask(index=index, reflections=reflections)
     else:
       task = Task(
-        index=index,
-        job=frames,
-        experiments=experiments,
-        reflections=reflections,
-        params=self.params,
-        executor=self.executor)
+          index=index,
+          job=frames,
+          experiments=experiments,
+          reflections=reflections,
+          params=self.params,
+          executor=self.executor)
     return task
 
   def tasks(self):
@@ -685,7 +669,7 @@ class Manager(object):
         assert self.params.block.threshold > 0, "Threshold must be > 0"
         assert self.params.block.threshold <= 1.0, "Threshold must be < 1"
         nframes = sorted([b[5] - b[4] for b in self.reflections['bbox']])
-        cutoff = int(self.params.block.threshold*len(nframes))
+        cutoff = int(self.params.block.threshold * len(nframes))
         block_size = nframes[cutoff] * 2
         self.params.block.size = block_size
         self.params.block.units = 'frames'
@@ -698,14 +682,12 @@ class Manager(object):
     from itertools import groupby
     from math import ceil
     groups = groupby(
-      range(len(self.experiments)),
-      lambda x: (id(self.experiments[x].imageset),
-                 id(self.experiments[x].scan)))
+        range(len(self.experiments)), lambda x: (id(self.experiments[x].imageset), id(self.experiments[x].scan)))
     self.jobs = JobList()
     for key, indices in groups:
       indices = list(indices)
       i0 = indices[0]
-      i1 = indices[-1]+1
+      i1 = indices[-1] + 1
       expr = self.experiments[i0]
       scan = expr.scan
       imgs = expr.imageset
@@ -742,9 +724,7 @@ class Manager(object):
       num_partial = len(self.reflections)
       assert num_partial >= num_full, "Invalid number of partials"
       if num_partial > num_full:
-        logger.info(' Split %d reflections into %d partial reflections\n' % (
-          num_full,
-          num_partial))
+        logger.info(' Split %d reflections into %d partial reflections\n' % (num_full, num_partial))
     else:
       num_full = len(self.reflections)
       self.jobs.split(self.reflections)
@@ -770,8 +750,7 @@ class Manager(object):
     if self.params.mp.method == 'multiprocessing' and self.params.mp.nproc > 1:
 
       # Get the maximum shoebox memory
-      max_memory = flex.max(self.jobs.shoebox_memory(
-        self.reflections, self.params.shoebox.flatten))
+      max_memory = flex.max(self.jobs.shoebox_memory(self.reflections, self.params.shoebox.flatten))
 
       # Compute percentage of max available. The function is not portable to
       # windows so need to add a check if the function fails. On windows no
@@ -790,7 +769,7 @@ class Manager(object):
               Total system memory: %g GB
               Limit shoebox memory: %g GB
               Max shoebox memory: %g GB
-          ''' % (total_memory/1e9, limit_memory/1e9, max_memory/1e9))
+          ''' % (total_memory / 1e9, limit_memory / 1e9, max_memory / 1e9))
         else:
           self.params.mp.nproc = min(self.params.mp.nproc, njobs)
           self.params.block.max_memory_usage /= self.params.mp.nproc
@@ -804,11 +783,7 @@ class Manager(object):
 
     # Compute the task table
     if self.experiments.all_stills():
-      rows = [["#",
-               "Group",
-               "Frame From",
-               "Frame To",
-               "# Reflections"]]
+      rows = [["#", "Group", "Frame From", "Frame To", "# Reflections"]]
       for i in range(len(self)):
         job = self.manager.job(i)
         group = job.index()
@@ -816,13 +791,7 @@ class Manager(object):
         n = self.manager.num_reflections(i)
         rows.append([str(i), str(group), str(f0), str(f1), str(n)])
     elif self.experiments.all_sweeps():
-      rows = [["#",
-               "Group",
-               "Frame From",
-               "Frame To",
-               "Angle From",
-               "Angle To",
-               "# Reflections"]]
+      rows = [["#", "Group", "Frame From", "Frame To", "Angle From", "Angle To", "# Reflections"]]
       for i in range(len(self)):
         job = self.manager.job(i)
         group = job.index()
@@ -844,15 +813,8 @@ class Manager(object):
       block_size = "auto"
     else:
       block_size = str(self.params.block.size)
-    fmt = (
-      'Processing reflections in the following blocks of images:\n'
-      '\n'
-      ' block_size: %s %s\n'
-      '\n'
-      '%s\n'
-    )
+    fmt = ('Processing reflections in the following blocks of images:\n' '\n' ' block_size: %s %s\n' '\n' '%s\n')
     return fmt % (block_size, self.params.block.units, task_table)
-
 
 class ManagerRot(Manager):
   ''' Specialize the manager for oscillation data using the oscillation pre and
@@ -870,9 +832,7 @@ class ManagerRot(Manager):
       ''')
 
     # Initialise the manager
-    super(ManagerRot, self).__init__(
-      experiments, reflections, params)
-
+    super(ManagerRot, self).__init__(experiments, reflections, params)
 
 class ManagerStills(Manager):
   ''' Specialize the manager for stills data using the stills pre and post
@@ -890,9 +850,7 @@ class ManagerStills(Manager):
       ''')
 
     # Initialise the manager
-    super(ManagerStills, self).__init__(
-      experiments, reflections, params)
-
+    super(ManagerStills, self).__init__(experiments, reflections, params)
 
 class Processor3D(Processor):
   ''' Top level processor for 3D processing. '''
@@ -910,7 +868,6 @@ class Processor3D(Processor):
     # Initialise the processor
     super(Processor3D, self).__init__(manager)
 
-
 class ProcessorFlat3D(Processor):
   ''' Top level processor for flat 2D processing. '''
 
@@ -927,7 +884,6 @@ class ProcessorFlat3D(Processor):
     # Initialise the processor
     super(ProcessorFlat3D, self).__init__(manager)
 
-
 class Processor2D(Processor):
   ''' Top level processor for 2D processing. '''
 
@@ -943,7 +899,6 @@ class Processor2D(Processor):
     # Initialise the processor
     super(Processor2D, self).__init__(manager)
 
-
 class ProcessorSingle2D(Processor):
   ''' Top level processor for still image processing. '''
 
@@ -957,11 +912,10 @@ class ProcessorSingle2D(Processor):
     params.shoebox.flatten = False
 
     # Create the processing manager
-    manager = ManagerRot(experiments, reflections,  params)
+    manager = ManagerRot(experiments, reflections, params)
 
     # Initialise the processor
     super(ProcessorSingle2D, self).__init__(manager)
-
 
 class ProcessorStills(Processor):
   ''' Top level processor for still image processing. '''
@@ -981,18 +935,13 @@ class ProcessorStills(Processor):
     # Initialise the processor
     super(ProcessorStills, self).__init__(manager)
 
-
 class ProcessorBuilder(object):
   '''
   A class to simplify building the processor
 
   '''
 
-  def __init__(self,
-               Class,
-               experiments,
-               reflections,
-               params=None):
+  def __init__(self, Class, experiments, reflections, params=None):
     '''
     Initialize with the required input
 
@@ -1016,7 +965,4 @@ class ProcessorBuilder(object):
     :return: The processor class
 
     '''
-    return self.Class(
-      self.experiments,
-      self.reflections,
-      self.params)
+    return self.Class(self.experiments, self.reflections, self.params)

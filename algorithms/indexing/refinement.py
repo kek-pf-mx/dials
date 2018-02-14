@@ -14,21 +14,17 @@ from __future__ import absolute_import, division
 from cctbx.array_family import flex
 import math
 
-
-def refine(params, reflections, experiments,
-           verbosity=0, debug_plots=False):
+def refine(params, reflections, experiments, verbosity=0, debug_plots=False):
   detector = experiments.detectors()[0]
 
   from dials.algorithms.refinement import RefinerFactory
-  refiner = RefinerFactory.from_parameters_data_experiments(
-    params, reflections, experiments, verbosity=verbosity)
+  refiner = RefinerFactory.from_parameters_data_experiments(params, reflections, experiments, verbosity=verbosity)
 
   outliers = None
   refined = refiner.run()
   if debug_plots:
     debug_plot_residuals(refiner)
   return refiner, refined, outliers
-
 
 def debug_plot_residuals(refiner, inlier_sel=None):
   from matplotlib import pyplot
@@ -44,7 +40,7 @@ def debug_plot_residuals(refiner, inlier_sel=None):
   if inlier_sel is None:
     inlier_sel = flex.bool(len(residuals), True)
   print inlier_sel.size(), panel_ids.size()
-  for i_crystal in range(flex.max(crystal_ids)+1):
+  for i_crystal in range(flex.max(crystal_ids) + 1):
     crystal_sel = (crystal_ids == i_crystal)
     for i_panel in range(len(refiner.get_experiments().detectors()[0])):
       panel_sel = (panel_ids == i_panel)
@@ -53,13 +49,15 @@ def debug_plot_residuals(refiner, inlier_sel=None):
       pyplot.axvline(0, color='grey')
 
       pyplot.scatter(
-        x_residuals.select(inlier_sel & panel_sel & crystal_sel).as_numpy_array(),
-        y_residuals.select(inlier_sel & panel_sel & crystal_sel).as_numpy_array(),
-        c='b', alpha=0.5)
+          x_residuals.select(inlier_sel & panel_sel & crystal_sel).as_numpy_array(),
+          y_residuals.select(inlier_sel & panel_sel & crystal_sel).as_numpy_array(),
+          c='b',
+          alpha=0.5)
       pyplot.scatter(
-        x_residuals.select((~inlier_sel) & panel_sel & crystal_sel).as_numpy_array(),
-        y_residuals.select((~inlier_sel) & panel_sel & crystal_sel).as_numpy_array(),
-        c='r', alpha=0.5)
+          x_residuals.select((~inlier_sel) & panel_sel & crystal_sel).as_numpy_array(),
+          y_residuals.select((~inlier_sel) & panel_sel & crystal_sel).as_numpy_array(),
+          c='r',
+          alpha=0.5)
       pyplot.axes().set_aspect('equal')
       pyplot.show()
 
@@ -69,12 +67,11 @@ def debug_plot_residuals(refiner, inlier_sel=None):
   mean_residuals_y = []
   mean_residuals_phi = []
   frame = []
-  phi_obs_deg = (180/math.pi) * phi_obs
+  phi_obs_deg = (180 / math.pi) * phi_obs
   phi = []
 
-  for i_phi in range(int(math.floor(flex.min(phi_obs_deg))),
-                 int(math.ceil(flex.max(phi_obs_deg)))):
-    sel = (phi_obs_deg >= i_phi) & (phi_obs_deg < (i_phi+1))
+  for i_phi in range(int(math.floor(flex.min(phi_obs_deg))), int(math.ceil(flex.max(phi_obs_deg)))):
+    sel = (phi_obs_deg >= i_phi) & (phi_obs_deg < (i_phi + 1))
     if sel.count(True) == 0:
       continue
     mean_residuals_x.append(flex.mean(x_residuals.select(sel)))

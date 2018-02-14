@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division
 
 class Test:
-
   def __init__(self):
     pass
 
@@ -29,12 +28,12 @@ class Test:
     for i in range(10000):
       i = randint(10, 1990)
       j = randint(10, 1990)
-      m1 = mean[j,i]
-      v1 = var[j,i]
-      f1 = index_of_dispersion[j,i]
-      p = image[j-3:j+4,i-3:i+4]
-      m = mask[j-3:j+4,i-3:i+4]
-      if mask[j,i] == 0:
+      m1 = mean[j, i]
+      v1 = var[j, i]
+      f1 = index_of_dispersion[j, i]
+      p = image[j - 3:j + 4, i - 3:i + 4]
+      m = mask[j - 3:j + 4, i - 3:i + 4]
+      if mask[j, i] == 0:
         m2 = 0.0
         v2 = 0.0
         f2 = 1.0
@@ -44,13 +43,12 @@ class Test:
         m2 = mv.mean()
         v2 = mv.unweighted_sample_variance()
         f2 = v2 / m2
-      assert(abs(m1 - m2) <= eps)
-      assert(abs(v1 - v2) <= eps)
-      assert(abs(f1 - f2) <= eps)
+      assert (abs(m1 - m2) <= eps)
+      assert (abs(v1 - v2) <= eps)
+      assert (abs(f1 - f2) <= eps)
 
     # Test passed
     print 'OK'
-
 
 if __name__ == '__main__':
   from dials.test import cd_auto

@@ -18,11 +18,10 @@ try:
 except ImportError:
   # Python 3 backport
   def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
-      return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+    return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
 import logging
 logger = logging.getLogger(__name__)
-
 
 def sum_partial_reflections(integrated_data, min_total_partiality=0.5):
   '''Sum partial reflections; weighted sum for summation integration; weighted
@@ -145,7 +144,6 @@ def sum_partial_reflections(integrated_data, min_total_partiality=0.5):
 
   return integrated_data
 
-
 def scale_partial_reflections(integrated_data, min_partiality=0.5):
   '''Scale partial reflections (after summation) according to their estimated
   partiality - for profile fitted reflections this will result in no change,
@@ -178,7 +176,6 @@ def scale_partial_reflections(integrated_data, min_partiality=0.5):
 
   return integrated_data
 
-
 def dials_u_to_mosflm(dials_U, uc):
   '''Compute the mosflm U matrix i.e. the U matrix from same UB definition
   as DIALS, but with Busing & Levy B matrix definition.'''
@@ -194,18 +191,15 @@ def dials_u_to_mosflm(dials_U, uc):
   b = r_parameters[:3]
   be = [pi * p / 180.0 for p in r_parameters[3:]]
 
-  mosflm_B = matrix.sqr((b[0], b[1] * cos(be[2]), b[2] * cos(be[1]),
-                         0, b[1] * sin(be[2]), - b[2] * sin(be[1]) * cos(al[0]),
-                         0, 0, 1.0 / a[2]))
+  mosflm_B = matrix.sqr((b[0], b[1] * cos(be[2]), b[2] * cos(be[1]), 0, b[1] * sin(be[2]),
+                         -b[2] * sin(be[1]) * cos(al[0]), 0, 0, 1.0 / a[2]))
 
   mosflm_U = dials_UB * mosflm_B.inverse()
 
   return mosflm_U
 
-
-def _apply_data_filters(integrated_data,
-                        ignore_profile_fitting, filter_ice_rings, min_isigi,
-                        include_partials, keep_partials, scale_partials):
+def _apply_data_filters(integrated_data, ignore_profile_fitting, filter_ice_rings, min_isigi, include_partials,
+                        keep_partials, scale_partials):
   """Apply filters to reflection data"""
 
   # select reflections that are assigned to an experiment (i.e. non-negative id)
@@ -219,12 +213,9 @@ def _apply_data_filters(integrated_data,
     del integrated_data['intensity.prf.variance']
 
   if 'intensity.prf.variance' in integrated_data:
-    selection = integrated_data.get_flags(
-      integrated_data.flags.integrated,
-      all=True)
+    selection = integrated_data.get_flags(integrated_data.flags.integrated, all=True)
   else:
-    selection = integrated_data.get_flags(
-      integrated_data.flags.integrated_sum)
+    selection = integrated_data.get_flags(integrated_data.flags.integrated_sum)
   integrated_data = integrated_data.select(selection)
   logger.info("Selected %d integrated reflections" % len(integrated_data))
 
@@ -233,8 +224,7 @@ def _apply_data_filters(integrated_data,
     if ignore_profile_fitting:
       raise Sorry("All reflections excluded based on flags.integrated")
     else:
-      raise Sorry("No profile fitted reflections, "
-                  "please try ignore_profile_fitting=True")
+      raise Sorry("No profile fitted reflections, " "please try ignore_profile_fitting=True")
 
   selection = integrated_data['intensity.sum.variance'] <= 0
   if selection.count(True) > 0:
@@ -252,25 +242,20 @@ def _apply_data_filters(integrated_data,
   if filter_ice_rings:
     selection = integrated_data.get_flags(integrated_data.flags.in_powder_ring)
     integrated_data.del_selected(selection)
-    logger.info("Removing %d reflections in ice ring resolutions" %
-                selection.count(True))
+    logger.info("Removing %d reflections in ice ring resolutions" % selection.count(True))
 
   if min_isigi is not None:
 
     selection = (
-      integrated_data['intensity.sum.value']/
-      flex.sqrt(integrated_data['intensity.sum.variance'])) < min_isigi
+        integrated_data['intensity.sum.value'] / flex.sqrt(integrated_data['intensity.sum.variance'])) < min_isigi
     integrated_data.del_selected(selection)
-    logger.info('Removing %d reflections with I/Sig(I) < %s' %(
-      selection.count(True), min_isigi))
+    logger.info('Removing %d reflections with I/Sig(I) < %s' % (selection.count(True), min_isigi))
 
     if 'intensity.prf.variance' in integrated_data:
       selection = (
-        integrated_data['intensity.prf.value'] /
-        flex.sqrt(integrated_data['intensity.prf.variance'])) < min_isigi
+          integrated_data['intensity.prf.value'] / flex.sqrt(integrated_data['intensity.prf.variance'])) < min_isigi
       integrated_data.del_selected(selection)
-      logger.info('Removing %d profile reflections with I/Sig(I) < %s' %(
-        selection.count(True), min_isigi))
+      logger.info('Removing %d profile reflections with I/Sig(I) < %s' % (selection.count(True), min_isigi))
 
   # FIXME in here work on including partial reflections => at this stage best
   # to split off the partial refections into a different selection & handle
@@ -290,7 +275,6 @@ def _apply_data_filters(integrated_data,
         selection.count(True))
 
   return integrated_data
-
 
 def _add_batch(mtz, experiment, batch_number, image_number, force_static_model):
   """Add a single image's metadata to an mtz file.
@@ -368,16 +352,13 @@ def _add_batch(mtz, experiment, batch_number, image_number, force_static_model):
     mosaic = experiment.crystal.get_mosaicity()
   except AttributeError:
     mosaic = 0
-  o.set_crydat(flex.float([mosaic, 0.0, 0.0, 0.0, 0.0, 0.0,
-                           0.0, 0.0, 0.0, 0.0, 0.0, 0.0]))
+  o.set_crydat(flex.float([mosaic, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]))
 
   o.set_lcrflg(0)
   o.set_datum(flex.float((0.0, 0.0, 0.0)))
 
   # detector size, distance
-  o.set_detlm(flex.float([0.0, panel.get_image_size()[0],
-                          0.0, panel.get_image_size()[1],
-                          0, 0, 0, 0]))
+  o.set_detlm(flex.float([0.0, panel.get_image_size()[0], 0.0, panel.get_image_size()[1], 0, 0, 0, 0]))
   o.set_dx(flex.float([panel.get_directed_distance(), 0.0]))
 
   # goniometer axes and names, and scan axis number, and num axes, missets
@@ -412,9 +393,7 @@ def _add_batch(mtz, experiment, batch_number, image_number, force_static_model):
 
   return o
 
-
-def _write_columns(mtz_file, dataset, integrated_data, scale_partials,
-                   apply_scales):
+def _write_columns(mtz_file, dataset, integrated_data, scale_partials, apply_scales):
   """Write the column definitions AND data for a single dataset."""
 
   # now create the actual data structures - first keep a track of the columns
@@ -443,33 +422,32 @@ def _write_columns(mtz_file, dataset, integrated_data, scale_partials,
   else:
     fractioncalc = integrated_data['partiality']
 
-
   # now add column information...
 
   # FIXME add DIALS_FLAG which can include e.g. was partial etc.
 
   type_table = {
-    'H': 'H',
-    'K': 'H',
-    'L': 'H',
-    'I': 'J',
-    'SIGI': 'Q',
-    'IPR': 'J',
-    'SIGIPR': 'Q',
-    'BG' : 'R',
-    'SIGBG' : 'R',
-    'XDET': 'R',
-    'YDET': 'R',
-    'BATCH': 'B',
-    'BGPKRATIOS': 'R',
-    'WIDTH': 'R',
-    'MPART': 'I',
-    'M_ISYM': 'Y',
-    'FLAG': 'I',
-    'LP': 'R',
-    'FRACTIONCALC': 'R',
-    'ROT': 'R',
-    'DQE': 'R',
+      'H': 'H',
+      'K': 'H',
+      'L': 'H',
+      'I': 'J',
+      'SIGI': 'Q',
+      'IPR': 'J',
+      'SIGIPR': 'Q',
+      'BG': 'R',
+      'SIGBG': 'R',
+      'XDET': 'R',
+      'YDET': 'R',
+      'BATCH': 'B',
+      'BGPKRATIOS': 'R',
+      'WIDTH': 'R',
+      'MPART': 'I',
+      'M_ISYM': 'Y',
+      'FLAG': 'I',
+      'LP': 'R',
+      'FRACTIONCALC': 'R',
+      'ROT': 'R',
+      'DQE': 'R',
   }
 
   # derive index columns from original indices with
@@ -484,13 +462,11 @@ def _write_columns(mtz_file, dataset, integrated_data, scale_partials,
 
   # assign H, K, L, M_ISYM space
   for column in 'H', 'K', 'L', 'M_ISYM':
-    dataset.add_column(column, type_table[column]).set_values(
-      flex.double(nref, 0.0).as_float())
+    dataset.add_column(column, type_table[column]).set_values(flex.double(nref, 0.0).as_float())
 
   mtz_file.replace_original_index_miller_indices(integrated_data['miller_index_rebase'])
 
-  dataset.add_column('BATCH', type_table['BATCH']).set_values(
-    batch.as_double().as_float())
+  dataset.add_column('BATCH', type_table['BATCH']).set_values(batch.as_double().as_float())
 
   if 'lp' in integrated_data:
     lp = integrated_data['lp']
@@ -516,18 +492,15 @@ def _write_columns(mtz_file, dataset, integrated_data, scale_partials,
     # Trap negative variances
     assert V_profile.all_gt(0)
     dataset.add_column('IPR', type_table['I']).set_values(I_profile.as_float())
-    dataset.add_column('SIGIPR', type_table['SIGI']).set_values(
-      flex.sqrt(V_profile).as_float())
+    dataset.add_column('SIGIPR', type_table['SIGI']).set_values(flex.sqrt(V_profile).as_float())
   if 'intensity.sum.value' in integrated_data:
     I_sum = integrated_data['intensity.sum.value'] * scl
     V_sum = integrated_data['intensity.sum.variance'] * scl * scl
     # Trap negative variances
     assert V_sum.all_gt(0)
     dataset.add_column('I', type_table['I']).set_values(I_sum.as_float())
-    dataset.add_column('SIGI', type_table['SIGI']).set_values(
-      flex.sqrt(V_sum).as_float())
-  if ('background.sum.value' in integrated_data and
-      'background.sum.variance' in integrated_data):
+    dataset.add_column('SIGI', type_table['SIGI']).set_values(flex.sqrt(V_sum).as_float())
+  if ('background.sum.value' in integrated_data and 'background.sum.variance' in integrated_data):
     bg = integrated_data['background.sum.value']
     varbg = integrated_data['background.sum.variance']
     assert (varbg >= 0).count(False) == 0
@@ -535,15 +508,13 @@ def _write_columns(mtz_file, dataset, integrated_data, scale_partials,
     dataset.add_column('BG', type_table['BG']).set_values(bg.as_float())
     dataset.add_column('SIGBG', type_table['SIGBG']).set_values(sigbg.as_float())
 
-  dataset.add_column('FRACTIONCALC', type_table['FRACTIONCALC']).set_values(
-    fractioncalc.as_float())
+  dataset.add_column('FRACTIONCALC', type_table['FRACTIONCALC']).set_values(fractioncalc.as_float())
 
   dataset.add_column('XDET', type_table['XDET']).set_values(xdet.as_float())
   dataset.add_column('YDET', type_table['YDET']).set_values(ydet.as_float())
   dataset.add_column('ROT', type_table['ROT']).set_values(integrated_data["ROT"].as_float())
   dataset.add_column('LP', type_table['LP']).set_values(lp.as_float())
   dataset.add_column('DQE', type_table['DQE']).set_values(dqe.as_float())
-
 
 def _next_epoch(val):
   """Find a reasonably round epoch a small number above an existing one.
@@ -555,15 +526,14 @@ def _next_epoch(val):
   """
 
   # Find the order of magnitude-1 (minimum: 1 as want no fractional values)
-  small_magnitude = 10**max(1, int(floor(log(val, 10))-1))
+  small_magnitude = 10**max(1, int(floor(log(val, 10)) - 1))
   # How many units of this we have (float cast for __division__ insensitivity)
   mag_multiple = int(ceil(val / float(small_magnitude)))
   epoch = small_magnitude * mag_multiple
   # If this would give a consecutive number then offset it by a magnitude step
   if epoch <= val + 1:
-    epoch = small_magnitude * (mag_multiple+1)
+    epoch = small_magnitude * (mag_multiple + 1)
   return epoch
-
 
 def _calculate_batch_offsets(experiments):
   """Take a list of experiments and resolve and return the batch offsets.
@@ -578,7 +548,7 @@ def _calculate_batch_offsets(experiments):
   experiments_to_shift = []
   existing_ranges = set()
   maximum_batch_number = 0
-  batch_offsets = [0]*len(experiments)
+  batch_offsets = [0] * len(experiments)
 
   # Handle zeroth shifts and kept ranges
   for i, experiment in enumerate(experiments):
@@ -588,19 +558,19 @@ def _calculate_batch_offsets(experiments):
     assert ilow >= 0, "Negative image indices are not expected"
     # Don't emit zero: Causes problems with C/fortran number conversion
     if ilow == 0:
-      ilow, ihigh = ilow+1, ihigh+1
+      ilow, ihigh = ilow + 1, ihigh + 1
     # If we overlap with anything, then process later
-    if any( ilow <= high+1 and ihigh >= low-1 for low, high in existing_ranges):
+    if any(ilow <= high + 1 and ihigh >= low - 1 for low, high in existing_ranges):
       experiments_to_shift.append((i, experiment))
     else:
-      batch_offsets[i] = ilow-experiment.image_range[0]
+      batch_offsets[i] = ilow - experiment.image_range[0]
       existing_ranges.add((ilow, ihigh))
       maximum_batch_number = max(maximum_batch_number, ihigh)
 
   # Now handle all the experiments that overlapped by pushing them higher
   for i, experiment in experiments_to_shift:
     start_number = _next_epoch(maximum_batch_number)
-    range_width = experiment.image_range[1]-experiment.image_range[0]+1
+    range_width = experiment.image_range[1] - experiment.image_range[0] + 1
     end_number = start_number + range_width - 1
     batch_offsets[i] = start_number - experiment.image_range[0]
     maximum_batch_number = end_number
@@ -608,11 +578,17 @@ def _calculate_batch_offsets(experiments):
 
   return batch_offsets
 
-
-def export_mtz(integrated_data, experiment_list, hklout,
-               include_partials=False, keep_partials=False, scale_partials=True,
-               min_isigi=None, force_static_model=False, filter_ice_rings=False,
-               ignore_profile_fitting=False, apply_scales=False):
+def export_mtz(integrated_data,
+               experiment_list,
+               hklout,
+               include_partials=False,
+               keep_partials=False,
+               scale_partials=True,
+               min_isigi=None,
+               force_static_model=False,
+               filter_ice_rings=False,
+               ignore_profile_fitting=False,
+               apply_scales=False):
   '''Export data from integrated_data corresponding to experiment_list to an
   MTZ file hklout.'''
 
@@ -623,7 +599,7 @@ def export_mtz(integrated_data, experiment_list, hklout,
   experiment_list = list(experiment_list)
 
   if apply_scales:
-    assert('inverse_scale_factor' in integrated_data)
+    assert ('inverse_scale_factor' in integrated_data)
 
   # Validate multi-experiment assumptions
   if len(experiment_list) > 1:
@@ -632,7 +608,9 @@ def export_mtz(integrated_data, experiment_list, hklout,
       logger.warning("Warning: Experiment crystals differ. Using first experiment crystal for file-level data.")
 
     # We must match wavelengths (until multiple datasets supported)
-    if not all(isclose(x.beam.get_wavelength(), experiment_list[0].beam.get_wavelength(), rel_tol=1e-9) for x in experiment_list[1:]):
+    if not all(
+        isclose(x.beam.get_wavelength(), experiment_list[0].beam.get_wavelength(), rel_tol=1e-9)
+        for x in experiment_list[1:]):
       data = [x.beam.get_wavelength() for x in experiment_list]
       raise Sorry("Cannot export multiple experiments with different beam wavelengths ({})".format(data))
 
@@ -641,14 +619,14 @@ def export_mtz(integrated_data, experiment_list, hklout,
     logger.warning('Warning: Ignoring multiple panels in output MTZ')
 
   # Clean up the data with the passed in options
-  integrated_data = _apply_data_filters(integrated_data,
+  integrated_data = _apply_data_filters(
+      integrated_data,
       ignore_profile_fitting=ignore_profile_fitting,
       min_isigi=min_isigi,
       filter_ice_rings=filter_ice_rings,
       include_partials=include_partials,
       keep_partials=keep_partials,
       scale_partials=scale_partials)
-
 
   # Calculate and store the image range for each image
   for experiment in experiment_list:
@@ -658,9 +636,7 @@ def export_mtz(integrated_data, experiment_list, hklout,
     else:
       experiment.image_range = 1, 1
 
-
-  batch_offsets = flex.int(
-    expt.scan.get_batch_offset() for expt in experiment_list)
+  batch_offsets = flex.int(expt.scan.get_batch_offset() for expt in experiment_list)
   if batch_offsets.all_eq(0):
     # Calculate any offset to the image numbers
     batch_offsets = _calculate_batch_offsets(experiment_list)
@@ -668,9 +644,8 @@ def export_mtz(integrated_data, experiment_list, hklout,
     unique_offsets = set(batch_offsets)
     if len(unique_offsets) != len(batch_offsets):
       import collections
-      raise Sorry('Duplicate batch offsets detected: %s' %', '.join(
-        str(item) for item, count in collections.Counter(batch_offsets).items()
-        if count > 1))
+      raise Sorry('Duplicate batch offsets detected: %s' % ', '.join(
+          str(item) for item, count in collections.Counter(batch_offsets).items() if count > 1))
 
   # Create the mtz file
   mtz_file = mtz.object()
@@ -691,8 +666,7 @@ def export_mtz(integrated_data, experiment_list, hklout,
     experiment.data = dict(integrated_data.select(integrated_data["id"] == experiment_index))
 
     # Do any crystal transformations for the experiment
-    cb_op_to_ref = experiment.crystal.get_space_group().info(
-        ).change_of_basis_op_to_reference_setting()
+    cb_op_to_ref = experiment.crystal.get_space_group().info().change_of_basis_op_to_reference_setting()
     experiment.crystal = experiment.crystal.change_basis(cb_op_to_ref)
     experiment.data["miller_index_rebase"] = cb_op_to_ref.apply(experiment.data["miller_index"])
 
@@ -700,11 +674,13 @@ def export_mtz(integrated_data, experiment_list, hklout,
     s0n = matrix.col(s0).normalize().elems
     logger.info('Beam vector: %.4f %.4f %.4f' % s0n)
 
-    for i in range(experiment.image_range[0], experiment.image_range[1]+1):
-      _add_batch(mtz_file, experiment,
-        batch_number=i+experiment.scan.get_batch_offset(),
-        image_number=i,
-        force_static_model=force_static_model)
+    for i in range(experiment.image_range[0], experiment.image_range[1] + 1):
+      _add_batch(
+          mtz_file,
+          experiment,
+          batch_number=i + experiment.scan.get_batch_offset(),
+          image_number=i,
+          force_static_model=force_static_model)
 
     # Create the batch offset array. This gives us an experiment (id)-dependent
     # batch offset to calculate the correct batch from image number.
@@ -715,7 +691,7 @@ def export_mtz(integrated_data, experiment_list, hklout,
     frac_image_id = flex.double(frac_image_id)
     if experiment.scan:
       # When getting angle, z_px counts from 0; image_index from 1
-      experiment.data["ROT"] = flex.double([experiment.scan.get_angle_from_image_index(z+1) for z in frac_image_id])
+      experiment.data["ROT"] = flex.double([experiment.scan.get_angle_from_image_index(z + 1) for z in frac_image_id])
     else:
       experiment.data["ROT"] = frac_image_id
 
@@ -735,8 +711,7 @@ def export_mtz(integrated_data, experiment_list, hklout,
   assert len(merged_data["id"] == len(integrated_data["id"])), "Lost rows in split/combine"
 
   # Write all the data and columns to the mtz file
-  _write_columns(mtz_file, mtz_dataset, merged_data,
-    scale_partials=scale_partials, apply_scales=apply_scales)
+  _write_columns(mtz_file, mtz_dataset, merged_data, scale_partials=scale_partials, apply_scales=apply_scales)
 
   logger.info("Saving {} integrated reflections to {}".format(len(merged_data['id']), hklout))
   mtz_file.write(hklout)

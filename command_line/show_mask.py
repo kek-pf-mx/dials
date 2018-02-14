@@ -10,7 +10,6 @@
 #
 
 # LIBTBX_SET_DISPATCHER_NAME dev.dials.show_mask
-
 """
 Just display the mask for the specified image
 
@@ -45,7 +44,6 @@ Examples::
 '''
 
 class Script(object):
-
   def __init__(self):
     '''Initialise the script.'''
     from dials.util.options import OptionParser
@@ -58,11 +56,7 @@ class Script(object):
              % libtbx.env.dispatcher_name
 
     # Create the parser
-    self.parser = OptionParser(
-      usage=usage,
-      phil=phil_scope,
-      read_datablocks=True,
-      epilog=help_message)
+    self.parser = OptionParser(usage=usage, phil=phil_scope, read_datablocks=True, epilog=help_message)
 
   def run(self):
     '''Execute the script.'''
@@ -78,7 +72,7 @@ class Script(object):
 
     mask = imageset.get_mask(params.image)
 
-    assert(len(mask) == 1)
+    assert (len(mask) == 1)
 
     print("Num True: %d" % mask[0].count(True))
     print("Num False: %d" % mask[0].count(False))
@@ -86,7 +80,6 @@ class Script(object):
     from matplotlib import pylab
     pylab.imshow(mask[0].as_numpy_array(), interpolation='none')
     pylab.show()
-
 
 if __name__ == "__main__":
   from dials.util import halraiser
