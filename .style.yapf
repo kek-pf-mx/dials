@@ -17,6 +17,10 @@ allow_multiline_lambdas=False
 # Allow splits before the dictionary value.
 allow_split_before_dict_value=True
 
+# Number of blank lines surrounding top-level function and class
+# definitions.
+blank_lines_around_top_level_definition=1
+
 # Insert a blank line before a class-level docstring.
 blank_line_before_class_docstring=False
 
@@ -49,6 +53,22 @@ coalesce_brackets=False
 
 # The column limit.
 column_limit=120
+
+# The style for continuation alignment. Possible values are:
+#
+# - SPACE: Use spaces for continuation alignment. This is default behavior.
+# - FIXED: Use fixed number (CONTINUATION_INDENT_WIDTH) of columns
+#   (ie: CONTINUATION_INDENT_WIDTH/INDENT_WIDTH tabs) for continuation
+#   alignment.
+# - LESS: Slightly left if cannot vertically align continuation lines with
+#   indent characters.
+# - VALIGN-RIGHT: Vertically align continuation lines with indent
+#   characters. Slightly right (one more indent character) if cannot
+#   vertically align continuation lines with indent characters.
+#
+# For options FIXED, and VALIGN-RIGHT are only available when USE_TABS is
+# enabled.
+continuation_align_style=SPACE
 
 # Indent width used for line continuations.
 continuation_indent_width=4
@@ -131,6 +151,10 @@ split_arguments_when_comma_terminated=False
 # Set to True to prefer splitting before '&', '|' or '^' rather than
 # after.
 split_before_bitwise_operator=True
+
+# Split before the closing bracket if a list or dict literal doesn't fit on
+# a single line.
+split_before_closing_bracket=True
 
 # Split before a dictionary or set generator (comp_for). For example, note
 # the split before the 'for':
